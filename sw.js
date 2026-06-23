@@ -14,7 +14,7 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-  if (e.request.url.includes('api.open-meteo.com') || e.request.url.includes('bigdatacloud.net')) return;
+  if (e.request.url.includes('api.open-meteo.com') || e.request.url.includes('bigdatacloud.net') || e.request.url.includes('stormglass.io')) return;
   e.respondWith(
     caches.match(e.request).then((cached) => cached || fetch(e.request))
   );

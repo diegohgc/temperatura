@@ -65,6 +65,12 @@
     opacity: 0.75;
     min-height: 1.2em;
   }
+  .marea {
+    font-size: 0.95rem;
+    opacity: 0.9;
+    margin-bottom: 20px;
+    min-height: 1.2em;
+  }
 </style>
 </head>
 <body>
@@ -77,6 +83,7 @@
       <span id="viento"></span>
       <span id="humedad"></span>
     </div>
+    <div class="marea" id="marea"></div>
     <button id="btnActualizar">Actualizar</button>
     <div class="estado" id="estado"></div>
   </div>
@@ -89,7 +96,10 @@ const elSensacion = document.getElementById('sensacion');
 const elViento = document.getElementById('viento');
 const elHumedad = document.getElementById('humedad');
 const elEstado = document.getElementById('estado');
+const elMarea = document.getElementById('marea');
 const btn = document.getElementById('btnActualizar');
+
+const STORMGLASS_KEY = '625f0ace-6f35-11f1-99cb-0242ac120004-625f0b78-6f35-11f1-99cb-0242ac120004';
 
 const CODIGOS = {
   0: 'Despejado', 1: 'Mayormente despejado', 2: 'Parcialmente nublado', 3: 'Nublado',
@@ -123,6 +133,28 @@ async function obtenerTiempo(lat, lon) {
   return r.json();
 }
 
+async function obtenerMarea(lat, lon) {
+  const ahora = Math.floor(Date.now() / 1000);
+  const inicio = ahora - 6 * 3600;
+  const fin = ahora + 24 * 3600;
+  const url = `https://api.stormglass.io/v2/tide/extremes/point?lat=${lat}&lng=${lon}&start=${inicio}&end=${fin}`;
+  const r = await fetch(url, { headers: { Authorization: STORMGLASS_KEY } });
+  if (!r.ok) throw new Error('Error al consultar la marea');
+  const data = await r.json();
+  const extremos = (data.data || [])
+    .map((e) => ({ tipo: e.type, hora: new Date(e.time) }))
+    .sort((a, b) => a.hora - b.hora);
+
+  const proximo = extremos.find((e) => e.hora.getTime() > Date.now());
+  if (!proximo) return null;
+
+  const subiendo = proximo.tipo === 'high';
+  const horaTexto = proximo.hora.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+  return subiendo
+    ? `Marea subiendo · pleamar a las ${horaTexto}`
+    : `Marea bajando · bajamar a las ${horaTexto}`;
+}
+
 async function actualizar() {
   setEstado('Localizando...');
   elTemp.textContent = '--°';
@@ -137,9 +169,10 @@ async function actualizar() {
     const { latitude, longitude } = pos.coords;
     setEstado('Consultando temperatura...');
     try {
-      const [tiempo, ciudad] = await Promise.all([
+      const [tiempo, ciudad, marea] = await Promise.all([
         obtenerTiempo(latitude, longitude),
-        obtenerCiudad(latitude, longitude)
+        obtenerCiudad(latitude, longitude),
+        obtenerMarea(latitude, longitude).catch(() => null)
       ]);
       const c = tiempo.current;
       elCiudad.textContent = ciudad;
@@ -148,6 +181,7 @@ async function actualizar() {
       elSensacion.textContent = 'Sensación ' + Math.round(c.apparent_temperature) + '°';
       elViento.textContent = Math.round(c.wind_speed_10m) + ' km/h';
       elHumedad.textContent = c.relative_humidity_2m + '% hum.';
+      elMarea.textContent = marea || '';
       setEstado('Actualizado ' + new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }));
     } catch (e) {
       setEstado('No se pudo obtener la temperatura.');

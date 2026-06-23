@@ -9,6 +9,16 @@ usando geolocalización del navegador y la API gratuita Open-Meteo (sin API key)
 - Datos del tiempo: Open-Meteo (`api.open-meteo.com` + `geocoding-api.open-meteo.com`), sin clave de API.
 - No usa localStorage ni backend propio; cada carga consulta la ubicación y el tiempo en directo.
 
+## Marea (Stormglass)
+- Estado de marea (subiendo/bajando) y hora del próximo cambio vía Stormglass API
+  (`api.stormglass.io/v2/tide/extremes/point`).
+- La API key está hardcodeada en `index.html` (`STORMGLASS_KEY`) porque es una app
+  100% cliente sin backend — por tanto la key es visible en el código fuente para
+  cualquiera que la inspeccione. Riesgo aceptado por el usuario dado el free tier
+  limitado (10 llamadas/día).
+- Si se agota la cuota diaria o falla la llamada, la app sigue funcionando sin mostrar
+  la marea (no rompe el resto de la funcionalidad).
+
 ## Plan futuro
 - De momento es solo PWA. Intención de empaquetarla más adelante como APK Android
   (WebView que cargue la PWA publicada), igual que se hizo con el proyecto de halterofilia
