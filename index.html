@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1e3a5f">
+<title>Temperatura</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(160deg, #1e3a5f, #3a6ea5);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: env(safe-area-inset-top, 20px) 20px env(safe-area-inset-bottom, 20px);
+  }
+  .card {
+    text-align: center;
+    width: 100%;
+    max-width: 360px;
+  }
+  .ciudad {
+    font-size: 1.2rem;
+    opacity: 0.85;
+    margin-bottom: 4px;
+  }
+  .temp {
+    font-size: 5rem;
+    font-weight: 600;
+    line-height: 1;
+    margin: 12px 0;
+  }
+  .desc {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin-bottom: 24px;
+  }
+  .detalles {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    font-size: 0.95rem;
+    opacity: 0.8;
+    margin-bottom: 28px;
+  }
+  button {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.4);
+    color: #fff;
+    padding: 10px 22px;
+    border-radius: 24px;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+  button:active { background: rgba(255,255,255,0.3); }
+  .estado {
+    margin-top: 20px;
+    font-size: 0.9rem;
+    opacity: 0.75;
+    min-height: 1.2em;
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="ciudad" id="ciudad">—</div>
+    <div class="temp" id="temp">--°</div>
+    <div class="desc" id="desc"></div>
+    <div class="detalles">
+      <span id="sensacion"></span>
+      <span id="viento"></span>
+      <span id="humedad"></span>
+    </div>
+    <button id="btnActualizar">Actualizar</button>
+    <div class="estado" id="estado"></div>
+  </div>
+
+<script>
+const elTemp = document.getElementById('temp');
+const elDesc = document.getElementById('desc');
+const elCiudad = document.getElementById('ciudad');
+const elSensacion = document.getElementById('sensacion');
+const elViento = document.getElementById('viento');
+const elHumedad = document.getElementById('humedad');
+const elEstado = document.getElementById('estado');
+const btn = document.getElementById('btnActualizar');
+
+const CODIGOS = {
+  0: 'Despejado', 1: 'Mayormente despejado', 2: 'Parcialmente nublado', 3: 'Nublado',
+  45: 'Niebla', 48: 'Niebla helada',
+  51: 'Llovizna ligera', 53: 'Llovizna', 55: 'Llovizna intensa',
+  61: 'Lluvia ligera', 63: 'Lluvia', 65: 'Lluvia intensa',
+  71: 'Nieve ligera', 73: 'Nieve', 75: 'Nieve intensa',
+  80: 'Chubascos ligeros', 81: 'Chubascos', 82: 'Chubascos intensos',
+  95: 'Tormenta', 96: 'Tormenta con granizo', 99: 'Tormenta fuerte con granizo'
+};
+
+function setEstado(msg) { elEstado.textContent = msg; }
+
+async function obtenerCiudad(lat, lon) {
+  try {
+    const r = await fetch(`https://geocoding-api.open-meteo.com/v1/reverse?latitude=${lat}&longitude=${lon}&language=es`);
+    const data = await r.json();
+    if (data.results && data.results.length) {
+      const res = data.results[0];
+      return res.name + (res.admin1 ? ', ' + res.admin1 : '');
+    }
+  } catch (e) {}
+  return 'Tu ubicación';
+}
+
+async function obtenerTiempo(lat, lon) {
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m`;
+  const r = await fetch(url);
+  if (!r.ok) throw new Error('Error al consultar el tiempo');
+  return r.json();
+}
+
+async function actualizar() {
+  setEstado('Localizando...');
+  elTemp.textContent = '--°';
+  elDesc.textContent = '';
+
+  if (!navigator.geolocation) {
+    setEstado('Geolocalización no disponible en este navegador.');
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(async (pos) => {
+    const { latitude, longitude } = pos.coords;
+    setEstado('Consultando temperatura...');
+    try {
+      const [tiempo, ciudad] = await Promise.all([
+        obtenerTiempo(latitude, longitude),
+        obtenerCiudad(latitude, longitude)
+      ]);
+      const c = tiempo.current;
+      elCiudad.textContent = ciudad;
+      elTemp.textContent = Math.round(c.temperature_2m) + '°';
+      elDesc.textContent = CODIGOS[c.weather_code] || '';
+      elSensacion.textContent = 'Sensación ' + Math.round(c.apparent_temperature) + '°';
+      elViento.textContent = Math.round(c.wind_speed_10m) + ' km/h';
+      elHumedad.textContent = c.relative_humidity_2m + '% hum.';
+      setEstado('Actualizado ' + new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }));
+    } catch (e) {
+      setEstado('No se pudo obtener la temperatura.');
+    }
+  }, (err) => {
+    if (err.code === err.PERMISSION_DENIED) {
+      setEstado('Permiso de ubicación denegado. Actívalo para ver la temperatura.');
+    } else {
+      setEstado('No se pudo obtener tu ubicación.');
+    }
+  }, { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 });
+}
+
+btn.addEventListener('click', actualizar);
+window.addEventListener('load', actualizar);
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
