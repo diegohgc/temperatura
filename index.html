@@ -105,12 +105,13 @@ function setEstado(msg) { elEstado.textContent = msg; }
 
 async function obtenerCiudad(lat, lon) {
   try {
-    const r = await fetch(`https://geocoding-api.open-meteo.com/v1/reverse?latitude=${lat}&longitude=${lon}&language=es`);
+    const r = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=es`);
     const data = await r.json();
-    if (data.results && data.results.length) {
-      const res = data.results[0];
-      return res.name + (res.admin1 ? ', ' + res.admin1 : '');
-    }
+    const barrio = data.locality;
+    const ciudad = data.city;
+    if (barrio && ciudad && barrio !== ciudad) return `${barrio}, ${ciudad}`;
+    if (ciudad) return ciudad;
+    if (barrio) return barrio;
   } catch (e) {}
   return 'Tu ubicación';
 }
