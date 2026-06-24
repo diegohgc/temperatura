@@ -9,15 +9,17 @@ usando geolocalización del navegador y la API gratuita Open-Meteo (sin API key)
 - Datos del tiempo: Open-Meteo (`api.open-meteo.com` + `geocoding-api.open-meteo.com`), sin clave de API.
 - No usa localStorage ni backend propio; cada carga consulta la ubicación y el tiempo en directo.
 
-## Marea (Stormglass)
-- Estado de marea (subiendo/bajando) y hora del próximo cambio vía Stormglass API
-  (`api.stormglass.io/v2/tide/extremes/point`).
-- La API key está hardcodeada en `index.html` (`STORMGLASS_KEY`) porque es una app
-  100% cliente sin backend — por tanto la key es visible en el código fuente para
-  cualquiera que la inspeccione. Riesgo aceptado por el usuario dado el free tier
-  limitado (10 llamadas/día).
-- Si se agota la cuota diaria o falla la llamada, la app sigue funcionando sin mostrar
-  la marea (no rompe el resto de la funcionalidad).
+## Marea (Marea API)
+- Estado de marea (subiendo/bajando) y hora del próximo cambio (pleamar/bajamar) vía
+  Marea API (`api.marea.ooo/v2/tides`, doc: https://api.marea.ooo/doc/v2#get-/tides).
+- Auth con header `x-marea-api-token`. La API key está hardcodeada en `index.html`
+  (`MAREA_API_KEY`) porque es una app 100% cliente sin backend — visible en el código
+  fuente para quien lo inspeccione. Riesgo aceptado por el usuario.
+- Plan gratuito: 100 requests totales para explorar la API (no es por día, es un total
+  limitado) — vigilar el consumo.
+- Si falla la llamada o se agota la cuota, la app sigue funcionando sin mostrar la marea
+  (no rompe el resto de la funcionalidad).
+- Antiguo proveedor (Stormglass) descartado y sustituido por Marea API a petición del usuario.
 
 ## Altitud
 - Si el GPS del dispositivo devuelve altitud (`coords.altitude`, requiere
