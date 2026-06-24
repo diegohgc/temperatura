@@ -84,6 +84,7 @@
       <span id="humedad"></span>
     </div>
     <div class="marea" id="marea"></div>
+    <div class="marea" id="altitud"></div>
     <button id="btnActualizar">Actualizar</button>
     <div class="estado" id="estado"></div>
   </div>
@@ -97,6 +98,7 @@ const elViento = document.getElementById('viento');
 const elHumedad = document.getElementById('humedad');
 const elEstado = document.getElementById('estado');
 const elMarea = document.getElementById('marea');
+const elAltitud = document.getElementById('altitud');
 const btn = document.getElementById('btnActualizar');
 
 const STORMGLASS_KEY = '625f0ace-6f35-11f1-99cb-0242ac120004-625f0b78-6f35-11f1-99cb-0242ac120004';
@@ -155,6 +157,22 @@ async function obtenerMarea(lat, lon) {
     : `Marea bajando · bajamar a las ${horaTexto}`;
 }
 
+async function obtenerElevacionTerreno(lat, lon) {
+  const r = await fetch(`https://api.open-meteo.com/v1/elevation?latitude=${lat}&longitude=${lon}`);
+  if (!r.ok) throw new Error('Error al consultar la elevación');
+  const data = await r.json();
+  return data.elevation && data.elevation.length ? data.elevation[0] : null;
+}
+
+async function obtenerAltitud(lat, lon, altitudGps) {
+  if (typeof altitudGps === 'number') {
+    return `Altitud (GPS) ${Math.round(altitudGps)} m`;
+  }
+  const elevacion = await obtenerElevacionTerreno(lat, lon);
+  if (elevacion === null) return null;
+  return `Altitud del terreno ${Math.round(elevacion)} m`;
+}
+
 async function actualizar() {
   setEstado('Localizando...');
   elTemp.textContent = '--°';
@@ -166,13 +184,14 @@ async function actualizar() {
   }
 
   navigator.geolocation.getCurrentPosition(async (pos) => {
-    const { latitude, longitude } = pos.coords;
+    const { latitude, longitude, altitude } = pos.coords;
     setEstado('Consultando temperatura...');
     try {
-      const [tiempo, ciudad, marea] = await Promise.all([
+      const [tiempo, ciudad, marea, altitudTexto] = await Promise.all([
         obtenerTiempo(latitude, longitude),
         obtenerCiudad(latitude, longitude),
-        obtenerMarea(latitude, longitude).catch(() => null)
+        obtenerMarea(latitude, longitude).catch(() => null),
+        obtenerAltitud(latitude, longitude, altitude).catch(() => null)
       ]);
       const c = tiempo.current;
       elCiudad.textContent = ciudad;
@@ -182,6 +201,7 @@ async function actualizar() {
       elViento.textContent = Math.round(c.wind_speed_10m) + ' km/h';
       elHumedad.textContent = c.relative_humidity_2m + '% hum.';
       elMarea.textContent = marea || '';
+      elAltitud.textContent = altitudTexto || '';
       setEstado('Actualizado ' + new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }));
     } catch (e) {
       setEstado('No se pudo obtener la temperatura.');
@@ -192,7 +212,7 @@ async function actualizar() {
     } else {
       setEstado('No se pudo obtener tu ubicación.');
     }
-  }, { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 });
+  }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 });
 }
 
 btn.addEventListener('click', actualizar);

@@ -19,6 +19,12 @@ usando geolocalización del navegador y la API gratuita Open-Meteo (sin API key)
 - Si se agota la cuota diaria o falla la llamada, la app sigue funcionando sin mostrar
   la marea (no rompe el resto de la funcionalidad).
 
+## Altitud
+- Si el GPS del dispositivo devuelve altitud (`coords.altitude`, requiere
+  `enableHighAccuracy: true`), se muestra esa.
+- Si no, se usa la elevación del terreno en esas coordenadas vía Open-Meteo
+  (`api.open-meteo.com/v1/elevation`, gratis sin key) como aproximación.
+
 ## Plan futuro
 - De momento es solo PWA. Intención de empaquetarla más adelante como APK Android
   (WebView que cargue la PWA publicada), igual que se hizo con el proyecto de halterofilia
