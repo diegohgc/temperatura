@@ -22,10 +22,13 @@ usando geolocalización del navegador y la API gratuita Open-Meteo (sin API key)
 - Antiguo proveedor (Stormglass) descartado y sustituido por Marea API a petición del usuario.
 
 ## Altitud
-- Si el GPS del dispositivo devuelve altitud (`coords.altitude`, requiere
-  `enableHighAccuracy: true`), se muestra esa.
-- Si no, se usa la elevación del terreno en esas coordenadas vía Open-Meteo
-  (`api.open-meteo.com/v1/elevation`, gratis sin key) como aproximación.
+- Se usa siempre la elevación del terreno en esas coordenadas vía Open-Meteo
+  (`api.open-meteo.com/v1/elevation`, gratis sin key).
+- Antes se usaba `coords.altitude` (GPS) cuando estaba disponible, pero se descartó:
+  esa altitud es sobre el elipsoide WGS84, no sobre el geoide/nivel del mar real, y
+  el navegador no permite corregir eso (depende del chip GPS/SO). La elevación de
+  Open-Meteo sí está referida a nivel del mar, así que es más correcta aunque menos
+  "en vivo" (terreno, no posición exacta dentro de un edificio, por ejemplo).
 
 ## Plan futuro
 - De momento es solo PWA. Intención de empaquetarla más adelante como APK Android

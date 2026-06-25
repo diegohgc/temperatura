@@ -170,10 +170,7 @@ async function obtenerElevacionTerreno(lat, lon) {
   return data.elevation && data.elevation.length ? data.elevation[0] : null;
 }
 
-async function obtenerAltitud(lat, lon, altitudGps) {
-  if (typeof altitudGps === 'number') {
-    return `Altitud (GPS) ${Math.round(altitudGps)} m`;
-  }
+async function obtenerAltitud(lat, lon) {
   const elevacion = await obtenerElevacionTerreno(lat, lon);
   if (elevacion === null) return null;
   return `Altitud del terreno ${Math.round(elevacion)} m`;
@@ -190,14 +187,14 @@ async function actualizar() {
   }
 
   navigator.geolocation.getCurrentPosition(async (pos) => {
-    const { latitude, longitude, altitude } = pos.coords;
+    const { latitude, longitude } = pos.coords;
     setEstado('Consultando temperatura...');
     try {
       const [tiempo, ciudad, marea, altitudTexto] = await Promise.all([
         obtenerTiempo(latitude, longitude),
         obtenerCiudad(latitude, longitude),
         obtenerMarea(latitude, longitude).catch(() => null),
-        obtenerAltitud(latitude, longitude, altitude).catch(() => null)
+        obtenerAltitud(latitude, longitude).catch(() => null)
       ]);
       const c = tiempo.current;
       elCiudad.textContent = ciudad;
