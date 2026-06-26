@@ -30,11 +30,25 @@
     opacity: 0.85;
     margin-bottom: 4px;
   }
+  .icono {
+    width: 72px;
+    height: 72px;
+    margin: 8px auto 0;
+  }
+  .icono svg {
+    width: 100%;
+    height: 100%;
+    stroke: #fff;
+    fill: none;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
   .temp {
     font-size: 5rem;
     font-weight: 600;
     line-height: 1;
-    margin: 12px 0;
+    margin: 4px 0 12px;
   }
   .desc {
     font-size: 1.1rem;
@@ -76,6 +90,7 @@
 <body>
   <div class="card">
     <div class="ciudad" id="ciudad">—</div>
+    <div class="icono" id="icono"></div>
     <div class="temp" id="temp">--°</div>
     <div class="desc" id="desc"></div>
     <div class="detalles">
@@ -99,7 +114,31 @@ const elHumedad = document.getElementById('humedad');
 const elEstado = document.getElementById('estado');
 const elMarea = document.getElementById('marea');
 const elAltitud = document.getElementById('altitud');
+const elIcono = document.getElementById('icono');
 const btn = document.getElementById('btnActualizar');
+
+const ICONOS = {
+  sol: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5"/><path d="M12 1.5v3M12 19.5v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M1.5 12h3M19.5 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>',
+  solNube: '<svg viewBox="0 0 24 24"><path d="M8.5 4a4 4 0 0 1 3.9 3.1"/><circle cx="8.5" cy="8" r="3.5"/><path d="M7 19.5h10.5a3.5 3.5 0 0 0 .5-6.96A5 5 0 0 0 8.6 11.2 4 4 0 0 0 7 19.5z"/></svg>',
+  nube: '<svg viewBox="0 0 24 24"><path d="M6.5 18.5h11a3.5 3.5 0 0 0 .5-6.96 5 5 0 0 0-9.62-1.65A4 4 0 0 0 6.5 18.5z"/></svg>',
+  niebla: '<svg viewBox="0 0 24 24"><path d="M5 9.5h11a3.2 3.2 0 0 0 0-6.4 4.6 4.6 0 0 0-8.6-1.5A3.6 3.6 0 0 0 5 9.5z"/><path d="M3 14h18M3 17.5h18M3 21h18"/></svg>',
+  llovizna: '<svg viewBox="0 0 24 24"><path d="M6.5 13.5h11a3.5 3.5 0 0 0 .5-6.96A5 5 0 0 0 8.6 5.85 4 4 0 0 0 6.5 13.5z"/><path d="M9 17v3M13 17v3M17 17v3"/></svg>',
+  lluvia: '<svg viewBox="0 0 24 24"><path d="M6.5 12.5h11a3.5 3.5 0 0 0 .5-6.96A5 5 0 0 0 8.6 4.85 4 4 0 0 0 6.5 12.5z"/><path d="M8 16l-1.5 4M13 16l-1.5 4M18 16l-1.5 4"/></svg>',
+  nieve: '<svg viewBox="0 0 24 24"><path d="M6.5 12.5h11a3.5 3.5 0 0 0 .5-6.96A5 5 0 0 0 8.6 4.85 4 4 0 0 0 6.5 12.5z"/><path d="M9 17v4M7.3 18.2l3.4 1.6M11.3 18.2l-3.4 1.6M15 17v4M13.3 18.2l3.4 1.6M17.3 18.2l-3.4 1.6"/></svg>',
+  tormenta: '<svg viewBox="0 0 24 24"><path d="M6.5 11.5h11a3.5 3.5 0 0 0 .5-6.96A5 5 0 0 0 8.6 3.85 4 4 0 0 0 6.5 11.5z"/><path d="M13 11.5l-3 5h3l-2 4.5 5.5-6.5h-3z"/></svg>',
+};
+
+function iconoParaCodigo(codigo) {
+  if (codigo === 0) return ICONOS.sol;
+  if (codigo === 1 || codigo === 2) return ICONOS.solNube;
+  if (codigo === 3) return ICONOS.nube;
+  if (codigo === 45 || codigo === 48) return ICONOS.niebla;
+  if (codigo >= 51 && codigo <= 55) return ICONOS.llovizna;
+  if ((codigo >= 61 && codigo <= 65) || (codigo >= 80 && codigo <= 82)) return ICONOS.lluvia;
+  if (codigo >= 71 && codigo <= 75) return ICONOS.nieve;
+  if (codigo >= 95) return ICONOS.tormenta;
+  return ICONOS.solNube;
+}
 
 const MAREA_API_KEY = '715aa404-0c8b-41df-8710-d4a6782757dc';
 
@@ -200,6 +239,7 @@ async function actualizar() {
       elCiudad.textContent = ciudad;
       elTemp.textContent = Math.round(c.temperature_2m) + '°';
       elDesc.textContent = CODIGOS[c.weather_code] || '';
+      elIcono.innerHTML = iconoParaCodigo(c.weather_code);
       elSensacion.textContent = 'Sensación ' + Math.round(c.apparent_temperature) + '°';
       elViento.textContent = Math.round(c.wind_speed_10m) + ' km/h';
       elHumedad.textContent = c.relative_humidity_2m + '% hum.';
