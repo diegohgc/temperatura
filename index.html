@@ -141,6 +141,7 @@
     </div>
     <div class="marea" id="marea"></div>
     <div class="marea" id="altitud"></div>
+    <div class="detalles" id="solInfo"></div>
     <div class="horas" id="horas"></div>
     <button id="btnActualizar">Actualizar</button>
     <div class="estado" id="estado"></div>
@@ -158,6 +159,7 @@ const elMarea = document.getElementById('marea');
 const elAltitud = document.getElementById('altitud');
 const elIcono = document.getElementById('icono');
 const elHoras = document.getElementById('horas');
+const elSolInfo = document.getElementById('solInfo');
 const btn = document.getElementById('btnActualizar');
 
 const ICONOS = {
@@ -213,7 +215,7 @@ async function obtenerCiudad(lat, lon) {
 }
 
 async function obtenerTiempo(lat, lon) {
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,is_day&hourly=temperature_2m,precipitation_probability,weather_code,is_day&forecast_days=2&timezone=auto`;
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,is_day&hourly=temperature_2m,precipitation_probability,weather_code,is_day&daily=sunrise,sunset&forecast_days=2&timezone=auto`;
   const r = await fetch(url);
   if (!r.ok) throw new Error('Error al consultar el tiempo');
   return r.json();
@@ -242,6 +244,14 @@ function renderHoras(hourly) {
     `;
     elHoras.appendChild(div);
   }
+}
+
+function renderSol(daily) {
+  elSolInfo.innerHTML = '';
+  if (!daily || !daily.sunrise || !daily.sunrise[0]) return;
+  const amanecer = new Date(daily.sunrise[0]).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+  const anochecer = new Date(daily.sunset[0]).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+  elSolInfo.innerHTML = `<span>Amanecer ${amanecer}</span><span>Anochecer ${anochecer}</span>`;
 }
 
 async function obtenerMarea(lat, lon) {
@@ -311,6 +321,7 @@ async function actualizar() {
       elDesc.textContent = CODIGOS[c.weather_code] || '';
       elIcono.innerHTML = iconoParaCodigo(c.weather_code, c.is_day === 1);
       renderHoras(tiempo.hourly);
+      renderSol(tiempo.daily);
       elSensacion.textContent = 'Sensación ' + Math.round(c.apparent_temperature) + '°';
       elViento.textContent = Math.round(c.wind_speed_10m) + ' km/h';
       elHumedad.textContent = c.relative_humidity_2m + '% hum.';
