@@ -212,7 +212,7 @@ async function obtenerElevacionTerreno(lat, lon) {
 async function obtenerAltitud(lat, lon) {
   const elevacion = await obtenerElevacionTerreno(lat, lon);
   if (elevacion === null) return null;
-  return `Altitud del terreno ${Math.round(elevacion)} m`;
+  return `Altitud ${Math.round(elevacion)} m`;
 }
 
 async function actualizar() {
