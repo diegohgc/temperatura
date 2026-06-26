@@ -169,11 +169,13 @@ const ICONOS = {
   lluvia: '<svg viewBox="0 0 24 24"><path d="M6.5 12.5h11a3.5 3.5 0 0 0 .5-6.96A5 5 0 0 0 8.6 4.85 4 4 0 0 0 6.5 12.5z"/><path d="M8 16l-1.5 4M13 16l-1.5 4M18 16l-1.5 4"/></svg>',
   nieve: '<svg viewBox="0 0 24 24"><path d="M6.5 12.5h11a3.5 3.5 0 0 0 .5-6.96A5 5 0 0 0 8.6 4.85 4 4 0 0 0 6.5 12.5z"/><path d="M9 17v4M7.3 18.2l3.4 1.6M11.3 18.2l-3.4 1.6M15 17v4M13.3 18.2l3.4 1.6M17.3 18.2l-3.4 1.6"/></svg>',
   tormenta: '<svg viewBox="0 0 24 24"><path d="M6.5 11.5h11a3.5 3.5 0 0 0 .5-6.96A5 5 0 0 0 8.6 3.85 4 4 0 0 0 6.5 11.5z"/><path d="M13 11.5l-3 5h3l-2 4.5 5.5-6.5h-3z"/></svg>',
+  luna: '<svg viewBox="0 0 24 24"><path d="M16.5 3.5a8.5 8.5 0 1 0 4 9.4 7 7 0 0 1-4-9.4z"/></svg>',
+  lunaNube: '<svg viewBox="0 0 24 24"><path d="M8.8 9.3a3.3 3.3 0 0 1 2.1-5.5 2.4 2.4 0 0 0 2.4 3.3 4.7 4.7 0 0 1-1.6 4.9"/><path d="M7 19.5h10.5a3.5 3.5 0 0 0 .5-6.96A5 5 0 0 0 8.6 11.2 4 4 0 0 0 7 19.5z"/></svg>',
 };
 
-function iconoParaCodigo(codigo) {
-  if (codigo === 0) return ICONOS.sol;
-  if (codigo === 1 || codigo === 2) return ICONOS.solNube;
+function iconoParaCodigo(codigo, esDia = true) {
+  if (codigo === 0) return esDia ? ICONOS.sol : ICONOS.luna;
+  if (codigo === 1 || codigo === 2) return esDia ? ICONOS.solNube : ICONOS.lunaNube;
   if (codigo === 3) return ICONOS.nube;
   if (codigo === 45 || codigo === 48) return ICONOS.niebla;
   if (codigo >= 51 && codigo <= 55) return ICONOS.llovizna;
@@ -211,7 +213,7 @@ async function obtenerCiudad(lat, lon) {
 }
 
 async function obtenerTiempo(lat, lon) {
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&hourly=temperature_2m,precipitation_probability,weather_code&forecast_days=2&timezone=auto`;
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,is_day&hourly=temperature_2m,precipitation_probability,weather_code,is_day&forecast_days=2&timezone=auto`;
   const r = await fetch(url);
   if (!r.ok) throw new Error('Error al consultar el tiempo');
   return r.json();
@@ -234,7 +236,7 @@ function renderHoras(hourly) {
     div.className = 'hora';
     div.innerHTML = `
       <div class="h">${hora}</div>
-      <div class="icono-hora">${iconoParaCodigo(hourly.weather_code[i])}</div>
+      <div class="icono-hora">${iconoParaCodigo(hourly.weather_code[i], hourly.is_day ? hourly.is_day[i] === 1 : true)}</div>
       <div class="t">${temp}°</div>
       ${prob !== null ? `<div class="p">${prob}%</div>` : ''}
     `;
@@ -307,7 +309,7 @@ async function actualizar() {
       elCiudad.textContent = ciudad;
       elTemp.textContent = Math.round(c.temperature_2m) + '°';
       elDesc.textContent = CODIGOS[c.weather_code] || '';
-      elIcono.innerHTML = iconoParaCodigo(c.weather_code);
+      elIcono.innerHTML = iconoParaCodigo(c.weather_code, c.is_day === 1);
       renderHoras(tiempo.hourly);
       elSensacion.textContent = 'Sensación ' + Math.round(c.apparent_temperature) + '°';
       elViento.textContent = Math.round(c.wind_speed_10m) + ' km/h';
