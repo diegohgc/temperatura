@@ -85,6 +85,47 @@
     margin-bottom: 20px;
     min-height: 1.2em;
   }
+  .horas {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    padding: 4px 4px 16px;
+    margin-bottom: 8px;
+  }
+  .hora {
+    flex: 0 0 auto;
+    text-align: center;
+    min-width: 46px;
+  }
+  .hora .h {
+    font-size: 0.8rem;
+    opacity: 0.75;
+    margin-bottom: 4px;
+  }
+  .hora .icono-hora {
+    width: 30px;
+    height: 30px;
+    margin: 0 auto 4px;
+  }
+  .hora .icono-hora svg {
+    width: 100%;
+    height: 100%;
+    stroke: #fff;
+    fill: none;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .hora .t {
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+  .hora .p {
+    font-size: 0.75rem;
+    opacity: 0.8;
+    color: #bfe0ff;
+    margin-top: 2px;
+  }
 </style>
 </head>
 <body>
@@ -100,6 +141,7 @@
     </div>
     <div class="marea" id="marea"></div>
     <div class="marea" id="altitud"></div>
+    <div class="horas" id="horas"></div>
     <button id="btnActualizar">Actualizar</button>
     <div class="estado" id="estado"></div>
   </div>
@@ -115,6 +157,7 @@ const elEstado = document.getElementById('estado');
 const elMarea = document.getElementById('marea');
 const elAltitud = document.getElementById('altitud');
 const elIcono = document.getElementById('icono');
+const elHoras = document.getElementById('horas');
 const btn = document.getElementById('btnActualizar');
 
 const ICONOS = {
@@ -168,10 +211,35 @@ async function obtenerCiudad(lat, lon) {
 }
 
 async function obtenerTiempo(lat, lon) {
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m`;
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&hourly=temperature_2m,precipitation_probability,weather_code&forecast_days=2&timezone=auto`;
   const r = await fetch(url);
   if (!r.ok) throw new Error('Error al consultar el tiempo');
   return r.json();
+}
+
+function renderHoras(hourly) {
+  elHoras.innerHTML = '';
+  if (!hourly || !hourly.time) return;
+  const ahora = Date.now();
+  const indices = hourly.time
+    .map((t, i) => ({ i, t: new Date(t).getTime() }))
+    .filter((x) => x.t >= ahora)
+    .slice(0, 8);
+
+  for (const { i, t } of indices) {
+    const hora = new Date(t).getHours() + 'h';
+    const temp = Math.round(hourly.temperature_2m[i]);
+    const prob = hourly.precipitation_probability ? hourly.precipitation_probability[i] : null;
+    const div = document.createElement('div');
+    div.className = 'hora';
+    div.innerHTML = `
+      <div class="h">${hora}</div>
+      <div class="icono-hora">${iconoParaCodigo(hourly.weather_code[i])}</div>
+      <div class="t">${temp}°</div>
+      ${prob !== null ? `<div class="p">${prob}%</div>` : ''}
+    `;
+    elHoras.appendChild(div);
+  }
 }
 
 async function obtenerMarea(lat, lon) {
@@ -240,6 +308,7 @@ async function actualizar() {
       elTemp.textContent = Math.round(c.temperature_2m) + '°';
       elDesc.textContent = CODIGOS[c.weather_code] || '';
       elIcono.innerHTML = iconoParaCodigo(c.weather_code);
+      renderHoras(tiempo.hourly);
       elSensacion.textContent = 'Sensación ' + Math.round(c.apparent_temperature) + '°';
       elViento.textContent = Math.round(c.wind_speed_10m) + ' km/h';
       elHumedad.textContent = c.relative_humidity_2m + '% hum.';
