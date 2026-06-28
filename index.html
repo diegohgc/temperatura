@@ -187,7 +187,7 @@ function iconoParaCodigo(codigo, esDia = true) {
   return ICONOS.solNube;
 }
 
-const MAREA_API_KEY = '715aa404-0c8b-41df-8710-d4a6782757dc';
+const STORMGLASS_KEY = '625f0ace-6f35-11f1-99cb-0242ac120004-625f0b78-6f35-11f1-99cb-0242ac120004';
 
 const CODIGOS = {
   0: 'Despejado', 1: 'Mayormente despejado', 2: 'Parcialmente nublado', 3: 'Nublado',
@@ -255,31 +255,25 @@ function renderSol(daily) {
 }
 
 async function obtenerMarea(lat, lon) {
-  const url = `https://api.marea.ooo/v2/tides?latitude=${lat}&longitude=${lon}&duration=1440&interval=60`;
-  const r = await fetch(url, { headers: { 'x-marea-api-token': MAREA_API_KEY } });
+  const ahora = Math.floor(Date.now() / 1000);
+  const inicio = ahora - 6 * 3600;
+  const fin = ahora + 24 * 3600;
+  const url = `https://api.stormglass.io/v2/tide/extremes/point?lat=${lat}&lng=${lon}&start=${inicio}&end=${fin}`;
+  const r = await fetch(url, { headers: { Authorization: STORMGLASS_KEY } });
   if (!r.ok) throw new Error('Error al consultar la marea');
   const data = await r.json();
+  const extremos = (data.data || [])
+    .map((e) => ({ tipo: e.type, hora: new Date(e.time) }))
+    .sort((a, b) => a.hora - b.hora);
 
-  const ahora = Date.now();
-  const actual = (data.heights || [])
-    .map((h) => ({ ...h, t: new Date(h.datetime).getTime() }))
-    .sort((a, b) => Math.abs(a.t - ahora) - Math.abs(b.t - ahora))[0];
+  const proximo = extremos.find((e) => e.hora.getTime() > Date.now());
+  if (!proximo) return null;
 
-  const proximo = (data.extremes || [])
-    .map((e) => ({ ...e, t: new Date(e.datetime).getTime() }))
-    .filter((e) => e.t > ahora)
-    .sort((a, b) => a.t - b.t)[0];
-
-  if (!actual && !proximo) return null;
-
-  const subiendo = actual ? actual.state === 'RISING' : proximo && proximo.state === 'HIGH TIDE';
-  const estadoTexto = subiendo ? 'Marea subiendo' : 'Marea bajando';
-
-  if (!proximo) return estadoTexto;
-
-  const horaTexto = new Date(proximo.datetime).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-  const tipoTexto = proximo.state === 'HIGH TIDE' ? 'pleamar' : 'bajamar';
-  return `${estadoTexto} · ${tipoTexto} a las ${horaTexto}`;
+  const subiendo = proximo.tipo === 'high';
+  const horaTexto = proximo.hora.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+  return subiendo
+    ? `Marea subiendo · pleamar a las ${horaTexto}`
+    : `Marea bajando · bajamar a las ${horaTexto}`;
 }
 
 async function obtenerElevacionTerreno(lat, lon) {
