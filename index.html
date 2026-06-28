@@ -126,6 +126,39 @@
     color: #bfe0ff;
     margin-top: 2px;
   }
+  .dia {
+    flex: 0 0 auto;
+    text-align: center;
+    min-width: 52px;
+  }
+  .dia .d {
+    font-size: 0.8rem;
+    opacity: 0.75;
+    margin-bottom: 4px;
+    text-transform: capitalize;
+  }
+  .dia .icono-dia {
+    width: 30px;
+    height: 30px;
+    margin: 0 auto 4px;
+  }
+  .dia .icono-dia svg {
+    width: 100%;
+    height: 100%;
+    stroke: #fff;
+    fill: none;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .dia .max {
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+  .dia .min {
+    font-size: 0.8rem;
+    opacity: 0.7;
+  }
 </style>
 </head>
 <body>
@@ -143,6 +176,7 @@
       <span id="humedad"></span>
     </div>
     <div class="horas" id="horas"></div>
+    <div class="horas" id="dias"></div>
     <button id="btnActualizar">Actualizar</button>
     <div class="estado" id="estado"></div>
   </div>
@@ -159,6 +193,7 @@ const elMarea = document.getElementById('marea');
 const elAltitud = document.getElementById('altitud');
 const elIcono = document.getElementById('icono');
 const elHoras = document.getElementById('horas');
+const elDias = document.getElementById('dias');
 const elSolInfo = document.getElementById('solInfo');
 const btn = document.getElementById('btnActualizar');
 
@@ -215,7 +250,7 @@ async function obtenerCiudad(lat, lon) {
 }
 
 async function obtenerTiempo(lat, lon) {
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,is_day&hourly=temperature_2m,precipitation_probability,weather_code,is_day&daily=sunrise,sunset&forecast_days=2&timezone=auto`;
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,is_day&hourly=temperature_2m,precipitation_probability,weather_code,is_day&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min,weather_code&forecast_days=7&timezone=auto`;
   const r = await fetch(url);
   if (!r.ok) throw new Error('Error al consultar el tiempo');
   return r.json();
@@ -252,6 +287,29 @@ function renderSol(daily) {
   const amanecer = new Date(daily.sunrise[0]).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
   const anochecer = new Date(daily.sunset[0]).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
   elSolInfo.innerHTML = `<span>Amanecer ${amanecer}</span><span>Anochecer ${anochecer}</span>`;
+}
+
+function renderDias(daily) {
+  elDias.innerHTML = '';
+  if (!daily || !daily.time) return;
+  const hoy = new Date().toDateString();
+
+  daily.time.forEach((fecha, i) => {
+    const d = new Date(fecha + 'T12:00:00');
+    const esHoy = d.toDateString() === hoy;
+    const nombreDia = esHoy ? 'Hoy' : d.toLocaleDateString('es-ES', { weekday: 'short' }).replace('.', '');
+    const max = Math.round(daily.temperature_2m_max[i]);
+    const min = Math.round(daily.temperature_2m_min[i]);
+    const div = document.createElement('div');
+    div.className = 'dia';
+    div.innerHTML = `
+      <div class="d">${nombreDia}</div>
+      <div class="icono-dia">${iconoParaCodigo(daily.weather_code[i], true)}</div>
+      <div class="max">${max}°</div>
+      <div class="min">${min}°</div>
+    `;
+    elDias.appendChild(div);
+  });
 }
 
 async function obtenerMarea(lat, lon) {
@@ -316,6 +374,7 @@ async function actualizar() {
       elIcono.innerHTML = iconoParaCodigo(c.weather_code, c.is_day === 1);
       renderHoras(tiempo.hourly);
       renderSol(tiempo.daily);
+      renderDias(tiempo.daily);
       elSensacion.textContent = 'Sensación ' + Math.round(c.apparent_temperature) + '°';
       elViento.textContent = Math.round(c.wind_speed_10m) + ' km/h';
       elHumedad.textContent = c.relative_humidity_2m + '% hum.';
