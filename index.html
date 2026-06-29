@@ -398,6 +398,9 @@ async function obtenerMarea(lat, lon) {
   const alturas = data.hourly && data.hourly.sea_level_height_msl;
   if (!tiempos || !alturas) return null;
 
+  const esCostero = alturas.some((h) => h !== null);
+  if (!esCostero) return null;
+
   const ahora = Date.now();
   let idx = tiempos.findIndex((t) => new Date(t).getTime() >= ahora);
   if (idx <= 0) idx = 0;
