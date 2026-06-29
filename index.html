@@ -25,10 +25,72 @@
     width: 100%;
     max-width: 360px;
   }
+  .ciudad-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 4px;
+  }
   .ciudad {
     font-size: 1.2rem;
     opacity: 0.85;
-    margin-bottom: 4px;
+  }
+  .btn-buscar {
+    background: none;
+    border: none;
+    padding: 4px;
+    opacity: 0.55;
+    cursor: pointer;
+    line-height: 0;
+  }
+  .btn-buscar svg {
+    width: 16px;
+    height: 16px;
+    stroke: #fff;
+    fill: none;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .buscador {
+    max-width: 260px;
+    margin: 0 auto 10px;
+  }
+  .buscador input {
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.4);
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    font-size: 0.85rem;
+  }
+  .buscador input::placeholder {
+    color: rgba(255,255,255,0.6);
+  }
+  .resultados {
+    text-align: left;
+    margin-top: 4px;
+  }
+  .resultado-item {
+    padding: 6px 10px;
+    font-size: 0.85rem;
+    opacity: 0.9;
+    cursor: pointer;
+    border-radius: 8px;
+  }
+  .resultado-item:active {
+    background: rgba(255,255,255,0.15);
+  }
+  .link-ubicacion {
+    background: none;
+    border: none;
+    color: #bfe0ff;
+    font-size: 0.8rem;
+    padding: 6px 0 0;
+    text-decoration: underline;
+    cursor: pointer;
   }
   .icono {
     width: 46px;
@@ -163,7 +225,17 @@
 </head>
 <body>
   <div class="card">
-    <div class="ciudad" id="ciudad">—</div>
+    <div class="ciudad-row">
+      <div class="ciudad" id="ciudad">—</div>
+      <button class="btn-buscar" id="btnBuscarCiudad" aria-label="Buscar otra ciudad">
+        <svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M19.5 19.5l-4.3-4.3"/></svg>
+      </button>
+    </div>
+    <div class="buscador" id="buscador" hidden>
+      <input type="text" id="inputCiudad" placeholder="Buscar ciudad..." autocomplete="off" />
+      <div class="resultados" id="resultadosCiudad"></div>
+      <button class="link-ubicacion" id="btnUsarGps">Usar mi ubicación</button>
+    </div>
     <div class="marea" id="altitud"></div>
     <div class="detalles" id="solInfo"></div>
     <div class="marea" id="marea"></div>
@@ -196,6 +268,13 @@ const elHoras = document.getElementById('horas');
 const elDias = document.getElementById('dias');
 const elSolInfo = document.getElementById('solInfo');
 const btn = document.getElementById('btnActualizar');
+const btnBuscarCiudad = document.getElementById('btnBuscarCiudad');
+const elBuscador = document.getElementById('buscador');
+const inputCiudad = document.getElementById('inputCiudad');
+const elResultadosCiudad = document.getElementById('resultadosCiudad');
+const btnUsarGps = document.getElementById('btnUsarGps');
+
+let ubicacionManual = null;
 
 const ICONOS = {
   sol: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5"/><path d="M12 1.5v3M12 19.5v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M1.5 12h3M19.5 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>',
@@ -353,43 +432,51 @@ async function obtenerAltitud(lat, lon) {
   return `Altitud ${Math.round(elevacion)} m`;
 }
 
+async function cargarDatos(latitude, longitude, nombreFijo) {
+  setEstado('Consultando temperatura...');
+  try {
+    const [tiempo, ciudad, marea, altitudTexto] = await Promise.all([
+      obtenerTiempo(latitude, longitude),
+      nombreFijo ? Promise.resolve(nombreFijo) : obtenerCiudad(latitude, longitude),
+      obtenerMarea(latitude, longitude).catch(() => null),
+      obtenerAltitud(latitude, longitude).catch(() => null)
+    ]);
+    const c = tiempo.current;
+    elCiudad.textContent = ciudad;
+    elTemp.textContent = Math.round(c.temperature_2m) + '°';
+    elDesc.textContent = CODIGOS[c.weather_code] || '';
+    elIcono.innerHTML = iconoParaCodigo(c.weather_code, c.is_day === 1);
+    renderHoras(tiempo.hourly);
+    renderSol(tiempo.daily);
+    renderDias(tiempo.daily);
+    elSensacion.textContent = 'Sensación ' + Math.round(c.apparent_temperature) + '°';
+    elViento.textContent = Math.round(c.wind_speed_10m) + ' km/h';
+    elHumedad.textContent = c.relative_humidity_2m + '% hum.';
+    elMarea.textContent = marea || '';
+    elAltitud.textContent = altitudTexto || '';
+    setEstado('Actualizado ' + new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }));
+  } catch (e) {
+    setEstado('No se pudo obtener la temperatura.');
+  }
+}
+
 async function actualizar() {
   setEstado('Localizando...');
   elTemp.textContent = '--°';
   elDesc.textContent = '';
+
+  if (ubicacionManual) {
+    cargarDatos(ubicacionManual.lat, ubicacionManual.lon, ubicacionManual.nombre);
+    return;
+  }
 
   if (!navigator.geolocation) {
     setEstado('Geolocalización no disponible en este navegador.');
     return;
   }
 
-  navigator.geolocation.getCurrentPosition(async (pos) => {
-    const { latitude, longitude } = pos.coords;
-    setEstado('Consultando temperatura...');
-    try {
-      const [tiempo, ciudad, marea, altitudTexto] = await Promise.all([
-        obtenerTiempo(latitude, longitude),
-        obtenerCiudad(latitude, longitude),
-        obtenerMarea(latitude, longitude).catch(() => null),
-        obtenerAltitud(latitude, longitude).catch(() => null)
-      ]);
-      const c = tiempo.current;
-      elCiudad.textContent = ciudad;
-      elTemp.textContent = Math.round(c.temperature_2m) + '°';
-      elDesc.textContent = CODIGOS[c.weather_code] || '';
-      elIcono.innerHTML = iconoParaCodigo(c.weather_code, c.is_day === 1);
-      renderHoras(tiempo.hourly);
-      renderSol(tiempo.daily);
-      renderDias(tiempo.daily);
-      elSensacion.textContent = 'Sensación ' + Math.round(c.apparent_temperature) + '°';
-      elViento.textContent = Math.round(c.wind_speed_10m) + ' km/h';
-      elHumedad.textContent = c.relative_humidity_2m + '% hum.';
-      elMarea.textContent = marea || '';
-      elAltitud.textContent = altitudTexto || '';
-      setEstado('Actualizado ' + new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }));
-    } catch (e) {
-      setEstado('No se pudo obtener la temperatura.');
-    }
+  navigator.geolocation.getCurrentPosition((pos) => {
+    cargarDatos(pos.coords.latitude, pos.coords.longitude);
   }, (err) => {
     if (err.code === err.PERMISSION_DENIED) {
       setEstado('Permiso de ubicación denegado. Actívalo para ver la temperatura.');
@@ -398,6 +485,53 @@ async function actualizar() {
     }
   }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 });
 }
+
+let timeoutBusqueda = null;
+
+function cerrarBuscador() {
+  elBuscador.hidden = true;
+  inputCiudad.value = '';
+  elResultadosCiudad.innerHTML = '';
+}
+
+btnBuscarCiudad.addEventListener('click', () => {
+  elBuscador.hidden = !elBuscador.hidden;
+  if (!elBuscador.hidden) inputCiudad.focus();
+});
+
+inputCiudad.addEventListener('input', () => {
+  clearTimeout(timeoutBusqueda);
+  const texto = inputCiudad.value.trim();
+  if (texto.length < 2) {
+    elResultadosCiudad.innerHTML = '';
+    return;
+  }
+  timeoutBusqueda = setTimeout(async () => {
+    try {
+      const r = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(texto)}&count=5&language=es`);
+      const data = await r.json();
+      elResultadosCiudad.innerHTML = '';
+      (data.results || []).forEach((res) => {
+        const nombre = res.name + (res.admin1 ? `, ${res.admin1}` : '') + (res.country ? `, ${res.country}` : '');
+        const item = document.createElement('div');
+        item.className = 'resultado-item';
+        item.textContent = nombre;
+        item.addEventListener('click', () => {
+          ubicacionManual = { lat: res.latitude, lon: res.longitude, nombre: res.name + (res.admin1 ? `, ${res.admin1}` : '') };
+          cerrarBuscador();
+          cargarDatos(ubicacionManual.lat, ubicacionManual.lon, ubicacionManual.nombre);
+        });
+        elResultadosCiudad.appendChild(item);
+      });
+    } catch (e) {}
+  }, 350);
+});
+
+btnUsarGps.addEventListener('click', () => {
+  ubicacionManual = null;
+  cerrarBuscador();
+  actualizar();
+});
 
 btn.addEventListener('click', actualizar);
 window.addEventListener('load', actualizar);
