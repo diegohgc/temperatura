@@ -1,4 +1,4 @@
-const CACHE = 'temperatura-v2';
+const CACHE = 'temperatura-v3';
 const ASSETS = ['./index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', (e) => {
@@ -16,7 +16,7 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-  if (e.request.url.includes('api.open-meteo.com') || e.request.url.includes('bigdatacloud.net') || e.request.url.includes('stormglass.io')) return;
+  if (e.request.url.includes('open-meteo.com') || e.request.url.includes('bigdatacloud.net')) return;
 
   if (e.request.mode === 'navigate' || e.request.url.endsWith('index.html')) {
     e.respondWith(

@@ -9,18 +9,21 @@ usando geolocalización del navegador y la API gratuita Open-Meteo (sin API key)
 - Datos del tiempo: Open-Meteo (`api.open-meteo.com` + `geocoding-api.open-meteo.com`), sin clave de API.
 - No usa localStorage ni backend propio; cada carga consulta la ubicación y el tiempo en directo.
 
-## Marea (Stormglass)
-- Estado de marea (subiendo/bajando) y hora del próximo cambio vía Stormglass API
-  (`api.stormglass.io/v2/tide/extremes/point`).
-- Auth con header `Authorization`. La API key está hardcodeada en `index.html`
-  (`STORMGLASS_KEY`) porque es una app 100% cliente sin backend — visible en el código
-  fuente para quien lo inspeccione. Riesgo aceptado por el usuario.
-- Free tier: 10 llamadas/día — vigilar el consumo.
-- Si falla la llamada o se agota la cuota, la app sigue funcionando sin mostrar la marea
-  (no rompe el resto de la funcionalidad).
-- Se probó también Marea API (`api.marea.ooo`) como alternativa, pero se ha vuelto a
-  Stormglass a petición del usuario. La key de Marea API queda sin usar por si se retoma
-  en el futuro: `715aa404-0c8b-41df-8710-d4a6782757dc`.
+## Marea (Open-Meteo Marine API)
+- Estado de marea (subiendo/bajando) y hora del próximo cambio vía la API marina de
+  Open-Meteo (`marine-api.open-meteo.com/v1/marine`, variable `sea_level_height_msl`
+  horaria). Gratis, sin API key.
+- El estado y el próximo extremo se calculan en el cliente comparando la serie horaria
+  de altura del nivel del mar (se busca el primer cambio de pendiente a partir de ahora).
+  Precisión de ±1h al ser datos horarios (menos exacta que un proveedor dedicado de
+  mareas, pero suficiente para el uso de la app).
+- Sin límite de llamadas restrictivo (a diferencia de los proveedores anteriores).
+- Si falla la llamada, la app sigue funcionando sin mostrar la marea (no rompe el resto
+  de la funcionalidad).
+- Proveedores probados anteriormente, descartados:
+  - Stormglass (`api.stormglass.io`): free tier de solo 10 llamadas/día.
+  - Marea API (`api.marea.ooo`): key sin usar por si se retoma en el futuro:
+    `715aa404-0c8b-41df-8710-d4a6782757dc`.
 
 ## Altitud
 - Se usa siempre la elevación del terreno en esas coordenadas vía Open-Meteo
