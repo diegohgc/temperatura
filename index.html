@@ -416,7 +416,21 @@ async function obtenerMarea(lat, lon) {
   }
   if (k >= alturas.length - 1) return subiendo ? 'Marea subiendo' : 'Marea bajando';
 
-  const horaTexto = new Date(tiempos[k]).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+  let horaExtremo = new Date(tiempos[k]).getTime();
+  if (k > 0 && k < alturas.length - 1) {
+    const h0 = alturas[k - 1];
+    const h1 = alturas[k];
+    const h2 = alturas[k + 1];
+    const denominador = h0 - 2 * h1 + h2;
+    if (denominador !== 0) {
+      const offsetHoras = 0.5 * (h0 - h2) / denominador;
+      if (offsetHoras > -1 && offsetHoras < 1) {
+        horaExtremo += offsetHoras * 3600000;
+      }
+    }
+  }
+
+  const horaTexto = new Date(horaExtremo).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
   return subiendo
     ? `Marea subiendo · pleamar a las ${horaTexto}`
     : `Marea bajando · bajamar a las ${horaTexto}`;
