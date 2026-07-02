@@ -19,6 +19,7 @@
     align-items: center;
     justify-content: center;
     padding: env(safe-area-inset-top, 20px) 20px env(safe-area-inset-bottom, 20px);
+    transition: background 1.5s ease, color 1.5s ease;
   }
   .card {
     text-align: center;
@@ -254,6 +255,234 @@
   </div>
 
 <script>
+const TRADUCCIONES = {
+  es: {
+    buscarPlaceholder: 'Buscar ciudad...',
+    usarGps: 'Usar mi ubicación',
+    actualizar: 'Actualizar',
+    consultando: 'Consultando temperatura...',
+    localizando: 'Localizando...',
+    geoNoDisponible: 'Geolocalización no disponible en este navegador.',
+    permisoDenegado: 'Permiso de ubicación denegado. Actívalo para ver la temperatura.',
+    errorUbicacion: 'No se pudo obtener tu ubicación.',
+    errorTemperatura: 'No se pudo obtener la temperatura.',
+    actualizado: 'Actualizado',
+    tuUbicacion: 'Tu ubicación',
+    sensacion: 'Sensación',
+    humedad: '% hum.',
+    mareaSubiendo: 'Marea subiendo · pleamar a las',
+    mareaBajando: 'Marea bajando · bajamar a las',
+    altitud: 'Altitud',
+    amanecer: 'Amanecer',
+    anochecer: 'Anochecer',
+    hoy: 'Hoy',
+    codigos: {
+      0: 'Despejado', 1: 'Mayormente despejado', 2: 'Parcialmente nublado', 3: 'Nublado',
+      45: 'Niebla', 48: 'Niebla helada',
+      51: 'Llovizna ligera', 53: 'Llovizna', 55: 'Llovizna intensa',
+      61: 'Lluvia ligera', 63: 'Lluvia', 65: 'Lluvia intensa',
+      71: 'Nieve ligera', 73: 'Nieve', 75: 'Nieve intensa',
+      80: 'Chubascos ligeros', 81: 'Chubascos', 82: 'Chubascos intensos',
+      95: 'Tormenta', 96: 'Tormenta con granizo', 99: 'Tormenta fuerte con granizo'
+    },
+    locale: 'es-ES'
+  },
+  en: {
+    buscarPlaceholder: 'Search city...',
+    usarGps: 'Use my location',
+    actualizar: 'Refresh',
+    consultando: 'Getting temperature...',
+    localizando: 'Locating...',
+    geoNoDisponible: 'Geolocation not available in this browser.',
+    permisoDenegado: 'Location permission denied. Enable it to see the temperature.',
+    errorUbicacion: 'Could not get your location.',
+    errorTemperatura: 'Could not get the temperature.',
+    actualizado: 'Updated',
+    tuUbicacion: 'Your location',
+    sensacion: 'Feels like',
+    humedad: '% hum.',
+    mareaSubiendo: 'Tide rising · high tide at',
+    mareaBajando: 'Tide falling · low tide at',
+    altitud: 'Altitude',
+    amanecer: 'Sunrise',
+    anochecer: 'Sunset',
+    hoy: 'Today',
+    codigos: {
+      0: 'Clear sky', 1: 'Mainly clear', 2: 'Partly cloudy', 3: 'Overcast',
+      45: 'Fog', 48: 'Icy fog',
+      51: 'Light drizzle', 53: 'Drizzle', 55: 'Heavy drizzle',
+      61: 'Light rain', 63: 'Rain', 65: 'Heavy rain',
+      71: 'Light snow', 73: 'Snow', 75: 'Heavy snow',
+      80: 'Light showers', 81: 'Showers', 82: 'Heavy showers',
+      95: 'Thunderstorm', 96: 'Thunderstorm with hail', 99: 'Heavy thunderstorm with hail'
+    },
+    locale: 'en-US'
+  },
+  de: {
+    buscarPlaceholder: 'Stadt suchen...',
+    usarGps: 'Meinen Standort verwenden',
+    actualizar: 'Aktualisieren',
+    consultando: 'Temperatur wird abgerufen...',
+    localizando: 'Standort wird ermittelt...',
+    geoNoDisponible: 'Geolokalisierung in diesem Browser nicht verfügbar.',
+    permisoDenegado: 'Standortberechtigung verweigert.',
+    errorUbicacion: 'Standort konnte nicht ermittelt werden.',
+    errorTemperatura: 'Temperatur konnte nicht abgerufen werden.',
+    actualizado: 'Aktualisiert',
+    tuUbicacion: 'Dein Standort',
+    sensacion: 'Gefühlt',
+    humedad: '% Feuchte',
+    mareaSubiendo: 'Flut · Hochwasser um',
+    mareaBajando: 'Ebbe · Niedrigwasser um',
+    altitud: 'Höhe',
+    amanecer: 'Sonnenaufgang',
+    anochecer: 'Sonnenuntergang',
+    hoy: 'Heute',
+    codigos: {
+      0: 'Klar', 1: 'Überwiegend klar', 2: 'Teilweise bewölkt', 3: 'Bewölkt',
+      45: 'Nebel', 48: 'Eisnebel',
+      51: 'Leichter Nieselregen', 53: 'Nieselregen', 55: 'Starker Nieselregen',
+      61: 'Leichter Regen', 63: 'Regen', 65: 'Starker Regen',
+      71: 'Leichter Schnee', 73: 'Schnee', 75: 'Starker Schnee',
+      80: 'Leichte Schauer', 81: 'Schauer', 82: 'Starke Schauer',
+      95: 'Gewitter', 96: 'Gewitter mit Hagel', 99: 'Starkes Gewitter mit Hagel'
+    },
+    locale: 'de-DE'
+  },
+  fr: {
+    buscarPlaceholder: 'Rechercher une ville...',
+    usarGps: 'Utiliser ma position',
+    actualizar: 'Actualiser',
+    consultando: 'Récupération de la température...',
+    localizando: 'Localisation...',
+    geoNoDisponible: 'Géolocalisation non disponible dans ce navigateur.',
+    permisoDenegado: 'Permission de localisation refusée.',
+    errorUbicacion: 'Impossible d\'obtenir votre position.',
+    errorTemperatura: 'Impossible d\'obtenir la température.',
+    actualizado: 'Mis à jour',
+    tuUbicacion: 'Votre position',
+    sensacion: 'Ressenti',
+    humedad: '% hum.',
+    mareaSubiendo: 'Marée montante · pleine mer à',
+    mareaBajando: 'Marée descendante · basse mer à',
+    altitud: 'Altitude',
+    amanecer: 'Lever du soleil',
+    anochecer: 'Coucher du soleil',
+    hoy: 'Aujourd\'hui',
+    codigos: {
+      0: 'Ciel dégagé', 1: 'Principalement dégagé', 2: 'Partiellement nuageux', 3: 'Nuageux',
+      45: 'Brouillard', 48: 'Brouillard givrant',
+      51: 'Bruine légère', 53: 'Bruine', 55: 'Bruine forte',
+      61: 'Pluie légère', 63: 'Pluie', 65: 'Pluie forte',
+      71: 'Neige légère', 73: 'Neige', 75: 'Neige forte',
+      80: 'Averses légères', 81: 'Averses', 82: 'Averses fortes',
+      95: 'Orage', 96: 'Orage avec grêle', 99: 'Orage violent avec grêle'
+    },
+    locale: 'fr-FR'
+  },
+  pt: {
+    buscarPlaceholder: 'Pesquisar cidade...',
+    usarGps: 'Usar minha localização',
+    actualizar: 'Atualizar',
+    consultando: 'Obtendo temperatura...',
+    localizando: 'Localizando...',
+    geoNoDisponible: 'Geolocalização não disponível neste navegador.',
+    permisoDenegado: 'Permissão de localização negada.',
+    errorUbicacion: 'Não foi possível obter sua localização.',
+    errorTemperatura: 'Não foi possível obter a temperatura.',
+    actualizado: 'Atualizado',
+    tuUbicacion: 'Sua localização',
+    sensacion: 'Sensação',
+    humedad: '% umid.',
+    mareaSubiendo: 'Maré subindo · maré alta às',
+    mareaBajando: 'Maré baixando · maré baixa às',
+    altitud: 'Altitude',
+    amanecer: 'Nascer do sol',
+    anochecer: 'Pôr do sol',
+    hoy: 'Hoje',
+    codigos: {
+      0: 'Céu limpo', 1: 'Maioritariamente limpo', 2: 'Parcialmente nublado', 3: 'Nublado',
+      45: 'Nevoeiro', 48: 'Nevoeiro gelado',
+      51: 'Garoa leve', 53: 'Garoa', 55: 'Garoa forte',
+      61: 'Chuva leve', 63: 'Chuva', 65: 'Chuva forte',
+      71: 'Neve leve', 73: 'Neve', 75: 'Neve forte',
+      80: 'Pancadas leves', 81: 'Pancadas', 82: 'Pancadas fortes',
+      95: 'Tempestade', 96: 'Tempestade com granizo', 99: 'Tempestade forte com granizo'
+    },
+    locale: 'pt-PT'
+  },
+  it: {
+    buscarPlaceholder: 'Cerca città...',
+    usarGps: 'Usa la mia posizione',
+    actualizar: 'Aggiorna',
+    consultando: 'Recupero temperatura...',
+    localizando: 'Localizzazione...',
+    geoNoDisponible: 'Geolocalizzazione non disponibile in questo browser.',
+    permisoDenegado: 'Permesso di localizzazione negato.',
+    errorUbicacion: 'Impossibile ottenere la posizione.',
+    errorTemperatura: 'Impossibile ottenere la temperatura.',
+    actualizado: 'Aggiornato',
+    tuUbicacion: 'La tua posizione',
+    sensacion: 'Percepita',
+    humedad: '% umid.',
+    mareaSubiendo: 'Marea in salita · alta marea alle',
+    mareaBajando: 'Marea in discesa · bassa marea alle',
+    altitud: 'Altitudine',
+    amanecer: 'Alba',
+    anochecer: 'Tramonto',
+    hoy: 'Oggi',
+    codigos: {
+      0: 'Sereno', 1: 'Prevalentemente sereno', 2: 'Parzialmente nuvoloso', 3: 'Nuvoloso',
+      45: 'Nebbia', 48: 'Nebbia gelata',
+      51: 'Pioggerella leggera', 53: 'Pioggerella', 55: 'Pioggerella intensa',
+      61: 'Pioggia leggera', 63: 'Pioggia', 65: 'Pioggia intensa',
+      71: 'Neve leggera', 73: 'Neve', 75: 'Neve intensa',
+      80: 'Rovesci leggeri', 81: 'Rovesci', 82: 'Rovesci intensi',
+      95: 'Temporale', 96: 'Temporale con grandine', 99: 'Temporale forte con grandine'
+    },
+    locale: 'it-IT'
+  },
+  zh: {
+    buscarPlaceholder: '搜索城市...',
+    usarGps: '使用我的位置',
+    actualizar: '刷新',
+    consultando: '获取温度中...',
+    localizando: '定位中...',
+    geoNoDisponible: '此浏览器不支持地理定位。',
+    permisoDenegado: '位置权限被拒绝。',
+    errorUbicacion: '无法获取您的位置。',
+    errorTemperatura: '无法获取温度。',
+    actualizado: '已更新',
+    tuUbicacion: '您的位置',
+    sensacion: '体感',
+    humedad: '% 湿度',
+    mareaSubiendo: '涨潮 · 高潮时间',
+    mareaBajando: '退潮 · 低潮时间',
+    altitud: '海拔',
+    amanecer: '日出',
+    anochecer: '日落',
+    hoy: '今天',
+    codigos: {
+      0: '晴天', 1: '大部晴天', 2: '局部多云', 3: '多云',
+      45: '雾', 48: '冻雾',
+      51: '小毛毛雨', 53: '毛毛雨', 55: '大毛毛雨',
+      61: '小雨', 63: '雨', 65: '大雨',
+      71: '小雪', 73: '雪', 75: '大雪',
+      80: '小阵雨', 81: '阵雨', 82: '大阵雨',
+      95: '雷暴', 96: '冰雹雷暴', 99: '强冰雹雷暴'
+    },
+    locale: 'zh-CN'
+  }
+};
+
+function detectarIdioma() {
+  const lang = (navigator.language || navigator.userLanguage || 'es').toLowerCase().substring(0, 2);
+  return TRADUCCIONES[lang] ? lang : 'en';
+}
+
+const idioma = detectarIdioma();
+const T = TRADUCCIONES[idioma];
+
 const elTemp = document.getElementById('temp');
 const elDesc = document.getElementById('desc');
 const elCiudad = document.getElementById('ciudad');
@@ -273,6 +502,11 @@ const elBuscador = document.getElementById('buscador');
 const inputCiudad = document.getElementById('inputCiudad');
 const elResultadosCiudad = document.getElementById('resultadosCiudad');
 const btnUsarGps = document.getElementById('btnUsarGps');
+
+// Aplicar textos traducidos
+inputCiudad.placeholder = T.buscarPlaceholder;
+btnUsarGps.textContent = T.usarGps;
+btn.textContent = T.actualizar;
 
 let ubicacionManual = null;
 
@@ -301,17 +535,48 @@ function iconoParaCodigo(codigo, esDia = true) {
   return ICONOS.solNube;
 }
 
-const CODIGOS = {
-  0: 'Despejado', 1: 'Mayormente despejado', 2: 'Parcialmente nublado', 3: 'Nublado',
-  45: 'Niebla', 48: 'Niebla helada',
-  51: 'Llovizna ligera', 53: 'Llovizna', 55: 'Llovizna intensa',
-  61: 'Lluvia ligera', 63: 'Lluvia', 65: 'Lluvia intensa',
-  71: 'Nieve ligera', 73: 'Nieve', 75: 'Nieve intensa',
-  80: 'Chubascos ligeros', 81: 'Chubascos', 82: 'Chubascos intensos',
-  95: 'Tormenta', 96: 'Tormenta con granizo', 99: 'Tormenta fuerte con granizo'
-};
+const CODIGOS = T.codigos;
 
 function setEstado(msg) { elEstado.textContent = msg; }
+
+function colorParaTemp(temp) {
+  const rangos = [
+    { t: 0,  c1: '#b8d8f0', c2: '#8ab8d8', texto: '#1a3a5c' },
+    { t: 10, c1: '#1e3a5f', c2: '#3a6ea5', texto: '#ffffff' },
+    { t: 18, c1: '#1a4a6e', c2: '#2a7a8a', texto: '#ffffff' },
+    { t: 24, c1: '#1e5c3a', c2: '#2e8a5a', texto: '#ffffff' },
+    { t: 30, c1: '#7a4a10', c2: '#c07020', texto: '#ffffff' },
+    { t: 35, c1: '#8a2a10', c2: '#c04020', texto: '#ffffff' },
+    { t: 999,c1: '#6a1010', c2: '#a02020', texto: '#ffffff' },
+  ];
+  for (let i = 0; i < rangos.length - 1; i++) {
+    const a = rangos[i], b = rangos[i + 1];
+    if (temp <= a.t || (temp >= a.t && temp < b.t)) {
+      if (temp <= a.t) return a;
+      const ratio = (temp - a.t) / (b.t - a.t);
+      return {
+        c1: interpolarColor(a.c1, b.c1, ratio),
+        c2: interpolarColor(a.c2, b.c2, ratio),
+        texto: ratio < 0.5 ? a.texto : b.texto
+      };
+    }
+  }
+  return rangos[rangos.length - 1];
+}
+
+function interpolarColor(hex1, hex2, t) {
+  const r1 = parseInt(hex1.slice(1,3),16), g1 = parseInt(hex1.slice(3,5),16), b1 = parseInt(hex1.slice(5,7),16);
+  const r2 = parseInt(hex2.slice(1,3),16), g2 = parseInt(hex2.slice(3,5),16), b2 = parseInt(hex2.slice(5,7),16);
+  const r = Math.round(r1 + (r2-r1)*t), g = Math.round(g1 + (g2-g1)*t), b = Math.round(b1 + (b2-b1)*t);
+  return `#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`;
+}
+
+function aplicarColorTemp(temp) {
+  const col = colorParaTemp(temp);
+  document.body.style.background = `linear-gradient(160deg, ${col.c1}, ${col.c2})`;
+  document.body.style.color = col.texto;
+  document.querySelector('meta[name="theme-color"]').setAttribute('content', col.c1);
+}
 
 async function obtenerCiudad(lat, lon) {
   try {
@@ -323,7 +588,7 @@ async function obtenerCiudad(lat, lon) {
     if (ciudad) return ciudad;
     if (barrio) return barrio;
   } catch (e) {}
-  return 'Tu ubicación';
+  return T.tuUbicacion;
 }
 
 async function obtenerTiempo(lat, lon) {
@@ -361,9 +626,9 @@ function renderHoras(hourly) {
 function renderSol(daily) {
   elSolInfo.innerHTML = '';
   if (!daily || !daily.sunrise || !daily.sunrise[0]) return;
-  const amanecer = new Date(daily.sunrise[0]).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-  const anochecer = new Date(daily.sunset[0]).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-  elSolInfo.innerHTML = `<span>Amanecer ${amanecer}</span><span>Anochecer ${anochecer}</span>`;
+  const amanecer = new Date(daily.sunrise[0]).toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' });
+  const anochecer = new Date(daily.sunset[0]).toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' });
+  elSolInfo.innerHTML = `<span>${T.amanecer} ${amanecer}</span><span>${T.anochecer} ${anochecer}</span>`;
 }
 
 function renderDias(daily) {
@@ -374,7 +639,7 @@ function renderDias(daily) {
   daily.time.forEach((fecha, i) => {
     const d = new Date(fecha + 'T12:00:00');
     const esHoy = d.toDateString() === hoy;
-    const nombreDia = esHoy ? 'Hoy' : d.toLocaleDateString('es-ES', { weekday: 'short' }).replace('.', '');
+    const nombreDia = esHoy ? T.hoy : d.toLocaleDateString(T.locale, { weekday: 'short' }).replace('.', '');
     const max = Math.round(daily.temperature_2m_max[i]);
     const min = Math.round(daily.temperature_2m_min[i]);
     const div = document.createElement('div');
@@ -430,10 +695,10 @@ async function obtenerMarea(lat, lon) {
     }
   }
 
-  const horaTexto = new Date(horaExtremo).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+  const horaTexto = new Date(horaExtremo).toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' });
   return subiendo
-    ? `Marea subiendo · pleamar a las ${horaTexto}`
-    : `Marea bajando · bajamar a las ${horaTexto}`;
+    ? `${T.mareaSubiendo} ${horaTexto}`
+    : `${T.mareaBajando} ${horaTexto}`;
 }
 
 async function obtenerElevacionTerreno(lat, lon) {
@@ -446,11 +711,11 @@ async function obtenerElevacionTerreno(lat, lon) {
 async function obtenerAltitud(lat, lon) {
   const elevacion = await obtenerElevacionTerreno(lat, lon);
   if (elevacion === null) return null;
-  return `Altitud ${Math.round(elevacion)} m`;
+  return `${T.altitud} ${Math.round(elevacion)} m`;
 }
 
 async function cargarDatos(latitude, longitude, nombreFijo) {
-  setEstado('Consultando temperatura...');
+  setEstado(T.consultando);
   try {
     const [tiempo, ciudad, marea, altitudTexto] = await Promise.all([
       obtenerTiempo(latitude, longitude),
@@ -466,19 +731,20 @@ async function cargarDatos(latitude, longitude, nombreFijo) {
     renderHoras(tiempo.hourly);
     renderSol(tiempo.daily);
     renderDias(tiempo.daily);
-    elSensacion.textContent = 'Sensación ' + Math.round(c.apparent_temperature) + '°';
+    aplicarColorTemp(Math.round(c.temperature_2m));
+    elSensacion.textContent = T.sensacion + ' ' + Math.round(c.apparent_temperature) + '°';
     elViento.textContent = Math.round(c.wind_speed_10m) + ' km/h';
-    elHumedad.textContent = c.relative_humidity_2m + '% hum.';
+    elHumedad.textContent = c.relative_humidity_2m + T.humedad;
     elMarea.textContent = marea || '';
     elAltitud.textContent = altitudTexto || '';
-    setEstado('Actualizado ' + new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }));
+    setEstado(T.actualizado + ' ' + new Date().toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' }));
   } catch (e) {
-    setEstado('No se pudo obtener la temperatura.');
+    setEstado(T.errorTemperatura);
   }
 }
 
 async function actualizar() {
-  setEstado('Localizando...');
+  setEstado(T.localizando);
   elTemp.textContent = '--°';
   elDesc.textContent = '';
 
@@ -488,7 +754,7 @@ async function actualizar() {
   }
 
   if (!navigator.geolocation) {
-    setEstado('Geolocalización no disponible en este navegador.');
+    setEstado(T.geoNoDisponible);
     return;
   }
 
@@ -496,9 +762,9 @@ async function actualizar() {
     cargarDatos(pos.coords.latitude, pos.coords.longitude);
   }, (err) => {
     if (err.code === err.PERMISSION_DENIED) {
-      setEstado('Permiso de ubicación denegado. Actívalo para ver la temperatura.');
+      setEstado(T.permisoDenegado);
     } else {
-      setEstado('No se pudo obtener tu ubicación.');
+      setEstado(T.errorUbicacion);
     }
   }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 });
 }
