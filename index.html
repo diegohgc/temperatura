@@ -819,14 +819,14 @@ async function obtenerCalidadAire(lat, lon) {
   const aqi = data.current && data.current.european_aqi;
   if (aqi === null || aqi === undefined) return null;
   const niveles = [
-    { max: 20,  texto: { es:'Aire muy bueno', en:'Very good air', de:'Sehr gute Luft', fr:'Air très bon', pt:'Ar muito bom', it:'Aria ottima', zh:'空气优', ca:'Aire molt bo', eu:'Aire oso ona', gl:'Aire moi bo' }, emoji: '🟢' },
-    { max: 40,  texto: { es:'Aire bueno',     en:'Good air',      de:'Gute Luft',     fr:'Bon air',      pt:'Ar bom',      it:'Aria buona',  zh:'空气良', ca:'Aire bo',     eu:'Aire ona',    gl:'Aire bo'    }, emoji: '🟡' },
-    { max: 60,  texto: { es:'Aire moderado',  en:'Moderate air',  de:'Mäßige Luft',   fr:'Air modéré',   pt:'Ar moderado', it:'Aria moderata',zh:'空气中等',ca:'Aire moderat',eu:'Aire moderatua',gl:'Aire moderado'}, emoji: '🟠' },
-    { max: 80,  texto: { es:'Aire malo',      en:'Poor air',      de:'Schlechte Luft',fr:'Air mauvais',  pt:'Ar ruim',     it:'Aria scarsa', zh:'空气差', ca:'Aire dolent', eu:'Aire txarra',  gl:'Aire malo'  }, emoji: '🔴' },
-    { max: 999, texto: { es:'Aire muy malo',  en:'Very poor air', de:'Sehr schlechte Luft',fr:'Air très mauvais',pt:'Ar muito ruim',it:'Aria pessima',zh:'空气极差',ca:'Aire molt dolent',eu:'Aire oso txarra',gl:'Aire moi malo'}, emoji: '🟣' },
+    { max: 20,  texto: { es:'Calidad del aire: Muy buena', en:'Air quality: Very good', de:'Luftqualität: Sehr gut', fr:'Qualité de l\'air: Très bonne', pt:'Qualidade do ar: Muito boa', it:'Qualità dell\'aria: Ottima', zh:'空气质量：优', ca:'Qualitat de l\'aire: Molt bona', eu:'Airearen kalitatea: Oso ona', gl:'Calidade do aire: Moi boa' } },
+    { max: 40,  texto: { es:'Calidad del aire: Buena',     en:'Air quality: Good',      de:'Luftqualität: Gut',      fr:'Qualité de l\'air: Bonne',      pt:'Qualidade do ar: Boa',      it:'Qualità dell\'aria: Buona',  zh:'空气质量：良', ca:'Qualitat de l\'aire: Bona',     eu:'Airearen kalitatea: Ona',     gl:'Calidade do aire: Boa'    } },
+    { max: 60,  texto: { es:'Calidad del aire: Moderada',  en:'Air quality: Moderate',  de:'Luftqualität: Mäßig',    fr:'Qualité de l\'air: Modérée',    pt:'Qualidade do ar: Moderada',  it:'Qualità dell\'aria: Moderata',zh:'空气质量：中等', ca:'Qualitat de l\'aire: Moderada', eu:'Airearen kalitatea: Moderatua',gl:'Calidade do aire: Moderada'} },
+    { max: 80,  texto: { es:'Calidad del aire: Mala',      en:'Air quality: Poor',      de:'Luftqualität: Schlecht',  fr:'Qualité de l\'air: Mauvaise',   pt:'Qualidade do ar: Ruim',      it:'Qualità dell\'aria: Scarsa',  zh:'空气质量：差', ca:'Qualitat de l\'aire: Dolenta',  eu:'Airearen kalitatea: Txarra',   gl:'Calidade do aire: Mala'   } },
+    { max: 999, texto: { es:'Calidad del aire: Muy mala',  en:'Air quality: Very poor',  de:'Luftqualität: Sehr schlecht',fr:'Qualité de l\'air: Très mauvaise',pt:'Qualidade do ar: Muito ruim',it:'Qualità dell\'aria: Pessima',zh:'空气质量：极差', ca:'Qualitat de l\'aire: Molt dolenta',eu:'Airearen kalitatea: Oso txarra',gl:'Calidade do aire: Moi mala'} },
   ];
   const nivel = niveles.find(n => aqi <= n.max) || niveles[niveles.length - 1];
-  return nivel.emoji + ' ' + (nivel.texto[idioma] || nivel.texto['en']);
+  return nivel.texto[idioma] || nivel.texto['en'];
 }
 
 async function obtenerAltitud(lat, lon) {
