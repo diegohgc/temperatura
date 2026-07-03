@@ -45,6 +45,12 @@
     cursor: pointer;
     line-height: 0;
   }
+  .btn-buscar-texto {
+    font-size: 0.72rem;
+    opacity: 0.7;
+    color: #fff;
+    vertical-align: middle;
+  }
   .btn-buscar svg {
     width: 16px;
     height: 16px;
@@ -266,6 +272,7 @@
       <div class="ciudad" id="ciudad">—</div>
       <button class="btn-buscar" id="btnBuscarCiudad" aria-label="Buscar otra ciudad">
         <svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M19.5 19.5l-4.3-4.3"/></svg>
+        <span class="btn-buscar-texto" id="textoCambiarCiudad"></span>
       </button>
     </div>
     <div class="buscador" id="buscador" hidden>
@@ -304,6 +311,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'No se pudo obtener tu ubicación.',
     errorTemperatura: 'No se pudo obtener la temperatura.',
     actualizado: 'Actualizado',
+    cambiarCiudad: 'Cambiar ciudad',
     tuUbicacion: 'Tu ubicación',
     sensacion: 'Sensación',
     humedad: '% hum.',
@@ -335,6 +343,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Could not get your location.',
     errorTemperatura: 'Could not get the temperature.',
     actualizado: 'Updated',
+    cambiarCiudad: 'Change city',
     tuUbicacion: 'Your location',
     sensacion: 'Feels like',
     humedad: '% hum.',
@@ -366,6 +375,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Standort konnte nicht ermittelt werden.',
     errorTemperatura: 'Temperatur konnte nicht abgerufen werden.',
     actualizado: 'Aktualisiert',
+    cambiarCiudad: 'Stadt ändern',
     tuUbicacion: 'Dein Standort',
     sensacion: 'Gefühlt',
     humedad: '% Feuchte',
@@ -397,6 +407,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Impossible d\'obtenir votre position.',
     errorTemperatura: 'Impossible d\'obtenir la température.',
     actualizado: 'Mis à jour',
+    cambiarCiudad: 'Changer de ville',
     tuUbicacion: 'Votre position',
     sensacion: 'Ressenti',
     humedad: '% hum.',
@@ -428,6 +439,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Não foi possível obter sua localização.',
     errorTemperatura: 'Não foi possível obter a temperatura.',
     actualizado: 'Atualizado',
+    cambiarCiudad: 'Mudar cidade',
     tuUbicacion: 'Sua localização',
     sensacion: 'Sensação',
     humedad: '% umid.',
@@ -459,6 +471,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Impossibile ottenere la posizione.',
     errorTemperatura: 'Impossibile ottenere la temperatura.',
     actualizado: 'Aggiornato',
+    cambiarCiudad: 'Cambia città',
     tuUbicacion: 'La tua posizione',
     sensacion: 'Percepita',
     humedad: '% umid.',
@@ -490,6 +503,7 @@ const TRADUCCIONES = {
     errorUbicacion: '无法获取您的位置。',
     errorTemperatura: '无法获取温度。',
     actualizado: '已更新',
+    cambiarCiudad: '切换城市',
     tuUbicacion: '您的位置',
     sensacion: '体感',
     humedad: '% 湿度',
@@ -521,6 +535,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'No s\'ha pogut obtenir la teva ubicació.',
     errorTemperatura: 'No s\'ha pogut obtenir la temperatura.',
     actualizado: 'Actualitzat',
+    cambiarCiudad: 'Canviar ciutat',
     tuUbicacion: 'La teva ubicació',
     sensacion: 'Sensació',
     humedad: '% hum.',
@@ -552,6 +567,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Ezin izan da zure kokapena lortu.',
     errorTemperatura: 'Ezin izan da tenperatura lortu.',
     actualizado: 'Eguneratuta',
+    cambiarCiudad: 'Hiria aldatu',
     tuUbicacion: 'Zure kokapena',
     sensacion: 'Sentsazioa',
     humedad: '% heze.',
@@ -583,6 +599,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Non se puido obter a túa localización.',
     errorTemperatura: 'Non se puido obter a temperatura.',
     actualizado: 'Actualizado',
+    cambiarCiudad: 'Cambiar cidade',
     tuUbicacion: 'A túa localización',
     sensacion: 'Sensación',
     humedad: '% hum.',
@@ -641,6 +658,7 @@ const btnUsarGps = document.getElementById('btnUsarGps');
 inputCiudad.placeholder = T.buscarPlaceholder;
 btnUsarGps.textContent = T.usarGps;
 btn.textContent = T.actualizar;
+document.getElementById('textoCambiarCiudad').textContent = T.cambiarCiudad;
 
 let ubicacionManual = null;
 
