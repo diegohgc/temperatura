@@ -472,11 +472,108 @@ const TRADUCCIONES = {
       95: '雷暴', 96: '冰雹雷暴', 99: '强冰雹雷暴'
     },
     locale: 'zh-CN'
+  },
+  ca: {
+    buscarPlaceholder: 'Cercar ciutat...',
+    usarGps: 'Usar la meva ubicació',
+    actualizar: 'Actualitzar',
+    consultando: 'Consultant temperatura...',
+    localizando: 'Localitzant...',
+    geoNoDisponible: 'Geolocalització no disponible en aquest navegador.',
+    permisoDenegado: 'Permís d\'ubicació denegat. Activa\'l per veure la temperatura.',
+    errorUbicacion: 'No s\'ha pogut obtenir la teva ubicació.',
+    errorTemperatura: 'No s\'ha pogut obtenir la temperatura.',
+    actualizado: 'Actualitzat',
+    tuUbicacion: 'La teva ubicació',
+    sensacion: 'Sensació',
+    humedad: '% hum.',
+    mareaSubiendo: 'Marea pujant · plenamar a les',
+    mareaBajando: 'Marea baixant · baixamar a les',
+    altitud: 'Altitud',
+    amanecer: 'Alba',
+    anochecer: 'Capvespre',
+    hoy: 'Avui',
+    codigos: {
+      0: 'Cel clar', 1: 'Majoritàriament clar', 2: 'Parcialment ennuvolat', 3: 'Ennuvolat',
+      45: 'Boira', 48: 'Boira gelada',
+      51: 'Plugim lleuger', 53: 'Plugim', 55: 'Plugim intens',
+      61: 'Pluja lleugera', 63: 'Pluja', 65: 'Pluja intensa',
+      71: 'Neu lleugera', 73: 'Neu', 75: 'Neu intensa',
+      80: 'Ruixats lleugers', 81: 'Ruixats', 82: 'Ruixats intensos',
+      95: 'Tempesta', 96: 'Tempesta amb calamarsa', 99: 'Tempesta forta amb calamarsa'
+    },
+    locale: 'ca-ES'
+  },
+  eu: {
+    buscarPlaceholder: 'Bilatu hiria...',
+    usarGps: 'Erabili nire kokapena',
+    actualizar: 'Eguneratu',
+    consultando: 'Tenperatura kontsultatzen...',
+    localizando: 'Kokatzen...',
+    geoNoDisponible: 'Geokokapena ez dago erabilgarri nabigatzaile honetan.',
+    permisoDenegado: 'Kokapenaren baimena ukatuta.',
+    errorUbicacion: 'Ezin izan da zure kokapena lortu.',
+    errorTemperatura: 'Ezin izan da tenperatura lortu.',
+    actualizado: 'Eguneratuta',
+    tuUbicacion: 'Zure kokapena',
+    sensacion: 'Sentsazioa',
+    humedad: '% heze.',
+    mareaSubiendo: 'Itsasgoraldi · goi-marea',
+    mareaBajando: 'Itsasbeheraldi · behe-marea',
+    altitud: 'Altitudea',
+    amanecer: 'Egunsentia',
+    anochecer: 'Ilunabarra',
+    hoy: 'Gaur',
+    codigos: {
+      0: 'Argi', 1: 'Gehienbat argi', 2: 'Partzialki hodeitsu', 3: 'Hodeitsu',
+      45: 'Lainoa', 48: 'Izotz-lainoa',
+      51: 'Txirimiri arina', 53: 'Txirimiri', 55: 'Txirimiri bizia',
+      61: 'Euri arina', 63: 'Euria', 65: 'Euri bizia',
+      71: 'Elur arina', 73: 'Elurra', 75: 'Elur bizia',
+      80: 'Zaparrada arina', 81: 'Zaparrada', 82: 'Zaparrada bizia',
+      95: 'Ekaitza', 96: 'Ekaitza txingorrekin', 99: 'Ekaitz bizia txingorrekin'
+    },
+    locale: 'eu-ES'
+  },
+  gl: {
+    buscarPlaceholder: 'Buscar cidade...',
+    usarGps: 'Usar a miña localización',
+    actualizar: 'Actualizar',
+    consultando: 'Consultando temperatura...',
+    localizando: 'Localizando...',
+    geoNoDisponible: 'Xeolocalización non dispoñible neste navegador.',
+    permisoDenegado: 'Permiso de localización denegado.',
+    errorUbicacion: 'Non se puido obter a túa localización.',
+    errorTemperatura: 'Non se puido obter a temperatura.',
+    actualizado: 'Actualizado',
+    tuUbicacion: 'A túa localización',
+    sensacion: 'Sensación',
+    humedad: '% hum.',
+    mareaSubiendo: 'Marea subindo · preamar ás',
+    mareaBajando: 'Marea baixando · baixamar ás',
+    altitud: 'Altitude',
+    amanecer: 'Amencer',
+    anochecer: 'Solpor',
+    hoy: 'Hoxe',
+    codigos: {
+      0: 'Despexado', 1: 'Principalmente despexado', 2: 'Parcialmente nublado', 3: 'Nublado',
+      45: 'Néboa', 48: 'Néboa xeada',
+      51: 'Orballo lixeiro', 53: 'Orballo', 55: 'Orballo intenso',
+      61: 'Choiva lixeira', 63: 'Choiva', 65: 'Choiva intensa',
+      71: 'Neve lixeira', 73: 'Neve', 75: 'Neve intensa',
+      80: 'Chuvascadas lixeiras', 81: 'Chuvascadas', 82: 'Chuvascadas intensas',
+      95: 'Tormenta', 96: 'Tormenta con sarabia', 99: 'Tormenta forte con sarabia'
+    },
+    locale: 'gl-ES'
   }
 };
 
 function detectarIdioma() {
-  const lang = (navigator.language || navigator.userLanguage || 'es').toLowerCase().substring(0, 2);
+  const full = (navigator.language || navigator.userLanguage || 'es').toLowerCase();
+  if (full.startsWith('ca')) return 'ca';
+  if (full.startsWith('eu')) return 'eu';
+  if (full.startsWith('gl')) return 'gl';
+  const lang = full.substring(0, 2);
   return TRADUCCIONES[lang] ? lang : 'en';
 }
 
