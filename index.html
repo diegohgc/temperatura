@@ -79,7 +79,21 @@
     width: 100%; height: 100%; stroke: #fff; fill: none;
     stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
   }
+  .temp-wrap { position: relative; display: flex; align-items: center; }
   .temp { font-size: 4rem; font-weight: 700; line-height: 1; }
+  .temp-minmax {
+    position: absolute;
+    left: 100%;
+    padding-left: 8px;
+    font-size: 0.78rem;
+    opacity: 0.8;
+    display: flex;
+    flex-direction: column;
+    line-height: 1.5;
+    white-space: nowrap;
+  }
+  .temp-minmax .tmx { font-weight: 600; }
+  .temp-minmax .tmn { opacity: 0.75; }
   .desc { font-size: 1rem; opacity: 0.9; margin-bottom: 4px; }
   .aire { font-size: 0.82rem; opacity: 0.85; margin-bottom: 10px; min-height: 1em; }
   .detalles {
@@ -189,7 +203,10 @@
     </div>
     <div class="principal" id="principal">
       <div class="icono" id="icono"></div>
-      <div class="temp" id="temp">--°</div>
+      <div class="temp-wrap">
+        <div class="temp" id="temp">--°</div>
+        <div class="temp-minmax" id="tempMinMax"></div>
+      </div>
     </div>
     <div class="desc" id="desc"></div>
     <div class="aire" id="aire"></div>
@@ -883,6 +900,12 @@ async function cargarDatos(latitude, longitude, nombreFijo) {
     renderDias(tiempo.daily);
     renderMarea(mdata);
     aplicarColorTemp(Math.round(c.temperature_2m));
+    const max0 = tiempo.daily && tiempo.daily.temperature_2m_max ? Math.round(tiempo.daily.temperature_2m_max[0]) : null;
+    const min0 = tiempo.daily && tiempo.daily.temperature_2m_min ? Math.round(tiempo.daily.temperature_2m_min[0]) : null;
+    const elMinMax = document.getElementById('tempMinMax');
+    if (max0 !== null && min0 !== null) {
+      elMinMax.innerHTML = `<span class="tmx">${max0}°</span><span class="tmn">${min0}°</span>`;
+    }
     elSensacion.textContent = T.sensacion + ' ' + Math.round(c.apparent_temperature) + '°';
     elViento.textContent = Math.round(c.wind_speed_10m) + ' km/h';
     elHumedad.textContent = c.relative_humidity_2m + T.humedad;
