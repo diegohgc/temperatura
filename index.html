@@ -16,26 +16,16 @@
     background: linear-gradient(160deg, #1e3a5f, #3a6ea5);
     color: #fff;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
-    padding: env(safe-area-inset-top, 20px) 20px env(safe-area-inset-bottom, 20px);
+    padding: env(safe-area-inset-top, 16px) 16px env(safe-area-inset-bottom, 16px);
     transition: background 1.5s ease, color 1.5s ease;
   }
   .card {
     text-align: center;
     width: 100%;
-    max-width: 360px;
-  }
-  .ciudad-row {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    margin-bottom: 4px;
-  }
-  .ciudad {
-    font-size: 1.2rem;
-    opacity: 0.85;
+    max-width: 420px;
+    padding-top: 8px;
   }
   .btn-buscar {
     background: none;
@@ -43,230 +33,132 @@
     padding: 4px;
     opacity: 0.55;
     cursor: pointer;
-    line-height: 0;
     display: flex;
     align-items: center;
     gap: 4px;
-    margin: 0 auto 2px;
+    margin: 0 auto 6px;
   }
-  .btn-buscar-texto {
-    font-size: 0.72rem;
-    color: #fff;
-    line-height: 1;
-  }
+  .btn-buscar-texto { font-size: 0.72rem; color: #fff; line-height: 1; }
   .btn-buscar svg {
-    width: 16px;
-    height: 16px;
-    stroke: #fff;
-    fill: none;
-    stroke-width: 1.8;
-    stroke-linecap: round;
-    stroke-linejoin: round;
+    width: 16px; height: 16px;
+    stroke: #fff; fill: none;
+    stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
   }
-  .buscador {
-    max-width: 260px;
-    margin: 0 auto 10px;
-  }
+  .buscador { max-width: 260px; margin: 0 auto 10px; }
   .buscador input {
-    width: 100%;
-    padding: 8px 12px;
-    border-radius: 14px;
+    width: 100%; padding: 8px 12px; border-radius: 14px;
     border: 1px solid rgba(255,255,255,0.4);
-    background: rgba(255,255,255,0.1);
-    color: #fff;
-    font-size: 0.85rem;
+    background: rgba(255,255,255,0.1); color: #fff; font-size: 0.85rem;
   }
-  .buscador input::placeholder {
-    color: rgba(255,255,255,0.6);
-  }
-  .resultados {
-    text-align: left;
-    margin-top: 4px;
-  }
-  .resultado-item {
-    padding: 6px 10px;
-    font-size: 0.85rem;
-    opacity: 0.9;
-    cursor: pointer;
-    border-radius: 8px;
-  }
-  .resultado-item:active {
-    background: rgba(255,255,255,0.15);
-  }
+  .buscador input::placeholder { color: rgba(255,255,255,0.6); }
+  .resultados { text-align: left; margin-top: 4px; }
+  .resultado-item { padding: 6px 10px; font-size: 0.85rem; opacity: 0.9; cursor: pointer; border-radius: 8px; }
+  .resultado-item:active { background: rgba(255,255,255,0.15); }
   .link-ubicacion {
-    background: none;
-    border: none;
-    color: #bfe0ff;
-    font-size: 0.8rem;
-    padding: 6px 0 0;
-    text-decoration: underline;
-    cursor: pointer;
+    background: none; border: none; color: #bfe0ff;
+    font-size: 0.8rem; padding: 6px 0 0; text-decoration: underline; cursor: pointer;
   }
-  .icono {
-    width: 38px;
-    height: 38px;
-    margin: 4px auto 0;
-  }
-  .aire {
-    font-size: 0.8rem;
-    opacity: 0.85;
-    margin-bottom: 6px;
-    min-height: 1em;
-  }
-  .icono svg {
-    width: 100%;
-    height: 100%;
-    stroke: #fff;
-    fill: none;
-    stroke-width: 1.5;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-  }
-  .temp {
-    font-size: 3.2rem;
-    font-weight: 600;
-    line-height: 1;
-    margin: 2px 0 8px;
-  }
-  .desc {
-    font-size: 0.95rem;
-    opacity: 0.9;
-    margin-bottom: 16px;
-  }
-  .detalles {
+  .top-row {
     display: flex;
-    justify-content: center;
-    gap: 24px;
-    font-size: 0.95rem;
-    opacity: 0.8;
-    margin-bottom: 28px;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    text-align: left;
+  }
+  .ciudad { font-size: 1.8rem; font-weight: 700; line-height: 1.1; }
+  .top-info {
+    text-align: right; font-size: 0.8rem; opacity: 0.85;
+    line-height: 1.8; white-space: nowrap; padding-top: 4px;
+  }
+  .principal {
+    display: flex; align-items: center; justify-content: center;
+    gap: 14px; margin: 4px 0 8px;
+  }
+  .icono { width: 64px; height: 64px; }
+  .icono svg {
+    width: 100%; height: 100%; stroke: #fff; fill: none;
+    stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .temp { font-size: 4rem; font-weight: 700; line-height: 1; }
+  .desc { font-size: 1rem; opacity: 0.9; margin-bottom: 4px; }
+  .aire { font-size: 0.82rem; opacity: 0.85; margin-bottom: 10px; min-height: 1em; }
+  .detalles {
+    display: flex; justify-content: center; gap: 20px;
+    font-size: 0.9rem; opacity: 0.85; margin-bottom: 14px;
+  }
+  .panel {
+    background: rgba(255,255,255,0.12);
+    border-radius: 16px; padding: 12px 14px; margin-bottom: 10px;
+  }
+  .panel-titulo {
+    font-size: 0.72rem; opacity: 0.65;
+    text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px;
+  }
+  .marea-extremos { display: flex; justify-content: space-around; margin-bottom: 8px; }
+  .marea-extremo { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .marea-extremo .me-icono svg {
+    width: 26px; height: 26px; stroke: #fff; fill: none;
+    stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .marea-extremo .me-label { font-size: 0.68rem; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.04em; }
+  .marea-extremo .me-hora { font-size: 0.95rem; font-weight: 600; }
+  .marea-extremo .me-altura { font-size: 0.78rem; opacity: 0.8; }
+  .marea-estado { font-size: 0.85rem; opacity: 0.9; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 6px; }
+  .horas { display: flex; gap: 14px; overflow-x: auto; padding-bottom: 2px; }
+  .horas::-webkit-scrollbar { height: 0; }
+  .hora { flex: 0 0 auto; text-align: center; min-width: 46px; }
+  .hora .h { font-size: 0.8rem; opacity: 0.75; margin-bottom: 4px; }
+  .hora .icono-hora { width: 28px; height: 28px; margin: 0 auto 4px; }
+  .hora .icono-hora svg {
+    width: 100%; height: 100%; stroke: #fff; fill: none;
+    stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .hora .t { font-size: 0.9rem; font-weight: 600; }
+  .hora .p { font-size: 0.75rem; opacity: 0.8; color: #bfe0ff; margin-top: 2px; }
+  .dia { flex: 0 0 auto; text-align: center; min-width: 52px; }
+  .dia .d { font-size: 0.8rem; opacity: 0.75; margin-bottom: 4px; text-transform: capitalize; }
+  .dia .icono-dia { width: 28px; height: 28px; margin: 0 auto 4px; }
+  .dia .icono-dia svg {
+    width: 100%; height: 100%; stroke: #fff; fill: none;
+    stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .dia .max { font-size: 0.9rem; font-weight: 600; }
+  .dia .min { font-size: 0.8rem; opacity: 0.7; }
+  .bottom-row {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 4px; gap: 12px;
   }
   button {
-    background: rgba(255,255,255,0.15);
-    border: 1px solid rgba(255,255,255,0.4);
-    color: #fff;
-    padding: 10px 22px;
-    border-radius: 24px;
-    font-size: 0.95rem;
-    cursor: pointer;
+    background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.4);
+    color: #fff; padding: 10px 22px; border-radius: 24px; font-size: 0.95rem; cursor: pointer;
   }
   button:active { background: rgba(255,255,255,0.3); }
-  .estado {
-    margin-top: 20px;
-    font-size: 0.9rem;
-    opacity: 0.75;
-    min-height: 1.2em;
-  }
-  .marea {
-    font-size: 0.95rem;
-    opacity: 0.9;
-    margin-bottom: 20px;
-    min-height: 1.2em;
-  }
-  .horas {
-    display: flex;
-    gap: 14px;
-    overflow-x: auto;
-    padding: 4px 4px 16px;
-    margin-bottom: 8px;
-  }
-  .hora {
-    flex: 0 0 auto;
-    text-align: center;
-    min-width: 46px;
-  }
-  .hora .h {
-    font-size: 0.8rem;
-    opacity: 0.75;
-    margin-bottom: 4px;
-  }
-  .hora .icono-hora {
-    width: 30px;
-    height: 30px;
-    margin: 0 auto 4px;
-  }
-  .hora .icono-hora svg {
-    width: 100%;
-    height: 100%;
-    stroke: #fff;
-    fill: none;
-    stroke-width: 1.5;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-  }
-  .hora .t {
-    font-size: 0.9rem;
-    font-weight: 600;
-  }
-  .hora .p {
-    font-size: 0.75rem;
-    opacity: 0.8;
-    color: #bfe0ff;
-    margin-top: 2px;
-  }
-  .dia {
-    flex: 0 0 auto;
-    text-align: center;
-    min-width: 52px;
-  }
-  .dia .d {
-    font-size: 0.8rem;
-    opacity: 0.75;
-    margin-bottom: 4px;
-    text-transform: capitalize;
-  }
-  .dia .icono-dia {
-    width: 30px;
-    height: 30px;
-    margin: 0 auto 4px;
-  }
-  .dia .icono-dia svg {
-    width: 100%;
-    height: 100%;
-    stroke: #fff;
-    fill: none;
-    stroke-width: 1.5;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-  }
-  .dia .max {
-    font-size: 0.9rem;
-    font-weight: 600;
-  }
-  .dia .min {
-    font-size: 0.8rem;
-    opacity: 0.7;
-  }
+  .estado { font-size: 0.8rem; opacity: 0.7; text-align: right; flex: 1; }
 
   @media (orientation: landscape) and (max-height: 500px) {
-    body {
-      align-items: flex-start;
-      padding-top: 4px;
-      padding-bottom: 4px;
-    }
+    body { align-items: flex-start; padding: 4px 16px; }
     .card {
-      max-width: 100%;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      column-gap: 16px;
-      text-align: center;
+      max-width: 100%; padding-top: 0;
+      display: grid; grid-template-columns: 1fr 1fr; column-gap: 14px; text-align: center;
     }
     #btnBuscarCiudad { grid-column: 1; grid-row: 1; margin-bottom: 0; }
-    .ciudad-row     { grid-column: 1; grid-row: 2; margin-bottom: 0; }
-    .ciudad         { font-size: 1rem; }
-    .buscador       { grid-column: 1 / 3; grid-row: 3; }
-    #altitud        { grid-column: 1; grid-row: 4; font-size: 0.8rem; margin-bottom: 0; }
-    #solInfo        { grid-column: 1; grid-row: 5; font-size: 0.8rem; gap: 12px; margin-bottom: 0; }
-    #marea          { grid-column: 1; grid-row: 6; font-size: 0.8rem; margin-bottom: 0; }
-    #icono          { grid-column: 1; grid-row: 7; width: 28px; height: 28px; margin: 0 auto; }
-    #desc           { grid-column: 1; grid-row: 8; font-size: 0.8rem; margin-bottom: 2px; }
-    #aire           { grid-column: 1; grid-row: 9; font-size: 0.72rem; margin-bottom: 0; }
-    #temp           { grid-column: 1; grid-row: 10; font-size: 2rem; margin: 0; }
-    .detalles:not(#solInfo) { grid-column: 1; grid-row: 11; font-size: 0.8rem; margin-bottom: 0; gap: 12px; }
-    #horas          { grid-column: 2; grid-row: 1 / 7; align-self: center; padding-bottom: 4px; }
-    #dias           { grid-column: 2; grid-row: 7 / 12; align-self: center; }
-    #btnActualizar  { grid-column: 1; grid-row: 12; margin: 2px auto; padding: 6px 16px; font-size: 0.8rem; }
-    #estado         { grid-column: 1 / 3; grid-row: 13; font-size: 0.75rem; }
+    .top-row         { grid-column: 1; grid-row: 2; margin-bottom: 4px; }
+    .buscador        { grid-column: 1 / 3; grid-row: 3; }
+    #principal       { grid-column: 1; grid-row: 4; margin: 0; }
+    .desc            { grid-column: 1; grid-row: 5; font-size: 0.78rem; margin-bottom: 2px; }
+    .aire            { grid-column: 1; grid-row: 6; font-size: 0.7rem; margin-bottom: 4px; }
+    .detalles        { grid-column: 1; grid-row: 7; font-size: 0.78rem; margin-bottom: 4px; gap: 10px; }
+    #panelMarea      { grid-column: 1; grid-row: 8; padding: 6px 10px; margin-bottom: 4px; }
+    #panelHoras      { grid-column: 2; grid-row: 1 / 6; align-self: center; padding: 8px; }
+    #panelDias       { grid-column: 2; grid-row: 6 / 10; align-self: center; padding: 8px; }
+    .bottom-row      { grid-column: 1; grid-row: 9; }
+    .ciudad { font-size: 1.1rem; }
+    .top-info { font-size: 0.68rem; line-height: 1.5; }
+    .icono { width: 38px; height: 38px; }
+    .temp { font-size: 2.2rem; }
+    .panel-titulo { margin-bottom: 4px; }
+    .marea-extremos { margin-bottom: 4px; }
+    .bottom-row button { padding: 6px 14px; font-size: 0.8rem; }
   }
 </style>
 </head>
@@ -276,30 +168,44 @@
       <svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M19.5 19.5l-4.3-4.3"/></svg>
       <span class="btn-buscar-texto" id="textoCambiarCiudad"></span>
     </button>
-    <div class="ciudad-row">
+    <div class="top-row">
       <div class="ciudad" id="ciudad">—</div>
+      <div class="top-info">
+        <div id="altitud"></div>
+        <div id="solInfo"></div>
+      </div>
     </div>
     <div class="buscador" id="buscador" hidden>
       <input type="text" id="inputCiudad" placeholder="Buscar ciudad..." autocomplete="off" />
       <div class="resultados" id="resultadosCiudad"></div>
       <button class="link-ubicacion" id="btnUsarGps">Usar mi ubicación</button>
     </div>
-    <div class="marea" id="altitud"></div>
-    <div class="detalles" id="solInfo"></div>
-    <div class="marea" id="marea"></div>
-    <div class="icono" id="icono"></div>
+    <div class="principal" id="principal">
+      <div class="icono" id="icono"></div>
+      <div class="temp" id="temp">--°</div>
+    </div>
     <div class="desc" id="desc"></div>
     <div class="aire" id="aire"></div>
-    <div class="temp" id="temp">--°</div>
     <div class="detalles">
       <span id="sensacion"></span>
       <span id="viento"></span>
       <span id="humedad"></span>
     </div>
-    <div class="horas" id="horas"></div>
-    <div class="horas" id="dias"></div>
-    <button id="btnActualizar">Actualizar</button>
-    <div class="estado" id="estado"></div>
+    <div class="panel" id="panelMarea" hidden>
+      <div class="panel-titulo" id="titMarea"></div>
+      <div class="marea-extremos" id="mareaExtremos"></div>
+      <div class="marea-estado" id="marea"></div>
+    </div>
+    <div class="panel" id="panelHoras">
+      <div class="horas" id="horas"></div>
+    </div>
+    <div class="panel" id="panelDias">
+      <div class="horas" id="dias"></div>
+    </div>
+    <div class="bottom-row">
+      <button id="btnActualizar">Actualizar</button>
+      <div class="estado" id="estado"></div>
+    </div>
   </div>
 
 <script>
@@ -321,6 +227,9 @@ const TRADUCCIONES = {
     humedad: '% hum.',
     mareaSubiendo: 'Marea subiendo · pleamar a las',
     mareaBajando: 'Marea bajando · bajamar a las',
+    mareasDeHoy: 'Mareas de Hoy',
+    pleamar: 'Pleamar',
+    bajamar: 'Bajamar',
     altitud: 'Altitud',
     amanecer: 'Amanecer',
     anochecer: 'Anochecer',
@@ -353,6 +262,9 @@ const TRADUCCIONES = {
     humedad: '% hum.',
     mareaSubiendo: 'Tide rising · high tide at',
     mareaBajando: 'Tide falling · low tide at',
+    mareasDeHoy: 'Today\'s Tides',
+    pleamar: 'High tide',
+    bajamar: 'Low tide',
     altitud: 'Altitude',
     amanecer: 'Sunrise',
     anochecer: 'Sunset',
@@ -385,6 +297,9 @@ const TRADUCCIONES = {
     humedad: '% Feuchte',
     mareaSubiendo: 'Flut · Hochwasser um',
     mareaBajando: 'Ebbe · Niedrigwasser um',
+    mareasDeHoy: 'Gezeiten Heute',
+    pleamar: 'Hochwasser',
+    bajamar: 'Niedrigwasser',
     altitud: 'Höhe',
     amanecer: 'Sonnenaufgang',
     anochecer: 'Sonnenuntergang',
@@ -417,6 +332,9 @@ const TRADUCCIONES = {
     humedad: '% hum.',
     mareaSubiendo: 'Marée montante · pleine mer à',
     mareaBajando: 'Marée descendante · basse mer à',
+    mareasDeHoy: 'Marées du Jour',
+    pleamar: 'Pleine mer',
+    bajamar: 'Basse mer',
     altitud: 'Altitude',
     amanecer: 'Lever du soleil',
     anochecer: 'Coucher du soleil',
@@ -449,6 +367,9 @@ const TRADUCCIONES = {
     humedad: '% umid.',
     mareaSubiendo: 'Maré subindo · maré alta às',
     mareaBajando: 'Maré baixando · maré baixa às',
+    mareasDeHoy: 'Marés de Hoje',
+    pleamar: 'Maré alta',
+    bajamar: 'Maré baixa',
     altitud: 'Altitude',
     amanecer: 'Nascer do sol',
     anochecer: 'Pôr do sol',
@@ -481,6 +402,9 @@ const TRADUCCIONES = {
     humedad: '% umid.',
     mareaSubiendo: 'Marea in salita · alta marea alle',
     mareaBajando: 'Marea in discesa · bassa marea alle',
+    mareasDeHoy: 'Maree di Oggi',
+    pleamar: 'Alta marea',
+    bajamar: 'Bassa marea',
     altitud: 'Altitudine',
     amanecer: 'Alba',
     anochecer: 'Tramonto',
@@ -513,6 +437,9 @@ const TRADUCCIONES = {
     humedad: '% 湿度',
     mareaSubiendo: '涨潮 · 高潮时间',
     mareaBajando: '退潮 · 低潮时间',
+    mareasDeHoy: '今日潮汐',
+    pleamar: '高潮',
+    bajamar: '低潮',
     altitud: '海拔',
     amanecer: '日出',
     anochecer: '日落',
@@ -545,6 +472,9 @@ const TRADUCCIONES = {
     humedad: '% hum.',
     mareaSubiendo: 'Marea pujant · plenamar a les',
     mareaBajando: 'Marea baixant · baixamar a les',
+    mareasDeHoy: 'Marees d\'Avui',
+    pleamar: 'Plenamar',
+    bajamar: 'Baixamar',
     altitud: 'Altitud',
     amanecer: 'Alba',
     anochecer: 'Capvespre',
@@ -577,6 +507,9 @@ const TRADUCCIONES = {
     humedad: '% heze.',
     mareaSubiendo: 'Itsasgoraldi · goi-marea',
     mareaBajando: 'Itsasbeheraldi · behe-marea',
+    mareasDeHoy: 'Gaurko Titak',
+    pleamar: 'Goi-marea',
+    bajamar: 'Behe-marea',
     altitud: 'Altitudea',
     amanecer: 'Egunsentia',
     anochecer: 'Ilunabarra',
@@ -609,6 +542,9 @@ const TRADUCCIONES = {
     humedad: '% hum.',
     mareaSubiendo: 'Marea subindo · preamar ás',
     mareaBajando: 'Marea baixando · baixamar ás',
+    mareasDeHoy: 'Marés de Hoxe',
+    pleamar: 'Preamar',
+    bajamar: 'Baixamar',
     altitud: 'Altitude',
     amanecer: 'Amencer',
     anochecer: 'Solpor',
@@ -645,7 +581,6 @@ const elSensacion = document.getElementById('sensacion');
 const elViento = document.getElementById('viento');
 const elHumedad = document.getElementById('humedad');
 const elEstado = document.getElementById('estado');
-const elMarea = document.getElementById('marea');
 const elAltitud = document.getElementById('altitud');
 const elIcono = document.getElementById('icono');
 const elHoras = document.getElementById('horas');
@@ -658,7 +593,6 @@ const inputCiudad = document.getElementById('inputCiudad');
 const elResultadosCiudad = document.getElementById('resultadosCiudad');
 const btnUsarGps = document.getElementById('btnUsarGps');
 
-// Aplicar textos traducidos
 inputCiudad.placeholder = T.buscarPlaceholder;
 btnUsarGps.textContent = T.usarGps;
 btn.textContent = T.actualizar;
@@ -679,6 +613,9 @@ const ICONOS = {
   lunaNube: '<svg viewBox="0 0 24 24"><path d="M8.8 9.3a3.3 3.3 0 0 1 2.1-5.5 2.4 2.4 0 0 0 2.4 3.3 4.7 4.7 0 0 1-1.6 4.9"/><path d="M7 19.5h10.5a3.5 3.5 0 0 0 .5-6.96A5 5 0 0 0 8.6 11.2 4 4 0 0 0 7 19.5z"/></svg>',
 };
 
+const ICONO_PLEAMAR = '<svg viewBox="0 0 24 24"><path d="M3 17c1.5-2 3-3 4.5-3s3 2 4.5 2 3-2 4.5-2 3 1 4.5 3"/><line x1="12" y1="14" x2="12" y2="6"/><polyline points="9,9 12,6 15,9"/></svg>';
+const ICONO_BAJAMAR = '<svg viewBox="0 0 24 24"><path d="M3 7c1.5 2 3 3 4.5 3s3-2 4.5-2 3 2 4.5 2 3-1 4.5-3"/><line x1="12" y1="10" x2="12" y2="18"/><polyline points="9,15 12,18 15,15"/></svg>';
+
 function iconoParaCodigo(codigo, esDia = true) {
   if (codigo === 0) return esDia ? ICONOS.sol : ICONOS.luna;
   if (codigo === 1 || codigo === 2) return esDia ? ICONOS.solNube : ICONOS.lunaNube;
@@ -697,13 +634,13 @@ function setEstado(msg) { elEstado.textContent = msg; }
 
 function colorParaTemp(temp) {
   const rangos = [
-    { t: 0,  c1: '#b8d8f0', c2: '#8ab8d8', texto: '#1a3a5c' },
-    { t: 10, c1: '#1e3a5f', c2: '#3a6ea5', texto: '#ffffff' },
-    { t: 18, c1: '#1a4a6e', c2: '#2a7a8a', texto: '#ffffff' },
-    { t: 24, c1: '#1e5c3a', c2: '#2e8a5a', texto: '#ffffff' },
-    { t: 30, c1: '#7a4a10', c2: '#c07020', texto: '#ffffff' },
-    { t: 35, c1: '#8a2a10', c2: '#c04020', texto: '#ffffff' },
-    { t: 999,c1: '#6a1010', c2: '#a02020', texto: '#ffffff' },
+    { t: 0,   c1: '#b8d8f0', c2: '#8ab8d8', texto: '#1a3a5c' },
+    { t: 10,  c1: '#1e3a5f', c2: '#3a6ea5', texto: '#ffffff' },
+    { t: 18,  c1: '#1a4a6e', c2: '#2a7a8a', texto: '#ffffff' },
+    { t: 24,  c1: '#1e5c3a', c2: '#2e8a5a', texto: '#ffffff' },
+    { t: 30,  c1: '#7a4a10', c2: '#c07020', texto: '#ffffff' },
+    { t: 35,  c1: '#8a2a10', c2: '#c04020', texto: '#ffffff' },
+    { t: 999, c1: '#6a1010', c2: '#a02020', texto: '#ffffff' },
   ];
   for (let i = 0; i < rangos.length - 1; i++) {
     const a = rangos[i], b = rangos[i + 1];
@@ -723,7 +660,7 @@ function colorParaTemp(temp) {
 function interpolarColor(hex1, hex2, t) {
   const r1 = parseInt(hex1.slice(1,3),16), g1 = parseInt(hex1.slice(3,5),16), b1 = parseInt(hex1.slice(5,7),16);
   const r2 = parseInt(hex2.slice(1,3),16), g2 = parseInt(hex2.slice(3,5),16), b2 = parseInt(hex2.slice(5,7),16);
-  const r = Math.round(r1 + (r2-r1)*t), g = Math.round(g1 + (g2-g1)*t), b = Math.round(b1 + (b2-b1)*t);
+  const r = Math.round(r1+(r2-r1)*t), g = Math.round(g1+(g2-g1)*t), b = Math.round(b1+(b2-b1)*t);
   return `#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`;
 }
 
@@ -762,7 +699,6 @@ function renderHoras(hourly) {
     .map((t, i) => ({ i, t: new Date(t).getTime() }))
     .filter((x) => x.t >= ahora)
     .slice(0, 8);
-
   for (const { i, t } of indices) {
     const hora = new Date(t).getHours() + 'h';
     const temp = Math.round(hourly.temperature_2m[i]);
@@ -784,14 +720,13 @@ function renderSol(daily) {
   if (!daily || !daily.sunrise || !daily.sunrise[0]) return;
   const amanecer = new Date(daily.sunrise[0]).toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' });
   const anochecer = new Date(daily.sunset[0]).toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' });
-  elSolInfo.innerHTML = `<span>${T.amanecer} ${amanecer}</span><span>${T.anochecer} ${anochecer}</span>`;
+  elSolInfo.innerHTML = `${T.amanecer} ${amanecer}<br>${T.anochecer} ${anochecer}`;
 }
 
 function renderDias(daily) {
   elDias.innerHTML = '';
   if (!daily || !daily.time) return;
   const hoy = new Date().toDateString();
-
   daily.time.forEach((fecha, i) => {
     const d = new Date(fecha + 'T12:00:00');
     const esHoy = d.toDateString() === hoy;
@@ -813,48 +748,88 @@ function renderDias(daily) {
 async function obtenerMarea(lat, lon) {
   const url = `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&hourly=sea_level_height_msl&forecast_days=2&timezone=auto`;
   const r = await fetch(url);
-  if (!r.ok) throw new Error('Error al consultar la marea');
+  if (!r.ok) throw new Error('No es costero');
   const data = await r.json();
   const tiempos = data.hourly && data.hourly.time;
   const alturas = data.hourly && data.hourly.sea_level_height_msl;
-  if (!tiempos || !alturas) return null;
-
-  const esCostero = alturas.some((h) => h !== null);
-  if (!esCostero) return null;
+  if (!tiempos || !alturas || !alturas.some(h => h !== null)) return null;
 
   const ahora = Date.now();
-  let idx = tiempos.findIndex((t) => new Date(t).getTime() >= ahora);
-  if (idx <= 0) idx = 0;
-  if (idx >= alturas.length - 1) return null;
+  const hoy = new Date().toDateString();
 
-  const subiendo = alturas[idx + 1] > alturas[idx];
+  // Find today's extremes
+  const extremos = [];
+  for (let i = 1; i < alturas.length - 1; i++) {
+    if (alturas[i] === null || alturas[i-1] === null || alturas[i+1] === null) continue;
+    const subeBefore = alturas[i] > alturas[i-1];
+    const subeAfter = alturas[i+1] > alturas[i];
+    if (subeBefore === subeAfter) continue;
 
-  let k = idx + 1;
-  while (k < alturas.length - 1) {
-    const subiendoAhi = alturas[k + 1] > alturas[k];
-    if (subiendoAhi !== subiendo) break;
-    k++;
-  }
-  if (k >= alturas.length - 1) return subiendo ? 'Marea subiendo' : 'Marea bajando';
-
-  let horaExtremo = new Date(tiempos[k]).getTime();
-  if (k > 0 && k < alturas.length - 1) {
-    const h0 = alturas[k - 1];
-    const h1 = alturas[k];
-    const h2 = alturas[k + 1];
-    const denominador = h0 - 2 * h1 + h2;
-    if (denominador !== 0) {
-      const offsetHoras = 0.5 * (h0 - h2) / denominador;
-      if (offsetHoras > -1 && offsetHoras < 1) {
-        horaExtremo += offsetHoras * 3600000;
+    let horaMs = new Date(tiempos[i]).getTime();
+    let altura = alturas[i];
+    const h0 = alturas[i-1], h1 = alturas[i], h2 = alturas[i+1];
+    const den = h0 - 2*h1 + h2;
+    if (den !== 0) {
+      const offset = 0.5*(h0-h2)/den;
+      if (offset > -1 && offset < 1) {
+        horaMs += offset * 3600000;
+        altura = h1 - (h0-h2)*(h0-h2)/(8*den);
       }
     }
+    if (new Date(horaMs).toDateString() !== hoy) continue;
+    extremos.push({ hora: horaMs, altura: Math.max(0, altura), tipo: subeBefore ? 'pleamar' : 'bajamar' });
   }
 
-  const horaTexto = new Date(horaExtremo).toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' });
-  return subiendo
-    ? `${T.mareaSubiendo} ${horaTexto}`
-    : `${T.mareaBajando} ${horaTexto}`;
+  // Current state
+  let idx = tiempos.findIndex(t => new Date(t).getTime() >= ahora);
+  if (idx < 0) idx = tiempos.length - 2;
+  if (idx >= alturas.length - 1) idx = alturas.length - 2;
+  const subiendo = alturas[idx+1] > alturas[idx];
+
+  // Next extreme
+  let k = idx + 1;
+  while (k < alturas.length - 1) {
+    if ((alturas[k+1] > alturas[k]) !== (alturas[k] > alturas[k-1])) break;
+    k++;
+  }
+  let horaNext = new Date(tiempos[Math.min(k, tiempos.length-1)]).getTime();
+  if (k > 0 && k < alturas.length - 1) {
+    const h0 = alturas[k-1], h1 = alturas[k], h2 = alturas[k+1];
+    const den = h0 - 2*h1 + h2;
+    if (den !== 0) {
+      const offset = 0.5*(h0-h2)/den;
+      if (offset > -1 && offset < 1) horaNext += offset*3600000;
+    }
+  }
+  const horaTexto = new Date(horaNext).toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' });
+  const estadoTexto = subiendo ? `${T.mareaSubiendo} ${horaTexto}` : `${T.mareaBajando} ${horaTexto}`;
+
+  return { extremos, estadoTexto };
+}
+
+function renderMarea(datos) {
+  const panel = document.getElementById('panelMarea');
+  if (!datos || (!datos.extremos.length && !datos.estadoTexto)) {
+    panel.hidden = true;
+    return;
+  }
+  panel.hidden = false;
+  document.getElementById('titMarea').textContent = T.mareasDeHoy;
+
+  const elExtremos = document.getElementById('mareaExtremos');
+  elExtremos.innerHTML = datos.extremos.map(e => {
+    const hora = new Date(e.hora).toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' });
+    const label = e.tipo === 'pleamar' ? T.pleamar : T.bajamar;
+    const icono = e.tipo === 'pleamar' ? ICONO_PLEAMAR : ICONO_BAJAMAR;
+    return `<div class="marea-extremo">
+      <div class="me-icono">${icono}</div>
+      <div class="me-label">${label}</div>
+      <div class="me-hora">${hora}</div>
+      <div class="me-altura">${e.altura.toFixed(1)}m</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('marea').textContent = datos.estadoTexto || '';
 }
 
 async function obtenerElevacionTerreno(lat, lon) {
@@ -872,29 +847,23 @@ async function obtenerCalidadAire(lat, lon) {
   if (aqi === null || aqi === undefined) return null;
   const niveles = [
     { max: 20,  texto: { es:'Calidad del aire: Muy buena', en:'Air quality: Very good', de:'Luftqualität: Sehr gut', fr:'Qualité de l\'air: Très bonne', pt:'Qualidade do ar: Muito boa', it:'Qualità dell\'aria: Ottima', zh:'空气质量：优', ca:'Qualitat de l\'aire: Molt bona', eu:'Airearen kalitatea: Oso ona', gl:'Calidade do aire: Moi boa' } },
-    { max: 40,  texto: { es:'Calidad del aire: Buena',     en:'Air quality: Good',      de:'Luftqualität: Gut',      fr:'Qualité de l\'air: Bonne',      pt:'Qualidade do ar: Boa',      it:'Qualità dell\'aria: Buona',  zh:'空气质量：良', ca:'Qualitat de l\'aire: Bona',     eu:'Airearen kalitatea: Ona',     gl:'Calidade do aire: Boa'    } },
-    { max: 60,  texto: { es:'Calidad del aire: Moderada',  en:'Air quality: Moderate',  de:'Luftqualität: Mäßig',    fr:'Qualité de l\'air: Modérée',    pt:'Qualidade do ar: Moderada',  it:'Qualità dell\'aria: Moderata',zh:'空气质量：中等', ca:'Qualitat de l\'aire: Moderada', eu:'Airearen kalitatea: Moderatua',gl:'Calidade do aire: Moderada'} },
-    { max: 80,  texto: { es:'Calidad del aire: Mala',      en:'Air quality: Poor',      de:'Luftqualität: Schlecht',  fr:'Qualité de l\'air: Mauvaise',   pt:'Qualidade do ar: Ruim',      it:'Qualità dell\'aria: Scarsa',  zh:'空气质量：差', ca:'Qualitat de l\'aire: Dolenta',  eu:'Airearen kalitatea: Txarra',   gl:'Calidade do aire: Mala'   } },
-    { max: 999, texto: { es:'Calidad del aire: Muy mala',  en:'Air quality: Very poor',  de:'Luftqualität: Sehr schlecht',fr:'Qualité de l\'air: Très mauvaise',pt:'Qualidade do ar: Muito ruim',it:'Qualità dell\'aria: Pessima',zh:'空气质量：极差', ca:'Qualitat de l\'aire: Molt dolenta',eu:'Airearen kalitatea: Oso txarra',gl:'Calidade do aire: Moi mala'} },
+    { max: 40,  texto: { es:'Calidad del aire: Buena', en:'Air quality: Good', de:'Luftqualität: Gut', fr:'Qualité de l\'air: Bonne', pt:'Qualidade do ar: Boa', it:'Qualità dell\'aria: Buona', zh:'空气质量：良', ca:'Qualitat de l\'aire: Bona', eu:'Airearen kalitatea: Ona', gl:'Calidade do aire: Boa' } },
+    { max: 60,  texto: { es:'Calidad del aire: Moderada', en:'Air quality: Moderate', de:'Luftqualität: Mäßig', fr:'Qualité de l\'air: Modérée', pt:'Qualidade do ar: Moderada', it:'Qualità dell\'aria: Moderata', zh:'空气质量：中等', ca:'Qualitat de l\'aire: Moderada', eu:'Airearen kalitatea: Moderatua', gl:'Calidade do aire: Moderada' } },
+    { max: 80,  texto: { es:'Calidad del aire: Mala', en:'Air quality: Poor', de:'Luftqualität: Schlecht', fr:'Qualité de l\'air: Mauvaise', pt:'Qualidade do ar: Ruim', it:'Qualità dell\'aria: Scarsa', zh:'空气质量：差', ca:'Qualitat de l\'aire: Dolenta', eu:'Airearen kalitatea: Txarra', gl:'Calidade do aire: Mala' } },
+    { max: 999, texto: { es:'Calidad del aire: Muy mala', en:'Air quality: Very poor', de:'Luftqualität: Sehr schlecht', fr:'Qualité de l\'air: Très mauvaise', pt:'Qualidade do ar: Muito ruim', it:'Qualità dell\'aria: Pessima', zh:'空气质量：极差', ca:'Qualitat de l\'aire: Molt dolenta', eu:'Airearen kalitatea: Oso txarra', gl:'Calidade do aire: Moi mala' } },
   ];
   const nivel = niveles.find(n => aqi <= n.max) || niveles[niveles.length - 1];
   return nivel.texto[idioma] || nivel.texto['en'];
 }
 
-async function obtenerAltitud(lat, lon) {
-  const elevacion = await obtenerElevacionTerreno(lat, lon);
-  if (elevacion === null) return null;
-  return `${T.altitud} ${Math.round(elevacion)} m`;
-}
-
 async function cargarDatos(latitude, longitude, nombreFijo) {
   setEstado(T.consultando);
   try {
-    const [tiempo, ciudad, marea, altitudTexto, aireTexto] = await Promise.all([
+    const [tiempo, ciudad, mdata, elevacion, aireTexto] = await Promise.all([
       obtenerTiempo(latitude, longitude),
       nombreFijo ? Promise.resolve(nombreFijo) : obtenerCiudad(latitude, longitude),
       obtenerMarea(latitude, longitude).catch(() => null),
-      obtenerAltitud(latitude, longitude).catch(() => null),
+      fetch(`https://api.open-meteo.com/v1/elevation?latitude=${latitude}&longitude=${longitude}`).then(r => r.json()).catch(() => null),
       obtenerCalidadAire(latitude, longitude).catch(() => null)
     ]);
     const c = tiempo.current;
@@ -905,12 +874,13 @@ async function cargarDatos(latitude, longitude, nombreFijo) {
     renderHoras(tiempo.hourly);
     renderSol(tiempo.daily);
     renderDias(tiempo.daily);
+    renderMarea(mdata);
     aplicarColorTemp(Math.round(c.temperature_2m));
     elSensacion.textContent = T.sensacion + ' ' + Math.round(c.apparent_temperature) + '°';
     elViento.textContent = Math.round(c.wind_speed_10m) + ' km/h';
     elHumedad.textContent = c.relative_humidity_2m + T.humedad;
-    elMarea.textContent = marea || '';
-    elAltitud.textContent = altitudTexto || '';
+    const alt = elevacion && elevacion.elevation && elevacion.elevation[0];
+    elAltitud.textContent = alt !== null && alt !== undefined ? `${T.altitud} ${Math.round(alt)} m` : '';
     document.getElementById('aire').textContent = aireTexto || '';
     setEstado(T.actualizado + ' ' + new Date().toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' }));
   } catch (e) {
@@ -922,17 +892,14 @@ async function actualizar() {
   setEstado(T.localizando);
   elTemp.textContent = '--°';
   elDesc.textContent = '';
-
   if (ubicacionManual) {
     cargarDatos(ubicacionManual.lat, ubicacionManual.lon, ubicacionManual.nombre);
     return;
   }
-
   if (!navigator.geolocation) {
     setEstado(T.geoNoDisponible);
     return;
   }
-
   navigator.geolocation.getCurrentPosition((pos) => {
     cargarDatos(pos.coords.latitude, pos.coords.longitude);
   }, (err) => {
@@ -960,10 +927,7 @@ btnBuscarCiudad.addEventListener('click', () => {
 inputCiudad.addEventListener('input', () => {
   clearTimeout(timeoutBusqueda);
   const texto = inputCiudad.value.trim();
-  if (texto.length < 2) {
-    elResultadosCiudad.innerHTML = '';
-    return;
-  }
+  if (texto.length < 2) { elResultadosCiudad.innerHTML = ''; return; }
   timeoutBusqueda = setTimeout(async () => {
     try {
       const r = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(texto)}&count=5&language=es`);
