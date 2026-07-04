@@ -7,7 +7,6 @@
 <title>Temperatura</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-app-pub-5015878857432448" crossorigin="anonymous"></script>
 <style>
   * { box-sizing: border-box; }
   #bg {
@@ -17,13 +16,14 @@
   }
   body {
     margin: 0;
-    height: 100vh;
-    overflow: hidden;
+    min-height: 100vh;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background: transparent;
     color: #fff;
     display: flex;
+    align-items: flex-start;
     justify-content: center;
+    padding: env(safe-area-inset-top, 16px) 16px calc(env(safe-area-inset-bottom, 16px) + 60px);
     transition: color 1.5s ease;
   }
   .card {
@@ -31,10 +31,6 @@
     width: 100%;
     max-width: 420px;
     padding-top: 8px;
-    overflow-y: auto;
-    height: 100%;
-    -webkit-overflow-scrolling: touch;
-    padding: env(safe-area-inset-top, 16px) 16px calc(env(safe-area-inset-bottom, 0px) + 60px);
   }
   .btn-buscar {
     background: none;
@@ -159,8 +155,10 @@
   .estado { font-size: 0.8rem; opacity: 0.7; text-align: right; flex: 1; }
   .ad-bottom {
     position: fixed; bottom: 0; left: 0; right: 0;
-    z-index: 100; background: #fff;
-    height: 50px; overflow: hidden;
+    z-index: 100; height: 50px;
+  }
+  .ad-bottom iframe {
+    width: 100%; height: 50px; border: none; display: block;
   }
 
   @media (orientation: landscape) and (max-height: 500px) {
@@ -247,11 +245,7 @@
     </div>
   </div>
   <div class="ad-bottom">
-    <ins class="adsbygoogle"
-         style="display:block; width:100%; height:50px;"
-         data-ad-client="ca-app-pub-5015878857432448"
-         data-ad-slot="6686595753"></ins>
-    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    <iframe srcdoc="<!DOCTYPE html><html><head><script async src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-app-pub-5015878857432448' crossorigin='anonymous'><\/script></head><body style='margin:0;padding:0;overflow:hidden'><ins class='adsbygoogle' style='display:block;width:100%;height:50px' data-ad-client='ca-app-pub-5015878857432448' data-ad-slot='6686595753'></ins><script>(adsbygoogle=window.adsbygoogle||[]).push({})<\/script></body></html>"></iframe>
   </div>
 
 <script>
