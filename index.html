@@ -10,11 +10,15 @@
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-app-pub-5015878857432448" crossorigin="anonymous"></script>
 <style>
   * { box-sizing: border-box; }
+  html {
+    min-height: 100%;
+    background: linear-gradient(160deg, #1e3a5f, #3a6ea5);
+  }
   body {
     margin: 0;
     min-height: 100vh;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: linear-gradient(160deg, #1e3a5f, #3a6ea5);
+    background: transparent;
     color: #fff;
     display: flex;
     align-items: flex-start;
@@ -151,7 +155,7 @@
   .estado { font-size: 0.8rem; opacity: 0.7; text-align: right; flex: 1; }
   .ad-bottom {
     position: fixed; bottom: 0; left: 0; right: 0;
-    z-index: 100; background: #000; text-align: center;
+    z-index: 100; text-align: center;
   }
 
   @media (orientation: landscape) and (max-height: 500px) {
