@@ -913,6 +913,7 @@ async function cargarDatos(latitude, longitude, nombreFijo) {
     elAltitud.textContent = alt !== null && alt !== undefined ? `${T.altitud} ${Math.round(alt)} m` : '';
     document.getElementById('aire').textContent = aireTexto || '';
     setEstado(T.actualizado + ' ' + new Date().toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' }));
+    localStorage.setItem('ql_ultima_act', Date.now().toString());
   } catch (e) {
     setEstado(T.errorTemperatura);
   }
@@ -987,6 +988,15 @@ btnUsarGps.addEventListener('click', () => {
 
 btn.addEventListener('click', actualizar);
 window.addEventListener('load', actualizar);
+
+// Actualizar al volver a primer plano si han pasado más de 10 minutos
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    const ahora = Date.now();
+    const ultima = parseInt(localStorage.getItem('ql_ultima_act') || '0', 10);
+    if (ahora - ultima > 10 * 60 * 1000) actualizar();
+  }
+});
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
