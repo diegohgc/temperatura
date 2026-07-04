@@ -152,7 +152,9 @@
   .estado { font-size: 0.8rem; opacity: 0.7; text-align: right; flex: 1; }
   .ad-bottom {
     position: fixed; bottom: 0; left: 0; right: 0;
-    z-index: 100; text-align: center; background: #fff;
+    z-index: 100; background: #fff;
+    height: 60px; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
   }
 
   @media (orientation: landscape) and (max-height: 500px) {
@@ -239,11 +241,9 @@
   </div>
   <div class="ad-bottom">
     <ins class="adsbygoogle"
-         style="display:block"
+         style="display:inline-block; width:320px; height:50px;"
          data-ad-client="ca-app-pub-5015878857432448"
-         data-ad-slot="6686595753"
-         data-ad-format="auto"
-         data-full-width-responsive="true"></ins>
+         data-ad-slot="6686595753"></ins>
     <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
   </div>
 
