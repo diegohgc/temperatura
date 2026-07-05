@@ -713,7 +713,8 @@ function aplicarColorTemp(temp) {
 
 async function obtenerCiudad(lat, lon) {
   try {
-    const r = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=es`);
+    const lang = T.locale.split('-')[0];
+    const r = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=${lang}`);
     const data = await r.json();
     const barrio = data.locality;
     const ciudad = data.city;
@@ -977,7 +978,7 @@ inputCiudad.addEventListener('input', () => {
   if (texto.length < 2) { elResultadosCiudad.innerHTML = ''; return; }
   timeoutBusqueda = setTimeout(async () => {
     try {
-      const r = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(texto)}&count=5&language=es`);
+      const r = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(texto)}&count=5&language=${T.locale.split('-')[0]}`);
       const data = await r.json();
       elResultadosCiudad.innerHTML = '';
       (data.results || []).forEach((res) => {
