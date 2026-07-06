@@ -109,6 +109,10 @@
     background: rgba(255,255,255,0.12);
     border-radius: 16px; padding: 12px 14px; margin-bottom: 10px;
   }
+  .panel-interior { display: flex; justify-content: space-around; align-items: center; }
+  .interior-item { display: flex; flex-direction: column; align-items: center; gap: 2px; flex: 1; }
+  .interior-valor { font-size: 1.5rem; font-weight: 600; }
+  .interior-label { font-size: 0.65rem; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.05em; text-align: center; }
   .panel-titulo {
     font-size: 0.72rem; opacity: 0.65;
     text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px;
@@ -233,6 +237,20 @@
       <div class="marea-extremos" id="mareaExtremos"></div>
       <div class="marea-estado" id="marea"></div>
     </div>
+    <div class="panel panel-interior" id="panelInterior" hidden>
+      <div class="interior-item">
+        <div class="interior-valor" id="intUV">--</div>
+        <div class="interior-label" id="intUVLabel">UV</div>
+      </div>
+      <div class="interior-item">
+        <div class="interior-valor" id="intSol">--</div>
+        <div class="interior-label" id="intSolLabel">Sol</div>
+      </div>
+      <div class="interior-item">
+        <div class="interior-valor" id="intAire">--</div>
+        <div class="interior-label" id="intAireLabel">Aire</div>
+      </div>
+    </div>
     <div class="panel" id="panelHoras">
       <div class="horas" id="horas"></div>
     </div>
@@ -273,6 +291,7 @@ const TRADUCCIONES = {
     altitud: 'Altitud',
     amanecer: 'Amanecer',
     anochecer: 'Anochecer',
+    uvIndex: 'Índice UV', solRestante: 'Sol restante', calidadAire: 'Calidad del aire',
     hoy: 'Hoy',
     codigos: {
       0: 'Despejado', 1: 'Mayormente despejado', 2: 'Parcialmente nublado', 3: 'Nublado',
@@ -308,6 +327,7 @@ const TRADUCCIONES = {
     altitud: 'Altitude',
     amanecer: 'Sunrise',
     anochecer: 'Sunset',
+    uvIndex: 'UV Index', solRestante: 'Remaining sun', calidadAire: 'Air quality',
     hoy: 'Today',
     codigos: {
       0: 'Clear sky', 1: 'Mainly clear', 2: 'Partly cloudy', 3: 'Overcast',
@@ -343,6 +363,7 @@ const TRADUCCIONES = {
     altitud: 'Höhe',
     amanecer: 'Sonnenaufgang',
     anochecer: 'Sonnenuntergang',
+    uvIndex: 'UV-Index', solRestante: 'Verbleibende Sonne', calidadAire: 'Luftqualität',
     hoy: 'Heute',
     codigos: {
       0: 'Klar', 1: 'Überwiegend klar', 2: 'Teilweise bewölkt', 3: 'Bewölkt',
@@ -378,6 +399,7 @@ const TRADUCCIONES = {
     altitud: 'Altitude',
     amanecer: 'Lever du soleil',
     anochecer: 'Coucher du soleil',
+    uvIndex: 'Indice UV', solRestante: 'Soleil restant', calidadAire: "Qualité de l'air",
     hoy: 'Aujourd\'hui',
     codigos: {
       0: 'Ciel dégagé', 1: 'Principalement dégagé', 2: 'Partiellement nuageux', 3: 'Nuageux',
@@ -413,6 +435,7 @@ const TRADUCCIONES = {
     altitud: 'Altitude',
     amanecer: 'Nascer do sol',
     anochecer: 'Pôr do sol',
+    uvIndex: 'Índice UV', solRestante: 'Sol restante', calidadAire: 'Qualidade do ar',
     hoy: 'Hoje',
     codigos: {
       0: 'Céu limpo', 1: 'Maioritariamente limpo', 2: 'Parcialmente nublado', 3: 'Nublado',
@@ -448,6 +471,7 @@ const TRADUCCIONES = {
     altitud: 'Altitudine',
     amanecer: 'Alba',
     anochecer: 'Tramonto',
+    uvIndex: 'Indice UV', solRestante: 'Sole rimanente', calidadAire: "Qualità dell'aria",
     hoy: 'Oggi',
     codigos: {
       0: 'Sereno', 1: 'Prevalentemente sereno', 2: 'Parzialmente nuvoloso', 3: 'Nuvoloso',
@@ -483,6 +507,7 @@ const TRADUCCIONES = {
     altitud: '海拔',
     amanecer: '日出',
     anochecer: '日落',
+    uvIndex: '紫外线指数', solRestante: '剩余日照', calidadAire: '空气质量',
     hoy: '今天',
     codigos: {
       0: '晴天', 1: '大部晴天', 2: '局部多云', 3: '多云',
@@ -518,6 +543,7 @@ const TRADUCCIONES = {
     altitud: 'Altitud',
     amanecer: 'Alba',
     anochecer: 'Capvespre',
+    uvIndex: 'Índex UV', solRestante: 'Sol restant', calidadAire: "Qualitat de l'aire",
     hoy: 'Avui',
     codigos: {
       0: 'Cel clar', 1: 'Majoritàriament clar', 2: 'Parcialment ennuvolat', 3: 'Ennuvolat',
@@ -553,6 +579,7 @@ const TRADUCCIONES = {
     altitud: 'Altitudea',
     amanecer: 'Egunsentia',
     anochecer: 'Ilunabarra',
+    uvIndex: 'UV Indizea', solRestante: 'Eguzki orduak', calidadAire: 'Airearen kalitatea',
     hoy: 'Gaur',
     codigos: {
       0: 'Argi', 1: 'Gehienbat argi', 2: 'Partzialki hodeitsu', 3: 'Hodeitsu',
@@ -588,6 +615,7 @@ const TRADUCCIONES = {
     altitud: 'Altitude',
     amanecer: 'Amencer',
     anochecer: 'Solpor',
+    uvIndex: 'Índice UV', solRestante: 'Sol restante', calidadAire: 'Calidade do aire',
     hoy: 'Hoxe',
     codigos: {
       0: 'Despexado', 1: 'Principalmente despexado', 2: 'Parcialmente nublado', 3: 'Nublado',
@@ -623,6 +651,7 @@ const TRADUCCIONES = {
     altitud: 'الارتفاع',
     amanecer: 'الشروق',
     anochecer: 'الغروب',
+    uvIndex: 'مؤشر الأشعة فوق البنفسجية', solRestante: 'ساعات الشمس المتبقية', calidadAire: 'جودة الهواء',
     hoy: 'اليوم',
     codigos: {
       0: 'سماء صافية', 1: 'صافية في معظمها', 2: 'غائم جزئياً', 3: 'غائم',
@@ -658,6 +687,7 @@ const TRADUCCIONES = {
     altitud: 'Высота',
     amanecer: 'Рассвет',
     anochecer: 'Закат',
+    uvIndex: 'УФ-индекс', solRestante: 'Оставшееся солнце', calidadAire: 'Качество воздуха',
     hoy: 'Сегодня',
     codigos: {
       0: 'Ясно', 1: 'Преимущественно ясно', 2: 'Переменная облачность', 3: 'Пасмурно',
@@ -693,6 +723,7 @@ const TRADUCCIONES = {
     altitud: '標高',
     amanecer: '日の出',
     anochecer: '日の入り',
+    uvIndex: 'UV指数', solRestante: '残り日照時間', calidadAire: '大気質',
     hoy: '今日',
     codigos: {
       0: '快晴', 1: 'ほぼ晴れ', 2: '一部曇り', 3: '曇り',
@@ -728,6 +759,7 @@ const TRADUCCIONES = {
     altitud: '고도',
     amanecer: '일출',
     anochecer: '일몰',
+    uvIndex: 'UV 지수', solRestante: '남은 일조', calidadAire: '공기 질',
     hoy: '오늘',
     codigos: {
       0: '맑음', 1: '대체로 맑음', 2: '구름 조금', 3: '흐림',
@@ -763,6 +795,7 @@ const TRADUCCIONES = {
     altitud: 'Hoogte',
     amanecer: 'Zonsopgang',
     anochecer: 'Zonsondergang',
+    uvIndex: 'UV-index', solRestante: 'Resterende zon', calidadAire: 'Luchtkwaliteit',
     hoy: 'Vandaag',
     codigos: {
       0: 'Helder', 1: 'Overwegend helder', 2: 'Gedeeltelijk bewolkt', 3: 'Bewolkt',
@@ -798,6 +831,7 @@ const TRADUCCIONES = {
     altitud: 'Wysokość',
     amanecer: 'Wschód słońca',
     anochecer: 'Zachód słońca',
+    uvIndex: 'Indeks UV', solRestante: 'Pozostałe nasłonecznienie', calidadAire: 'Jakość powietrza',
     hoy: 'Dziś',
     codigos: {
       0: 'Pogodnie', 1: 'Przeważnie pogodnie', 2: 'Częściowe zachmurzenie', 3: 'Pochmurno',
@@ -833,6 +867,7 @@ const TRADUCCIONES = {
     altitud: 'ऊँचाई',
     amanecer: 'सूर्योदय',
     anochecer: 'सूर्यास्त',
+    uvIndex: 'यूवी सूचकांक', solRestante: 'शेष धूप', calidadAire: 'वायु गुणवत्ता',
     hoy: 'आज',
     codigos: {
       0: 'साफ आसमान', 1: 'अधिकतर साफ', 2: 'आंशिक बादल', 3: 'बादल छाए',
@@ -868,6 +903,7 @@ const TRADUCCIONES = {
     altitud: 'Altitudine',
     amanecer: 'Răsărit',
     anochecer: 'Apus',
+    uvIndex: 'Indice UV', solRestante: 'Soare rămas', calidadAire: 'Calitatea aerului',
     hoy: 'Azi',
     codigos: {
       0: 'Cer senin', 1: 'Predominant senin', 2: 'Parțial înnorat', 3: 'Înnorat',
@@ -903,6 +939,7 @@ const TRADUCCIONES = {
     altitud: 'Magasság',
     amanecer: 'Napkelte',
     anochecer: 'Napnyugta',
+    uvIndex: 'UV-index', solRestante: 'Maradék napsütés', calidadAire: 'Levegőminőség',
     hoy: 'Ma',
     codigos: {
       0: 'Derült', 1: 'Többnyire derült', 2: 'Részben felhős', 3: 'Borult',
@@ -1041,7 +1078,7 @@ async function obtenerCiudad(lat, lon) {
 }
 
 async function obtenerTiempo(lat, lon) {
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,is_day&hourly=temperature_2m,precipitation_probability,weather_code,is_day&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min,weather_code&forecast_days=7&timezone=auto`;
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,is_day,uv_index&hourly=temperature_2m,precipitation_probability,weather_code,is_day&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min,weather_code&forecast_days=7&timezone=auto`;
   const r = await fetch(url);
   if (!r.ok) throw new Error('Error al consultar el tiempo');
   return r.json();
@@ -1188,6 +1225,36 @@ function renderMarea(datos) {
   document.getElementById('marea').textContent = datos.estadoTexto || '';
 }
 
+function renderPanelInterior(uvIndex, aireData, sunsetStr) {
+  const panel = document.getElementById('panelInterior');
+  const marePanel = document.getElementById('panelMarea');
+  if (!marePanel.hidden) { panel.hidden = true; return; }
+  panel.hidden = false;
+
+  const uvVal = uvIndex !== null && uvIndex !== undefined ? Math.round(uvIndex) : '--';
+  document.getElementById('intUV').textContent = uvVal;
+  document.getElementById('intUVLabel').textContent = T.uvIndex || 'UV Index';
+
+  const now = new Date();
+  const sunset = sunsetStr ? new Date(sunsetStr) : null;
+  let solTexto = '--';
+  if (sunset) {
+    if (now < sunset) {
+      const diffMs = sunset - now;
+      const hrs = Math.floor(diffMs / 3600000);
+      const mins = Math.floor((diffMs % 3600000) / 60000);
+      solTexto = hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
+    } else {
+      solTexto = '0h';
+    }
+  }
+  document.getElementById('intSol').textContent = solTexto;
+  document.getElementById('intSolLabel').textContent = T.solRestante || 'Remaining sun';
+
+  document.getElementById('intAire').textContent = aireData ? aireData.aqi : '--';
+  document.getElementById('intAireLabel').textContent = T.calidadAire || 'Air quality';
+}
+
 async function obtenerElevacionTerreno(lat, lon) {
   const r = await fetch(`https://api.open-meteo.com/v1/elevation?latitude=${lat}&longitude=${lon}`);
   if (!r.ok) throw new Error('Error al consultar la elevación');
@@ -1209,13 +1276,13 @@ async function obtenerCalidadAire(lat, lon) {
     { max: 999, texto: { es:'Calidad del aire: Muy mala', en:'Air quality: Very poor', de:'Luftqualität: Sehr schlecht', fr:'Qualité de l\'air: Très mauvaise', pt:'Qualidade do ar: Muito ruim', it:'Qualità dell\'aria: Pessima', zh:'空气质量：极差', ca:'Qualitat de l\'aire: Molt dolenta', eu:'Airearen kalitatea: Oso txarra', gl:'Calidade do aire: Moi mala' } },
   ];
   const nivel = niveles.find(n => aqi <= n.max) || niveles[niveles.length - 1];
-  return nivel.texto[idioma] || nivel.texto['en'];
+  return { texto: nivel.texto[idioma] || nivel.texto['en'], aqi };
 }
 
 async function cargarDatos(latitude, longitude, nombreFijo) {
   setEstado(T.consultando);
   try {
-    const [tiempo, ciudad, mdata, elevacion, aireTexto] = await Promise.all([
+    const [tiempo, ciudad, mdata, elevacion, aireData] = await Promise.all([
       obtenerTiempo(latitude, longitude),
       nombreFijo ? Promise.resolve(nombreFijo) : obtenerCiudad(latitude, longitude),
       obtenerMarea(latitude, longitude).catch(() => null),
@@ -1231,6 +1298,7 @@ async function cargarDatos(latitude, longitude, nombreFijo) {
     renderSol(tiempo.daily);
     renderDias(tiempo.daily);
     renderMarea(mdata);
+    renderPanelInterior(c.uv_index, aireData, tiempo.daily && tiempo.daily.sunset ? tiempo.daily.sunset[0] : null);
     aplicarColorTemp(Math.round(c.temperature_2m));
     const max0 = tiempo.daily && tiempo.daily.temperature_2m_max ? Math.round(tiempo.daily.temperature_2m_max[0]) : null;
     const min0 = tiempo.daily && tiempo.daily.temperature_2m_min ? Math.round(tiempo.daily.temperature_2m_min[0]) : null;
@@ -1243,7 +1311,7 @@ async function cargarDatos(latitude, longitude, nombreFijo) {
     elHumedad.textContent = c.relative_humidity_2m + T.humedad;
     const alt = elevacion && elevacion.elevation && elevacion.elevation[0];
     elAltitud.textContent = alt !== null && alt !== undefined ? `${T.altitud} ${Math.round(alt)} m` : '';
-    document.getElementById('aire').textContent = aireTexto || '';
+    document.getElementById('aire').textContent = (aireData && aireData.texto) || '';
     setEstado(T.actualizado + ' ' + new Date().toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' }));
     localStorage.setItem('ql_ultima_act', Date.now().toString());
   } catch (e) {
