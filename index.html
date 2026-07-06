@@ -51,8 +51,9 @@
   }
   .buscador { max-width: 260px; margin: 0 auto 10px; }
   .buscar-fila { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 4px; }
-  .btn-fav { background: none; border: none; cursor: pointer; font-size: 1.3rem; color: inherit; opacity: 0.75; padding: 0; line-height: 1; transition: opacity 0.2s; }
+  .btn-fav { background: none; border: none; cursor: pointer; font-size: 1rem; color: inherit; opacity: 0.75; padding: 0; line-height: 1; transition: opacity 0.2s; display: flex; align-items: center; gap: 4px; }
   .btn-fav:hover { opacity: 1; }
+  .btn-fav-texto { font-size: 0.82rem; }
   .fav-titulo { font-size: 0.7rem; opacity: 0.65; text-transform: uppercase; letter-spacing: 0.06em; margin: 10px 0 5px; }
   .fav-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; border-radius: 10px; background: rgba(255,255,255,0.1); margin-bottom: 5px; cursor: pointer; }
   .fav-item:hover { background: rgba(255,255,255,0.18); }
@@ -1016,7 +1017,9 @@ document.getElementById('textoCambiarCiudad').textContent = T.cambiarCiudad;
 let ubicacionManual = null;
 let currentCoords = null;
 
-const FAV_LABEL = { es:'Favoritos', en:'Favorites', de:'Favoriten', fr:'Favoris', pt:'Favoritos', it:'Preferiti', zh:'收藏', ca:'Favorits', eu:'Gogokoenak', gl:'Favoritos', ar:'المفضلة', ru:'Избранное', ja:'お気に入り', ko:'즐겨찾기', nl:'Favorieten', pl:'Ulubione', hi:'पसंदीदा', ro:'Favorite', hu:'Kedvencek' };
+const FAV_LABEL  = { es:'Favoritos', en:'Favorites', de:'Favoriten', fr:'Favoris', pt:'Favoritos', it:'Preferiti', zh:'收藏', ca:'Favorits', eu:'Gogokoenak', gl:'Favoritos', ar:'المفضلة', ru:'Избранное', ja:'お気に入り', ko:'즐겨찾기', nl:'Favorieten', pl:'Ulubione', hi:'पसंदीदा', ro:'Favorite', hu:'Kedvencek' };
+const FAV_ADD    = { es:'Añadir favorita', en:'Add to favorites', de:'Zu Favoriten', fr:'Ajouter aux favoris', pt:'Adicionar favorita', it:'Aggiungi preferiti', zh:'添加收藏', ca:'Afegir favorita', eu:'Gogokoak gehitu', gl:'Engadir favorita', ar:'إضافة للمفضلة', ru:'В избранное', ja:'お気に入り追加', ko:'즐겨찾기 추가', nl:'Aan favorieten', pl:'Dodaj ulubione', hi:'पसंदीदा जोड़ें', ro:'Adaugă favorit', hu:'Hozzáad' };
+const FAV_REMOVE = { es:'Quitar favorita', en:'Remove favorite', de:'Aus Favoriten', fr:'Retirer des favoris', pt:'Remover favorita', it:'Rimuovi preferiti', zh:'移除收藏', ca:'Treure favorita', eu:'Gogokoak kendu', gl:'Retirar favorita', ar:'إزالة من المفضلة', ru:'Из избранного', ja:'お気に入り削除', ko:'즐겨찾기 삭제', nl:'Uit favorieten', pl:'Usuń ulubione', hi:'पसंदीदा हटाएं', ro:'Elimină favorit', hu:'Eltávolít' };
 
 function loadFavoritos() {
   try { return JSON.parse(localStorage.getItem('ql_favoritos') || '[]'); } catch { return []; }
@@ -1031,7 +1034,8 @@ function actualizarBtnFav() {
   const btn = document.getElementById('btnFavorito');
   if (!currentCoords) { btn.hidden = true; return; }
   btn.hidden = false;
-  btn.textContent = esFavorito(currentCoords.lat, currentCoords.lon) ? '★' : '☆';
+  const esFav = esFavorito(currentCoords.lat, currentCoords.lon);
+  btn.innerHTML = `${esFav ? '★' : '☆'} <span class="btn-fav-texto">${(esFav ? FAV_REMOVE : FAV_ADD)[idioma] || (esFav ? 'Remove favorite' : 'Add to favorites')}</span>`;
 }
 function renderFavoritosLista() {
   const seccion = document.getElementById('favoritosSeccion');
