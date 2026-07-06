@@ -50,6 +50,15 @@
     stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
   }
   .buscador { max-width: 260px; margin: 0 auto 10px; }
+  .ciudad-fila { display: flex; align-items: center; gap: 8px; }
+  .btn-fav { background: none; border: none; cursor: pointer; font-size: 1.3rem; color: inherit; opacity: 0.75; padding: 0; line-height: 1; transition: opacity 0.2s; }
+  .btn-fav:hover { opacity: 1; }
+  .fav-titulo { font-size: 0.7rem; opacity: 0.65; text-transform: uppercase; letter-spacing: 0.06em; margin: 10px 0 5px; }
+  .fav-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; border-radius: 10px; background: rgba(255,255,255,0.1); margin-bottom: 5px; cursor: pointer; }
+  .fav-item:hover { background: rgba(255,255,255,0.18); }
+  .fav-nombre { font-size: 0.88rem; }
+  .fav-remove { background: none; border: none; color: inherit; opacity: 0.45; cursor: pointer; font-size: 1rem; padding: 2px 0 2px 8px; }
+  .fav-remove:hover { opacity: 1; }
   .buscador input {
     width: 100%; padding: 8px 12px; border-radius: 14px;
     border: 1px solid rgba(255,255,255,0.4);
@@ -209,7 +218,10 @@
       <span class="btn-buscar-texto" id="textoCambiarCiudad"></span>
     </button>
     <div class="top-row">
-      <div class="ciudad" id="ciudad">—</div>
+      <div class="ciudad-fila">
+        <div class="ciudad" id="ciudad">—</div>
+        <button class="btn-fav" id="btnFavorito" aria-label="Guardar favorito" hidden>☆</button>
+      </div>
       <div class="top-info">
         <div id="altitud"></div>
         <div id="solInfo"></div>
@@ -217,6 +229,10 @@
     </div>
     <div class="buscador" id="buscador" hidden>
       <input type="text" id="inputCiudad" placeholder="Buscar ciudad..." autocomplete="off" />
+      <div id="favoritosSeccion" hidden>
+        <div class="fav-titulo" id="favTitulo"></div>
+        <div id="favoritosLista"></div>
+      </div>
       <div class="resultados" id="resultadosCiudad"></div>
       <button class="link-ubicacion" id="btnUsarGps">Usar mi ubicación</button>
     </div>
@@ -998,6 +1014,68 @@ btn.textContent = T.actualizar;
 document.getElementById('textoCambiarCiudad').textContent = T.cambiarCiudad;
 
 let ubicacionManual = null;
+let currentCoords = null;
+
+const FAV_LABEL = { es:'Favoritos', en:'Favorites', de:'Favoriten', fr:'Favoris', pt:'Favoritos', it:'Preferiti', zh:'收藏', ca:'Favorits', eu:'Gogokoenak', gl:'Favoritos', ar:'المفضلة', ru:'Избранное', ja:'お気に入り', ko:'즐겨찾기', nl:'Favorieten', pl:'Ulubione', hi:'पसंदीदा', ro:'Favorite', hu:'Kedvencek' };
+
+function loadFavoritos() {
+  try { return JSON.parse(localStorage.getItem('ql_favoritos') || '[]'); } catch { return []; }
+}
+function saveFavoritos(favs) {
+  localStorage.setItem('ql_favoritos', JSON.stringify(favs));
+}
+function esFavorito(lat, lon) {
+  return loadFavoritos().some(f => Math.abs(f.lat - lat) < 0.01 && Math.abs(f.lon - lon) < 0.01);
+}
+function actualizarBtnFav() {
+  const btn = document.getElementById('btnFavorito');
+  if (!currentCoords) { btn.hidden = true; return; }
+  btn.hidden = false;
+  btn.textContent = esFavorito(currentCoords.lat, currentCoords.lon) ? '★' : '☆';
+}
+function renderFavoritosLista() {
+  const seccion = document.getElementById('favoritosSeccion');
+  const lista = document.getElementById('favoritosLista');
+  const favs = loadFavoritos();
+  if (!favs.length) { seccion.hidden = true; return; }
+  seccion.hidden = false;
+  document.getElementById('favTitulo').textContent = FAV_LABEL[idioma] || 'Favoritos';
+  lista.innerHTML = favs.map((f, i) => `
+    <div class="fav-item" data-i="${i}">
+      <span class="fav-nombre">${f.nombre}</span>
+      <button class="fav-remove" data-i="${i}" aria-label="Eliminar">✕</button>
+    </div>`).join('');
+  lista.querySelectorAll('.fav-item').forEach(el => {
+    el.addEventListener('click', (e) => {
+      if (e.target.classList.contains('fav-remove')) return;
+      const f = loadFavoritos()[+el.dataset.i];
+      if (!f) return;
+      ubicacionManual = { lat: f.lat, lon: f.lon, nombre: f.nombre };
+      cerrarBuscador();
+      cargarDatos(f.lat, f.lon, f.nombre);
+    });
+  });
+  lista.querySelectorAll('.fav-remove').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const favs = loadFavoritos();
+      favs.splice(+btn.dataset.i, 1);
+      saveFavoritos(favs);
+      renderFavoritosLista();
+      actualizarBtnFav();
+    });
+  });
+}
+
+document.getElementById('btnFavorito').addEventListener('click', () => {
+  if (!currentCoords) return;
+  const favs = loadFavoritos();
+  const idx = favs.findIndex(f => Math.abs(f.lat - currentCoords.lat) < 0.01 && Math.abs(f.lon - currentCoords.lon) < 0.01);
+  if (idx >= 0) favs.splice(idx, 1);
+  else favs.push({ nombre: currentCoords.nombre, lat: currentCoords.lat, lon: currentCoords.lon });
+  saveFavoritos(favs);
+  actualizarBtnFav();
+});
 
 const ICONOS = {
   sol: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5"/><path d="M12 1.5v3M12 19.5v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M1.5 12h3M19.5 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>',
@@ -1315,6 +1393,8 @@ async function cargarDatos(latitude, longitude, nombreFijo) {
     ]);
     const c = tiempo.current;
     elCiudad.textContent = ciudad;
+    currentCoords = { lat: latitude, lon: longitude, nombre: ciudad };
+    actualizarBtnFav();
     elTemp.textContent = toTemp(c.temperature_2m);
     elDesc.textContent = CODIGOS[c.weather_code] || '';
     elIcono.innerHTML = iconoParaCodigo(c.weather_code, c.is_day === 1);
@@ -1376,7 +1456,7 @@ function cerrarBuscador() {
 
 btnBuscarCiudad.addEventListener('click', () => {
   elBuscador.hidden = !elBuscador.hidden;
-  if (!elBuscador.hidden) inputCiudad.focus();
+  if (!elBuscador.hidden) { renderFavoritosLista(); inputCiudad.focus(); }
 });
 
 inputCiudad.addEventListener('input', () => {
