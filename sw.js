@@ -1,5 +1,5 @@
-const CACHE = 'temperatura-v6';
-const ASSETS = ['./index.html', './manifest.json', './icon-192.png', './icon-512.png'];
+const CACHE = 'temperatura-v7';
+const ASSETS = ['./manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)));
@@ -20,12 +20,8 @@ self.addEventListener('fetch', (e) => {
 
   if (e.request.mode === 'navigate' || e.request.url.endsWith('index.html')) {
     e.respondWith(
-      fetch(e.request)
-        .then((respuesta) => {
-          caches.open(CACHE).then((c) => c.put(e.request, respuesta.clone()));
-          return respuesta;
-        })
-        .catch(() => caches.match(e.request))
+      fetch(new Request(e.request, { cache: 'no-cache' }))
+        .catch(() => caches.match('./index.html'))
     );
     return;
   }
