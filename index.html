@@ -50,7 +50,7 @@
     stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
   }
   .buscador { max-width: 260px; margin: 0 auto 10px; }
-  .ciudad-fila { display: flex; align-items: center; gap: 8px; }
+  .buscar-fila { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 4px; }
   .btn-fav { background: none; border: none; cursor: pointer; font-size: 1.3rem; color: inherit; opacity: 0.75; padding: 0; line-height: 1; transition: opacity 0.2s; }
   .btn-fav:hover { opacity: 1; }
   .fav-titulo { font-size: 0.7rem; opacity: 0.65; text-transform: uppercase; letter-spacing: 0.06em; margin: 10px 0 5px; }
@@ -213,15 +213,15 @@
 <body>
   <div id="bg"></div>
   <div class="card">
-    <button class="btn-buscar" id="btnBuscarCiudad" aria-label="Buscar otra ciudad">
-      <svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M19.5 19.5l-4.3-4.3"/></svg>
-      <span class="btn-buscar-texto" id="textoCambiarCiudad"></span>
-    </button>
+    <div class="buscar-fila">
+      <button class="btn-buscar" id="btnBuscarCiudad" aria-label="Buscar otra ciudad">
+        <svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M19.5 19.5l-4.3-4.3"/></svg>
+        <span class="btn-buscar-texto" id="textoCambiarCiudad"></span>
+      </button>
+      <button class="btn-fav" id="btnFavorito" aria-label="Guardar favorito" hidden>☆</button>
+    </div>
     <div class="top-row">
-      <div class="ciudad-fila">
-        <div class="ciudad" id="ciudad">—</div>
-        <button class="btn-fav" id="btnFavorito" aria-label="Guardar favorito" hidden>☆</button>
-      </div>
+      <div class="ciudad" id="ciudad">—</div>
       <div class="top-info">
         <div id="altitud"></div>
         <div id="solInfo"></div>
