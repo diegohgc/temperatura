@@ -968,6 +968,10 @@ function detectarIdioma() {
 
 const idioma = detectarIdioma();
 const T = TRADUCCIONES[idioma];
+const usaFahrenheit = (navigator.language || '').toLowerCase() === 'en-us';
+function toTemp(c) {
+  return usaFahrenheit ? Math.round(c * 9 / 5 + 32) + '°F' : Math.round(c) + '°';
+}
 
 const elTemp = document.getElementById('temp');
 const elDesc = document.getElementById('desc');
@@ -1097,14 +1101,14 @@ function renderHoras(hourly) {
     .slice(0, 8);
   for (const { i, t } of indices) {
     const hora = new Date(t).getHours() + 'h';
-    const temp = Math.round(hourly.temperature_2m[i]);
+    const temp = hourly.temperature_2m[i];
     const prob = hourly.precipitation_probability ? hourly.precipitation_probability[i] : null;
     const div = document.createElement('div');
     div.className = 'hora';
     div.innerHTML = `
       <div class="h">${hora}</div>
       <div class="icono-hora">${iconoParaCodigo(hourly.weather_code[i], hourly.is_day ? hourly.is_day[i] === 1 : true)}</div>
-      <div class="t">${temp}°</div>
+      <div class="t">${toTemp(temp)}</div>
       ${prob !== null ? `<div class="p">${prob}%</div>` : ''}
     `;
     elHoras.appendChild(div);
@@ -1127,15 +1131,15 @@ function renderDias(daily) {
     const d = new Date(fecha + 'T12:00:00');
     const esHoy = d.toDateString() === hoy;
     const nombreDia = esHoy ? T.hoy : d.toLocaleDateString(T.locale, { weekday: 'short' }).replace('.', '');
-    const max = Math.round(daily.temperature_2m_max[i]);
-    const min = Math.round(daily.temperature_2m_min[i]);
+    const max = daily.temperature_2m_max[i];
+    const min = daily.temperature_2m_min[i];
     const div = document.createElement('div');
     div.className = 'dia';
     div.innerHTML = `
       <div class="d">${nombreDia}</div>
       <div class="icono-dia">${iconoParaCodigo(daily.weather_code[i], true)}</div>
-      <div class="max">${max}°</div>
-      <div class="min">${min}°</div>
+      <div class="max">${toTemp(max)}</div>
+      <div class="min">${toTemp(min)}</div>
     `;
     elDias.appendChild(div);
   });
@@ -1241,7 +1245,7 @@ function renderMarea(datos) {
   document.getElementById('marea').textContent = datos.estadoTexto || '';
   const elAgua = document.getElementById('mareaAgua');
   elAgua.textContent = datos.tempAgua !== null && datos.tempAgua !== undefined
-    ? `🌊 ${datos.tempAgua}°`
+    ? `🌊 ${toTemp(datos.tempAgua)}`
     : '';
   return true;
 }
@@ -1311,7 +1315,7 @@ async function cargarDatos(latitude, longitude, nombreFijo) {
     ]);
     const c = tiempo.current;
     elCiudad.textContent = ciudad;
-    elTemp.textContent = Math.round(c.temperature_2m) + '°';
+    elTemp.textContent = toTemp(c.temperature_2m);
     elDesc.textContent = CODIGOS[c.weather_code] || '';
     elIcono.innerHTML = iconoParaCodigo(c.weather_code, c.is_day === 1);
     renderHoras(tiempo.hourly);
@@ -1320,13 +1324,13 @@ async function cargarDatos(latitude, longitude, nombreFijo) {
     const tieneMarea = renderMarea(mdata);
     renderPanelInterior(c.uv_index, aireData, tiempo.daily && tiempo.daily.sunset ? tiempo.daily.sunset[0] : null, tieneMarea);
     aplicarColorTemp(Math.round(c.temperature_2m));
-    const max0 = tiempo.daily && tiempo.daily.temperature_2m_max ? Math.round(tiempo.daily.temperature_2m_max[0]) : null;
-    const min0 = tiempo.daily && tiempo.daily.temperature_2m_min ? Math.round(tiempo.daily.temperature_2m_min[0]) : null;
+    const max0 = tiempo.daily && tiempo.daily.temperature_2m_max ? tiempo.daily.temperature_2m_max[0] : null;
+    const min0 = tiempo.daily && tiempo.daily.temperature_2m_min ? tiempo.daily.temperature_2m_min[0] : null;
     const elMinMax = document.getElementById('tempMinMax');
     if (max0 !== null && min0 !== null) {
-      elMinMax.innerHTML = `<span class="tmx">${max0}°</span><span class="tmn">${min0}°</span>`;
+      elMinMax.innerHTML = `<span class="tmx">${toTemp(max0)}</span><span class="tmn">${toTemp(min0)}</span>`;
     }
-    elSensacion.textContent = T.sensacion + ' ' + Math.round(c.apparent_temperature) + '°';
+    elSensacion.textContent = T.sensacion + ' ' + toTemp(c.apparent_temperature);
     elViento.textContent = Math.round(c.wind_speed_10m) + ' km/h';
     elHumedad.textContent = c.relative_humidity_2m + T.humedad;
     const alt = elevacion && elevacion.elevation && elevacion.elevation[0];
