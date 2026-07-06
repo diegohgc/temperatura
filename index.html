@@ -1204,7 +1204,7 @@ function renderMarea(datos) {
   const panel = document.getElementById('panelMarea');
   if (!datos || (!datos.extremos.length && !datos.estadoTexto)) {
     panel.hidden = true;
-    return;
+    return false;
   }
   panel.hidden = false;
   document.getElementById('titMarea').textContent = T.mareasDeHoy;
@@ -1223,11 +1223,12 @@ function renderMarea(datos) {
   }).join('');
 
   document.getElementById('marea').textContent = datos.estadoTexto || '';
+  return true;
 }
 
-function renderPanelInterior(uvIndex, aireData, sunsetStr, mdata) {
+function renderPanelInterior(uvIndex, aireData, sunsetStr, tieneMarea) {
   const panel = document.getElementById('panelInterior');
-  if (mdata !== null && mdata !== undefined) { panel.hidden = true; return; }
+  if (tieneMarea) { panel.hidden = true; return; }
   panel.hidden = false;
 
   const uvVal = uvIndex !== null && uvIndex !== undefined ? Math.round(uvIndex) : '--';
@@ -1296,8 +1297,8 @@ async function cargarDatos(latitude, longitude, nombreFijo) {
     renderHoras(tiempo.hourly);
     renderSol(tiempo.daily);
     renderDias(tiempo.daily);
-    renderMarea(mdata);
-    renderPanelInterior(c.uv_index, aireData, tiempo.daily && tiempo.daily.sunset ? tiempo.daily.sunset[0] : null, mdata);
+    const tieneMarea = renderMarea(mdata);
+    renderPanelInterior(c.uv_index, aireData, tiempo.daily && tiempo.daily.sunset ? tiempo.daily.sunset[0] : null, tieneMarea);
     aplicarColorTemp(Math.round(c.temperature_2m));
     const max0 = tiempo.daily && tiempo.daily.temperature_2m_max ? Math.round(tiempo.daily.temperature_2m_max[0]) : null;
     const min0 = tiempo.daily && tiempo.daily.temperature_2m_min ? Math.round(tiempo.daily.temperature_2m_min[0]) : null;
