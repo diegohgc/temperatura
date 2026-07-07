@@ -231,7 +231,7 @@
 <body>
   <div id="bg"></div>
   <div class="card">
-    <button class="btn-ajustes" id="btnAjustes" aria-label="Ajustes">⚙ Ajustes</button>
+    <button class="btn-ajustes" id="btnAjustes"></button>
     <div id="ajustesPanel" hidden>
       <div class="ajustes-panel">
         <div class="ajustes-fila">
@@ -341,6 +341,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'No se pudo obtener tu ubicación.',
     errorTemperatura: 'No se pudo obtener la temperatura.',
     actualizado: 'Actualizado',
+    ajustes: 'Ajustes',
     cambiarCiudad: 'Cambiar ciudad',
     tuUbicacion: 'Tu ubicación',
     sensacion: 'Sensación',
@@ -377,6 +378,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Could not get your location.',
     errorTemperatura: 'Could not get the temperature.',
     actualizado: 'Updated',
+    ajustes: 'Settings',
     cambiarCiudad: 'Change city',
     tuUbicacion: 'Your location',
     sensacion: 'Feels like',
@@ -413,6 +415,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Standort konnte nicht ermittelt werden.',
     errorTemperatura: 'Temperatur konnte nicht abgerufen werden.',
     actualizado: 'Aktualisiert',
+    ajustes: 'Einstellungen',
     cambiarCiudad: 'Stadt ändern',
     tuUbicacion: 'Dein Standort',
     sensacion: 'Gefühlt',
@@ -449,6 +452,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Impossible d\'obtenir votre position.',
     errorTemperatura: 'Impossible d\'obtenir la température.',
     actualizado: 'Mis à jour',
+    ajustes: 'Paramètres',
     cambiarCiudad: 'Changer de ville',
     tuUbicacion: 'Votre position',
     sensacion: 'Ressenti',
@@ -485,6 +489,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Não foi possível obter sua localização.',
     errorTemperatura: 'Não foi possível obter a temperatura.',
     actualizado: 'Atualizado',
+    ajustes: 'Configurações',
     cambiarCiudad: 'Mudar cidade',
     tuUbicacion: 'Sua localização',
     sensacion: 'Sensação',
@@ -521,6 +526,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Impossibile ottenere la posizione.',
     errorTemperatura: 'Impossibile ottenere la temperatura.',
     actualizado: 'Aggiornato',
+    ajustes: 'Impostazioni',
     cambiarCiudad: 'Cambia città',
     tuUbicacion: 'La tua posizione',
     sensacion: 'Percepita',
@@ -557,6 +563,7 @@ const TRADUCCIONES = {
     errorUbicacion: '无法获取您的位置。',
     errorTemperatura: '无法获取温度。',
     actualizado: '已更新',
+    ajustes: '设置',
     cambiarCiudad: '切换城市',
     tuUbicacion: '您的位置',
     sensacion: '体感',
@@ -593,6 +600,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'No s\'ha pogut obtenir la teva ubicació.',
     errorTemperatura: 'No s\'ha pogut obtenir la temperatura.',
     actualizado: 'Actualitzat',
+    ajustes: 'Configuració',
     cambiarCiudad: 'Canviar ciutat',
     tuUbicacion: 'La teva ubicació',
     sensacion: 'Sensació',
@@ -629,6 +637,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Ezin izan da zure kokapena lortu.',
     errorTemperatura: 'Ezin izan da tenperatura lortu.',
     actualizado: 'Eguneratuta',
+    ajustes: 'Ezarpenak',
     cambiarCiudad: 'Hiria aldatu',
     tuUbicacion: 'Zure kokapena',
     sensacion: 'Sentsazioa',
@@ -665,6 +674,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Non se puido obter a túa localización.',
     errorTemperatura: 'Non se puido obter a temperatura.',
     actualizado: 'Actualizado',
+    ajustes: 'Configuración',
     cambiarCiudad: 'Cambiar cidade',
     tuUbicacion: 'A túa localización',
     sensacion: 'Sensación',
@@ -701,6 +711,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'تعذّر الحصول على موقعك.',
     errorTemperatura: 'تعذّر الحصول على درجة الحرارة.',
     actualizado: 'تم التحديث',
+    ajustes: 'الإعدادات',
     cambiarCiudad: 'تغيير المدينة',
     tuUbicacion: 'موقعك',
     sensacion: 'يبدو كأنه',
@@ -737,6 +748,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Не удалось получить ваше местоположение.',
     errorTemperatura: 'Не удалось получить температуру.',
     actualizado: 'Обновлено',
+    ajustes: 'Настройки',
     cambiarCiudad: 'Изменить город',
     tuUbicacion: 'Ваше местоположение',
     sensacion: 'Ощущается как',
@@ -773,6 +785,7 @@ const TRADUCCIONES = {
     errorUbicacion: '位置情報を取得できませんでした。',
     errorTemperatura: '気温を取得できませんでした。',
     actualizado: '更新しました',
+    ajustes: '設定',
     cambiarCiudad: '都市を変更',
     tuUbicacion: '現在地',
     sensacion: '体感',
@@ -809,6 +822,7 @@ const TRADUCCIONES = {
     errorUbicacion: '위치를 가져올 수 없습니다.',
     errorTemperatura: '기온을 가져올 수 없습니다.',
     actualizado: '업데이트됨',
+    ajustes: '설정',
     cambiarCiudad: '도시 변경',
     tuUbicacion: '내 위치',
     sensacion: '체감',
@@ -845,6 +859,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Kon uw locatie niet ophalen.',
     errorTemperatura: 'Kon de temperatuur niet ophalen.',
     actualizado: 'Bijgewerkt',
+    ajustes: 'Instellingen',
     cambiarCiudad: 'Stad wijzigen',
     tuUbicacion: 'Uw locatie',
     sensacion: 'Voelt als',
@@ -881,6 +896,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Nie można pobrać lokalizacji.',
     errorTemperatura: 'Nie można pobrać temperatury.',
     actualizado: 'Zaktualizowano',
+    ajustes: 'Ustawienia',
     cambiarCiudad: 'Zmień miasto',
     tuUbicacion: 'Twoja lokalizacja',
     sensacion: 'Odczuwalna',
@@ -917,6 +933,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'आपका स्थान प्राप्त नहीं हो सका।',
     errorTemperatura: 'तापमान प्राप्त नहीं हो सका।',
     actualizado: 'अपडेट किया गया',
+    ajustes: 'सेटिंग्स',
     cambiarCiudad: 'शहर बदलें',
     tuUbicacion: 'आपका स्थान',
     sensacion: 'महसूस होता है',
@@ -953,6 +970,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Nu s-a putut obține locația.',
     errorTemperatura: 'Nu s-a putut obține temperatura.',
     actualizado: 'Actualizat',
+    ajustes: 'Setări',
     cambiarCiudad: 'Schimbă orașul',
     tuUbicacion: 'Locația ta',
     sensacion: 'Se simte ca',
@@ -989,6 +1007,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Nem sikerült lekérni a helyzetet.',
     errorTemperatura: 'Nem sikerült lekérni a hőmérsékletet.',
     actualizado: 'Frissítve',
+    ajustes: 'Beállítások',
     cambiarCiudad: 'Város megváltoztatása',
     tuUbicacion: 'Az Ön helyzete',
     sensacion: 'Érzet',
@@ -1113,6 +1132,7 @@ inputCiudad.placeholder = T.buscarPlaceholder;
 btnUsarGps.textContent = T.usarGps;
 btn.textContent = T.actualizar;
 document.getElementById('textoCambiarCiudad').textContent = T.cambiarCiudad;
+document.getElementById('btnAjustes').textContent = '⚙ ' + (T.ajustes || 'Settings');
 
 let ubicacionManual = null;
 let currentCoords = null;
