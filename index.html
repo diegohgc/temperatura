@@ -125,7 +125,8 @@
   }
   .temp-minmax .tmx { font-weight: 600; }
   .temp-minmax .tmn { opacity: 0.75; }
-  .desc { font-size: 1rem; opacity: 0.9; margin-bottom: 4px; }
+  .desc { font-size: 1rem; opacity: 0.9; margin-bottom: 2px; }
+  .lluvia { font-size: 0.78rem; opacity: 0.8; margin-bottom: 4px; min-height: 1em; }
   .aire { font-size: 0.82rem; opacity: 0.85; margin-bottom: 2px; min-height: 1em; }
   .detalles {
     display: flex; justify-content: center; gap: 20px;
@@ -284,6 +285,7 @@
       </div>
     </div>
     <div class="desc" id="desc"></div>
+    <div class="lluvia" id="lluvia"></div>
     <div class="detalles">
       <span id="sensacion"></span>
       <span id="viento"></span>
@@ -1502,6 +1504,16 @@ function renderDatos(datos) {
   elTemp.textContent = toTemp(c.temperature_2m);
   elDesc.textContent = CODIGOS[c.weather_code] || '';
   elIcono.innerHTML = iconoParaCodigo(c.weather_code, c.is_day === 1);
+  const elLluvia = document.getElementById('lluvia');
+  const hourly = tiempo.hourly;
+  if (hourly && hourly.time && hourly.precipitation_probability) {
+    const now = new Date();
+    const idx = hourly.time.findIndex(t => new Date(t) >= now);
+    const prob = idx >= 0 ? hourly.precipitation_probability[idx] : null;
+    elLluvia.textContent = prob !== null && prob > 0 ? `🌧 ${prob}%` : '';
+  } else {
+    elLluvia.textContent = '';
+  }
   renderHoras(tiempo.hourly);
   renderSol(tiempo.daily);
   renderDias(tiempo.daily);
