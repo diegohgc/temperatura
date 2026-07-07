@@ -996,7 +996,7 @@ function toTemp(c) {
 }
 function actualizarBtnUnidad() {
   const btn = document.getElementById('btnUnidad');
-  btn.textContent = usaFahrenheit ? '°C' : '°F';
+  btn.textContent = usaFahrenheit ? 'Cambiar a °C' : 'Cambiar a °F';
   btn.title = usaFahrenheit ? 'Cambiar a Celsius' : 'Cambiar a Fahrenheit';
 }
 document.getElementById('btnUnidad').addEventListener('click', () => {
