@@ -290,6 +290,7 @@
       <span id="humedad"></span>
     </div>
     <div class="aire" id="aire"></div>
+    <div class="aire" id="aireExtra" hidden></div>
     <div class="panel" id="panelMarea" hidden>
       <div class="panel-titulo" id="titMarea"></div>
       <div class="marea-extremos" id="mareaExtremos"></div>
@@ -1432,16 +1433,13 @@ function renderMarea(datos) {
 
 function renderPanelInterior(uvIndex, aireData, sunsetStr, tieneMarea) {
   const panel = document.getElementById('panelInterior');
-  if (tieneMarea) { panel.hidden = true; return; }
-  panel.hidden = false;
+  const aireExtra = document.getElementById('aireExtra');
 
-  const uvVal = uvIndex !== null && uvIndex !== undefined ? Math.round(uvIndex) : '--';
-  document.getElementById('intUV').textContent = uvVal;
-  document.getElementById('intUVLabel').textContent = T.uvIndex || 'UV Index';
+  const uvVal = uvIndex !== null && uvIndex !== undefined ? Math.round(uvIndex) : null;
 
   const now = new Date();
   const sunset = sunsetStr ? new Date(sunsetStr) : null;
-  let solTexto = '--';
+  let solTexto = null;
   if (sunset) {
     if (now < sunset) {
       const diffMs = sunset - now;
@@ -1452,9 +1450,23 @@ function renderPanelInterior(uvIndex, aireData, sunsetStr, tieneMarea) {
       solTexto = '0h';
     }
   }
-  document.getElementById('intSol').textContent = solTexto;
-  document.getElementById('intSolLabel').textContent = T.solRestante || 'Remaining sun';
 
+  if (tieneMarea) {
+    panel.hidden = true;
+    const partes = [];
+    if (uvVal !== null) partes.push(`UV ${uvVal}`);
+    if (solTexto) partes.push(`☀ ${solTexto}`);
+    if (partes.length) { aireExtra.textContent = partes.join(' · '); aireExtra.hidden = false; }
+    else aireExtra.hidden = true;
+    return;
+  }
+
+  aireExtra.hidden = true;
+  panel.hidden = false;
+  document.getElementById('intUV').textContent = uvVal ?? '--';
+  document.getElementById('intUVLabel').textContent = T.uvIndex || 'UV Index';
+  document.getElementById('intSol').textContent = solTexto ?? '--';
+  document.getElementById('intSolLabel').textContent = T.solRestante || 'Remaining sun';
   document.getElementById('intAire').textContent = aireData ? aireData.aqi : '--';
   document.getElementById('intAireLabel').textContent = T.calidadAire || 'Air quality';
 }
