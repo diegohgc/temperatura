@@ -1505,7 +1505,7 @@ function renderDatos(datos) {
   elViento.textContent = toViento(c.wind_speed_10m);
   elHumedad.textContent = c.relative_humidity_2m + T.humedad;
   const alt = elevacion && elevacion.elevation && elevacion.elevation[0];
-  elAltitud.textContent = alt !== null && alt !== undefined ? `${T.altitud} ${Math.round(alt)} m` : '';
+  elAltitud.textContent = alt !== null && alt !== undefined ? (usaMph ? `${T.altitud} ${Math.round(alt * 3.28084)} ft` : `${T.altitud} ${Math.round(alt)} m`) : '';
   document.getElementById('aire').textContent = (aireData && aireData.texto) || '';
 }
 
