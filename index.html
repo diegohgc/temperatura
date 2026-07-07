@@ -1456,6 +1456,7 @@ function renderPanelInterior(uvIndex, aireData, sunsetStr, tieneMarea) {
     const partes = [];
     if (uvVal !== null) partes.push(`UV ${uvVal}`);
     if (solTexto) partes.push(`☀ ${solTexto}`);
+    if (solTexto) partes[partes.length - 1] += ` ${T.solRestante || 'restantes'}`;
     if (partes.length) { aireExtra.textContent = partes.join(' · '); aireExtra.hidden = false; }
     else aireExtra.hidden = true;
     return;
