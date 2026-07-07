@@ -1003,7 +1003,7 @@ document.getElementById('btnUnidad').addEventListener('click', () => {
   usaFahrenheit = !usaFahrenheit;
   localStorage.setItem('ql_unidad', usaFahrenheit ? 'F' : 'C');
   actualizarBtnUnidad();
-  cargarDatos();
+  if (ultimosDatos) renderDatos(ultimosDatos);
 });
 actualizarBtnUnidad();
 
@@ -1033,6 +1033,7 @@ document.getElementById('textoCambiarCiudad').textContent = T.cambiarCiudad;
 
 let ubicacionManual = null;
 let currentCoords = null;
+let ultimosDatos = null;
 
 const FAV_LABEL  = { es:'Favoritos', en:'Favorites', de:'Favoriten', fr:'Favoris', pt:'Favoritos', it:'Preferiti', zh:'收藏', ca:'Favorits', eu:'Gogokoenak', gl:'Favoritos', ar:'المفضلة', ru:'Избранное', ja:'お気に入り', ko:'즐겨찾기', nl:'Favorieten', pl:'Ulubione', hi:'पसंदीदा', ro:'Favorite', hu:'Kedvencek' };
 const FAV_ADD    = { es:'Añadir favorita', en:'Add to favorites', de:'Zu Favoriten', fr:'Ajouter aux favoris', pt:'Adicionar favorita', it:'Aggiungi preferiti', zh:'添加收藏', ca:'Afegir favorita', eu:'Gogokoak gehitu', gl:'Engadir favorita', ar:'إضافة للمفضلة', ru:'В избранное', ja:'お気に入り追加', ko:'즐겨찾기 추가', nl:'Aan favorieten', pl:'Dodaj ulubione', hi:'पसंदीदा जोड़ें', ro:'Adaugă favorit', hu:'Hozzáad' };
@@ -1402,6 +1403,32 @@ async function obtenerCalidadAire(lat, lon) {
   return { texto: nivel.texto[idioma] || nivel.texto['en'], aqi };
 }
 
+function renderDatos(datos) {
+  const { tiempo, ciudad, mdata, elevacion, aireData } = datos;
+  const c = tiempo.current;
+  elTemp.textContent = toTemp(c.temperature_2m);
+  elDesc.textContent = CODIGOS[c.weather_code] || '';
+  elIcono.innerHTML = iconoParaCodigo(c.weather_code, c.is_day === 1);
+  renderHoras(tiempo.hourly);
+  renderSol(tiempo.daily);
+  renderDias(tiempo.daily);
+  const tieneMarea = renderMarea(mdata);
+  renderPanelInterior(c.uv_index, aireData, tiempo.daily && tiempo.daily.sunset ? tiempo.daily.sunset[0] : null, tieneMarea);
+  aplicarColorTemp(Math.round(c.temperature_2m));
+  const max0 = tiempo.daily && tiempo.daily.temperature_2m_max ? tiempo.daily.temperature_2m_max[0] : null;
+  const min0 = tiempo.daily && tiempo.daily.temperature_2m_min ? tiempo.daily.temperature_2m_min[0] : null;
+  const elMinMax = document.getElementById('tempMinMax');
+  if (max0 !== null && min0 !== null) {
+    elMinMax.innerHTML = `<span class="tmx">${toTemp(max0)}</span><span class="tmn">${toTemp(min0)}</span>`;
+  }
+  elSensacion.textContent = T.sensacion + ' ' + toTemp(c.apparent_temperature);
+  elViento.textContent = Math.round(c.wind_speed_10m) + ' km/h';
+  elHumedad.textContent = c.relative_humidity_2m + T.humedad;
+  const alt = elevacion && elevacion.elevation && elevacion.elevation[0];
+  elAltitud.textContent = alt !== null && alt !== undefined ? `${T.altitud} ${Math.round(alt)} m` : '';
+  document.getElementById('aire').textContent = (aireData && aireData.texto) || '';
+}
+
 async function cargarDatos(latitude, longitude, nombreFijo) {
   setEstado(T.consultando);
   try {
@@ -1412,31 +1439,11 @@ async function cargarDatos(latitude, longitude, nombreFijo) {
       fetch(`https://api.open-meteo.com/v1/elevation?latitude=${latitude}&longitude=${longitude}`).then(r => r.json()).catch(() => null),
       obtenerCalidadAire(latitude, longitude).catch(() => null)
     ]);
-    const c = tiempo.current;
     elCiudad.textContent = ciudad;
     currentCoords = { lat: latitude, lon: longitude, nombre: ciudad };
     actualizarBtnFav();
-    elTemp.textContent = toTemp(c.temperature_2m);
-    elDesc.textContent = CODIGOS[c.weather_code] || '';
-    elIcono.innerHTML = iconoParaCodigo(c.weather_code, c.is_day === 1);
-    renderHoras(tiempo.hourly);
-    renderSol(tiempo.daily);
-    renderDias(tiempo.daily);
-    const tieneMarea = renderMarea(mdata);
-    renderPanelInterior(c.uv_index, aireData, tiempo.daily && tiempo.daily.sunset ? tiempo.daily.sunset[0] : null, tieneMarea);
-    aplicarColorTemp(Math.round(c.temperature_2m));
-    const max0 = tiempo.daily && tiempo.daily.temperature_2m_max ? tiempo.daily.temperature_2m_max[0] : null;
-    const min0 = tiempo.daily && tiempo.daily.temperature_2m_min ? tiempo.daily.temperature_2m_min[0] : null;
-    const elMinMax = document.getElementById('tempMinMax');
-    if (max0 !== null && min0 !== null) {
-      elMinMax.innerHTML = `<span class="tmx">${toTemp(max0)}</span><span class="tmn">${toTemp(min0)}</span>`;
-    }
-    elSensacion.textContent = T.sensacion + ' ' + toTemp(c.apparent_temperature);
-    elViento.textContent = Math.round(c.wind_speed_10m) + ' km/h';
-    elHumedad.textContent = c.relative_humidity_2m + T.humedad;
-    const alt = elevacion && elevacion.elevation && elevacion.elevation[0];
-    elAltitud.textContent = alt !== null && alt !== undefined ? `${T.altitud} ${Math.round(alt)} m` : '';
-    document.getElementById('aire').textContent = (aireData && aireData.texto) || '';
+    ultimosDatos = { tiempo, ciudad, mdata, elevacion, aireData };
+    renderDatos(ultimosDatos);
     setEstado(T.actualizado + ' ' + new Date().toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' }));
     localStorage.setItem('ql_ultima_act', Date.now().toString());
   } catch (e) {
