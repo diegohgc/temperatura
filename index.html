@@ -54,8 +54,15 @@
   .buscar-fila { display: flex; flex-direction: column; align-items: center; gap: 2px; margin-bottom: 4px; }
   .btn-fav { background: none; border: none; cursor: pointer; font-size: 1rem; color: inherit; opacity: 0.75; padding: 0; line-height: 1; transition: opacity 0.2s; display: flex; align-items: center; gap: 4px; }
   .btn-fav:hover { opacity: 1; }
-  .btn-unidad { position: absolute; top: 10px; right: 12px; background: rgba(255,255,255,0.15); border: none; border-radius: 6px; color: inherit; font-size: 0.75rem; font-weight: 600; padding: 3px 7px; cursor: pointer; opacity: 0.8; transition: opacity 0.2s; }
-  .btn-unidad:hover { opacity: 1; }
+  .btn-ajustes { position: absolute; top: 10px; left: 12px; background: rgba(255,255,255,0.15); border: none; border-radius: 6px; color: inherit; font-size: 1rem; padding: 3px 7px; cursor: pointer; opacity: 0.8; transition: opacity 0.2s; line-height: 1; }
+  .btn-ajustes:hover { opacity: 1; }
+  .ajustes-panel { position: absolute; top: 38px; left: 12px; background: rgba(30,30,40,0.92); backdrop-filter: blur(8px); border-radius: 10px; padding: 10px 14px; z-index: 100; min-width: 180px; box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
+  .ajustes-fila { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 5px 0; font-size: 0.82rem; opacity: 0.9; }
+  .ajustes-fila:not(:last-child) { border-bottom: 1px solid rgba(255,255,255,0.1); }
+  .ajustes-label { color: #fff; }
+  .ajustes-toggle { display: flex; background: rgba(255,255,255,0.12); border-radius: 6px; overflow: hidden; }
+  .ajustes-toggle button { background: none; border: none; color: #fff; font-size: 0.78rem; font-weight: 600; padding: 4px 9px; cursor: pointer; opacity: 0.55; transition: opacity 0.15s, background 0.15s; }
+  .ajustes-toggle button.activo { background: rgba(255,255,255,0.25); opacity: 1; }
   .btn-fav-texto { font-size: 0.82rem; }
   .fav-titulo { font-size: 0.7rem; opacity: 0.65; text-transform: uppercase; letter-spacing: 0.06em; margin: 10px 0 5px; }
   .fav-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; border-radius: 10px; background: rgba(255,255,255,0.1); margin-bottom: 5px; cursor: pointer; }
@@ -217,7 +224,25 @@
 <body>
   <div id="bg"></div>
   <div class="card">
-    <button class="btn-unidad" id="btnUnidad"></button>
+    <button class="btn-ajustes" id="btnAjustes" aria-label="Ajustes">⚙</button>
+    <div id="ajustesPanel" hidden>
+      <div class="ajustes-panel">
+        <div class="ajustes-fila">
+          <span class="ajustes-label">Temperatura</span>
+          <div class="ajustes-toggle">
+            <button id="btnC">°C</button>
+            <button id="btnF">°F</button>
+          </div>
+        </div>
+        <div class="ajustes-fila">
+          <span class="ajustes-label">Velocidad</span>
+          <div class="ajustes-toggle">
+            <button id="btnKmh">km/h</button>
+            <button id="btnMph">mph</button>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="buscar-fila">
       <button class="btn-buscar" id="btnBuscarCiudad" aria-label="Buscar otra ciudad">
         <svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M19.5 19.5l-4.3-4.3"/></svg>
@@ -991,21 +1016,30 @@ const idioma = detectarIdioma();
 const T = TRADUCCIONES[idioma];
 const defaultF = (navigator.language || '').toLowerCase() === 'en-us';
 let usaFahrenheit = localStorage.getItem('ql_unidad') ? localStorage.getItem('ql_unidad') === 'F' : defaultF;
+let usaMph = localStorage.getItem('ql_velocidad') === 'mph';
 function toTemp(c) {
   return usaFahrenheit ? Math.round(c * 9 / 5 + 32) + '°F' : Math.round(c) + '°';
 }
-function actualizarBtnUnidad() {
-  const btn = document.getElementById('btnUnidad');
-  btn.textContent = usaFahrenheit ? 'Cambiar a °C' : 'Cambiar a °F';
-  btn.title = usaFahrenheit ? 'Cambiar a Celsius' : 'Cambiar a Fahrenheit';
+function toViento(kmh) {
+  return usaMph ? Math.round(kmh * 0.621371) + ' mph' : Math.round(kmh) + ' km/h';
 }
-document.getElementById('btnUnidad').addEventListener('click', () => {
-  usaFahrenheit = !usaFahrenheit;
-  localStorage.setItem('ql_unidad', usaFahrenheit ? 'F' : 'C');
-  actualizarBtnUnidad();
-  if (ultimosDatos) renderDatos(ultimosDatos);
+function actualizarAjustes() {
+  document.getElementById('btnC').classList.toggle('activo', !usaFahrenheit);
+  document.getElementById('btnF').classList.toggle('activo', usaFahrenheit);
+  document.getElementById('btnKmh').classList.toggle('activo', !usaMph);
+  document.getElementById('btnMph').classList.toggle('activo', usaMph);
+}
+document.getElementById('btnAjustes').addEventListener('click', (e) => {
+  e.stopPropagation();
+  document.getElementById('ajustesPanel').hidden = !document.getElementById('ajustesPanel').hidden;
 });
-actualizarBtnUnidad();
+document.addEventListener('click', () => { document.getElementById('ajustesPanel').hidden = true; });
+document.getElementById('ajustesPanel').addEventListener('click', (e) => e.stopPropagation());
+document.getElementById('btnC').addEventListener('click', () => { usaFahrenheit = false; localStorage.setItem('ql_unidad', 'C'); actualizarAjustes(); if (ultimosDatos) renderDatos(ultimosDatos); });
+document.getElementById('btnF').addEventListener('click', () => { usaFahrenheit = true; localStorage.setItem('ql_unidad', 'F'); actualizarAjustes(); if (ultimosDatos) renderDatos(ultimosDatos); });
+document.getElementById('btnKmh').addEventListener('click', () => { usaMph = false; localStorage.setItem('ql_velocidad', 'kmh'); actualizarAjustes(); if (ultimosDatos) renderDatos(ultimosDatos); });
+document.getElementById('btnMph').addEventListener('click', () => { usaMph = true; localStorage.setItem('ql_velocidad', 'mph'); actualizarAjustes(); if (ultimosDatos) renderDatos(ultimosDatos); });
+actualizarAjustes();
 
 const elTemp = document.getElementById('temp');
 const elDesc = document.getElementById('desc');
@@ -1422,7 +1456,7 @@ function renderDatos(datos) {
     elMinMax.innerHTML = `<span class="tmx">${toTemp(max0)}</span><span class="tmn">${toTemp(min0)}</span>`;
   }
   elSensacion.textContent = T.sensacion + ' ' + toTemp(c.apparent_temperature);
-  elViento.textContent = Math.round(c.wind_speed_10m) + ' km/h';
+  elViento.textContent = toViento(c.wind_speed_10m);
   elHumedad.textContent = c.relative_humidity_2m + T.humedad;
   const alt = elevacion && elevacion.elevation && elevacion.elevation[0];
   elAltitud.textContent = alt !== null && alt !== undefined ? `${T.altitud} ${Math.round(alt)} m` : '';
