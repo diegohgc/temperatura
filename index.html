@@ -985,13 +985,7 @@ function detectarIdioma() {
 
 const idioma = detectarIdioma();
 const T = TRADUCCIONES[idioma];
-const usaFahrenheit = (() => {
-  try {
-    const F_REGIONS = new Set(['US', 'KY', 'LR', 'BS', 'BZ', 'PW', 'MH', 'FM']);
-    const langs = navigator.languages || [navigator.language];
-    return langs.some(l => { try { return F_REGIONS.has(new Intl.Locale(l).region); } catch { return false; } });
-  } catch { return false; }
-})();
+const usaFahrenheit = (navigator.language || '').toLowerCase() === 'en-us';
 function toTemp(c) {
   return usaFahrenheit ? Math.round(c * 9 / 5 + 32) + '°F' : Math.round(c) + '°';
 }
