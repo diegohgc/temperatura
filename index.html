@@ -63,6 +63,12 @@
   .ajustes-toggle { display: flex; background: rgba(255,255,255,0.12); border-radius: 6px; overflow: hidden; }
   .ajustes-toggle button { background: none; border: none; color: #fff; font-size: 0.78rem; font-weight: 600; padding: 4px 9px; cursor: pointer; opacity: 0.55; transition: opacity 0.15s, background 0.15s; }
   .ajustes-toggle button.activo { background: rgba(255,255,255,0.25); opacity: 1; }
+  .ajustes-favs-titulo { font-size: 0.7rem; opacity: 0.55; text-transform: uppercase; letter-spacing: 0.06em; color: #fff; margin: 8px 0 4px; }
+  .ajustes-fav-item { display: flex; align-items: center; justify-content: space-between; padding: 5px 8px; border-radius: 7px; background: rgba(255,255,255,0.08); margin-bottom: 4px; cursor: pointer; transition: background 0.15s; }
+  .ajustes-fav-item:hover { background: rgba(255,255,255,0.18); }
+  .ajustes-fav-nombre { font-size: 0.82rem; color: #fff; }
+  .ajustes-fav-remove { background: none; border: none; color: #fff; opacity: 0.4; cursor: pointer; font-size: 0.85rem; padding: 0 0 0 8px; line-height: 1; }
+  .ajustes-fav-remove:hover { opacity: 0.9; }
   .btn-fav-texto { font-size: 0.82rem; }
   .fav-titulo { font-size: 0.7rem; opacity: 0.65; text-transform: uppercase; letter-spacing: 0.06em; margin: 10px 0 5px; }
   .fav-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; border-radius: 10px; background: rgba(255,255,255,0.1); margin-bottom: 5px; cursor: pointer; }
@@ -224,7 +230,7 @@
 <body>
   <div id="bg"></div>
   <div class="card">
-    <button class="btn-ajustes" id="btnAjustes" aria-label="Ajustes">⚙</button>
+    <button class="btn-ajustes" id="btnAjustes" aria-label="Ajustes">⚙ Ajustes</button>
     <div id="ajustesPanel" hidden>
       <div class="ajustes-panel">
         <div class="ajustes-fila">
@@ -240,6 +246,10 @@
             <button id="btnKmh">km/h</button>
             <button id="btnMph">mph</button>
           </div>
+        </div>
+        <div id="ajustesFavsSeccion" hidden>
+          <div class="ajustes-favs-titulo">Ciudades guardadas</div>
+          <div id="ajustesFavsLista"></div>
         </div>
       </div>
     </div>
@@ -1029,9 +1039,45 @@ function actualizarAjustes() {
   document.getElementById('btnKmh').classList.toggle('activo', !usaMph);
   document.getElementById('btnMph').classList.toggle('activo', usaMph);
 }
+function renderFavsEnAjustes() {
+  const seccion = document.getElementById('ajustesFavsSeccion');
+  const lista = document.getElementById('ajustesFavsLista');
+  const favs = loadFavoritos();
+  if (!favs.length) { seccion.hidden = true; return; }
+  seccion.hidden = false;
+  lista.innerHTML = favs.map((f, i) => `
+    <div class="ajustes-fav-item" data-i="${i}">
+      <span class="ajustes-fav-nombre">${f.nombre}</span>
+      <button class="ajustes-fav-remove" data-i="${i}" aria-label="Eliminar">✕</button>
+    </div>`).join('');
+  lista.querySelectorAll('.ajustes-fav-item').forEach(el => {
+    el.addEventListener('click', (e) => {
+      if (e.target.classList.contains('ajustes-fav-remove')) return;
+      const f = loadFavoritos()[+el.dataset.i];
+      if (!f) return;
+      ubicacionManual = { lat: f.lat, lon: f.lon, nombre: f.nombre };
+      document.getElementById('ajustesPanel').hidden = true;
+      cargarDatos(f.lat, f.lon, f.nombre);
+    });
+  });
+  lista.querySelectorAll('.ajustes-fav-remove').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const favs = loadFavoritos();
+      favs.splice(+btn.dataset.i, 1);
+      saveFavoritos(favs);
+      renderFavsEnAjustes();
+      renderFavoritosLista();
+      actualizarBtnFav();
+    });
+  });
+}
+
 document.getElementById('btnAjustes').addEventListener('click', (e) => {
   e.stopPropagation();
-  document.getElementById('ajustesPanel').hidden = !document.getElementById('ajustesPanel').hidden;
+  const panel = document.getElementById('ajustesPanel');
+  panel.hidden = !panel.hidden;
+  if (!panel.hidden) renderFavsEnAjustes();
 });
 document.addEventListener('click', () => { document.getElementById('ajustesPanel').hidden = true; });
 document.getElementById('ajustesPanel').addEventListener('click', (e) => e.stopPropagation());
