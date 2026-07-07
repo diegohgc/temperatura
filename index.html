@@ -1510,7 +1510,7 @@ function renderDatos(datos) {
     const now = new Date();
     const idx = hourly.time.findIndex(t => new Date(t) >= now);
     const prob = idx >= 0 ? hourly.precipitation_probability[idx] : null;
-    elLluvia.textContent = prob !== null && prob > 0 ? `🌧 ${prob}% próxima hora` : '';
+    elLluvia.textContent = prob !== null && prob > 0 ? `🌧 Probabilidad de lluvia próxima hora: ${prob}%` : '';
   } else {
     elLluvia.textContent = '';
   }
