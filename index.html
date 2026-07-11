@@ -1534,9 +1534,8 @@ function renderDatos(datos) {
   }
   // Corregir icono si la nubosidad real contradice el código del modelo
   const cloudCover = c.cloud_cover ?? 0;
-  console.log('cloud_cover:', cloudCover, 'weatherCode:', weatherCode);
-  if (weatherCode <= 1 && cloudCover >= 75) weatherCode = 3;      // muy nublado
-  else if (weatherCode <= 1 && cloudCover >= 50) weatherCode = 2; // parcialmente nublado
+  if (weatherCode <= 1 && cloudCover >= 75) weatherCode = 3;
+  else if (weatherCode <= 1 && cloudCover >= 50) weatherCode = 2;
   elTemp.textContent = toTemp(c.temperature_2m);
   elDesc.textContent = CODIGOS[weatherCode] || '';
   elIcono.innerHTML = iconoParaCodigo(weatherCode, isDay);
