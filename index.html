@@ -1534,6 +1534,7 @@ function renderDatos(datos) {
   }
   // Corregir icono si la nubosidad real contradice el código del modelo
   const owmClouds = owmData?.clouds?.all ?? null;
+  console.log('OWM clouds:', owmClouds, 'OWM condition:', owmData?.weather?.[0]?.description);
   const cloudCover = owmClouds !== null ? owmClouds : Math.max(c.cloud_cover ?? 0, c.cloud_cover_low ?? 0, c.cloud_cover_mid ?? 0, c.cloud_cover_high ?? 0);
   if (weatherCode <= 1 && cloudCover >= 75) weatherCode = 3;
   else if (weatherCode <= 1 && cloudCover >= 50) weatherCode = 2;
