@@ -1522,7 +1522,7 @@ async function obtenerCalidadAire(lat, lon) {
 }
 
 function renderDatos(datos) {
-  const { tiempo, ciudad, mdata, elevacion, aireData } = datos;
+  const { tiempo, ciudad, mdata, elevacion, aireData, owmData } = datos;
   const c = tiempo.current;
   const m15 = tiempo.minutely_15;
   let weatherCode = c.weather_code;
@@ -1533,7 +1533,8 @@ function renderDatos(datos) {
     if (idx >= 0) { weatherCode = m15.weather_code[idx]; isDay = m15.is_day ? m15.is_day[idx] === 1 : isDay; }
   }
   // Corregir icono si la nubosidad real contradice el código del modelo
-  const cloudCover = Math.max(c.cloud_cover ?? 0, c.cloud_cover_low ?? 0, c.cloud_cover_mid ?? 0, c.cloud_cover_high ?? 0);
+  const owmClouds = owmData?.clouds?.all ?? null;
+  const cloudCover = owmClouds !== null ? owmClouds : Math.max(c.cloud_cover ?? 0, c.cloud_cover_low ?? 0, c.cloud_cover_mid ?? 0, c.cloud_cover_high ?? 0);
   if (weatherCode <= 1 && cloudCover >= 75) weatherCode = 3;
   else if (weatherCode <= 1 && cloudCover >= 50) weatherCode = 2;
   elTemp.textContent = toTemp(c.temperature_2m);
@@ -1572,17 +1573,18 @@ function renderDatos(datos) {
 async function cargarDatos(latitude, longitude, nombreFijo) {
   setEstado(T.consultando);
   try {
-    const [tiempo, ciudad, mdata, elevacion, aireData] = await Promise.all([
+    const [tiempo, ciudad, mdata, elevacion, aireData, owmData] = await Promise.all([
       obtenerTiempo(latitude, longitude),
       nombreFijo ? Promise.resolve(nombreFijo) : obtenerCiudad(latitude, longitude),
       obtenerMarea(latitude, longitude).catch(() => null),
       fetch(`https://api.open-meteo.com/v1/elevation?latitude=${latitude}&longitude=${longitude}`).then(r => r.json()).catch(() => null),
-      obtenerCalidadAire(latitude, longitude).catch(() => null)
+      obtenerCalidadAire(latitude, longitude).catch(() => null),
+      fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=ee01a14dca6430b5ddb8b0fed708d4ba`).then(r => r.json()).catch(() => null)
     ]);
     elCiudad.textContent = ciudad;
     currentCoords = { lat: latitude, lon: longitude, nombre: ciudad };
     actualizarBtnFav();
-    ultimosDatos = { tiempo, ciudad, mdata, elevacion, aireData };
+    ultimosDatos = { tiempo, ciudad, mdata, elevacion, aireData, owmData };
     renderDatos(ultimosDatos);
     setEstado(T.actualizado + ' ' + new Date().toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' }));
     localStorage.setItem('ql_ultima_act', Date.now().toString());
