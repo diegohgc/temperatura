@@ -1397,13 +1397,14 @@ function renderDias(daily) {
 }
 
 async function obtenerMarea(lat, lon) {
-  const url = `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&hourly=sea_level_height_msl,sea_surface_temperature&forecast_days=2&timezone=auto`;
+  const url = `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&hourly=sea_level_height_msl,sea_surface_temperature,wave_height&forecast_days=2&timezone=auto`;
   const r = await fetch(url);
   if (!r.ok) throw new Error('No es costero');
   const data = await r.json();
   const tiempos = data.hourly && data.hourly.time;
   const alturas = data.hourly && data.hourly.sea_level_height_msl;
   const tempAguas = data.hourly && data.hourly.sea_surface_temperature;
+  const waveHeights = data.hourly && data.hourly.wave_height;
   if (!tiempos || !alturas || !alturas.some(h => h !== null)) return null;
 
   const ahora = Date.now();
@@ -1468,7 +1469,16 @@ async function obtenerMarea(lat, lon) {
     if (tempAguas[bestIdx] !== null) tempAgua = Math.round(tempAguas[bestIdx]);
   }
 
-  return { extremos, estadoTexto, tempAgua, tiempos, alturas };
+  let waveHeight = null;
+  if (waveHeights) {
+    for (let d = 0; d < waveHeights.length; d++) {
+      const i1 = Math.max(0, idx - d), i2 = Math.min(waveHeights.length - 1, idx + d);
+      if (waveHeights[i1] !== null) { waveHeight = waveHeights[i1]; break; }
+      if (waveHeights[i2] !== null) { waveHeight = waveHeights[i2]; break; }
+    }
+  }
+
+  return { extremos, estadoTexto, tempAgua, waveHeight, tiempos, alturas };
 }
 
 function renderMarea(datos) {
@@ -1495,9 +1505,10 @@ function renderMarea(datos) {
 
   document.getElementById('marea').textContent = datos.estadoTexto || '';
   const elAgua = document.getElementById('mareaAgua');
-  elAgua.textContent = datos.tempAgua !== null && datos.tempAgua !== undefined
-    ? `🌊 ${toTemp(datos.tempAgua)}`
-    : '';
+  const partes = [];
+  if (datos.tempAgua !== null && datos.tempAgua !== undefined) partes.push(`🌊 ${toTemp(datos.tempAgua)}`);
+  if (datos.waveHeight !== null && datos.waveHeight !== undefined) partes.push(`〰️ ${datos.waveHeight.toFixed(1)}m`);
+  elAgua.textContent = partes.join('  ');
   return true;
 }
 
