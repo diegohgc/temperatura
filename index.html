@@ -1507,7 +1507,7 @@ function renderMarea(datos) {
   const elAgua = document.getElementById('mareaAgua');
   const partes = [];
   if (datos.tempAgua !== null && datos.tempAgua !== undefined) partes.push(`🌊 ${toTemp(datos.tempAgua)}`);
-  if (datos.waveHeight !== null && datos.waveHeight !== undefined) partes.push(`〰️ ${datos.waveHeight.toFixed(1)}m`);
+  if (datos.waveHeight !== null && datos.waveHeight !== undefined) partes.push(`Olas ${datos.waveHeight.toFixed(1)}m`);
   elAgua.textContent = partes.join('  ');
   return true;
 }
