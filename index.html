@@ -1394,6 +1394,12 @@ function renderSol(daily) {
   elSolInfo.innerHTML = `${T.amanecer} ${amanecer}<br>${T.anochecer} ${anochecer}`;
 }
 
+function codigoSinLluvia(code, prob) {
+  if (prob > 0) return code;
+  const esLluvia = (code >= 51 && code <= 67) || (code >= 80 && code <= 82) || (code >= 85 && code <= 86) || (code >= 95 && code <= 99);
+  return esLluvia ? 3 : code;
+}
+
 function renderDias(daily) {
   elDias.innerHTML = '';
   if (!daily || !daily.time) return;
@@ -1408,7 +1414,7 @@ function renderDias(daily) {
     div.className = 'dia';
     div.innerHTML = `
       <div class="d">${nombreDia}</div>
-      <div class="icono-dia">${iconoParaCodigo(daily.weather_code[i], true)}</div>
+      <div class="icono-dia">${iconoParaCodigo(codigoSinLluvia(daily.weather_code[i], daily.precipitation_probability_max ? (daily.precipitation_probability_max[i] ?? 0) : 0), true)}</div>
       <div class="max">${toTemp(max)}</div>
       <div class="min">${toTemp(min)}</div>
       <div class="dia-lluvia">${daily.precipitation_probability_max ? (daily.precipitation_probability_max[i] ?? 0) : 0}%</div>
