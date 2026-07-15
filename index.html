@@ -1411,7 +1411,7 @@ function renderDias(daily) {
       <div class="icono-dia">${iconoParaCodigo(daily.weather_code[i], true)}</div>
       <div class="max">${toTemp(max)}</div>
       <div class="min">${toTemp(min)}</div>
-      ${daily.precipitation_probability_max && daily.precipitation_probability_max[i] > 0 ? `<div class="dia-lluvia">${daily.precipitation_probability_max[i]}%</div>` : ''}
+      <div class="dia-lluvia">${daily.precipitation_probability_max ? (daily.precipitation_probability_max[i] ?? 0) : 0}%</div>
     `;
     elDias.appendChild(div);
   });
