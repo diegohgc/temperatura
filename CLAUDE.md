@@ -8,6 +8,10 @@ según la ubicación GPS del usuario. Publicada en Google Play en prueba cerrada
 - PWA: `manifest.json` + `sw.js` (service worker v4) + iconos. Instalable desde el navegador.
 - Datos del tiempo: Open-Meteo (`api.open-meteo.com` + `geocoding-api.open-meteo.com`), sin clave de API.
 - Ciudad: BigDataCloud (`api.bigdatacloud.net/data/reverse-geocode-client`), sin key.
+- Cloud cover real-time: OpenWeatherMap (`api.openweathermap.org/data/2.5/weather`), key: `ee01a14dca6430b5ddb8b0fed708d4ba` (cuenta quicktempapi, activa).
+  - OWM `clouds.all` corrige el weather_code de Open-Meteo cuando dice despejado pero hay nubes.
+  - Umbral ≥75% → muy nublado (code 3), ≥50% → parcialmente nublado (code 2).
+  - Fallback: si OWM falla, usa `max(cloud_cover, cloud_cover_low, cloud_cover_mid, cloud_cover_high)` de Open-Meteo.
 - No usa localStorage ni backend propio; cada carga consulta la ubicación y el tiempo en directo.
 - URL pública: https://diegohgc.github.io/temperatura/
 - Se publica con GitHub Pages: editar `index.html` + `git push` y se actualiza solo.
@@ -20,17 +24,27 @@ según la ubicación GPS del usuario. Publicada en Google Play en prueba cerrada
   `gradlew bundleRelease -PQUICKTEMP_STORE_PASS=Dindurra1 -PQUICKTEMP_KEY_PASS=Dindurra1`
 - AAB generado en: `app/build/outputs/bundle/release/app-release.aab`
 - AdMob App ID: `ca-app-pub-5015878857432448~7059763758`
+- AdMob no se puede vincular a Google Play hasta que la app esté en producción pública.
 - Widget de pantalla de inicio implementado (TemperaturaWidget.kt): temperatura, altitud y ciudad.
   Usa Open-Meteo + BigDataCloud. Click en el widget refresca los datos.
-- Versión actual: versionCode=2, versionName=1.1
+  Se refresca también al desbloquear el teléfono (`ACTION_USER_PRESENT` en AndroidManifest.xml).
+- Versión actual: versionCode=3, versionName="1.2"
 
 ## Google Play
 - App: QuickTemp (`com.diegohg.quicktemp`)
 - Estado: **prueba cerrada activa** (desde ~3 julio 2026)
 - Testers: >12 aceptados (requisito cumplido)
-- Falta: ejecutar prueba 14 días → solicitar acceso a producción (~17 julio 2026)
-- Cuenta desarrollador: DHaudiovisuales (hay typo, debería ser DHaudiovisuales sin la 'a' extra — en proceso de corrección)
+- Falta: completar 14 días de prueba cerrada → solicitar acceso a producción (~17 julio 2026)
+- Tras aprobación, se puede vincular AdMob a Google Play y monetizar con anuncios.
+- Cuenta desarrollador: DHaudiovisuales
 - Grupo Telegram testers: @Android12TestersBot
+
+## Play Store listing (ASO)
+- Título: "QuickTemp: Tiempo, Altitud y Marea"
+- Descripción corta: "Temperatura, altitud, marea y previsión del tiempo según tu ubicación GPS"
+- Traducciones añadidas: English (US), English (UK), French, German, Italian, Portuguese
+- Arabic NO disponible en Play Console (no aparece como idioma)
+- Fichas de tienda: Play Console > Ficha de Play Store > Fichas de Play Store y productos
 
 ## Funcionalidades implementadas
 - Temperatura actual + sensación térmica, viento, humedad
@@ -41,6 +55,7 @@ según la ubicación GPS del usuario. Publicada en Google Play en prueba cerrada
 - Buscador de ciudades (geocoding Open-Meteo)
 - **Fondo de color dinámico** según temperatura: azul hielo (<0°) → azul (frío) → verde (templado) → naranja (cálido) → rojo (sofocante). Cambia gradualmente con transición suave.
 - **Multiidioma**: detecta el idioma del navegador automáticamente. Soporta: es, en, de, fr, pt, it, zh.
+- Unidades configurables: °C/°F, km/h / mph, m / ft
 - Widget Android en pantalla de inicio
 
 ## Marea (Open-Meteo Marine API)

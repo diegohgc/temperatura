@@ -156,6 +156,40 @@
   .marea-extremo .me-hora { font-size: 0.95rem; font-weight: 600; }
   .marea-extremo .me-altura { font-size: 0.78rem; opacity: 0.8; }
   .marea-estado { font-size: 0.85rem; opacity: 0.9; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 6px; }
+  #panelMarea { cursor: pointer; }
+  #panelMarea:hover { opacity: 0.85; }
+  /* Modal mareas */
+  #modalMarea {
+    display: none; position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.55); backdrop-filter: blur(4px);
+    align-items: flex-end; justify-content: center;
+  }
+  #modalMarea.abierto { display: flex; }
+  .modal-sheet {
+    background: rgba(20,30,50,0.97); border-radius: 20px 20px 0 0;
+    width: 100%; max-width: 480px; padding: 20px 18px 32px;
+    color: #fff; max-height: 90vh; overflow-y: auto;
+  }
+  .modal-handle {
+    width: 40px; height: 4px; background: rgba(255,255,255,0.3);
+    border-radius: 2px; margin: 0 auto 16px;
+  }
+  .modal-titulo {
+    font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em;
+    opacity: 0.6; margin-bottom: 14px; text-align: center;
+  }
+  #mareaChart { width: 100%; height: 130px; display: block; margin-bottom: 16px; }
+  .modal-extremos {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(90px,1fr));
+    gap: 10px; margin-top: 4px;
+  }
+  .modal-extremo {
+    background: rgba(255,255,255,0.08); border-radius: 10px;
+    padding: 10px 6px; text-align: center;
+  }
+  .modal-extremo .mex-tipo { font-size: 0.65rem; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.05em; }
+  .modal-extremo .mex-hora { font-size: 1rem; font-weight: 600; margin: 3px 0; }
+  .modal-extremo .mex-alt { font-size: 0.8rem; opacity: 0.8; }
   .horas { display: flex; gap: 14px; overflow-x: auto; padding-bottom: 2px; }
   .horas::-webkit-scrollbar { height: 0; }
   .hora { flex: 0 0 auto; text-align: center; min-width: 46px; }
@@ -1423,7 +1457,7 @@ async function obtenerMarea(lat, lon) {
     if (tempAguas[bestIdx] !== null) tempAgua = Math.round(tempAguas[bestIdx]);
   }
 
-  return { extremos, estadoTexto, tempAgua };
+  return { extremos, estadoTexto, tempAgua, tiempos, alturas };
 }
 
 function renderMarea(datos) {
@@ -1677,6 +1711,123 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(() => {});
   });
 }
+
+// ── Modal mareas ──────────────────────────────────────────
+document.getElementById('panelMarea').addEventListener('click', abrirModalMarea);
+document.getElementById('modalMarea').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('modalMarea')) cerrarModalMarea();
+});
+
+function abrirModalMarea() {
+  const mdata = ultimosDatos && ultimosDatos.mdata;
+  if (!mdata || !mdata.tiempos || !mdata.alturas) return;
+  document.getElementById('modalMareaTit').textContent = T.mareasDeHoy || 'Mareas';
+  renderModalMareaChart(mdata);
+  renderModalMareaExtremost(mdata);
+  document.getElementById('modalMarea').classList.add('abierto');
+  document.body.style.overflow = 'hidden';
+}
+
+function cerrarModalMarea() {
+  document.getElementById('modalMarea').classList.remove('abierto');
+  document.body.style.overflow = '';
+}
+
+function renderModalMareaChart(mdata) {
+  const { tiempos, alturas } = mdata;
+  const ahora = Date.now();
+  const W = 360, H = 130, PAD = 10;
+
+  // Next 25 hours from now
+  const startIdx = Math.max(0, tiempos.findIndex(t => new Date(t).getTime() >= ahora - 3600000));
+  const endIdx = Math.min(tiempos.length - 1, startIdx + 25);
+  const slice = alturas.slice(startIdx, endIdx + 1).map((h, i) => ({
+    t: new Date(tiempos[startIdx + i]).getTime(), h: h ?? 0
+  }));
+  if (slice.length < 2) return;
+
+  const minH = Math.min(...slice.map(p => p.h));
+  const maxH = Math.max(...slice.map(p => p.h));
+  const rangeH = maxH - minH || 1;
+  const minT = slice[0].t, maxT = slice[slice.length - 1].t;
+  const rangeT = maxT - minT || 1;
+
+  const px = t => PAD + ((t - minT) / rangeT) * (W - 2 * PAD);
+  const py = h => (H - PAD) - ((h - minH) / rangeH) * (H - 2 * PAD);
+
+  // Build smooth path (cubic bezier)
+  let d = `M ${px(slice[0].t)} ${py(slice[0].h)}`;
+  for (let i = 1; i < slice.length; i++) {
+    const x0 = px(slice[i-1].t), y0 = py(slice[i-1].h);
+    const x1 = px(slice[i].t),   y1 = py(slice[i].h);
+    const cpx = (x0 + x1) / 2;
+    d += ` C ${cpx} ${y0}, ${cpx} ${y1}, ${x1} ${y1}`;
+  }
+
+  // Fill area
+  const fillD = d + ` L ${px(slice[slice.length-1].t)} ${H} L ${px(slice[0].t)} ${H} Z`;
+
+  // Now marker
+  const nowX = Math.min(W - PAD, Math.max(PAD, px(ahora)));
+
+  // Hour labels (every 6h)
+  const labels = slice.filter((p, i) => {
+    const hr = new Date(p.t).getHours();
+    return i > 0 && i < slice.length - 1 && hr % 6 === 0;
+  });
+
+  const svg = `
+    <defs>
+      <linearGradient id="mgrd" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="rgba(100,180,255,0.45)"/>
+        <stop offset="100%" stop-color="rgba(100,180,255,0.03)"/>
+      </linearGradient>
+    </defs>
+    <path d="${fillD}" fill="url(#mgrd)"/>
+    <path d="${d}" fill="none" stroke="rgba(120,200,255,0.9)" stroke-width="2" stroke-linecap="round"/>
+    <line x1="${nowX}" y1="${PAD - 4}" x2="${nowX}" y2="${H - PAD + 4}" stroke="rgba(255,255,255,0.7)" stroke-width="1.5" stroke-dasharray="3,3"/>
+    ${labels.map(p => {
+      const x = px(p.t);
+      const label = new Date(p.t).toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' });
+      return `<text x="${x}" y="${H - 2}" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.5)">${label}</text>`;
+    }).join('')}
+    ${mdata.extremos.map(e => {
+      const eT = e.hora;
+      if (eT < minT || eT > maxT) return '';
+      const ex = px(eT), ey = py(e.altura);
+      const col = e.tipo === 'pleamar' ? 'rgba(120,220,255,1)' : 'rgba(180,220,255,0.7)';
+      const label = new Date(eT).toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' });
+      const textY = e.tipo === 'pleamar' ? ey - 8 : ey + 16;
+      return `<circle cx="${ex}" cy="${ey}" r="4" fill="${col}"/>
+              <text x="${ex}" y="${textY}" text-anchor="middle" font-size="9.5" fill="${col}" font-weight="600">${label}</text>`;
+    }).join('')}
+  `;
+  document.getElementById('mareaChart').innerHTML = svg;
+}
+
+function renderModalMareaExtremost(mdata) {
+  const el = document.getElementById('modalExtremost');
+  if (!mdata.extremos || !mdata.extremos.length) { el.innerHTML = ''; return; }
+  el.innerHTML = mdata.extremos.map(e => {
+    const hora = new Date(e.hora).toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' });
+    const label = e.tipo === 'pleamar' ? (T.pleamar || 'Pleamar') : (T.bajamar || 'Bajamar');
+    return `<div class="modal-extremo">
+      <div class="mex-tipo">${label}</div>
+      <div class="mex-hora">${hora}</div>
+      <div class="mex-alt">${e.altura.toFixed(2)} m</div>
+    </div>`;
+  }).join('');
+}
 </script>
+
+<!-- Modal mareas -->
+<div id="modalMarea" role="dialog" aria-modal="true">
+  <div class="modal-sheet" id="modalSheet">
+    <div class="modal-handle"></div>
+    <div class="modal-titulo" id="modalMareaTit"></div>
+    <svg id="mareaChart" viewBox="0 0 360 130" preserveAspectRatio="none"></svg>
+    <div class="modal-extremos" id="modalExtremost"></div>
+  </div>
+</div>
 </body>
 </html>
