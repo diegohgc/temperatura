@@ -170,9 +170,20 @@
     width: 100%; max-width: 480px; padding: 20px 18px 32px;
     color: #fff; max-height: 90vh; overflow-y: auto;
   }
+  .modal-handle-row {
+    display: flex; align-items: center; justify-content: center;
+    position: relative; margin-bottom: 16px;
+  }
   .modal-handle {
     width: 40px; height: 4px; background: rgba(255,255,255,0.3);
-    border-radius: 2px; margin: 0 auto 16px;
+    border-radius: 2px;
+  }
+  .modal-close {
+    position: absolute; right: 0; top: -4px;
+    background: rgba(255,255,255,0.12); border: none; color: #fff;
+    border-radius: 50%; width: 28px; height: 28px; font-size: 16px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    line-height: 1;
   }
   .modal-titulo {
     font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em;
@@ -1823,7 +1834,10 @@ function renderModalMareaExtremost(mdata) {
 <!-- Modal mareas -->
 <div id="modalMarea" role="dialog" aria-modal="true">
   <div class="modal-sheet" id="modalSheet">
-    <div class="modal-handle"></div>
+    <div class="modal-handle-row">
+      <div class="modal-handle"></div>
+      <button class="modal-close" onclick="cerrarModalMarea()">✕</button>
+    </div>
     <div class="modal-titulo" id="modalMareaTit"></div>
     <svg id="mareaChart" viewBox="0 0 360 130" preserveAspectRatio="none"></svg>
     <div class="modal-extremos" id="modalExtremost"></div>
