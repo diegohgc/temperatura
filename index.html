@@ -1173,7 +1173,7 @@ function toAlt(m, decimals = 1) {
   return usaFahrenheit ? (m * 3.28084).toFixed(decimals) + ' ft' : m.toFixed(decimals) + ' m';
 }
 function toViento(kmh) {
-  return usaMph ? Math.round(kmh * 0.621371) + ' mph' : Math.round(kmh) + ' km/h';
+  return (usaMph || usaFahrenheit) ? Math.round(kmh * 0.621371) + ' mph' : Math.round(kmh) + ' km/h';
 }
 const NOMBRES_IDIOMA = {
   es:'Español', en:'English', de:'Deutsch', fr:'Français', pt:'Português',
