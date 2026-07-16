@@ -1882,7 +1882,7 @@ async function crearMapaRadar() {
   const lat = currentCoords ? currentCoords.lat : 43.5;
   const lon = currentCoords ? currentCoords.lon : -5.7;
 
-  radarMap = L.map('radarMap', { zoomControl: true, attributionControl: false }).setView([lat, lon], 8);
+  radarMap = L.map('radarMap', { zoomControl: true, attributionControl: false }).setView([lat, lon], 6);
 
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19
