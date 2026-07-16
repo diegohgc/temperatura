@@ -63,6 +63,7 @@
   .ajustes-toggle { display: flex; background: rgba(255,255,255,0.12); border-radius: 6px; overflow: hidden; }
   .ajustes-toggle button { background: none; border: none; color: #fff; font-size: 0.78rem; font-weight: 600; padding: 4px 9px; cursor: pointer; opacity: 0.55; transition: opacity 0.15s, background 0.15s; }
   .ajustes-toggle button.activo { background: rgba(255,255,255,0.25); opacity: 1; }
+  .ajustes-select { background: rgba(255,255,255,0.12); border: none; border-radius: 6px; color: #fff; font-size: 0.78rem; font-weight: 600; padding: 4px 8px; cursor: pointer; outline: none; }
   .ajustes-favs-titulo { font-size: 0.7rem; opacity: 0.55; text-transform: uppercase; letter-spacing: 0.06em; color: #fff; margin: 8px 0 4px; }
   .ajustes-fav-item { display: flex; align-items: center; justify-content: space-between; padding: 5px 8px; border-radius: 7px; background: rgba(255,255,255,0.08); margin-bottom: 4px; cursor: pointer; transition: background 0.15s; }
   .ajustes-fav-item:hover { background: rgba(255,255,255,0.18); }
@@ -294,6 +295,10 @@
             <button id="btnMph">mph</button>
           </div>
         </div>
+        <div class="ajustes-fila">
+          <span class="ajustes-label" id="ajustesIdiomaLabel"></span>
+          <select id="selectIdioma" class="ajustes-select"></select>
+        </div>
         <div id="ajustesFavsSeccion" hidden>
           <div class="ajustes-favs-titulo" id="ajustesFavsTitulo"></div>
           <div id="ajustesFavsLista"></div>
@@ -387,7 +392,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'No se pudo obtener tu ubicación.',
     errorTemperatura: 'No se pudo obtener la temperatura.',
     actualizado: 'Actualizado',
-    ajustes: 'Ajustes', probLluvia: 'Probabilidad de lluvia próxima hora', ajustesTemp: 'Temperatura', ajustesVel: 'Velocidad', ciudadesGuardadas: 'Ciudades guardadas',
+    ajustes: 'Ajustes', idioma: 'Idioma', probLluvia: 'Probabilidad de lluvia próxima hora', ajustesTemp: 'Temperatura', ajustesVel: 'Velocidad', ciudadesGuardadas: 'Ciudades guardadas',
     cambiarCiudad: 'Cambiar ciudad',
     tuUbicacion: 'Tu ubicación',
     sensacion: 'Sensación',
@@ -425,7 +430,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Could not get your location.',
     errorTemperatura: 'Could not get the temperature.',
     actualizado: 'Updated',
-    ajustes: 'Settings', probLluvia: 'Rain probability next hour', ajustesTemp: 'Temperature', ajustesVel: 'Wind speed', ciudadesGuardadas: 'Saved cities',
+    ajustes: 'Settings', idioma: 'Language', probLluvia: 'Rain probability next hour', ajustesTemp: 'Temperature', ajustesVel: 'Wind speed', ciudadesGuardadas: 'Saved cities',
     cambiarCiudad: 'Change city',
     tuUbicacion: 'Your location',
     sensacion: 'Feels like',
@@ -463,7 +468,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Standort konnte nicht ermittelt werden.',
     errorTemperatura: 'Temperatur konnte nicht abgerufen werden.',
     actualizado: 'Aktualisiert',
-    ajustes: 'Einstellungen', probLluvia: 'Regenwahrscheinlichkeit nächste Stunde', ajustesTemp: 'Temperatur', ajustesVel: 'Windgeschwindigkeit', ciudadesGuardadas: 'Gespeicherte Städte',
+    ajustes: 'Einstellungen', idioma: 'Sprache', probLluvia: 'Regenwahrscheinlichkeit nächste Stunde', ajustesTemp: 'Temperatur', ajustesVel: 'Windgeschwindigkeit', ciudadesGuardadas: 'Gespeicherte Städte',
     cambiarCiudad: 'Stadt ändern',
     tuUbicacion: 'Dein Standort',
     sensacion: 'Gefühlt',
@@ -501,7 +506,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Impossible d\'obtenir votre position.',
     errorTemperatura: 'Impossible d\'obtenir la température.',
     actualizado: 'Mis à jour',
-    ajustes: 'Paramètres', probLluvia: 'Probabilité de pluie heure suivante', ajustesTemp: 'Température', ajustesVel: 'Vitesse du vent', ciudadesGuardadas: 'Villes enregistrées',
+    ajustes: 'Paramètres', idioma: 'Langue', probLluvia: 'Probabilité de pluie heure suivante', ajustesTemp: 'Température', ajustesVel: 'Vitesse du vent', ciudadesGuardadas: 'Villes enregistrées',
     cambiarCiudad: 'Changer de ville',
     tuUbicacion: 'Votre position',
     sensacion: 'Ressenti',
@@ -539,7 +544,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Não foi possível obter sua localização.',
     errorTemperatura: 'Não foi possível obter a temperatura.',
     actualizado: 'Atualizado',
-    ajustes: 'Configurações', probLluvia: 'Probabilidade de chuva próxima hora', ajustesTemp: 'Temperatura', ajustesVel: 'Velocidade do vento', ciudadesGuardadas: 'Cidades guardadas',
+    ajustes: 'Configurações', idioma: 'Idioma', probLluvia: 'Probabilidade de chuva próxima hora', ajustesTemp: 'Temperatura', ajustesVel: 'Velocidade do vento', ciudadesGuardadas: 'Cidades guardadas',
     cambiarCiudad: 'Mudar cidade',
     tuUbicacion: 'Sua localização',
     sensacion: 'Sensação',
@@ -577,7 +582,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Impossibile ottenere la posizione.',
     errorTemperatura: 'Impossibile ottenere la temperatura.',
     actualizado: 'Aggiornato',
-    ajustes: 'Impostazioni', probLluvia: 'Probabilità pioggia prossima ora', ajustesTemp: 'Temperatura', ajustesVel: 'Velocità del vento', ciudadesGuardadas: 'Città salvate',
+    ajustes: 'Impostazioni', idioma: 'Lingua', probLluvia: 'Probabilità pioggia prossima ora', ajustesTemp: 'Temperatura', ajustesVel: 'Velocità del vento', ciudadesGuardadas: 'Città salvate',
     cambiarCiudad: 'Cambia città',
     tuUbicacion: 'La tua posizione',
     sensacion: 'Percepita',
@@ -615,7 +620,7 @@ const TRADUCCIONES = {
     errorUbicacion: '无法获取您的位置。',
     errorTemperatura: '无法获取温度。',
     actualizado: '已更新',
-    ajustes: '设置', probLluvia: '下一小时降雨概率', ajustesTemp: '温度', ajustesVel: '风速', ciudadesGuardadas: '已保存城市',
+    ajustes: '设置', idioma: '语言', probLluvia: '下一小时降雨概率', ajustesTemp: '温度', ajustesVel: '风速', ciudadesGuardadas: '已保存城市',
     cambiarCiudad: '切换城市',
     tuUbicacion: '您的位置',
     sensacion: '体感',
@@ -653,7 +658,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'No s\'ha pogut obtenir la teva ubicació.',
     errorTemperatura: 'No s\'ha pogut obtenir la temperatura.',
     actualizado: 'Actualitzat',
-    ajustes: 'Configuració', probLluvia: 'Probabilitat de pluja propera hora', ajustesTemp: 'Temperatura', ajustesVel: 'Velocitat del vent', ciudadesGuardadas: 'Ciutats guardades',
+    ajustes: 'Configuració', idioma: 'Idioma', probLluvia: 'Probabilitat de pluja propera hora', ajustesTemp: 'Temperatura', ajustesVel: 'Velocitat del vent', ciudadesGuardadas: 'Ciutats guardades',
     cambiarCiudad: 'Canviar ciutat',
     tuUbicacion: 'La teva ubicació',
     sensacion: 'Sensació',
@@ -691,7 +696,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Ezin izan da zure kokapena lortu.',
     errorTemperatura: 'Ezin izan da tenperatura lortu.',
     actualizado: 'Eguneratuta',
-    ajustes: 'Ezarpenak', probLluvia: 'Euri probabilitatea hurrengo orduan', ajustesTemp: 'Tenperatura', ajustesVel: 'Haize abiadura', ciudadesGuardadas: 'Gordetako hiriak',
+    ajustes: 'Ezarpenak', idioma: 'Hizkuntza', probLluvia: 'Euri probabilitatea hurrengo orduan', ajustesTemp: 'Tenperatura', ajustesVel: 'Haize abiadura', ciudadesGuardadas: 'Gordetako hiriak',
     cambiarCiudad: 'Hiria aldatu',
     tuUbicacion: 'Zure kokapena',
     sensacion: 'Sentsazioa',
@@ -729,7 +734,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Non se puido obter a túa localización.',
     errorTemperatura: 'Non se puido obter a temperatura.',
     actualizado: 'Actualizado',
-    ajustes: 'Configuración', probLluvia: 'Probabilidade de choiva próxima hora', ajustesTemp: 'Temperatura', ajustesVel: 'Velocidade do vento', ciudadesGuardadas: 'Cidades gardadas',
+    ajustes: 'Configuración', idioma: 'Idioma', probLluvia: 'Probabilidade de choiva próxima hora', ajustesTemp: 'Temperatura', ajustesVel: 'Velocidade do vento', ciudadesGuardadas: 'Cidades gardadas',
     cambiarCiudad: 'Cambiar cidade',
     tuUbicacion: 'A túa localización',
     sensacion: 'Sensación',
@@ -767,7 +772,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'تعذّر الحصول على موقعك.',
     errorTemperatura: 'تعذّر الحصول على درجة الحرارة.',
     actualizado: 'تم التحديث',
-    ajustes: 'الإعدادات', probLluvia: 'احتمال المطر الساعة القادمة', ajustesTemp: 'درجة الحرارة', ajustesVel: 'سرعة الرياح', ciudadesGuardadas: 'المدن المحفوظة',
+    ajustes: 'الإعدادات', idioma: 'اللغة', probLluvia: 'احتمال المطر الساعة القادمة', ajustesTemp: 'درجة الحرارة', ajustesVel: 'سرعة الرياح', ciudadesGuardadas: 'المدن المحفوظة',
     cambiarCiudad: 'تغيير المدينة',
     tuUbicacion: 'موقعك',
     sensacion: 'يبدو كأنه',
@@ -805,7 +810,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Не удалось получить ваше местоположение.',
     errorTemperatura: 'Не удалось получить температуру.',
     actualizado: 'Обновлено',
-    ajustes: 'Настройки', probLluvia: 'Вероятность дождя следующий час', ajustesTemp: 'Температура', ajustesVel: 'Скорость ветра', ciudadesGuardadas: 'Сохранённые города',
+    ajustes: 'Настройки', idioma: 'Язык', probLluvia: 'Вероятность дождя следующий час', ajustesTemp: 'Температура', ajustesVel: 'Скорость ветра', ciudadesGuardadas: 'Сохранённые города',
     cambiarCiudad: 'Изменить город',
     tuUbicacion: 'Ваше местоположение',
     sensacion: 'Ощущается как',
@@ -843,7 +848,7 @@ const TRADUCCIONES = {
     errorUbicacion: '位置情報を取得できませんでした。',
     errorTemperatura: '気温を取得できませんでした。',
     actualizado: '更新しました',
-    ajustes: '設定', probLluvia: '次の1時間の降水確率', ajustesTemp: '気温', ajustesVel: '風速', ciudadesGuardadas: '保存された都市',
+    ajustes: '設定', idioma: '言語', probLluvia: '次の1時間の降水確率', ajustesTemp: '気温', ajustesVel: '風速', ciudadesGuardadas: '保存された都市',
     cambiarCiudad: '都市を変更',
     tuUbicacion: '現在地',
     sensacion: '体感',
@@ -881,7 +886,7 @@ const TRADUCCIONES = {
     errorUbicacion: '위치를 가져올 수 없습니다.',
     errorTemperatura: '기온을 가져올 수 없습니다.',
     actualizado: '업데이트됨',
-    ajustes: '설정', probLluvia: '다음 한 시간 강수 확률', ajustesTemp: '기온', ajustesVel: '풍속', ciudadesGuardadas: '저장된 도시',
+    ajustes: '설정', idioma: '언어', probLluvia: '다음 한 시간 강수 확률', ajustesTemp: '기온', ajustesVel: '풍속', ciudadesGuardadas: '저장된 도시',
     cambiarCiudad: '도시 변경',
     tuUbicacion: '내 위치',
     sensacion: '체감',
@@ -919,7 +924,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Kon uw locatie niet ophalen.',
     errorTemperatura: 'Kon de temperatuur niet ophalen.',
     actualizado: 'Bijgewerkt',
-    ajustes: 'Instellingen', probLluvia: 'Neerslagkans volgend uur', ajustesTemp: 'Temperatuur', ajustesVel: 'Windsnelheid', ciudadesGuardadas: 'Opgeslagen steden',
+    ajustes: 'Instellingen', idioma: 'Taal', probLluvia: 'Neerslagkans volgend uur', ajustesTemp: 'Temperatuur', ajustesVel: 'Windsnelheid', ciudadesGuardadas: 'Opgeslagen steden',
     cambiarCiudad: 'Stad wijzigen',
     tuUbicacion: 'Uw locatie',
     sensacion: 'Voelt als',
@@ -957,7 +962,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Nie można pobrać lokalizacji.',
     errorTemperatura: 'Nie można pobrać temperatury.',
     actualizado: 'Zaktualizowano',
-    ajustes: 'Ustawienia', probLluvia: 'Prawdopodobieństwo deszczu następna godzina', ajustesTemp: 'Temperatura', ajustesVel: 'Prędkość wiatru', ciudadesGuardadas: 'Zapisane miasta',
+    ajustes: 'Ustawienia', idioma: 'Język', probLluvia: 'Prawdopodobieństwo deszczu następna godzina', ajustesTemp: 'Temperatura', ajustesVel: 'Prędkość wiatru', ciudadesGuardadas: 'Zapisane miasta',
     cambiarCiudad: 'Zmień miasto',
     tuUbicacion: 'Twoja lokalizacja',
     sensacion: 'Odczuwalna',
@@ -995,7 +1000,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'आपका स्थान प्राप्त नहीं हो सका।',
     errorTemperatura: 'तापमान प्राप्त नहीं हो सका।',
     actualizado: 'अपडेट किया गया',
-    ajustes: 'सेटिंग्स', probLluvia: 'अगले घंटे बारिश की संभावना', ajustesTemp: 'तापमान', ajustesVel: 'हवा की गति', ciudadesGuardadas: 'सहेजे गए शहर',
+    ajustes: 'सेटिंग्स', idioma: 'भाषा', probLluvia: 'अगले घंटे बारिश की संभावना', ajustesTemp: 'तापमान', ajustesVel: 'हवा की गति', ciudadesGuardadas: 'सहेजे गए शहर',
     cambiarCiudad: 'शहर बदलें',
     tuUbicacion: 'आपका स्थान',
     sensacion: 'महसूस होता है',
@@ -1033,7 +1038,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Nu s-a putut obține locația.',
     errorTemperatura: 'Nu s-a putut obține temperatura.',
     actualizado: 'Actualizat',
-    ajustes: 'Setări', probLluvia: 'Probabilitate ploaie ora următoare', ajustesTemp: 'Temperatură', ajustesVel: 'Viteza vântului', ciudadesGuardadas: 'Orașe salvate',
+    ajustes: 'Setări', idioma: 'Limbă', probLluvia: 'Probabilitate ploaie ora următoare', ajustesTemp: 'Temperatură', ajustesVel: 'Viteza vântului', ciudadesGuardadas: 'Orașe salvate',
     cambiarCiudad: 'Schimbă orașul',
     tuUbicacion: 'Locația ta',
     sensacion: 'Se simte ca',
@@ -1071,7 +1076,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Nem sikerült lekérni a helyzetet.',
     errorTemperatura: 'Nem sikerült lekérni a hőmérsékletet.',
     actualizado: 'Frissítve',
-    ajustes: 'Beállítások', probLluvia: 'Esővalószínűség következő óra', ajustesTemp: 'Hőmérséklet', ajustesVel: 'Szélsebesség', ciudadesGuardadas: 'Mentett városok',
+    ajustes: 'Beállítások', idioma: 'Nyelv', probLluvia: 'Esővalószínűség következő óra', ajustesTemp: 'Hőmérséklet', ajustesVel: 'Szélsebesség', ciudadesGuardadas: 'Mentett városok',
     cambiarCiudad: 'Város megváltoztatása',
     tuUbicacion: 'Az Ön helyzete',
     sensacion: 'Érzet',
@@ -1109,8 +1114,8 @@ function detectarIdioma() {
   return TRADUCCIONES[lang] ? lang : 'en';
 }
 
-const idioma = detectarIdioma();
-const T = TRADUCCIONES[idioma];
+let idioma = localStorage.getItem('ql_idioma') || detectarIdioma();
+let T = TRADUCCIONES[idioma] || TRADUCCIONES['en'];
 const defaultF = (navigator.language || '').toLowerCase() === 'en-us';
 let usaFahrenheit = localStorage.getItem('ql_unidad') ? localStorage.getItem('ql_unidad') === 'F' : defaultF;
 let usaMph = localStorage.getItem('ql_velocidad') === 'mph';
@@ -1120,11 +1125,35 @@ function toTemp(c) {
 function toViento(kmh) {
   return usaMph ? Math.round(kmh * 0.621371) + ' mph' : Math.round(kmh) + ' km/h';
 }
+const NOMBRES_IDIOMA = {
+  es:'Español', en:'English', de:'Deutsch', fr:'Français', pt:'Português',
+  it:'Italiano', zh:'中文', ca:'Català', eu:'Euskara', gl:'Galego',
+  ar:'العربية', ru:'Русский', ja:'日本語', ko:'한국어', nl:'Nederlands',
+  pl:'Polski', hi:'हिन्दी', ro:'Română', hu:'Magyar'
+};
+
+function rellenarSelectIdioma() {
+  const sel = document.getElementById('selectIdioma');
+  sel.innerHTML = Object.entries(NOMBRES_IDIOMA)
+    .map(([k, v]) => `<option value="${k}" ${k === idioma ? 'selected' : ''}>${v}</option>`)
+    .join('');
+}
+
+document.getElementById('selectIdioma').addEventListener('change', (e) => {
+  idioma = e.target.value;
+  localStorage.setItem('ql_idioma', idioma);
+  T = TRADUCCIONES[idioma] || TRADUCCIONES['en'];
+  actualizarAjustes();
+  if (ultimosDatos) renderDatos(ultimosDatos);
+});
+
 function actualizarAjustes() {
   document.getElementById('btnC').classList.toggle('activo', !usaFahrenheit);
   document.getElementById('btnF').classList.toggle('activo', usaFahrenheit);
   document.getElementById('btnKmh').classList.toggle('activo', !usaMph);
   document.getElementById('btnMph').classList.toggle('activo', usaMph);
+  document.getElementById('ajustesIdiomaLabel').textContent = T.idioma || 'Idioma';
+  rellenarSelectIdioma();
 }
 function renderFavsEnAjustes() {
   const seccion = document.getElementById('ajustesFavsSeccion');
