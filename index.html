@@ -1146,6 +1146,8 @@ document.getElementById('selectIdioma').addEventListener('change', (e) => {
   T = TRADUCCIONES[idioma] || TRADUCCIONES['en'];
   actualizarAjustes();
   if (ultimosDatos) renderDatos(ultimosDatos);
+  actualizarBtnFav();
+  renderFavoritosLista();
 });
 
 function actualizarTextosFijos() {
