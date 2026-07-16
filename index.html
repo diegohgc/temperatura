@@ -1850,6 +1850,7 @@ document.getElementById('modalRadar').addEventListener('click', (e) => {
 });
 
 function abrirModalRadar() {
+  document.getElementById('radarTit').textContent = T.radar;
   document.getElementById('modalRadar').classList.add('abierto');
   document.body.style.overflow = 'hidden';
   if (!radarMap) inicializarRadar();
@@ -2026,7 +2027,7 @@ function renderModalMareaExtremost(mdata) {
       <div class="modal-handle"></div>
       <button class="modal-close" onclick="cerrarModalRadar()">✕</button>
     </div>
-    <div id="radarTit">Radar de lluvia</div>
+    <div id="radarTit"></div>
     <div id="radarMap"></div>
   </div>
 </div>
