@@ -1170,7 +1170,7 @@ function toTemp(c) {
   return usaFahrenheit ? Math.round(c * 9 / 5 + 32) + '°F' : Math.round(c) + '°';
 }
 function toAlt(m, decimals = 1) {
-  return usaMph ? (m * 3.28084).toFixed(decimals) + ' ft' : m.toFixed(decimals) + ' m';
+  return usaFahrenheit ? (m * 3.28084).toFixed(decimals) + ' ft' : m.toFixed(decimals) + ' m';
 }
 function toViento(kmh) {
   return usaMph ? Math.round(kmh * 0.621371) + ' mph' : Math.round(kmh) + ' km/h';
