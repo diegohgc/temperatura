@@ -186,6 +186,27 @@
     cursor: pointer; display: flex; align-items: center; justify-content: center;
     line-height: 1;
   }
+  /* Radar */
+  #btnRadar {
+    display: block; width: calc(100% - 32px); margin: 8px 16px 0;
+    background: rgba(255,255,255,0.1); border: none; border-radius: 12px;
+    color: #fff; font-size: 0.82rem; padding: 10px 14px; cursor: pointer;
+    text-align: left; opacity: 0.85;
+  }
+  #btnRadar:hover { opacity: 1; }
+  #modalRadar {
+    display: none; position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+    align-items: flex-end; justify-content: center;
+  }
+  #modalRadar.abierto { display: flex; }
+  #radarSheet {
+    background: #0d1b2a; border-radius: 20px 20px 0 0;
+    width: 100%; max-width: 480px; padding: 16px 16px 32px;
+    color: #fff; max-height: 90vh;
+  }
+  #radarMap { width: 100%; height: 340px; border-radius: 10px; overflow: hidden; margin-top: 8px; }
+  #radarTit { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.6; text-align: center; }
   .modal-titulo {
     font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em;
     opacity: 0.6; margin-bottom: 14px; text-align: center;
@@ -350,6 +371,7 @@
       <div class="marea-estado" id="marea"></div>
       <div class="marea-agua" id="mareaAgua"></div>
     </div>
+    <button id="btnRadar">🌧 Radar de lluvia</button>
     <div class="panel panel-interior" id="panelInterior" hidden>
       <div class="interior-item">
         <div class="interior-valor" id="intUV">--</div>
@@ -1818,6 +1840,76 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+// ── Modal radar ───────────────────────────────────────────
+let radarMap = null;
+
+document.getElementById('btnRadar').addEventListener('click', abrirModalRadar);
+document.getElementById('modalRadar').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('modalRadar')) cerrarModalRadar();
+});
+
+function abrirModalRadar() {
+  document.getElementById('modalRadar').classList.add('abierto');
+  document.body.style.overflow = 'hidden';
+  if (!radarMap) inicializarRadar();
+}
+
+function cerrarModalRadar() {
+  document.getElementById('modalRadar').classList.remove('abierto');
+  document.body.style.overflow = '';
+}
+
+function inicializarRadar() {
+  // Cargar Leaflet CSS y JS dinámicamente
+  if (!document.getElementById('leaflet-css')) {
+    const link = document.createElement('link');
+    link.id = 'leaflet-css';
+    link.rel = 'stylesheet';
+    link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+    document.head.appendChild(link);
+  }
+  if (window.L) {
+    crearMapaRadar();
+  } else {
+    const script = document.createElement('script');
+    script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+    script.onload = crearMapaRadar;
+    document.head.appendChild(script);
+  }
+}
+
+async function crearMapaRadar() {
+  const lat = currentCoords ? currentCoords.lat : 43.5;
+  const lon = currentCoords ? currentCoords.lon : -5.7;
+
+  radarMap = L.map('radarMap', { zoomControl: true, attributionControl: false }).setView([lat, lon], 8);
+
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19
+  }).addTo(radarMap);
+
+  // Marcador de posición actual
+  L.circleMarker([lat, lon], {
+    radius: 7, color: '#fff', fillColor: '#4af', fillOpacity: 1, weight: 2
+  }).addTo(radarMap);
+
+  // Cargar frames de radar de RainViewer
+  try {
+    const res = await fetch('https://api.rainviewer.com/public/weather-maps.json');
+    const data = await res.json();
+    const frames = data.radar && data.radar.past ? data.radar.past : [];
+    if (frames.length > 0) {
+      const last = frames[frames.length - 1];
+      L.tileLayer(`https://tilecache.rainviewer.com${last.path}/256/{z}/{x}/{y}/2/1_1.png`, {
+        opacity: 0.6, maxZoom: 19
+      }).addTo(radarMap);
+    }
+  } catch(e) {}
+
+  // Forzar refresco del tamaño (el modal puede estar animándose)
+  setTimeout(() => radarMap.invalidateSize(), 100);
+}
+
 // ── Modal mareas ──────────────────────────────────────────
 document.getElementById('panelMarea').addEventListener('click', abrirModalMarea);
 document.getElementById('modalMarea').addEventListener('click', (e) => {
@@ -1926,6 +2018,17 @@ function renderModalMareaExtremost(mdata) {
 }
 </script>
 
+<!-- Modal radar -->
+<div id="modalRadar" role="dialog" aria-modal="true">
+  <div id="radarSheet">
+    <div class="modal-handle-row">
+      <div class="modal-handle"></div>
+      <button class="modal-close" onclick="cerrarModalRadar()">✕</button>
+    </div>
+    <div id="radarTit">Radar de lluvia</div>
+    <div id="radarMap"></div>
+  </div>
+</div>
 <!-- Modal mareas -->
 <div id="modalMarea" role="dialog" aria-modal="true">
   <div class="modal-sheet" id="modalSheet">
