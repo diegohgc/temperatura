@@ -1116,6 +1116,7 @@ function detectarIdioma() {
 
 let idioma = localStorage.getItem('ql_idioma') || detectarIdioma();
 let T = TRADUCCIONES[idioma] || TRADUCCIONES['en'];
+let ultimaActualizacion = null;
 const defaultF = (navigator.language || '').toLowerCase() === 'en-us';
 let usaFahrenheit = localStorage.getItem('ql_unidad') ? localStorage.getItem('ql_unidad') === 'F' : defaultF;
 let usaMph = localStorage.getItem('ql_velocidad') === 'mph';
@@ -1341,7 +1342,6 @@ function iconoParaCodigo(codigo, esDia = true) {
 
 const CODIGOS = T.codigos;
 
-let ultimaActualizacion = null;
 function setEstado(msg) { elEstado.textContent = msg; }
 
 function colorParaTemp(temp) {
