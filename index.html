@@ -1572,8 +1572,7 @@ async function obtenerMarea(lat, lon) {
       if (offset > -1 && offset < 1) horaNext += offset*3600000;
     }
   }
-  const horaTexto = new Date(horaNext).toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' });
-  const estadoTexto = subiendo ? `${T.mareaSubiendo} ${horaTexto}` : `${T.mareaBajando} ${horaTexto}`;
+  const estadoTexto = null; // se computa en renderMarea con T actual
 
   // Current sea surface temperature (closest non-null value to now)
   let tempAgua = null;
@@ -1596,12 +1595,15 @@ async function obtenerMarea(lat, lon) {
     }
   }
 
-  return { extremos, estadoTexto, tempAgua, waveHeight, tiempos, alturas };
+  return { extremos, subiendo, horaNext, tempAgua, waveHeight, tiempos, alturas };
 }
 
 function renderMarea(datos) {
   const panel = document.getElementById('panelMarea');
-  if (!datos || (!datos.extremos.length && !datos.estadoTexto)) {
+  const estadoTexto = datos && datos.horaNext != null
+    ? (datos.subiendo ? `${T.mareaSubiendo} ` : `${T.mareaBajando} `) + new Date(datos.horaNext).toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' })
+    : null;
+  if (!datos || (!datos.extremos.length && !estadoTexto)) {
     panel.hidden = true;
     return false;
   }
@@ -1621,7 +1623,7 @@ function renderMarea(datos) {
     </div>`;
   }).join('');
 
-  document.getElementById('marea').textContent = datos.estadoTexto || '';
+  document.getElementById('marea').textContent = estadoTexto || '';
   const elAgua = document.getElementById('mareaAgua');
   const partes = [];
   if (datos.tempAgua !== null && datos.tempAgua !== undefined) partes.push(`🌊 ${toTemp(datos.tempAgua)}`);
@@ -1692,7 +1694,7 @@ async function obtenerCalidadAire(lat, lon) {
     { max: 999, texto: { es:'Calidad del aire: Muy mala', en:'Air quality: Very poor', de:'Luftqualität: Sehr schlecht', fr:'Qualité de l\'air: Très mauvaise', pt:'Qualidade do ar: Muito ruim', it:'Qualità dell\'aria: Pessima', zh:'空气质量：极差', ca:'Qualitat de l\'aire: Molt dolenta', eu:'Airearen kalitatea: Oso txarra', gl:'Calidade do aire: Moi mala' } },
   ];
   const nivel = niveles.find(n => aqi <= n.max) || niveles[niveles.length - 1];
-  return { texto: nivel.texto[idioma] || nivel.texto['en'], aqi };
+  return { texto: nivel.texto[idioma] || nivel.texto['en'], aqi, nivelTexto: nivel.texto };
 }
 
 function renderDatos(datos) {
@@ -1753,7 +1755,7 @@ function renderDatos(datos) {
   elHumedad.textContent = c.relative_humidity_2m + T.humedad;
   const alt = elevacion && elevacion.elevation && elevacion.elevation[0];
   elAltitud.textContent = alt !== null && alt !== undefined ? (usaMph ? `${T.altitud} ${Math.round(alt * 3.28084)} ft` : `${T.altitud} ${Math.round(alt)} m`) : '';
-  document.getElementById('aire').textContent = (aireData && aireData.texto) || '';
+  document.getElementById('aire').textContent = aireData ? (aireData.nivelTexto ? (aireData.nivelTexto[idioma] || aireData.nivelTexto['en']) : aireData.texto) : '';
 }
 
 async function cargarDatos(latitude, longitude, nombreFijo) {
