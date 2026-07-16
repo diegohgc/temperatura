@@ -1169,6 +1169,9 @@ let usaMph = localStorage.getItem('ql_velocidad') === 'mph';
 function toTemp(c) {
   return usaFahrenheit ? Math.round(c * 9 / 5 + 32) + '°F' : Math.round(c) + '°';
 }
+function toAlt(m, decimals = 1) {
+  return usaMph ? (m * 3.28084).toFixed(decimals) + ' ft' : m.toFixed(decimals) + ' m';
+}
 function toViento(kmh) {
   return usaMph ? Math.round(kmh * 0.621371) + ' mph' : Math.round(kmh) + ' km/h';
 }
@@ -1619,7 +1622,7 @@ function renderMarea(datos) {
       <div class="me-icono">${icono}</div>
       <div class="me-label">${label}</div>
       <div class="me-hora">${hora}</div>
-      <div class="me-altura">${e.altura.toFixed(1)}m</div>
+      <div class="me-altura">${toAlt(e.altura)}</div>
     </div>`;
   }).join('');
 
@@ -1627,7 +1630,7 @@ function renderMarea(datos) {
   const elAgua = document.getElementById('mareaAgua');
   const partes = [];
   if (datos.tempAgua !== null && datos.tempAgua !== undefined) partes.push(`🌊 ${toTemp(datos.tempAgua)}`);
-  if (datos.waveHeight !== null && datos.waveHeight !== undefined) partes.push(`${T.olas} ${datos.waveHeight.toFixed(1)}m`);
+  if (datos.waveHeight !== null && datos.waveHeight !== undefined) partes.push(`${T.olas} ${toAlt(datos.waveHeight)}`);
   elAgua.textContent = partes.join('  ');
   return true;
 }
@@ -2042,7 +2045,7 @@ function renderModalMareaExtremost(mdata) {
     return `<div class="modal-extremo">
       <div class="mex-tipo">${label}</div>
       <div class="mex-hora">${hora}</div>
-      <div class="mex-alt">${e.altura.toFixed(2)} m</div>
+      <div class="mex-alt">${toAlt(e.altura, 2)}</div>
     </div>`;
   }).join('');
 }
