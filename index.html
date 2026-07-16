@@ -1659,9 +1659,21 @@ function renderDatos(datos) {
     const idx = m15.time.reduce((best, t, i) => new Date(t) <= now ? i : best, 0);
     if (idx >= 0) { weatherCode = m15.weather_code[idx]; isDay = m15.is_day ? m15.is_day[idx] === 1 : isDay; }
   }
-  // Corregir icono si la nubosidad real contradice el código del modelo
+  // Corregir icono con OWM
   const owmClouds = owmData?.clouds?.all ?? null;
+  const owmId = owmData?.weather?.[0]?.id ?? null;
   const cloudCover = owmClouds !== null ? owmClouds : Math.max(c.cloud_cover ?? 0, c.cloud_cover_low ?? 0, c.cloud_cover_mid ?? 0, c.cloud_cover_high ?? 0);
+  if (owmId !== null) {
+    if (owmId >= 200 && owmId < 300 && weatherCode < 95) weatherCode = 95;        // tormenta
+    else if (owmId >= 300 && owmId < 400 && weatherCode < 51) weatherCode = 51;   // llovizna
+    else if (owmId >= 500 && owmId < 600 && weatherCode < 61) {
+      if (owmId === 500) weatherCode = 61;
+      else if (owmId === 501) weatherCode = 63;
+      else weatherCode = 65;
+    }
+    else if (owmId >= 600 && owmId < 700 && weatherCode < 71) weatherCode = 71;   // nieve
+    else if (owmId >= 700 && owmId < 800 && weatherCode < 45) weatherCode = 45;   // niebla
+  }
   if (weatherCode <= 1 && cloudCover >= 75) weatherCode = 3;
   else if (weatherCode <= 1 && cloudCover >= 50) weatherCode = 2;
   elTemp.textContent = toTemp(c.temperature_2m);
