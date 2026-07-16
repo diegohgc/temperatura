@@ -401,6 +401,30 @@
     <iframe srcdoc="<!DOCTYPE html><html><head><script async src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-app-pub-5015878857432448' crossorigin='anonymous'><\/script></head><body style='margin:0;padding:0;overflow:hidden'><ins class='adsbygoogle' style='display:block;width:100%;height:50px' data-ad-client='ca-app-pub-5015878857432448' data-ad-slot='6686595753'></ins><script>(adsbygoogle=window.adsbygoogle||[]).push({})<\/script></body></html>"></iframe>
   </div>
 
+<!-- Modal radar -->
+<div id="modalRadar" role="dialog" aria-modal="true">
+  <div id="radarSheet">
+    <div class="modal-handle-row">
+      <div class="modal-handle"></div>
+      <button class="modal-close" onclick="cerrarModalRadar()">✕</button>
+    </div>
+    <div id="radarTit"></div>
+    <div id="radarMap"></div>
+  </div>
+</div>
+<!-- Modal mareas -->
+<div id="modalMarea" role="dialog" aria-modal="true">
+  <div class="modal-sheet" id="modalSheet">
+    <div class="modal-handle-row">
+      <div class="modal-handle"></div>
+      <button class="modal-close" onclick="cerrarModalMarea()">✕</button>
+    </div>
+    <div class="modal-titulo" id="modalMareaTit"></div>
+    <svg id="mareaChart" viewBox="0 0 360 130" preserveAspectRatio="none"></svg>
+    <div class="modal-extremos" id="modalExtremost"></div>
+  </div>
+</div>
+
 <script>
 const TRADUCCIONES = {
   es: {
@@ -1919,13 +1943,15 @@ document.getElementById('modalMarea').addEventListener('click', (e) => {
 });
 
 function abrirModalMarea() {
-  const mdata = ultimosDatos && ultimosDatos.mdata;
-  if (!mdata || !mdata.tiempos || !mdata.alturas) return;
-  document.getElementById('modalMareaTit').textContent = T.mareasDeHoy || 'Mareas';
-  renderModalMareaChart(mdata);
-  renderModalMareaExtremost(mdata);
   document.getElementById('modalMarea').classList.add('abierto');
   document.body.style.overflow = 'hidden';
+  document.getElementById('modalMareaTit').textContent = T.mareasDeHoy || 'Mareas';
+  const mdata = ultimosDatos && ultimosDatos.mdata;
+  if (!mdata || !mdata.tiempos || !mdata.alturas) return;
+  try {
+    renderModalMareaChart(mdata);
+    renderModalMareaExtremost(mdata);
+  } catch(e) {}
 }
 
 function cerrarModalMarea() {
@@ -2020,28 +2046,6 @@ function renderModalMareaExtremost(mdata) {
 }
 </script>
 
-<!-- Modal radar -->
-<div id="modalRadar" role="dialog" aria-modal="true">
-  <div id="radarSheet">
-    <div class="modal-handle-row">
-      <div class="modal-handle"></div>
-      <button class="modal-close" onclick="cerrarModalRadar()">✕</button>
-    </div>
-    <div id="radarTit"></div>
-    <div id="radarMap"></div>
-  </div>
-</div>
-<!-- Modal mareas -->
-<div id="modalMarea" role="dialog" aria-modal="true">
-  <div class="modal-sheet" id="modalSheet">
-    <div class="modal-handle-row">
-      <div class="modal-handle"></div>
-      <button class="modal-close" onclick="cerrarModalMarea()">✕</button>
-    </div>
-    <div class="modal-titulo" id="modalMareaTit"></div>
-    <svg id="mareaChart" viewBox="0 0 360 130" preserveAspectRatio="none"></svg>
-    <div class="modal-extremos" id="modalExtremost"></div>
-  </div>
-</div>
+
 </body>
 </html>
