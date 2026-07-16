@@ -1147,6 +1147,17 @@ document.getElementById('selectIdioma').addEventListener('change', (e) => {
   if (ultimosDatos) renderDatos(ultimosDatos);
 });
 
+function actualizarTextosFijos() {
+  document.getElementById('btnActualizar').textContent = T.actualizar;
+  document.getElementById('btnAjustes').textContent = T.ajustes;
+  document.getElementById('textoCambiarCiudad').textContent = T.cambiarCiudad;
+  document.getElementById('ajustesTempLabel').textContent = T.ajustesTemp;
+  document.getElementById('ajustesVelLabel').textContent = T.ajustesVel;
+  const favsTit = document.getElementById('ajustesFavsTitulo');
+  if (favsTit) favsTit.textContent = T.ciudadesGuardadas;
+  if (ultimaActualizacion) setEstado(T.actualizado + ' ' + new Date(ultimaActualizacion).toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' }));
+}
+
 function actualizarAjustes() {
   document.getElementById('btnC').classList.toggle('activo', !usaFahrenheit);
   document.getElementById('btnF').classList.toggle('activo', usaFahrenheit);
@@ -1154,6 +1165,7 @@ function actualizarAjustes() {
   document.getElementById('btnMph').classList.toggle('activo', usaMph);
   document.getElementById('ajustesIdiomaLabel').textContent = T.idioma || 'Idioma';
   rellenarSelectIdioma();
+  actualizarTextosFijos();
 }
 function renderFavsEnAjustes() {
   const seccion = document.getElementById('ajustesFavsSeccion');
@@ -1329,6 +1341,7 @@ function iconoParaCodigo(codigo, esDia = true) {
 
 const CODIGOS = T.codigos;
 
+let ultimaActualizacion = null;
 function setEstado(msg) { elEstado.textContent = msg; }
 
 function colorParaTemp(temp) {
@@ -1698,7 +1711,8 @@ async function cargarDatos(latitude, longitude, nombreFijo) {
     actualizarBtnFav();
     ultimosDatos = { tiempo, ciudad, mdata, elevacion, aireData, owmData };
     renderDatos(ultimosDatos);
-    setEstado(T.actualizado + ' ' + new Date().toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' }));
+    ultimaActualizacion = Date.now();
+    setEstado(T.actualizado + ' ' + new Date(ultimaActualizacion).toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' }));
     localStorage.setItem('ql_ultima_act', Date.now().toString());
   } catch (e) {
     setEstado(T.errorTemperatura);
