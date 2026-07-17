@@ -1392,7 +1392,6 @@ function iconoParaCodigo(codigo, esDia = true) {
   return ICONOS.solNube;
 }
 
-const CODIGOS = T.codigos;
 
 function setEstado(msg) { elEstado.textContent = msg; }
 
@@ -1729,7 +1728,7 @@ function renderDatos(datos) {
   if (weatherCode <= 1 && cloudCover >= 75) weatherCode = 3;
   else if (weatherCode <= 1 && cloudCover >= 50) weatherCode = 2;
   elTemp.textContent = toTemp(c.temperature_2m);
-  elDesc.textContent = CODIGOS[weatherCode] || '';
+  elDesc.textContent = T.codigos[weatherCode] || '';
   elIcono.innerHTML = iconoParaCodigo(weatherCode, isDay);
   const elLluvia = document.getElementById('lluvia');
   const hourly = tiempo.hourly;
