@@ -19,7 +19,7 @@ self.addEventListener('fetch', (e) => {
   if (e.request.url.includes('open-meteo.com') || e.request.url.includes('bigdatacloud.net') ||
       e.request.url.includes('openweathermap.org') || e.request.url.includes('rainviewer.com') ||
       e.request.url.includes('tile.openstreetmap.org') || e.request.url.includes('unpkg.com') ||
-      e.request.url.includes('cdnjs.cloudflare.com')) return;
+      e.request.url.includes('cdnjs.cloudflare.com') || e.request.url.includes('tomorrow.io')) return;
 
   if (e.request.mode === 'navigate' || e.request.url.endsWith('index.html')) {
     e.respondWith(

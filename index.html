@@ -1919,6 +1919,7 @@ function inicializarRadar() {
   }
 }
 
+const TOMORROW_KEY = 'rpsEqfKu6NfHhDm4TApP3gOmeL6LCIaJ';
 let _radarFrames = [];
 let _radarLayer = null;
 let _radarIdx = 0;
@@ -1933,57 +1934,73 @@ async function crearMapaRadar() {
   L.circleMarker([lat, lon], { radius: 7, color: '#fff', fillColor: '#4af', fillOpacity: 1, weight: 2 }).addTo(radarMap);
   setTimeout(() => radarMap.invalidateSize(), 100);
 
+  // Frames pasados: RainViewer
+  let pastFrames = [];
   try {
     const res = await fetch('https://api.rainviewer.com/public/weather-maps.json');
     const data = await res.json();
     const past = (data.radar && data.radar.past) || [];
-    const nowcast = (data.radar && data.radar.nowcast) || [];
-    _radarFrames = [
-      ...past.map(f => ({ ...f, tipo: 'past' })),
-      ...nowcast.map(f => ({ ...f, tipo: 'nowcast' }))
-    ];
-    if (!_radarFrames.length) return;
-
-    const slider = document.getElementById('radarSlider');
-    slider.max = _radarFrames.length - 1;
-    slider.value = past.length - 1;
-    _radarIdx = past.length - 1;
-
-    radarSetFrame(_radarIdx);
-
-    slider.oninput = () => {
-      _radarIdx = parseInt(slider.value);
-      radarSetFrame(_radarIdx);
-      radarStopPlay();
-    };
-
-    const playBtn = document.getElementById('radarPlayBtn');
-    playBtn.onclick = () => {
-      if (_radarPlayInterval) { radarStopPlay(); return; }
-      playBtn.textContent = '⏹';
-      _radarPlayInterval = setInterval(() => {
-        _radarIdx = (_radarIdx + 1) % _radarFrames.length;
-        slider.value = _radarIdx;
-        radarSetFrame(_radarIdx);
-      }, 600);
-    };
+    pastFrames = past.map(f => ({
+      url: `https://tilecache.rainviewer.com${f.path}/256/{z}/{x}/{y}/2/1_1.png`,
+      time: f.time * 1000,
+      tipo: 'past',
+      maxNativeZoom: 6
+    }));
   } catch(e) {}
+
+  // Frames futuros: Tomorrow.io (próximas 6h, cada hora)
+  const futureFrames = [];
+  const now = Date.now();
+  for (let h = 1; h <= 6; h++) {
+    const t = new Date(Math.ceil(now / 3600000) * 3600000 + h * 3600000);
+    futureFrames.push({
+      url: `https://api.tomorrow.io/v4/map/tile/{z}/{x}/{y}/precipitationIntensity.png?apikey=${TOMORROW_KEY}&startTime=${t.toISOString()}`,
+      time: t.getTime(),
+      tipo: 'nowcast',
+      maxNativeZoom: 10
+    });
+  }
+
+  _radarFrames = [...pastFrames, ...futureFrames];
+  if (!_radarFrames.length) return;
+
+  const slider = document.getElementById('radarSlider');
+  slider.max = _radarFrames.length - 1;
+  const lastPastIdx = pastFrames.length - 1;
+  slider.value = lastPastIdx;
+  _radarIdx = lastPastIdx;
+  radarSetFrame(_radarIdx);
+
+  slider.oninput = () => {
+    _radarIdx = parseInt(slider.value);
+    radarSetFrame(_radarIdx);
+    radarStopPlay();
+  };
+
+  const playBtn = document.getElementById('radarPlayBtn');
+  playBtn.onclick = () => {
+    if (_radarPlayInterval) { radarStopPlay(); return; }
+    playBtn.textContent = '⏹';
+    _radarPlayInterval = setInterval(() => {
+      _radarIdx = (_radarIdx + 1) % _radarFrames.length;
+      slider.value = _radarIdx;
+      radarSetFrame(_radarIdx);
+    }, 700);
+  };
 }
 
 function radarSetFrame(idx) {
   const frame = _radarFrames[idx];
   if (!frame || !radarMap) return;
   if (_radarLayer) radarMap.removeLayer(_radarLayer);
-  _radarLayer = L.tileLayer(
-    `https://tilecache.rainviewer.com${frame.path}/256/{z}/{x}/{y}/2/1_1.png`,
-    { opacity: 0.6, maxZoom: 19, maxNativeZoom: 6 }
-  ).addTo(radarMap);
+  _radarLayer = L.tileLayer(frame.url, {
+    opacity: 0.6, maxZoom: 19, maxNativeZoom: frame.maxNativeZoom
+  }).addTo(radarMap);
 
-  const d = new Date(frame.time * 1000);
+  const d = new Date(frame.time);
   const hora = d.toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' });
-  const esNowcast = frame.tipo === 'nowcast';
   const lbl = document.getElementById('radarTimeLabel');
-  lbl.innerHTML = esNowcast
+  lbl.innerHTML = frame.tipo === 'nowcast'
     ? `<span class="radar-nowcast">▶ ${hora} (predicción)</span>`
     : hora;
 }
