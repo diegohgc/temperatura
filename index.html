@@ -1968,11 +1968,11 @@ function renderModalMareaChart(mdata) {
   const ahora = Date.now();
   const W = 360, H = 130, PAD = 10;
 
-  // Show from 1h ago until last extremo of the day + 2h buffer (min 30h window)
+  // Show from 1h ago until last extremo of the day + 3h buffer
   const startIdx = Math.max(0, tiempos.findIndex(t => new Date(t).getTime() >= ahora - 3600000));
-  const lastExtremo = mdata.extremos.length ? Math.max(...mdata.extremos.map(e => e.hora)) : ahora;
-  const hoursNeeded = Math.ceil((lastExtremo + 7200000 - new Date(tiempos[startIdx]).getTime()) / 3600000);
-  const endIdx = Math.min(tiempos.length - 1, startIdx + Math.max(30, hoursNeeded));
+  const lastExtremo = mdata.extremos.length ? Math.max(...mdata.extremos.map(e => e.hora)) : ahora + 18 * 3600000;
+  const hoursNeeded = Math.ceil((lastExtremo + 3 * 3600000 - new Date(tiempos[startIdx]).getTime()) / 3600000);
+  const endIdx = Math.min(tiempos.length - 1, startIdx + hoursNeeded);
   const slice = alturas.slice(startIdx, endIdx + 1).map((h, i) => ({
     t: new Date(tiempos[startIdx + i]).getTime(), h: h ?? 0
   }));
@@ -2029,7 +2029,7 @@ function renderModalMareaChart(mdata) {
       const ex = px(eT), ey = py(e.altura);
       const col = e.tipo === 'pleamar' ? 'rgba(120,220,255,1)' : 'rgba(180,220,255,0.7)';
       const label = new Date(eT).toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' });
-      const textY = e.tipo === 'pleamar' ? ey - 8 : ey + 16;
+      const textY = e.tipo === 'pleamar' ? Math.max(10, ey - 8) : ey + 16;
       return `<circle cx="${ex}" cy="${ey}" r="4" fill="${col}"/>
               <text x="${ex}" y="${textY}" text-anchor="middle" font-size="9.5" fill="${col}" font-weight="600">${label}</text>`;
     }).join('')}
