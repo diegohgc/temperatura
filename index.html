@@ -1948,20 +1948,20 @@ async function crearMapaRadar() {
     }));
   } catch(e) {}
 
-  // Frames futuros: OWM precipitation forecast (próximas 6h, cada hora)
-  const futureFrames = [];
-  const now = Date.now();
-  for (let h = 1; h <= 6; h++) {
-    const t = Math.round((now + h * 3600000) / 1000);
-    futureFrames.push({
-      url: `https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=${OWM_KEY}&date=${t}`,
-      time: t * 1000,
+  // Frames futuros: RainViewer nowcast (30-120 min según zona)
+  let nowcastFrames = [];
+  try {
+    const res2 = await fetch('https://api.rainviewer.com/public/weather-maps.json');
+    const data2 = await res2.json();
+    nowcastFrames = ((data2.radar && data2.radar.nowcast) || []).map(f => ({
+      url: `https://tilecache.rainviewer.com${f.path}/256/{z}/{x}/{y}/2/1_1.png`,
+      time: f.time * 1000,
       tipo: 'nowcast',
-      maxNativeZoom: 10
-    });
-  }
+      maxNativeZoom: 6
+    }));
+  } catch(e) {}
 
-  _radarFrames = [...pastFrames, ...futureFrames];
+  _radarFrames = [...pastFrames, ...nowcastFrames];
   if (!_radarFrames.length) return;
 
   const slider = document.getElementById('radarSlider');
