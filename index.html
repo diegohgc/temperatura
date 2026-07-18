@@ -1963,6 +1963,8 @@ function cerrarModalMarea() {
   document.body.style.overflow = '';
 }
 
+let _scrubData = null;
+
 function renderModalMareaChart(mdata) {
   const { tiempos, alturas } = mdata;
   const ahora = Date.now();
@@ -2033,8 +2035,61 @@ function renderModalMareaChart(mdata) {
       return `<circle cx="${ex}" cy="${ey}" r="4" fill="${col}"/>
               <text x="${ex}" y="${textY}" text-anchor="middle" font-size="9.5" fill="${col}" font-weight="600">${label}</text>`;
     }).join('')}
+    <line id="mScrubLine" x1="-1" y1="${PAD-4}" x2="-1" y2="${H-PAD+4}" stroke="rgba(255,255,255,0.95)" stroke-width="1.5"/>
+    <circle id="mScrubDot" cx="-1" cy="0" r="5" fill="white" stroke="rgba(100,180,255,0.9)" stroke-width="1.5"/>
+    <rect id="mScrubBg" x="-200" y="2" width="70" height="16" rx="3" fill="rgba(5,15,35,0.85)"/>
+    <text id="mScrubTxt" x="-200" y="14" font-size="9" fill="white" text-anchor="middle" font-weight="600"></text>
   `;
-  document.getElementById('mareaChart').innerHTML = svg;
+
+  const svgEl = document.getElementById('mareaChart');
+  svgEl.innerHTML = svg;
+  _scrubData = { slice, minT, rangeT, minH, rangeH, W, H, PAD };
+
+  const handleScrub = (clientX) => {
+    if (!_scrubData) return;
+    const rect = svgEl.getBoundingClientRect();
+    const svgX = Math.max(PAD, Math.min(W - PAD, ((clientX - rect.left) / rect.width) * W));
+    const { slice, minT, rangeT, minH, rangeH } = _scrubData;
+    const t = minT + ((svgX - PAD) / (W - 2 * PAD)) * rangeT;
+    let h = slice[slice.length - 1].h;
+    for (let i = 1; i < slice.length; i++) {
+      if (t <= slice[i].t) {
+        const r = (t - slice[i-1].t) / (slice[i].t - slice[i-1].t);
+        h = slice[i-1].h + r * (slice[i].h - slice[i-1].h);
+        break;
+      }
+    }
+    const dotY = (H - PAD) - ((h - minH) / rangeH) * (H - 2 * PAD);
+    const hora = new Date(t).toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' });
+    const txt = `${hora}  ${toAlt(h)}`;
+    const lblW = txt.length * 5.5 + 8;
+    const lblX = svgX + 6 + lblW > W - PAD ? svgX - 6 - lblW : svgX + 6;
+    const lblY = Math.max(4, dotY - 22);
+    document.getElementById('mScrubLine').setAttribute('x1', svgX);
+    document.getElementById('mScrubLine').setAttribute('x2', svgX);
+    document.getElementById('mScrubDot').setAttribute('cx', svgX);
+    document.getElementById('mScrubDot').setAttribute('cy', dotY);
+    document.getElementById('mScrubBg').setAttribute('x', lblX);
+    document.getElementById('mScrubBg').setAttribute('y', lblY);
+    document.getElementById('mScrubBg').setAttribute('width', lblW);
+    document.getElementById('mScrubTxt').setAttribute('x', lblX + lblW / 2);
+    document.getElementById('mScrubTxt').setAttribute('y', lblY + 11);
+    document.getElementById('mScrubTxt').textContent = txt;
+  };
+
+  const hideScrub = () => {
+    document.getElementById('mScrubLine').setAttribute('x1', -1);
+    document.getElementById('mScrubLine').setAttribute('x2', -1);
+    document.getElementById('mScrubDot').setAttribute('cx', -1);
+    document.getElementById('mScrubBg').setAttribute('x', -200);
+    document.getElementById('mScrubTxt').setAttribute('x', -200);
+  };
+
+  svgEl.onmousemove = e => handleScrub(e.clientX);
+  svgEl.onmouseleave = hideScrub;
+  svgEl.ontouchstart = e => handleScrub(e.touches[0].clientX);
+  svgEl.ontouchmove = e => handleScrub(e.touches[0].clientX);
+  svgEl.ontouchend = hideScrub;
 }
 
 function renderModalMareaExtremost(mdata) {
