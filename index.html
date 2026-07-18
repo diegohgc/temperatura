@@ -1948,20 +1948,7 @@ async function crearMapaRadar() {
     }));
   } catch(e) {}
 
-  // Frames futuros: Tomorrow.io (próximas 6h, cada hora)
-  const futureFrames = [];
-  const now = Date.now();
-  for (let h = 1; h <= 6; h++) {
-    const t = new Date(Math.ceil(now / 3600000) * 3600000 + h * 3600000);
-    futureFrames.push({
-      url: `https://api.tomorrow.io/v4/map/tile/{z}/{x}/{y}/precipitationIntensity.png?apikey=${TOMORROW_KEY}&startTime=${t.toISOString()}`,
-      time: t.getTime(),
-      tipo: 'nowcast',
-      maxNativeZoom: 10
-    });
-  }
-
-  _radarFrames = [...pastFrames, ...futureFrames];
+  _radarFrames = [...pastFrames];
   if (!_radarFrames.length) return;
 
   const slider = document.getElementById('radarSlider');
