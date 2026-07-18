@@ -1919,7 +1919,7 @@ function inicializarRadar() {
   }
 }
 
-const TOMORROW_KEY = 'rpsEqfKu6NfHhDm4TApP3gOmeL6LCIaJ';
+const OWM_KEY = 'ee01a14dca6430b5ddb8b0fed708d4ba';
 let _radarFrames = [];
 let _radarLayer = null;
 let _radarIdx = 0;
@@ -1948,7 +1948,20 @@ async function crearMapaRadar() {
     }));
   } catch(e) {}
 
-  _radarFrames = [...pastFrames];
+  // Frames futuros: OWM precipitation forecast (próximas 6h, cada hora)
+  const futureFrames = [];
+  const now = Date.now();
+  for (let h = 1; h <= 6; h++) {
+    const t = Math.round((now + h * 3600000) / 1000);
+    futureFrames.push({
+      url: `https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=${OWM_KEY}&date=${t}`,
+      time: t * 1000,
+      tipo: 'nowcast',
+      maxNativeZoom: 10
+    });
+  }
+
+  _radarFrames = [...pastFrames, ...futureFrames];
   if (!_radarFrames.length) return;
 
   const slider = document.getElementById('radarSlider');
