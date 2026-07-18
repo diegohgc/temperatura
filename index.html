@@ -1968,9 +1968,11 @@ function renderModalMareaChart(mdata) {
   const ahora = Date.now();
   const W = 360, H = 130, PAD = 10;
 
-  // Next 25 hours from now
+  // Show from 1h ago until last extremo of the day + 2h buffer (min 30h window)
   const startIdx = Math.max(0, tiempos.findIndex(t => new Date(t).getTime() >= ahora - 3600000));
-  const endIdx = Math.min(tiempos.length - 1, startIdx + 25);
+  const lastExtremo = mdata.extremos.length ? Math.max(...mdata.extremos.map(e => e.hora)) : ahora;
+  const hoursNeeded = Math.ceil((lastExtremo + 7200000 - new Date(tiempos[startIdx]).getTime()) / 3600000);
+  const endIdx = Math.min(tiempos.length - 1, startIdx + Math.max(30, hoursNeeded));
   const slice = alturas.slice(startIdx, endIdx + 1).map((h, i) => ({
     t: new Date(tiempos[startIdx + i]).getTime(), h: h ?? 0
   }));
@@ -2038,10 +2040,12 @@ function renderModalMareaChart(mdata) {
 function renderModalMareaExtremost(mdata) {
   const el = document.getElementById('modalExtremost');
   if (!mdata.extremos || !mdata.extremos.length) { el.innerHTML = ''; return; }
+  const ahora = Date.now();
   el.innerHTML = mdata.extremos.map(e => {
+    const pasado = e.hora < ahora;
     const hora = new Date(e.hora).toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' });
     const label = e.tipo === 'pleamar' ? (T.pleamar || 'Pleamar') : (T.bajamar || 'Bajamar');
-    return `<div class="modal-extremo">
+    return `<div class="modal-extremo" style="${pasado ? 'opacity:0.35' : ''}">
       <div class="mex-tipo">${label}</div>
       <div class="mex-hora">${hora}</div>
       <div class="mex-alt">${toAlt(e.altura, 2)}</div>
