@@ -218,7 +218,7 @@
   }
   #mareaChart { width: 100%; height: 130px; display: block; margin-bottom: 16px; }
   .modal-extremos {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(90px,1fr));
+    display: grid; grid-template-columns: repeat(3, 1fr);
     gap: 10px; margin-top: 4px;
   }
   .modal-extremo {
@@ -2168,7 +2168,10 @@ function renderModalMareaExtremost(mdata) {
   const el = document.getElementById('modalExtremost');
   if (!mdata.extremos || !mdata.extremos.length) { el.innerHTML = ''; return; }
   const ahora = Date.now();
-  el.innerHTML = mdata.extremos.map(e => {
+  const pasados = mdata.extremos.filter(e => e.hora < ahora);
+  const futuros = mdata.extremos.filter(e => e.hora >= ahora);
+  const visibles = [...pasados.slice(-1), ...futuros.slice(0, 2)];
+  el.innerHTML = visibles.map(e => {
     const pasado = e.hora < ahora;
     const hora = new Date(e.hora).toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' });
     const label = e.tipo === 'pleamar' ? (T.pleamar || 'Pleamar') : (T.bajamar || 'Bajamar');
