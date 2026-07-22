@@ -456,6 +456,7 @@
       <div class="dia-temp-max" id="diaTempMax"></div>
       <div class="dia-temp-min" id="diaTempMin"></div>
     </div>
+    <div class="horas" id="diaHoras" style="margin-bottom:18px"></div>
     <div class="dia-stats">
       <div class="dia-stat"><div class="dia-stat-lbl" id="diaLblLluvia"></div><div class="dia-stat-val" id="diaValLluvia"></div></div>
       <div class="dia-stat"><div class="dia-stat-lbl" id="diaLblViento"></div><div class="dia-stat-val" id="diaValViento"></div></div>
@@ -1596,6 +1597,27 @@ function abrirModalDia(i) {
   document.getElementById('diaDesc').textContent = T.codigos[code] || '';
   document.getElementById('diaTempMax').textContent = toTemp(daily.temperature_2m_max[i]);
   document.getElementById('diaTempMin').textContent = toTemp(daily.temperature_2m_min[i]);
+  const diaHoras = document.getElementById('diaHoras');
+  diaHoras.innerHTML = '';
+  const hourly = ultimosDatos && ultimosDatos.tiempo && ultimosDatos.tiempo.hourly;
+  if (hourly && hourly.time) {
+    const fechaDia = daily.time[i];
+    hourly.time.forEach((t, hi) => {
+      if (!t.startsWith(fechaDia)) return;
+      const hora = new Date(t).getHours() + 'h';
+      const temp = hourly.temperature_2m[hi];
+      const probH = hourly.precipitation_probability ? hourly.precipitation_probability[hi] : null;
+      const div = document.createElement('div');
+      div.className = 'hora';
+      div.innerHTML = `
+        <div class="h">${hora}</div>
+        <div class="icono-hora">${iconoParaCodigo(hourly.weather_code[hi], hourly.is_day ? hourly.is_day[hi] === 1 : true)}</div>
+        <div class="t">${toTemp(temp)}</div>
+        ${probH !== null ? `<div class="p">${probH}%</div>` : ''}
+      `;
+      diaHoras.appendChild(div);
+    });
+  }
   document.getElementById('diaLblLluvia').textContent = '💧';
   document.getElementById('diaValLluvia').textContent = prob + '%';
   document.getElementById('diaLblViento').textContent = T.ajustesVel || 'Viento';
