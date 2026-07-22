@@ -97,7 +97,8 @@
     margin-bottom: 10px;
     text-align: left;
   }
-  .ciudad { font-size: 1.8rem; font-weight: 700; line-height: 1.1; }
+  .ciudad { font-size: 1.8rem; font-weight: 700; line-height: 1.1; display: flex; flex-direction: column; }
+  #ciudadSub { font-size: 0.85rem; font-weight: 400; opacity: 0.65; margin-top: 1px; }
   .top-info {
     text-align: right; font-size: 0.8rem; opacity: 0.85;
     line-height: 1.8; white-space: nowrap; padding-top: 4px;
@@ -359,7 +360,7 @@
       <button class="btn-fav" id="btnFavorito" aria-label="Guardar favorito" hidden>☆</button>
     </div>
     <div class="top-row">
-      <div class="ciudad" id="ciudad">—</div>
+      <div class="ciudad" id="ciudad">—<span id="ciudadSub"></span></div>
       <div class="top-info">
         <div id="altitud"></div>
         <div id="solInfo"></div>
@@ -1500,11 +1501,11 @@ async function obtenerCiudad(lat, lon) {
     const data = await r.json();
     const barrio = data.locality;
     const ciudad = data.city;
-    if (barrio && ciudad && barrio !== ciudad) return `${barrio}, ${ciudad}`;
-    if (ciudad) return ciudad;
-    if (barrio) return barrio;
+    if (barrio && ciudad && barrio !== ciudad) return { principal: barrio, sub: ciudad };
+    if (ciudad) return { principal: ciudad, sub: null };
+    if (barrio) return { principal: barrio, sub: null };
   } catch (e) {}
-  return T.tuUbicacion;
+  return { principal: T.tuUbicacion, sub: null };
 }
 
 async function obtenerTiempo(lat, lon) {
@@ -1893,14 +1894,16 @@ async function cargarDatos(latitude, longitude, nombreFijo) {
   try {
     const [tiempo, ciudad, mdata, elevacion, aireData, owmData] = await Promise.all([
       obtenerTiempo(latitude, longitude),
-      nombreFijo ? Promise.resolve(nombreFijo) : obtenerCiudad(latitude, longitude),
+      nombreFijo ? Promise.resolve({ principal: nombreFijo, sub: null }) : obtenerCiudad(latitude, longitude),
       obtenerMarea(latitude, longitude).catch(() => null),
       fetch(`https://api.open-meteo.com/v1/elevation?latitude=${latitude}&longitude=${longitude}`).then(r => r.json()).catch(() => null),
       obtenerCalidadAire(latitude, longitude).catch(() => null),
       fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=ee01a14dca6430b5ddb8b0fed708d4ba`).then(r => r.json()).catch(() => null)
     ]);
-    elCiudad.textContent = ciudad;
-    currentCoords = { lat: latitude, lon: longitude, nombre: ciudad };
+    elCiudad.firstChild.textContent = ciudad.principal;
+    document.getElementById('ciudadSub').textContent = ciudad.sub || '';
+    const nombreCiudad = ciudad.sub ? `${ciudad.principal}, ${ciudad.sub}` : ciudad.principal;
+    currentCoords = { lat: latitude, lon: longitude, nombre: nombreCiudad };
     actualizarBtnFav();
     ultimosDatos = { tiempo, ciudad, mdata, elevacion, aireData, owmData };
     renderDatos(ultimosDatos);
