@@ -1499,11 +1499,12 @@ async function obtenerCiudad(lat, lon) {
     const lang = T.locale.split('-')[0];
     const r = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=${lang}`);
     const data = await r.json();
-    const barrio = data.locality;
-    const ciudad = data.city;
-    if (barrio && ciudad && barrio !== ciudad) return { principal: barrio, sub: ciudad };
+    const ciudad = data.city || data.locality;
+    const infos = data.localityInfo && data.localityInfo.informative;
+    const barrio = infos && infos.find(x => x.description && /neighbourhood|suburb|quarter|barrio|borough/i.test(x.description));
+    const nombreBarrio = barrio && barrio.name !== ciudad ? barrio.name : null;
+    if (nombreBarrio && ciudad) return { principal: nombreBarrio, sub: ciudad };
     if (ciudad) return { principal: ciudad, sub: null };
-    if (barrio) return { principal: barrio, sub: null };
   } catch (e) {}
   return { principal: T.tuUbicacion, sub: null };
 }
