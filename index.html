@@ -249,6 +249,26 @@
   .dia .max { font-size: 0.9rem; font-weight: 600; }
   .dia .min { font-size: 0.8rem; opacity: 0.7; }
   .dia-lluvia { font-size: 0.72rem; color: #7dd3fc; opacity: 0.9; margin-top: 2px; }
+  .dia { cursor: pointer; transition: opacity 0.15s; }
+  .dia:active { opacity: 0.6; }
+  /* Modal día */
+  #modalDia {
+    display: none; position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.55); backdrop-filter: blur(4px);
+    align-items: flex-end; justify-content: center;
+  }
+  #modalDia.abierto { display: flex; }
+  #diaNombreFecha { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.6; margin-bottom: 12px; text-align: center; }
+  #diaIconoGrande { width: 56px; height: 56px; margin: 0 auto 8px; }
+  #diaIconoGrande svg { width: 100%; height: 100%; stroke: #fff; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  #diaDesc { text-align: center; font-size: 0.9rem; opacity: 0.85; margin-bottom: 16px; }
+  .dia-temps { display: flex; justify-content: center; gap: 18px; margin-bottom: 18px; }
+  .dia-temp-max { font-size: 2rem; font-weight: 700; }
+  .dia-temp-min { font-size: 2rem; font-weight: 400; opacity: 0.55; }
+  .dia-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .dia-stat { background: rgba(255,255,255,0.07); border-radius: 12px; padding: 12px 10px; text-align: center; }
+  .dia-stat-lbl { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.55; margin-bottom: 4px; }
+  .dia-stat-val { font-size: 0.95rem; font-weight: 600; }
   .bottom-row {
     display: flex; align-items: center; justify-content: space-between;
     margin-top: 4px; gap: 12px;
@@ -419,6 +439,30 @@
       <div id="radarTimeLabel">—</div>
       <input id="radarSlider" type="range" min="0" value="0" step="1">
       <button id="radarPlayBtn">▶</button>
+    </div>
+  </div>
+</div>
+<!-- Modal día -->
+<div id="modalDia" role="dialog" aria-modal="true">
+  <div class="modal-sheet">
+    <div class="modal-handle-row">
+      <div class="modal-handle"></div>
+      <button class="modal-close" onclick="cerrarModalDia()">✕</button>
+    </div>
+    <div id="diaNombreFecha"></div>
+    <div id="diaIconoGrande"></div>
+    <div id="diaDesc"></div>
+    <div class="dia-temps">
+      <div class="dia-temp-max" id="diaTempMax"></div>
+      <div class="dia-temp-min" id="diaTempMin"></div>
+    </div>
+    <div class="dia-stats">
+      <div class="dia-stat"><div class="dia-stat-lbl" id="diaLblLluvia"></div><div class="dia-stat-val" id="diaValLluvia"></div></div>
+      <div class="dia-stat"><div class="dia-stat-lbl" id="diaLblViento"></div><div class="dia-stat-val" id="diaValViento"></div></div>
+      <div class="dia-stat"><div class="dia-stat-lbl" id="diaLblSalida"></div><div class="dia-stat-val" id="diaValSalida"></div></div>
+      <div class="dia-stat"><div class="dia-stat-lbl" id="diaLblPuesta"></div><div class="dia-stat-val" id="diaValPuesta"></div></div>
+      <div class="dia-stat"><div class="dia-stat-lbl" id="diaLblUv"></div><div class="dia-stat-val" id="diaValUv"></div></div>
+      <div class="dia-stat"><div class="dia-stat-lbl" id="diaLblPrecip"></div><div class="dia-stat-val" id="diaValPrecip"></div></div>
     </div>
   </div>
 </div>
@@ -1185,6 +1229,10 @@ function toAlt(m, decimals = 1) {
 function toViento(kmh) {
   return (usaMph || usaFahrenheit) ? Math.round(kmh * 0.621371) + ' mph' : Math.round(kmh) + ' km/h';
 }
+function dirViento(deg) {
+  const dirs = ['N','NE','E','SE','S','SO','O','NO'];
+  return dirs[Math.round(deg / 45) % 8];
+}
 const NOMBRES_IDIOMA = {
   es:'Español', en:'English', de:'Deutsch', fr:'Français', pt:'Português',
   it:'Italiano', zh:'中文', ca:'Català', eu:'Euskara', gl:'Galego',
@@ -1459,7 +1507,7 @@ async function obtenerCiudad(lat, lon) {
 }
 
 async function obtenerTiempo(lat, lon) {
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,is_day,uv_index,cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high&hourly=temperature_2m,precipitation_probability,weather_code,is_day&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max&forecast_days=7&timezone=auto&minutely_15=weather_code,is_day`;
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,is_day,uv_index,cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high&hourly=temperature_2m,precipitation_probability,weather_code,is_day&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max,wind_speed_10m_max,wind_direction_10m_dominant,uv_index_max,precipitation_sum&forecast_days=7&timezone=auto&minutely_15=weather_code,is_day`;
   const r = await fetch(url);
   if (!r.ok) throw new Error('Error al consultar el tiempo');
   return r.json();
@@ -1503,7 +1551,10 @@ function codigoSinLluvia(code, prob) {
   return esLluvia ? 3 : code;
 }
 
+let _ultimoDaily = null;
+
 function renderDias(daily) {
+  _ultimoDaily = daily;
   elDias.innerHTML = '';
   if (!daily || !daily.time) return;
   const hoy = new Date().toDateString();
@@ -1515,6 +1566,7 @@ function renderDias(daily) {
     const min = daily.temperature_2m_min[i];
     const div = document.createElement('div');
     div.className = 'dia';
+    div.dataset.index = i;
     div.innerHTML = `
       <div class="d">${nombreDia}</div>
       <div class="icono-dia">${iconoParaCodigo(codigoSinLluvia(daily.weather_code[i], daily.precipitation_probability_max ? (daily.precipitation_probability_max[i] ?? 0) : 0), true)}</div>
@@ -1522,9 +1574,53 @@ function renderDias(daily) {
       <div class="min">${toTemp(min)}</div>
       <div class="dia-lluvia">${daily.precipitation_probability_max ? (daily.precipitation_probability_max[i] ?? 0) : 0}%</div>
     `;
+    div.addEventListener('click', () => abrirModalDia(i));
     elDias.appendChild(div);
   });
 }
+
+function abrirModalDia(i) {
+  const daily = _ultimoDaily;
+  if (!daily) return;
+  document.getElementById('modalDia').classList.add('abierto');
+  document.body.style.overflow = 'hidden';
+  const d = new Date(daily.time[i] + 'T12:00:00');
+  const hoy = new Date().toDateString();
+  const esHoy = d.toDateString() === hoy;
+  const nombreDia = esHoy ? T.hoy : d.toLocaleDateString(T.locale, { weekday: 'long' });
+  const fechaStr = d.toLocaleDateString(T.locale, { day: 'numeric', month: 'long' });
+  document.getElementById('diaNombreFecha').textContent = `${nombreDia} · ${fechaStr}`;
+  const code = daily.weather_code[i];
+  const prob = daily.precipitation_probability_max ? (daily.precipitation_probability_max[i] ?? 0) : 0;
+  document.getElementById('diaIconoGrande').innerHTML = iconoParaCodigo(codigoSinLluvia(code, prob), true);
+  document.getElementById('diaDesc').textContent = T.codigos[code] || '';
+  document.getElementById('diaTempMax').textContent = toTemp(daily.temperature_2m_max[i]);
+  document.getElementById('diaTempMin').textContent = toTemp(daily.temperature_2m_min[i]);
+  document.getElementById('diaLblLluvia').textContent = '💧';
+  document.getElementById('diaValLluvia').textContent = prob + '%';
+  document.getElementById('diaLblViento').textContent = T.ajustesVel || 'Viento';
+  const vMax = daily.wind_speed_10m_max ? daily.wind_speed_10m_max[i] : null;
+  const vDir = daily.wind_direction_10m_dominant ? daily.wind_direction_10m_dominant[i] : null;
+  document.getElementById('diaValViento').textContent = vMax != null ? toViento(vMax) + (vDir != null ? ' ' + dirViento(vDir) : '') : '—';
+  const fmtHora = t => t ? new Date(t).toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' }) : '—';
+  document.getElementById('diaLblSalida').textContent = T.amanecer || 'Amanecer';
+  document.getElementById('diaValSalida').textContent = fmtHora(daily.sunrise ? daily.sunrise[i] : null);
+  document.getElementById('diaLblPuesta').textContent = T.anochecer || 'Atardecer';
+  document.getElementById('diaValPuesta').textContent = fmtHora(daily.sunset ? daily.sunset[i] : null);
+  document.getElementById('diaLblUv').textContent = T.uvIndex || 'UV';
+  document.getElementById('diaValUv').textContent = daily.uv_index_max ? (daily.uv_index_max[i] != null ? daily.uv_index_max[i].toFixed(0) : '—') : '—';
+  document.getElementById('diaLblPrecip').textContent = 'mm';
+  document.getElementById('diaValPrecip').textContent = daily.precipitation_sum ? (daily.precipitation_sum[i] != null ? daily.precipitation_sum[i].toFixed(1) + ' mm' : '—') : '—';
+}
+
+function cerrarModalDia() {
+  document.getElementById('modalDia').classList.remove('abierto');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('modalDia').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('modalDia')) cerrarModalDia();
+});
 
 async function obtenerMarea(lat, lon) {
   const url = `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&hourly=sea_level_height_msl,sea_surface_temperature,wave_height&forecast_days=2&timezone=auto`;
