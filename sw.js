@@ -16,7 +16,7 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-  if (e.request.url.includes('open-meteo.com') || e.request.url.includes('bigdatacloud.net') ||
+  if (e.request.url.includes('open-meteo.com') || e.request.url.includes('bigdatacloud.net') || e.request.url.includes('nominatim.openstreetmap.org') ||
       e.request.url.includes('openweathermap.org') || e.request.url.includes('rainviewer.com') ||
       e.request.url.includes('tile.openstreetmap.org') || e.request.url.includes('unpkg.com') ||
       e.request.url.includes('cdnjs.cloudflare.com') || e.request.url.includes('tomorrow.io')) return;

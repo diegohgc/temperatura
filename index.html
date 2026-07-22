@@ -1497,14 +1497,14 @@ function aplicarColorTemp(temp) {
 async function obtenerCiudad(lat, lon) {
   try {
     const lang = T.locale.split('-')[0];
-    const r = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=${lang}`);
+    const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=${lang}`, { headers: { 'Accept-Language': lang } });
     const data = await r.json();
-    const ciudad = data.city || data.locality;
-    const infos = data.localityInfo && data.localityInfo.informative;
-    const barrio = infos && infos.find(x => x.description && /neighbourhood|suburb|quarter|barrio|borough/i.test(x.description));
-    const nombreBarrio = barrio && barrio.name !== ciudad ? barrio.name : null;
-    if (nombreBarrio && ciudad) return { principal: nombreBarrio, sub: ciudad };
+    const addr = data.address || {};
+    const barrio = addr.neighbourhood || addr.suburb || addr.quarter || addr.hamlet;
+    const ciudad = addr.city || addr.town || addr.village || addr.municipality;
+    if (barrio && ciudad && barrio !== ciudad) return { principal: barrio, sub: ciudad };
     if (ciudad) return { principal: ciudad, sub: null };
+    if (barrio) return { principal: barrio, sub: null };
   } catch (e) {}
   return { principal: T.tuUbicacion, sub: null };
 }
