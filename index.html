@@ -2293,9 +2293,9 @@ function renderModalMareaExtremost(mdata) {
   const el = document.getElementById('modalExtremost');
   if (!mdata.extremos || !mdata.extremos.length) { el.innerHTML = ''; return; }
   const ahora = Date.now();
-  const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
-  const manana6 = new Date(hoy); manana6.setDate(manana6.getDate() + 1); manana6.setHours(6, 0, 0, 0);
-  const visibles = mdata.extremos.filter(e => e.hora >= hoy.getTime() && e.hora <= manana6.getTime());
+  const pasados = mdata.extremos.filter(e => e.hora < ahora);
+  const futuros = mdata.extremos.filter(e => e.hora >= ahora);
+  const visibles = [...pasados.slice(-1), ...futuros.slice(0, 2)];
   el.innerHTML = visibles.map(e => {
     const pasado = e.hora < ahora;
     const hora = new Date(e.hora).toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' });
