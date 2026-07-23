@@ -219,7 +219,7 @@
   }
   #mareaChart { width: 100%; height: 130px; display: block; margin-bottom: 16px; }
   .modal-extremos {
-    display: grid; grid-template-columns: repeat(3, 1fr);
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
     gap: 10px; margin-top: 4px;
   }
   .modal-extremo {
@@ -2229,10 +2229,10 @@ function renderModalMareaChart(mdata) {
       return `<circle cx="${ex}" cy="${ey}" r="4" fill="${col}"/>
               <text x="${ex}" y="${textY}" text-anchor="middle" font-size="9.5" fill="${col}" font-weight="600">${label}</text>`;
     }).join('')}
-    <line id="mScrubLine" x1="-1" y1="${PAD-4}" x2="-1" y2="${H-PAD+4}" stroke="rgba(255,255,255,0.95)" stroke-width="1.5"/>
-    <circle id="mScrubDot" cx="-1" cy="0" r="5" fill="white" stroke="rgba(100,180,255,0.9)" stroke-width="1.5"/>
-    <rect id="mScrubBg" x="-200" y="2" width="70" height="16" rx="3" fill="rgba(5,15,35,0.85)"/>
-    <text id="mScrubTxt" x="-200" y="14" font-size="9" fill="white" text-anchor="middle" font-weight="600"></text>
+    <line id="mScrubLine" x1="-1" y1="${PAD-4}" x2="-1" y2="${H-PAD+4}" stroke="rgba(255,255,255,0.95)" stroke-width="1.5" visibility="hidden"/>
+    <circle id="mScrubDot" cx="-1" cy="0" r="5" fill="white" stroke="rgba(100,180,255,0.9)" stroke-width="1.5" visibility="hidden"/>
+    <rect id="mScrubBg" x="-200" y="2" width="70" height="16" rx="3" fill="rgba(5,15,35,0.85)" visibility="hidden"/>
+    <text id="mScrubTxt" x="-200" y="14" font-size="9" fill="white" text-anchor="middle" font-weight="600" visibility="hidden"></text>
   `;
 
   const svgEl = document.getElementById('mareaChart');
@@ -2261,8 +2261,12 @@ function renderModalMareaChart(mdata) {
     const lblY = Math.max(4, dotY - 22);
     document.getElementById('mScrubLine').setAttribute('x1', svgX);
     document.getElementById('mScrubLine').setAttribute('x2', svgX);
+    document.getElementById('mScrubLine').setAttribute('visibility', 'visible');
     document.getElementById('mScrubDot').setAttribute('cx', svgX);
     document.getElementById('mScrubDot').setAttribute('cy', dotY);
+    document.getElementById('mScrubDot').setAttribute('visibility', 'visible');
+    document.getElementById('mScrubBg').setAttribute('visibility', 'visible');
+    document.getElementById('mScrubTxt').setAttribute('visibility', 'visible');
     document.getElementById('mScrubBg').setAttribute('x', lblX);
     document.getElementById('mScrubBg').setAttribute('y', lblY);
     document.getElementById('mScrubBg').setAttribute('width', lblW);
@@ -2272,11 +2276,10 @@ function renderModalMareaChart(mdata) {
   };
 
   const hideScrub = () => {
-    document.getElementById('mScrubLine').setAttribute('x1', -1);
-    document.getElementById('mScrubLine').setAttribute('x2', -1);
-    document.getElementById('mScrubDot').setAttribute('cx', -1);
-    document.getElementById('mScrubBg').setAttribute('x', -200);
-    document.getElementById('mScrubTxt').setAttribute('x', -200);
+    document.getElementById('mScrubLine').setAttribute('visibility', 'hidden');
+    document.getElementById('mScrubDot').setAttribute('visibility', 'hidden');
+    document.getElementById('mScrubBg').setAttribute('visibility', 'hidden');
+    document.getElementById('mScrubTxt').setAttribute('visibility', 'hidden');
   };
 
   svgEl.onmousemove = e => handleScrub(e.clientX);
@@ -2290,9 +2293,9 @@ function renderModalMareaExtremost(mdata) {
   const el = document.getElementById('modalExtremost');
   if (!mdata.extremos || !mdata.extremos.length) { el.innerHTML = ''; return; }
   const ahora = Date.now();
-  const pasados = mdata.extremos.filter(e => e.hora < ahora);
-  const futuros = mdata.extremos.filter(e => e.hora >= ahora);
-  const visibles = [...pasados.slice(-1), ...futuros.slice(0, 2)];
+  const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
+  const manana6 = new Date(hoy); manana6.setDate(manana6.getDate() + 1); manana6.setHours(6, 0, 0, 0);
+  const visibles = mdata.extremos.filter(e => e.hora >= hoy.getTime() && e.hora <= manana6.getTime());
   el.innerHTML = visibles.map(e => {
     const pasado = e.hora < ahora;
     const hora = new Date(e.hora).toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' });
