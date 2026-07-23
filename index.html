@@ -2164,11 +2164,11 @@ function renderModalMareaChart(mdata) {
   const ahora = Date.now();
   const W = 360, H = 130, PAD = 10;
 
-  // Show from 1h ago until last extremo of the day + 3h buffer
-  const startIdx = Math.max(0, tiempos.findIndex(t => new Date(t).getTime() >= ahora - 3600000));
-  const lastExtremo = mdata.extremos.length ? Math.max(...mdata.extremos.map(e => e.hora)) : ahora + 18 * 3600000;
-  const hoursNeeded = Math.ceil((lastExtremo + 3 * 3600000 - new Date(tiempos[startIdx]).getTime()) / 3600000);
-  const endIdx = Math.min(tiempos.length - 1, startIdx + hoursNeeded);
+  // Show from midnight today until 06:00 tomorrow
+  const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
+  const manana6 = new Date(hoy); manana6.setDate(manana6.getDate() + 1); manana6.setHours(6, 0, 0, 0);
+  const startIdx = Math.max(0, tiempos.findIndex(t => new Date(t).getTime() >= hoy.getTime()));
+  const endIdx = Math.min(tiempos.length - 1, tiempos.findIndex(t => new Date(t).getTime() >= manana6.getTime()));
   const slice = alturas.slice(startIdx, endIdx + 1).map((h, i) => ({
     t: new Date(tiempos[startIdx + i]).getTime(), h: h ?? 0
   }));
