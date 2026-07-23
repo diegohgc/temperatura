@@ -1679,7 +1679,8 @@ async function obtenerMarea(lat, lon) {
         altura = h1 - (h0-h2)*(h0-h2)/(8*den);
       }
     }
-    if (new Date(horaMs).toDateString() !== hoy) continue;
+    const manana6 = new Date(); manana6.setDate(manana6.getDate() + 1); manana6.setHours(6, 0, 0, 0);
+    if (horaMs > manana6.getTime()) continue;
     extremos.push({ hora: horaMs, altura: Math.max(0, altura), tipo: subeBefore ? 'pleamar' : 'bajamar' });
   }
 
