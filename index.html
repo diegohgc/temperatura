@@ -1632,7 +1632,7 @@ function abrirModalDia(i) {
       diaHoras.appendChild(div);
     });
   }
-  document.getElementById('diaLblLluvia').textContent = T.probLluvia ? T.probLluvia.split(' ')[0] + '.' : 'Prob. lluvia';
+  document.getElementById('diaLblLluvia').textContent = '🌧 ' + (T.probLluvia ? T.probLluvia.split(' ')[0] : 'Probabilidad');
   document.getElementById('diaValLluvia').textContent = prob + '%';
   document.getElementById('diaLblViento').textContent = T.ajustesVel || 'Viento';
   const vMax = daily.wind_speed_10m_max ? daily.wind_speed_10m_max[i] : null;
@@ -1645,7 +1645,7 @@ function abrirModalDia(i) {
   document.getElementById('diaValPuesta').textContent = fmtHora(daily.sunset ? daily.sunset[i] : null);
   document.getElementById('diaLblUv').textContent = T.uvIndex || 'UV';
   document.getElementById('diaValUv').textContent = daily.uv_index_max ? (daily.uv_index_max[i] != null ? daily.uv_index_max[i].toFixed(0) : '—') : '—';
-  document.getElementById('diaLblPrecip').textContent = 'mm';
+  document.getElementById('diaLblPrecip').textContent = '🌂 Precip.';
   document.getElementById('diaValPrecip').textContent = daily.precipitation_sum ? (daily.precipitation_sum[i] != null ? daily.precipitation_sum[i].toFixed(1) + ' mm' : '—') : '—';
 }
 
