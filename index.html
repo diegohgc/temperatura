@@ -1632,7 +1632,7 @@ function abrirModalDia(i) {
       diaHoras.appendChild(div);
     });
   }
-  document.getElementById('diaLblLluvia').textContent = '💧';
+  document.getElementById('diaLblLluvia').textContent = T.probLluvia ? T.probLluvia.split(' ')[0] + '.' : 'Prob. lluvia';
   document.getElementById('diaValLluvia').textContent = prob + '%';
   document.getElementById('diaLblViento').textContent = T.ajustesVel || 'Viento';
   const vMax = daily.wind_speed_10m_max ? daily.wind_speed_10m_max[i] : null;
