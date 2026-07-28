@@ -25,6 +25,7 @@
     justify-content: center;
     padding: env(safe-area-inset-top, 16px) 16px calc(env(safe-area-inset-bottom, 16px) + 60px);
     transition: color 1.5s ease;
+    overflow-x: hidden;
   }
   .card {
     text-align: center;
@@ -344,7 +345,7 @@
 <body>
   <div id="pullIndicator"></div>
   <div id="bg"></div>
-  <div class="card">
+  <div class="card" id="pageCard">
     <button class="btn-ajustes" id="btnAjustes"></button>
     <div id="ajustesPanel" hidden>
       <div class="ajustes-panel">
@@ -2593,28 +2594,26 @@ function actualizarFavIdx() {
 let _swipeEnterDir = null;
 
 function animarSwipe(dir) {
-  // Fase 1: salida del contenido actual
-  const el = document.getElementById('principal');
+  const el = document.getElementById('pageCard');
   if (!el) return;
   _swipeEnterDir = dir;
-  el.style.transition = 'transform 0.18s ease, opacity 0.18s ease';
-  el.style.transform = `translateX(${dir === 'left' ? '-50px' : '50px'})`;
-  el.style.opacity = '0';
+  el.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
+  el.style.transform = `translateX(${dir === 'left' ? '-100vw' : '100vw'})`;
+  el.style.opacity = '0.3';
 }
 
 function animarSwipeEntrada() {
-  // Fase 2: entrada del nuevo contenido (llamada tras renderDatos)
   if (!_swipeEnterDir) return;
   const dir = _swipeEnterDir;
   _swipeEnterDir = null;
-  const el = document.getElementById('principal');
+  const el = document.getElementById('pageCard');
   if (!el) return;
   el.style.transition = 'none';
-  el.style.transform = `translateX(${dir === 'left' ? '50px' : '-50px'})`;
-  el.style.opacity = '0';
+  el.style.transform = `translateX(${dir === 'left' ? '100vw' : '-100vw'})`;
+  el.style.opacity = '0.3';
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
-      el.style.transition = 'transform 0.22s ease, opacity 0.22s ease';
+      el.style.transition = 'transform 0.25s ease, opacity 0.25s ease';
       el.style.transform = 'translateX(0)';
       el.style.opacity = '1';
     });
