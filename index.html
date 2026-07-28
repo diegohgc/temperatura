@@ -253,6 +253,14 @@
   .dia { cursor: pointer; transition: opacity 0.15s; }
   .dia:active { opacity: 0.6; }
   /* Modal día */
+  #modalInterior {
+    display: none; position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.55); backdrop-filter: blur(4px);
+    align-items: flex-end; justify-content: center;
+  }
+  #modalInterior.abierto { display: flex; }
+  .interior-item { cursor: pointer; }
+  .interior-item:active { opacity: 0.6; }
   #modalDia {
     display: none; position: fixed; inset: 0; z-index: 200;
     background: rgba(0,0,0,0.55); backdrop-filter: blur(4px);
@@ -453,6 +461,19 @@
       <input id="radarSlider" type="range" min="0" value="0" step="1">
       <button id="radarPlayBtn">▶</button>
     </div>
+  </div>
+</div>
+<!-- Modal interior (UV / Sol / Aire) -->
+<div id="modalInterior" role="dialog" aria-modal="true">
+  <div class="modal-sheet">
+    <div class="modal-handle-row">
+      <div class="modal-handle"></div>
+      <button class="modal-close" onclick="cerrarModalInterior()">✕</button>
+    </div>
+    <div id="intModalTitulo" style="font-size:1.1rem;font-weight:700;text-align:center;margin-bottom:12px"></div>
+    <div id="intModalValor" style="font-size:2.5rem;font-weight:800;text-align:center;margin-bottom:6px"></div>
+    <div id="intModalNivel" style="font-size:0.9rem;text-align:center;opacity:0.7;margin-bottom:18px"></div>
+    <div id="intModalDetalle" style="font-size:0.88rem;line-height:1.6;padding:0 4px"></div>
   </div>
 </div>
 <!-- Modal día -->
@@ -1658,6 +1679,86 @@ document.getElementById('modalDia').addEventListener('click', (e) => {
   if (e.target === document.getElementById('modalDia')) cerrarModalDia();
 });
 
+let _ultimoUV = null, _ultimoAireData = null, _ultimoSunset = null;
+
+function abrirModalInterior(tipo) {
+  const uvNiveles = [
+    { max: 2,  nivel: { es:'Bajo', en:'Low', de:'Niedrig', fr:'Faible', pt:'Baixo', it:'Basso' }, emoji: '🟢',
+      consejo: { es:'Sin riesgo especial. No se necesita protección.', en:'No special risk. No protection needed.', de:'Kein besonderes Risiko.', fr:'Pas de risque particulier.', pt:'Sem risco especial.', it:'Nessun rischio speciale.' } },
+    { max: 5,  nivel: { es:'Moderado', en:'Moderate', de:'Mäßig', fr:'Modéré', pt:'Moderado', it:'Moderato' }, emoji: '🟡',
+      consejo: { es:'Usa protector solar FPS 30+ si vas a estar más de 30 min al sol.', en:'Use SPF 30+ sunscreen if outdoors more than 30 min.', de:'Sonnenschutz LSF 30+ bei längerem Aufenthalt im Freien.', fr:'Utilisez une crème FPS 30+ si vous êtes dehors plus de 30 min.', pt:'Use protetor FPS 30+ se ficar mais de 30 min ao sol.', it:'Usa protezione SPF 30+ se stai più di 30 min al sole.' } },
+    { max: 7,  nivel: { es:'Alto', en:'High', de:'Hoch', fr:'Élevé', pt:'Alto', it:'Alto' }, emoji: '🟠',
+      consejo: { es:'Protector FPS 50+, gorra y gafas de sol. Evita el sol entre 12h y 16h.', en:'SPF 50+, hat and sunglasses. Avoid sun between 12–16h.', de:'LSF 50+, Hut und Sonnenbrille. Sonne zwischen 12–16h meiden.', fr:'FPS 50+, chapeau et lunettes. Évitez le soleil entre 12h et 16h.', pt:'FPS 50+, chapéu e óculos. Evite o sol entre 12h e 16h.', it:'SPF 50+, cappello e occhiali. Evita il sole tra le 12 e le 16.' } },
+    { max: 10, nivel: { es:'Muy alto', en:'Very high', de:'Sehr hoch', fr:'Très élevé', pt:'Muito alto', it:'Molto alto' }, emoji: '🔴',
+      consejo: { es:'Protección máxima. Permanece a la sombra entre 11h y 17h. FPS 50+.', en:'Maximum protection. Stay in shade 11h–17h. SPF 50+.', de:'Maximaler Schutz. Im Schatten bleiben 11–17h. LSF 50+.', fr:'Protection maximale. À l\'ombre entre 11h et 17h. FPS 50+.', pt:'Proteção máxima. Fique à sombra entre 11h e 17h. FPS 50+.', it:'Protezione massima. Stai all\'ombra tra le 11 e le 17. SPF 50+.' } },
+    { max: 99, nivel: { es:'Extremo', en:'Extreme', de:'Extrem', fr:'Extrême', pt:'Extremo', it:'Estremo' }, emoji: '🟣',
+      consejo: { es:'Peligro extremo. Evita el sol por completo. Protección total obligatoria.', en:'Extreme danger. Avoid sun entirely. Full protection required.', de:'Extreme Gefahr. Sonne vollständig meiden. Voller Schutz erforderlich.', fr:'Danger extrême. Évitez totalement le soleil. Protection complète.', pt:'Perigo extremo. Evite o sol completamente. Proteção total.', it:'Pericolo estremo. Evita completamente il sole. Protezione totale.' } },
+  ];
+  const lang = (typeof idioma !== 'undefined' ? idioma : 'es');
+
+  let titulo = '', valor = '', nivel = '', detalle = '';
+
+  if (tipo === 'uv') {
+    const uv = _ultimoUV !== null ? Math.round(_ultimoUV) : null;
+    titulo = '☀️ ' + (T.uvIndex || 'Índice UV');
+    valor = uv !== null ? uv : '--';
+    const n = uv !== null ? (uvNiveles.find(x => uv <= x.max) || uvNiveles[uvNiveles.length-1]) : null;
+    nivel = n ? `${n.emoji} ${n.nivel[lang] || n.nivel.es}` : '';
+    detalle = n ? (n.consejo[lang] || n.consejo.es) : '';
+  } else if (tipo === 'sol') {
+    titulo = '🌅 ' + (T.solRestante || 'Sol restante');
+    const sunset = _ultimoSunset ? new Date(_ultimoSunset) : null;
+    const now = new Date();
+    if (sunset) {
+      const hPuesta = sunset.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+      if (now < sunset) {
+        const diffMs = sunset - now;
+        const hrs = Math.floor(diffMs / 3600000);
+        const mins = Math.floor((diffMs % 3600000) / 60000);
+        valor = hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
+        nivel = { es:`Puesta de sol a las ${hPuesta}`, en:`Sunset at ${hPuesta}`, de:`Sonnenuntergang um ${hPuesta}`, fr:`Coucher du soleil à ${hPuesta}`, pt:`Pôr do sol às ${hPuesta}`, it:`Tramonto alle ${hPuesta}` }[lang] || `Puesta de sol a las ${hPuesta}`;
+        detalle = { es:'Tiempo restante hasta que el sol se ponga hoy.', en:'Time remaining until sunset today.', de:'Verbleibende Zeit bis zum heutigen Sonnenuntergang.', fr:'Temps restant avant le coucher du soleil aujourd\'hui.', pt:'Tempo restante até o pôr do sol hoje.', it:'Tempo rimanente fino al tramonto di oggi.' }[lang] || '';
+      } else {
+        valor = '0h';
+        nivel = { es:`El sol se puso a las ${hPuesta}`, en:`Sun set at ${hPuesta}`, de:`Sonne unterging um ${hPuesta}`, fr:`Soleil couché à ${hPuesta}`, pt:`Sol se pôs às ${hPuesta}`, it:`Sole tramontato alle ${hPuesta}` }[lang] || '';
+        detalle = { es:'El sol ya se ha puesto hoy.', en:'The sun has already set today.', de:'Die Sonne ist heute bereits untergegangen.', fr:'Le soleil s\'est déjà couché aujourd\'hui.', pt:'O sol já se pôs hoje.', it:'Il sole è già tramontato oggi.' }[lang] || '';
+      }
+    } else { valor = '--'; }
+  } else if (tipo === 'aire') {
+    titulo = '💨 ' + (T.calidadAire || 'Calidad del aire');
+    if (_ultimoAireData) {
+      valor = _ultimoAireData.aqi;
+      nivel = _ultimoAireData.texto;
+      const consejos = [
+        { max: 20,  c: { es:'Aire excelente. Ideal para actividades al aire libre.', en:'Excellent air. Ideal for outdoor activities.', de:'Ausgezeichnete Luft. Ideal für Aktivitäten im Freien.', fr:'Air excellent. Idéal pour les activités en plein air.', pt:'Ar excelente. Ideal para atividades ao ar livre.', it:'Aria eccellente. Ideale per attività all\'aperto.' } },
+        { max: 40,  c: { es:'Aire bueno. Sin restricciones para la mayoría.', en:'Good air. No restrictions for most people.', de:'Gute Luft. Keine Einschränkungen für die meisten Menschen.', fr:'Bon air. Pas de restrictions pour la plupart.', pt:'Ar bom. Sem restrições para a maioria.', it:'Aria buona. Nessuna restrizione per la maggior parte.' } },
+        { max: 60,  c: { es:'Calidad moderada. Personas sensibles pueden notar molestias.', en:'Moderate quality. Sensitive people may feel discomfort.', de:'Mäßige Qualität. Empfindliche Personen können Beschwerden haben.', fr:'Qualité modérée. Les personnes sensibles peuvent ressentir une gêne.', pt:'Qualidade moderada. Pessoas sensíveis podem sentir desconforto.', it:'Qualità moderata. Le persone sensibili potrebbero avvertire disagio.' } },
+        { max: 80,  c: { es:'Aire malo. Personas con asma o problemas respiratorios deben evitar actividades exteriores.', en:'Poor air. People with asthma should avoid outdoor activities.', de:'Schlechte Luft. Personen mit Asthma sollten Outdoor-Aktivitäten vermeiden.', fr:'Mauvais air. Les personnes asthmatiques doivent éviter les activités extérieures.', pt:'Ar ruim. Pessoas com asma devem evitar atividades ao ar livre.', it:'Aria scarsa. Le persone con asma dovrebbero evitare attività all\'aperto.' } },
+        { max: 999, c: { es:'Aire muy malo. Evita salir al exterior. Mantén las ventanas cerradas.', en:'Very poor air. Avoid going outside. Keep windows closed.', de:'Sehr schlechte Luft. Draußen bleiben vermeiden. Fenster geschlossen halten.', fr:'Air très mauvais. Évitez de sortir. Gardez les fenêtres fermées.', pt:'Ar muito ruim. Evite sair. Mantenha as janelas fechadas.', it:'Aria molto scarsa. Evita di uscire. Tieni le finestre chiuse.' } },
+      ];
+      const cn = consejos.find(x => _ultimoAireData.aqi <= x.max) || consejos[consejos.length-1];
+      detalle = (cn.c[lang] || cn.c.es) + `\n\nÍndice AQI europeo: ${_ultimoAireData.aqi}`;
+    } else { valor = '--'; nivel = ''; detalle = ''; }
+  }
+
+  document.getElementById('intModalTitulo').textContent = titulo;
+  document.getElementById('intModalValor').textContent = valor;
+  document.getElementById('intModalNivel').textContent = nivel;
+  document.getElementById('intModalDetalle').style.whiteSpace = 'pre-line';
+  document.getElementById('intModalDetalle').textContent = detalle;
+  document.getElementById('modalInterior').classList.add('abierto');
+  document.body.style.overflow = 'hidden';
+}
+
+function cerrarModalInterior() {
+  document.getElementById('modalInterior').classList.remove('abierto');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('modalInterior').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('modalInterior')) cerrarModalInterior();
+});
+
 async function obtenerMarea(lat, lon) {
   const url = `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&hourly=sea_level_height_msl,sea_surface_temperature,wave_height&forecast_days=2&timezone=auto`;
   const r = await fetch(url);
@@ -1808,6 +1909,10 @@ function renderPanelInterior(uvIndex, aireData, sunsetStr, tieneMarea) {
     return;
   }
 
+  _ultimoUV = uvIndex ?? null;
+  _ultimoAireData = aireData ?? null;
+  _ultimoSunset = sunsetStr ?? null;
+
   aireExtra.hidden = true;
   panel.hidden = false;
   document.getElementById('intUV').textContent = uvVal ?? '--';
@@ -1816,6 +1921,10 @@ function renderPanelInterior(uvIndex, aireData, sunsetStr, tieneMarea) {
   document.getElementById('intSolLabel').textContent = T.solRestante || 'Remaining sun';
   document.getElementById('intAire').textContent = aireData ? aireData.aqi : '--';
   document.getElementById('intAireLabel').textContent = T.calidadAire || 'Air quality';
+
+  document.getElementById('intUV').closest('.interior-item').onclick = () => abrirModalInterior('uv');
+  document.getElementById('intSol').closest('.interior-item').onclick = () => abrirModalInterior('sol');
+  document.getElementById('intAire').closest('.interior-item').onclick = () => abrirModalInterior('aire');
 }
 
 async function obtenerElevacionTerreno(lat, lon) {
