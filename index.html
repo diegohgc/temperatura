@@ -396,43 +396,6 @@
             </g>
           </svg>
 
-          <!-- Modal brújula grande -->
-          <div id="brujulaModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.65);backdrop-filter:blur(4px);align-items:center;justify-content:center">
-            <div style="background:var(--card-bg,#1e2330);border-radius:20px;padding:32px 28px;text-align:center;min-width:260px;box-shadow:0 8px 40px rgba(0,0,0,0.5)">
-              <div style="font-size:0.8rem;opacity:0.6;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">Brújula</div>
-              <svg id="brujulaGrande" width="180" height="180" viewBox="0 0 100 100" style="display:block;margin:0 auto">
-                <circle cx="50" cy="50" r="46" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"/>
-                <circle cx="50" cy="50" r="48" fill="none" stroke="currentColor" stroke-width="0.5" opacity="0.15"/>
-                <!-- ticks cada 30° -->
-                <line x1="50" y1="4" x2="50" y2="10" stroke="currentColor" stroke-width="1.5" opacity="0.5" transform="rotate(0 50 50)"/>
-                <line x1="50" y1="4" x2="50" y2="8" stroke="currentColor" stroke-width="1" opacity="0.3" transform="rotate(30 50 50)"/>
-                <line x1="50" y1="4" x2="50" y2="8" stroke="currentColor" stroke-width="1" opacity="0.3" transform="rotate(60 50 50)"/>
-                <line x1="50" y1="4" x2="50" y2="10" stroke="currentColor" stroke-width="1.5" opacity="0.5" transform="rotate(90 50 50)"/>
-                <line x1="50" y1="4" x2="50" y2="8" stroke="currentColor" stroke-width="1" opacity="0.3" transform="rotate(120 50 50)"/>
-                <line x1="50" y1="4" x2="50" y2="8" stroke="currentColor" stroke-width="1" opacity="0.3" transform="rotate(150 50 50)"/>
-                <line x1="50" y1="4" x2="50" y2="10" stroke="currentColor" stroke-width="1.5" opacity="0.5" transform="rotate(180 50 50)"/>
-                <line x1="50" y1="4" x2="50" y2="8" stroke="currentColor" stroke-width="1" opacity="0.3" transform="rotate(210 50 50)"/>
-                <line x1="50" y1="4" x2="50" y2="8" stroke="currentColor" stroke-width="1" opacity="0.3" transform="rotate(240 50 50)"/>
-                <line x1="50" y1="4" x2="50" y2="10" stroke="currentColor" stroke-width="1.5" opacity="0.5" transform="rotate(270 50 50)"/>
-                <line x1="50" y1="4" x2="50" y2="8" stroke="currentColor" stroke-width="1" opacity="0.3" transform="rotate(300 50 50)"/>
-                <line x1="50" y1="4" x2="50" y2="8" stroke="currentColor" stroke-width="1" opacity="0.3" transform="rotate(330 50 50)"/>
-                <!-- letras cardinales -->
-                <text x="50" y="16" text-anchor="middle" font-size="9" fill="#e74c3c" font-family="sans-serif" font-weight="700">N</text>
-                <text x="50" y="92" text-anchor="middle" font-size="8" fill="currentColor" font-family="sans-serif" opacity="0.7">S</text>
-                <text x="90" y="53" text-anchor="middle" font-size="8" fill="currentColor" font-family="sans-serif" opacity="0.7">E</text>
-                <text x="10" y="53" text-anchor="middle" font-size="8" fill="currentColor" font-family="sans-serif" opacity="0.7">O</text>
-                <!-- aguja grande -->
-                <g id="brujulaAgujaGrande" style="transform-origin:50px 50px">
-                  <polygon points="50,14 53,50 50,46 47,50" fill="#e74c3c"/>
-                  <polygon points="50,86 53,50 50,54 47,50" fill="rgba(255,255,255,0.35)"/>
-                  <circle cx="50" cy="50" r="3" fill="currentColor" opacity="0.5"/>
-                </g>
-              </svg>
-              <div id="brujulaGradosTexto" style="font-size:2rem;font-weight:700;margin-top:12px;letter-spacing:2px">—</div>
-              <div id="brujulaDireccionTexto" style="font-size:0.9rem;opacity:0.6;margin-top:2px">sin señal</div>
-              <button onclick="document.getElementById('brujulaModal').style.display='none'" style="margin-top:20px;padding:10px 32px;border:none;border-radius:30px;background:rgba(255,255,255,0.12);color:inherit;font-size:0.95rem;cursor:pointer">Cerrar</button>
-            </div>
-          </div>
         </div>
         <div id="solInfo"></div>
       </div>
@@ -2587,6 +2550,40 @@ function renderModalMareaExtremost(mdata) {
 })();
 </script>
 
+<!-- Modal brújula grande — fuera del topbar para evitar stacking context -->
+<div id="brujulaModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.65);backdrop-filter:blur(4px);align-items:center;justify-content:center">
+  <div style="background:var(--card-bg,#1e2330);border-radius:20px;padding:32px 28px;text-align:center;min-width:260px;box-shadow:0 8px 40px rgba(0,0,0,0.5)">
+    <div style="font-size:0.8rem;opacity:0.6;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">Brújula</div>
+    <svg width="180" height="180" viewBox="0 0 100 100" style="display:block;margin:0 auto">
+      <circle cx="50" cy="50" r="46" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"/>
+      <circle cx="50" cy="50" r="48" fill="none" stroke="currentColor" stroke-width="0.5" opacity="0.15"/>
+      <line x1="50" y1="4" x2="50" y2="10" stroke="currentColor" stroke-width="1.5" opacity="0.5" transform="rotate(0 50 50)"/>
+      <line x1="50" y1="4" x2="50" y2="8" stroke="currentColor" stroke-width="1" opacity="0.3" transform="rotate(30 50 50)"/>
+      <line x1="50" y1="4" x2="50" y2="8" stroke="currentColor" stroke-width="1" opacity="0.3" transform="rotate(60 50 50)"/>
+      <line x1="50" y1="4" x2="50" y2="10" stroke="currentColor" stroke-width="1.5" opacity="0.5" transform="rotate(90 50 50)"/>
+      <line x1="50" y1="4" x2="50" y2="8" stroke="currentColor" stroke-width="1" opacity="0.3" transform="rotate(120 50 50)"/>
+      <line x1="50" y1="4" x2="50" y2="8" stroke="currentColor" stroke-width="1" opacity="0.3" transform="rotate(150 50 50)"/>
+      <line x1="50" y1="4" x2="50" y2="10" stroke="currentColor" stroke-width="1.5" opacity="0.5" transform="rotate(180 50 50)"/>
+      <line x1="50" y1="4" x2="50" y2="8" stroke="currentColor" stroke-width="1" opacity="0.3" transform="rotate(210 50 50)"/>
+      <line x1="50" y1="4" x2="50" y2="8" stroke="currentColor" stroke-width="1" opacity="0.3" transform="rotate(240 50 50)"/>
+      <line x1="50" y1="4" x2="50" y2="10" stroke="currentColor" stroke-width="1.5" opacity="0.5" transform="rotate(270 50 50)"/>
+      <line x1="50" y1="4" x2="50" y2="8" stroke="currentColor" stroke-width="1" opacity="0.3" transform="rotate(300 50 50)"/>
+      <line x1="50" y1="4" x2="50" y2="8" stroke="currentColor" stroke-width="1" opacity="0.3" transform="rotate(330 50 50)"/>
+      <text x="50" y="16" text-anchor="middle" font-size="9" fill="#e74c3c" font-family="sans-serif" font-weight="700">N</text>
+      <text x="50" y="92" text-anchor="middle" font-size="8" fill="currentColor" font-family="sans-serif" opacity="0.7">S</text>
+      <text x="90" y="53" text-anchor="middle" font-size="8" fill="currentColor" font-family="sans-serif" opacity="0.7">E</text>
+      <text x="10" y="53" text-anchor="middle" font-size="8" fill="currentColor" font-family="sans-serif" opacity="0.7">O</text>
+      <g id="brujulaAgujaGrande" style="transform-origin:50px 50px">
+        <polygon points="50,14 53,50 50,46 47,50" fill="#e74c3c"/>
+        <polygon points="50,86 53,50 50,54 47,50" fill="rgba(255,255,255,0.35)"/>
+        <circle cx="50" cy="50" r="3" fill="currentColor" opacity="0.5"/>
+      </g>
+    </svg>
+    <div id="brujulaGradosTexto" style="font-size:2rem;font-weight:700;margin-top:12px;letter-spacing:2px">—</div>
+    <div id="brujulaDireccionTexto" style="font-size:0.9rem;opacity:0.6;margin-top:2px">sin señal</div>
+    <button onclick="document.getElementById('brujulaModal').style.display='none'" style="margin-top:20px;padding:10px 32px;border:none;border-radius:30px;background:rgba(255,255,255,0.12);color:inherit;font-size:0.95rem;cursor:pointer">Cerrar</button>
+  </div>
+</div>
 
 </body>
 </html>
