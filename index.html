@@ -399,6 +399,7 @@
         <div id="solInfo"></div>
       </div>
     </div>
+    <div id="swipeDots" style="display:flex;justify-content:center;gap:6px;padding:4px 0 2px;min-height:14px"></div>
     <div class="buscador" id="buscador" hidden>
       <input type="text" id="inputCiudad" placeholder="Buscar ciudad..." autocomplete="off" />
       <div id="favoritosSeccion" hidden>
@@ -1484,6 +1485,7 @@ function renderFavoritosLista() {
       saveFavoritos(favs);
       renderFavoritosLista();
       actualizarBtnFav();
+      renderSwipeDots();
     });
   });
 }
@@ -1496,6 +1498,7 @@ document.getElementById('btnFavorito').addEventListener('click', () => {
   else favs.push({ nombre: currentCoords.nombre, lat: currentCoords.lat, lon: currentCoords.lon });
   saveFavoritos(favs);
   actualizarBtnFav();
+  renderSwipeDots();
 });
 
 const ICONOS = {
@@ -2069,6 +2072,7 @@ async function cargarDatos(latitude, longitude, nombreFijo) {
     const nombreCiudad = ciudad.sub ? `${ciudad.principal}, ${ciudad.sub}` : ciudad.principal;
     currentCoords = { lat: latitude, lon: longitude, nombre: nombreCiudad };
     actualizarBtnFav();
+    actualizarFavIdx();
     ultimosDatos = { tiempo, ciudad, mdata, elevacion, aireData, owmData };
     renderDatos(ultimosDatos);
     ultimaActualizacion = Date.now();
@@ -2515,6 +2519,74 @@ function renderModalMareaExtremost(mdata) {
     </div>`;
   }).join('');
 }
+
+// ── Swipe entre favoritas ──────────────────────────────────────────
+let currentFavIdx = -1;
+
+function renderSwipeDots() {
+  const favs = loadFavoritos();
+  const container = document.getElementById('swipeDots');
+  if (!container) return;
+  if (favs.length < 2) { container.innerHTML = ''; return; }
+  container.innerHTML = favs.map((_, i) => {
+    const activo = i === currentFavIdx;
+    return `<span style="width:${activo?'18px':'6px'};height:6px;border-radius:3px;background:currentColor;opacity:${activo?'0.9':'0.3'};transition:all 0.3s;display:inline-block"></span>`;
+  }).join('');
+}
+
+function irAFav(idx) {
+  const favs = loadFavoritos();
+  if (!favs.length) return;
+  idx = ((idx % favs.length) + favs.length) % favs.length;
+  const f = favs[idx];
+  currentFavIdx = idx;
+  ubicacionManual = { lat: f.lat, lon: f.lon, nombre: f.nombre };
+  animarSwipe(idx > currentFavIdx ? 'left' : 'right');
+  cargarDatos(f.lat, f.lon, f.nombre);
+  renderSwipeDots();
+}
+
+function actualizarFavIdx() {
+  if (!currentCoords) return;
+  const favs = loadFavoritos();
+  currentFavIdx = favs.findIndex(f => Math.abs(f.lat - currentCoords.lat) < 0.01 && Math.abs(f.lon - currentCoords.lon) < 0.01);
+  renderSwipeDots();
+}
+
+function animarSwipe(dir) {
+  const el = document.getElementById('principal');
+  if (!el) return;
+  el.style.transition = 'none';
+  el.style.transform = `translateX(${dir === 'left' ? '40px' : '-40px'})`;
+  el.style.opacity = '0';
+  requestAnimationFrame(() => {
+    el.style.transition = 'transform 0.25s ease, opacity 0.25s ease';
+    el.style.transform = 'translateX(0)';
+    el.style.opacity = '1';
+  });
+}
+
+(function initSwipe() {
+  let tx = 0, ty = 0, swiping = false;
+  const area = document.body;
+  area.addEventListener('touchstart', e => {
+    if (loadFavoritos().length < 2) return;
+    tx = e.touches[0].clientX;
+    ty = e.touches[0].clientY;
+    swiping = true;
+  }, { passive: true });
+  area.addEventListener('touchend', e => {
+    if (!swiping) return;
+    swiping = false;
+    const dx = e.changedTouches[0].clientX - tx;
+    const dy = e.changedTouches[0].clientY - ty;
+    if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    const favs = loadFavoritos();
+    if (!favs.length) return;
+    const base = currentFavIdx >= 0 ? currentFavIdx : 0;
+    irAFav(dx < 0 ? base + 1 : base - 1);
+  }, { passive: true });
+})();
 
 function abrirMapaAltitud() {
   if (!currentCoords) return;
