@@ -385,14 +385,13 @@
         <div id="altitudRow" style="display:flex;align-items:center;gap:5px;justify-content:flex-end">
           <div id="altitud" style="font-size:0.95rem;font-weight:600"></div>
           <svg id="brujula" width="28" height="28" viewBox="0 0 22 22" style="opacity:0.9;flex-shrink:0;cursor:pointer;touch-action:manipulation" aria-label="Abrir brújula">
-            <circle cx="11" cy="11" r="10" fill="none" stroke="currentColor" stroke-width="1.2"/>
-            <text x="11" y="5" text-anchor="middle" font-size="4.5" fill="currentColor" font-family="sans-serif" font-weight="700">N</text>
-            <text x="11" y="20.5" text-anchor="middle" font-size="4.5" fill="currentColor" font-family="sans-serif">S</text>
-            <text x="20.5" y="12" text-anchor="middle" font-size="4.5" fill="currentColor" font-family="sans-serif">E</text>
-            <text x="1.5" y="12" text-anchor="middle" font-size="4.5" fill="currentColor" font-family="sans-serif">O</text>
+            <circle cx="11" cy="11" r="10" fill="none" stroke="currentColor" stroke-width="1"/>
+            <line x1="11" y1="2" x2="11" y2="20" stroke="currentColor" stroke-width="0.8" stroke-dasharray="1.5,2.2" opacity="0.35"/>
+            <line x1="2" y1="11" x2="20" y2="11" stroke="currentColor" stroke-width="0.8" stroke-dasharray="1.5,2.2" opacity="0.35"/>
             <g id="brujulaAguja" style="transform-origin:11px 11px">
-              <polygon points="11,4 12.2,11 11,10 9.8,11" fill="#e74c3c"/>
-              <polygon points="11,18 12.2,11 11,12 9.8,11" fill="rgba(255,255,255,0.5)"/>
+              <path d="M11 3.5 L12.8 10 L11 8.8 L9.2 10 Z" fill="currentColor"/>
+              <path d="M11 18.5 L12.8 12 L11 13.2 L9.2 12 Z" fill="currentColor" opacity="0.25"/>
+              <circle cx="11" cy="11" r="1.8" fill="currentColor"/>
             </g>
           </svg>
 
@@ -2516,7 +2515,8 @@ function renderModalMareaExtremost(mdata) {
   }
 
   function abrirModal() {
-    modal.style.display = 'flex';
+    const m = document.getElementById('brujulaModal');
+    if (m) m.style.display = 'flex';
   }
 
   function iniciarSensor() {
@@ -2537,9 +2537,10 @@ function renderModalMareaExtremost(mdata) {
     iniciarSensor();
   });
 
-  // Cerrar modal al pulsar fuera de la tarjeta
-  modal.addEventListener('click', function(ev) {
-    if (ev.target === modal) modal.style.display = 'none';
+  // Cerrar modal al pulsar fuera de la tarjeta (lazy)
+  document.addEventListener('click', function(ev) {
+    const m = document.getElementById('brujulaModal');
+    if (m && ev.target === m) m.style.display = 'none';
   });
 
   // Iniciar sensor automáticamente en Android (sin requestPermission)
@@ -2555,28 +2556,18 @@ function renderModalMareaExtremost(mdata) {
   <div style="background:var(--card-bg,#1e2330);border-radius:20px;padding:32px 28px;text-align:center;min-width:260px;box-shadow:0 8px 40px rgba(0,0,0,0.5)">
     <div style="font-size:0.8rem;opacity:0.6;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">Brújula</div>
     <svg width="180" height="180" viewBox="0 0 100 100" style="display:block;margin:0 auto">
-      <circle cx="50" cy="50" r="46" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"/>
-      <circle cx="50" cy="50" r="48" fill="none" stroke="currentColor" stroke-width="0.5" opacity="0.15"/>
-      <line x1="50" y1="4" x2="50" y2="10" stroke="currentColor" stroke-width="1.5" opacity="0.5" transform="rotate(0 50 50)"/>
-      <line x1="50" y1="4" x2="50" y2="8" stroke="currentColor" stroke-width="1" opacity="0.3" transform="rotate(30 50 50)"/>
-      <line x1="50" y1="4" x2="50" y2="8" stroke="currentColor" stroke-width="1" opacity="0.3" transform="rotate(60 50 50)"/>
-      <line x1="50" y1="4" x2="50" y2="10" stroke="currentColor" stroke-width="1.5" opacity="0.5" transform="rotate(90 50 50)"/>
-      <line x1="50" y1="4" x2="50" y2="8" stroke="currentColor" stroke-width="1" opacity="0.3" transform="rotate(120 50 50)"/>
-      <line x1="50" y1="4" x2="50" y2="8" stroke="currentColor" stroke-width="1" opacity="0.3" transform="rotate(150 50 50)"/>
-      <line x1="50" y1="4" x2="50" y2="10" stroke="currentColor" stroke-width="1.5" opacity="0.5" transform="rotate(180 50 50)"/>
-      <line x1="50" y1="4" x2="50" y2="8" stroke="currentColor" stroke-width="1" opacity="0.3" transform="rotate(210 50 50)"/>
-      <line x1="50" y1="4" x2="50" y2="8" stroke="currentColor" stroke-width="1" opacity="0.3" transform="rotate(240 50 50)"/>
-      <line x1="50" y1="4" x2="50" y2="10" stroke="currentColor" stroke-width="1.5" opacity="0.5" transform="rotate(270 50 50)"/>
-      <line x1="50" y1="4" x2="50" y2="8" stroke="currentColor" stroke-width="1" opacity="0.3" transform="rotate(300 50 50)"/>
-      <line x1="50" y1="4" x2="50" y2="8" stroke="currentColor" stroke-width="1" opacity="0.3" transform="rotate(330 50 50)"/>
-      <text x="50" y="16" text-anchor="middle" font-size="9" fill="#e74c3c" font-family="sans-serif" font-weight="700">N</text>
-      <text x="50" y="92" text-anchor="middle" font-size="8" fill="currentColor" font-family="sans-serif" opacity="0.7">S</text>
-      <text x="90" y="53" text-anchor="middle" font-size="8" fill="currentColor" font-family="sans-serif" opacity="0.7">E</text>
-      <text x="10" y="53" text-anchor="middle" font-size="8" fill="currentColor" font-family="sans-serif" opacity="0.7">O</text>
+      <circle cx="50" cy="50" r="46" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.3"/>
+      <line x1="50" y1="5" x2="50" y2="95" stroke="currentColor" stroke-width="1" stroke-dasharray="3,4" opacity="0.25"/>
+      <line x1="5" y1="50" x2="95" y2="50" stroke="currentColor" stroke-width="1" stroke-dasharray="3,4" opacity="0.25"/>
+      <text x="50" y="14" text-anchor="middle" font-size="9" fill="currentColor" font-family="sans-serif" font-weight="700" opacity="0.9">N</text>
+      <text x="50" y="93" text-anchor="middle" font-size="8" fill="currentColor" font-family="sans-serif" opacity="0.45">S</text>
+      <text x="91" y="53" text-anchor="middle" font-size="8" fill="currentColor" font-family="sans-serif" opacity="0.45">E</text>
+      <text x="9" y="53" text-anchor="middle" font-size="8" fill="currentColor" font-family="sans-serif" opacity="0.45">O</text>
       <g id="brujulaAgujaGrande" style="transform-origin:50px 50px">
-        <polygon points="50,14 53,50 50,46 47,50" fill="#e74c3c"/>
-        <polygon points="50,86 53,50 50,54 47,50" fill="rgba(255,255,255,0.35)"/>
-        <circle cx="50" cy="50" r="3" fill="currentColor" opacity="0.5"/>
+        <path d="M50 18 L55 50 L50 45 L45 50 Z" fill="currentColor"/>
+        <path d="M50 82 L55 50 L50 55 L45 50 Z" fill="currentColor" opacity="0.2"/>
+        <circle cx="50" cy="50" r="4" fill="currentColor"/>
+        <circle cx="50" cy="50" r="2.5" fill="none" stroke="currentColor" stroke-width="1" opacity="0.4"/>
       </g>
     </svg>
     <div id="brujulaGradosTexto" style="font-size:2rem;font-weight:700;margin-top:12px;letter-spacing:2px">—</div>
