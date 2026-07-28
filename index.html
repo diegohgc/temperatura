@@ -2507,7 +2507,7 @@ function renderModalMareaExtremost(mdata) {
       const ag = document.getElementById('brujulaRosa');
       const gt = document.getElementById('brujulaGradosTexto');
       const dt = document.getElementById('brujulaDireccionTexto');
-      if (ag) ag.style.transform = `rotate(${-h}deg)`;
+      if (ag) ag.setAttribute('transform', `rotate(${-h}, 50, 50)`);
       if (gt) gt.textContent = h + '°';
       if (dt) dt.textContent = dirs[Math.round(h / 22.5) % 16];
     }
