@@ -25,7 +25,6 @@
     justify-content: center;
     padding: env(safe-area-inset-top, 16px) 16px calc(env(safe-area-inset-bottom, 16px) + 60px);
     transition: color 1.5s ease;
-    overflow-x: hidden;
   }
   .card {
     text-align: center;
@@ -345,6 +344,7 @@
 <body>
   <div id="pullIndicator"></div>
   <div id="bg"></div>
+  <div id="swipeClip" style="width:100%;max-width:420px;overflow:hidden">
   <div class="card" id="pageCard">
     <button class="btn-ajustes" id="btnAjustes"></button>
     <div id="ajustesPanel" hidden>
@@ -459,6 +459,7 @@
       <div class="estado" id="estado"></div>
     </div>
   </div>
+  </div><!-- /swipeClip -->
   <div class="ad-bottom">
     <iframe srcdoc="<!DOCTYPE html><html><head><script async src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-app-pub-5015878857432448' crossorigin='anonymous'><\/script></head><body style='margin:0;padding:0;overflow:hidden'><ins class='adsbygoogle' style='display:block;width:100%;height:50px' data-ad-client='ca-app-pub-5015878857432448' data-ad-slot='6686595753'></ins><script>(adsbygoogle=window.adsbygoogle||[]).push({})<\/script></body></html>"></iframe>
   </div>
@@ -2597,9 +2598,8 @@ function animarSwipe(dir) {
   const el = document.getElementById('pageCard');
   if (!el) return;
   _swipeEnterDir = dir;
-  el.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
-  el.style.transform = `translateX(${dir === 'left' ? '-100vw' : '100vw'})`;
-  el.style.opacity = '0.3';
+  el.style.transition = 'transform 0.22s ease';
+  el.style.transform = `translateX(${dir === 'left' ? '-100%' : '100%'})`;
 }
 
 function animarSwipeEntrada() {
@@ -2609,15 +2609,11 @@ function animarSwipeEntrada() {
   const el = document.getElementById('pageCard');
   if (!el) return;
   el.style.transition = 'none';
-  el.style.transform = `translateX(${dir === 'left' ? '100vw' : '-100vw'})`;
-  el.style.opacity = '0.3';
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      el.style.transition = 'transform 0.25s ease, opacity 0.25s ease';
-      el.style.transform = 'translateX(0)';
-      el.style.opacity = '1';
-    });
-  });
+  el.style.transform = `translateX(${dir === 'left' ? '100%' : '-100%'})`;
+  setTimeout(() => {
+    el.style.transition = 'transform 0.28s ease';
+    el.style.transform = 'translateX(0)';
+  }, 20);
 }
 
 (function initSwipe() {
