@@ -2061,6 +2061,7 @@ function renderDatos(datos) {
   const alt = elevacion && elevacion.elevation && elevacion.elevation[0];
   elAltitud.textContent = alt !== null && alt !== undefined ? (usaMph ? `${T.altitud} ${Math.round(alt * 3.28084)} ft` : `${T.altitud} ${Math.round(alt)} m`) : '';
   document.getElementById('aire').textContent = aireData ? (aireData.nivelTexto ? (aireData.nivelTexto[idioma] || aireData.nivelTexto['en']) : aireData.texto) : '';
+  animarSwipeEntrada();
 }
 
 async function cargarDatos(latitude, longitude, nombreFijo) {
@@ -2589,16 +2590,34 @@ function actualizarFavIdx() {
   renderSwipeDots();
 }
 
+let _swipeEnterDir = null;
+
 function animarSwipe(dir) {
+  // Fase 1: salida del contenido actual
+  const el = document.getElementById('principal');
+  if (!el) return;
+  _swipeEnterDir = dir;
+  el.style.transition = 'transform 0.18s ease, opacity 0.18s ease';
+  el.style.transform = `translateX(${dir === 'left' ? '-50px' : '50px'})`;
+  el.style.opacity = '0';
+}
+
+function animarSwipeEntrada() {
+  // Fase 2: entrada del nuevo contenido (llamada tras renderDatos)
+  if (!_swipeEnterDir) return;
+  const dir = _swipeEnterDir;
+  _swipeEnterDir = null;
   const el = document.getElementById('principal');
   if (!el) return;
   el.style.transition = 'none';
-  el.style.transform = `translateX(${dir === 'left' ? '40px' : '-40px'})`;
+  el.style.transform = `translateX(${dir === 'left' ? '50px' : '-50px'})`;
   el.style.opacity = '0';
   requestAnimationFrame(() => {
-    el.style.transition = 'transform 0.25s ease, opacity 0.25s ease';
-    el.style.transform = 'translateX(0)';
-    el.style.opacity = '1';
+    requestAnimationFrame(() => {
+      el.style.transition = 'transform 0.22s ease, opacity 0.22s ease';
+      el.style.transform = 'translateX(0)';
+      el.style.opacity = '1';
+    });
   });
 }
 
