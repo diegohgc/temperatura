@@ -384,6 +384,10 @@
     <div class="top-row">
       <div class="ciudad" id="ciudad">—<span id="ciudadSub"></span></div>
       <div class="top-info">
+        <div id="velocidadRow" style="display:none;align-items:center;gap:4px;justify-content:flex-end;cursor:pointer;touch-action:manipulation" onclick="abrirVelocimetro()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="opacity:0.8"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 12 L18 6"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/></svg>
+          <span id="velocidadTxt" style="font-size:0.85rem;font-weight:600;opacity:0.9"></span>
+        </div>
         <div id="altitudRow" style="display:flex;align-items:center;gap:5px;justify-content:flex-end">
           <div id="altitud" style="font-size:0.95rem;font-weight:600;cursor:pointer;touch-action:manipulation" onclick="abrirMapaAltitud()"></div>
           <svg id="brujula" width="28" height="28" viewBox="0 0 22 22" style="opacity:0.9;flex-shrink:0;cursor:pointer;touch-action:manipulation" aria-label="Abrir brújula">
@@ -556,6 +560,7 @@ const TRADUCCIONES = {
     bajamar: 'Bajamar',
     olas: 'Olas',
     altitud: 'Altitud',
+    tuVelocidad: 'Tu velocidad', velMax: 'Máx.', velMedia: 'Media',
     amanecer: 'Amanecer',
     anochecer: 'Anochecer',
     uvIndex: 'Índice UV', solRestante: 'Sol restante', calidadAire: 'Calidad del aire',
@@ -595,6 +600,7 @@ const TRADUCCIONES = {
     bajamar: 'Low tide',
     olas: 'Waves',
     altitud: 'Altitude',
+    tuVelocidad: 'Your speed', velMax: 'Max.', velMedia: 'Avg.',
     amanecer: 'Sunrise',
     anochecer: 'Sunset',
     uvIndex: 'UV Index', solRestante: 'Remaining sun', calidadAire: 'Air quality',
@@ -634,6 +640,7 @@ const TRADUCCIONES = {
     bajamar: 'Niedrigwasser',
     olas: 'Wellen',
     altitud: 'Höhe',
+    tuVelocidad: 'Deine Geschwindigkeit', velMax: 'Max.', velMedia: 'Ø',
     amanecer: 'Sonnenaufgang',
     anochecer: 'Sonnenuntergang',
     uvIndex: 'UV-Index', solRestante: 'Verbleibende Sonne', calidadAire: 'Luftqualität',
@@ -673,6 +680,7 @@ const TRADUCCIONES = {
     bajamar: 'Basse mer',
     olas: 'Vagues',
     altitud: 'Altitude',
+    tuVelocidad: 'Votre vitesse', velMax: 'Max.', velMedia: 'Moy.',
     amanecer: 'Lever du soleil',
     anochecer: 'Coucher du soleil',
     uvIndex: 'Indice UV', solRestante: 'Soleil restant', calidadAire: "Qualité de l'air",
@@ -712,6 +720,7 @@ const TRADUCCIONES = {
     bajamar: 'Maré baixa',
     olas: 'Ondas',
     altitud: 'Altitude',
+    tuVelocidad: 'Sua velocidade', velMax: 'Máx.', velMedia: 'Média',
     amanecer: 'Nascer do sol',
     anochecer: 'Pôr do sol',
     uvIndex: 'Índice UV', solRestante: 'Sol restante', calidadAire: 'Qualidade do ar',
@@ -751,6 +760,7 @@ const TRADUCCIONES = {
     bajamar: 'Bassa marea',
     olas: 'Onde',
     altitud: 'Altitudine',
+    tuVelocidad: 'La tua velocità', velMax: 'Max.', velMedia: 'Media',
     amanecer: 'Alba',
     anochecer: 'Tramonto',
     uvIndex: 'Indice UV', solRestante: 'Sole rimanente', calidadAire: "Qualità dell'aria",
@@ -790,6 +800,7 @@ const TRADUCCIONES = {
     bajamar: '低潮',
     olas: '浪高',
     altitud: '海拔',
+    tuVelocidad: '你的速度', velMax: '最高', velMedia: '平均',
     amanecer: '日出',
     anochecer: '日落',
     uvIndex: '紫外线指数', solRestante: '剩余日照', calidadAire: '空气质量',
@@ -829,6 +840,7 @@ const TRADUCCIONES = {
     bajamar: 'Baixamar',
     olas: 'Onades',
     altitud: 'Altitud',
+    tuVelocidad: 'La teva velocitat', velMax: 'Màx.', velMedia: 'Mitjana',
     amanecer: 'Alba',
     anochecer: 'Capvespre',
     uvIndex: 'Índex UV', solRestante: 'Sol restant', calidadAire: "Qualitat de l'aire",
@@ -868,6 +880,7 @@ const TRADUCCIONES = {
     bajamar: 'Behe-marea',
     olas: 'Olatuak',
     altitud: 'Altitudea',
+    tuVelocidad: 'Zure abiadura', velMax: 'Max.', velMedia: 'Batez beste',
     amanecer: 'Egunsentia',
     anochecer: 'Ilunabarra',
     uvIndex: 'UV Indizea', solRestante: 'Eguzki orduak', calidadAire: 'Airearen kalitatea',
@@ -907,6 +920,7 @@ const TRADUCCIONES = {
     bajamar: 'Baixamar',
     olas: 'Ondas',
     altitud: 'Altitude',
+    tuVelocidad: 'A túa velocidade', velMax: 'Máx.', velMedia: 'Media',
     amanecer: 'Amencer',
     anochecer: 'Solpor',
     uvIndex: 'Índice UV', solRestante: 'Sol restante', calidadAire: 'Calidade do aire',
@@ -946,6 +960,7 @@ const TRADUCCIONES = {
     bajamar: 'جزر',
     olas: 'أمواج',
     altitud: 'الارتفاع',
+    tuVelocidad: 'سرعتك', velMax: 'أقصى', velMedia: 'متوسط',
     amanecer: 'الشروق',
     anochecer: 'الغروب',
     uvIndex: 'مؤشر الأشعة فوق البنفسجية', solRestante: 'ساعات الشمس المتبقية', calidadAire: 'جودة الهواء',
@@ -985,6 +1000,7 @@ const TRADUCCIONES = {
     bajamar: 'Малая вода',
     olas: 'Волны',
     altitud: 'Высота',
+    tuVelocidad: 'Ваша скорость', velMax: 'Макс.', velMedia: 'Средн.',
     amanecer: 'Рассвет',
     anochecer: 'Закат',
     uvIndex: 'УФ-индекс', solRestante: 'Оставшееся солнце', calidadAire: 'Качество воздуха',
@@ -1024,6 +1040,7 @@ const TRADUCCIONES = {
     bajamar: '干潮',
     olas: '波高',
     altitud: '標高',
+    tuVelocidad: '現在の速度', velMax: '最高', velMedia: '平均',
     amanecer: '日の出',
     anochecer: '日の入り',
     uvIndex: 'UV指数', solRestante: '残り日照時間', calidadAire: '大気質',
@@ -1063,6 +1080,7 @@ const TRADUCCIONES = {
     bajamar: '간조',
     olas: '파도',
     altitud: '고도',
+    tuVelocidad: '현재 속도', velMax: '최고', velMedia: '평균',
     amanecer: '일출',
     anochecer: '일몰',
     uvIndex: 'UV 지수', solRestante: '남은 일조', calidadAire: '공기 질',
@@ -1102,6 +1120,7 @@ const TRADUCCIONES = {
     bajamar: 'Laagwater',
     olas: 'Golven',
     altitud: 'Hoogte',
+    tuVelocidad: 'Uw snelheid', velMax: 'Max.', velMedia: 'Gem.',
     amanecer: 'Zonsopgang',
     anochecer: 'Zonsondergang',
     uvIndex: 'UV-index', solRestante: 'Resterende zon', calidadAire: 'Luchtkwaliteit',
@@ -1141,6 +1160,7 @@ const TRADUCCIONES = {
     bajamar: 'Niska woda',
     olas: 'Fale',
     altitud: 'Wysokość',
+    tuVelocidad: 'Twoja prędkość', velMax: 'Maks.', velMedia: 'Śred.',
     amanecer: 'Wschód słońca',
     anochecer: 'Zachód słońca',
     uvIndex: 'Indeks UV', solRestante: 'Pozostałe nasłonecznienie', calidadAire: 'Jakość powietrza',
@@ -1180,6 +1200,7 @@ const TRADUCCIONES = {
     bajamar: 'निम्न ज्वार',
     olas: 'लहरें',
     altitud: 'ऊँचाई',
+    tuVelocidad: 'आपकी गति', velMax: 'अधिकतम', velMedia: 'औसत',
     amanecer: 'सूर्योदय',
     anochecer: 'सूर्यास्त',
     uvIndex: 'यूवी सूचकांक', solRestante: 'शेष धूप', calidadAire: 'वायु गुणवत्ता',
@@ -1219,6 +1240,7 @@ const TRADUCCIONES = {
     bajamar: 'Reflux',
     olas: 'Valuri',
     altitud: 'Altitudine',
+    tuVelocidad: 'Viteza ta', velMax: 'Max.', velMedia: 'Med.',
     amanecer: 'Răsărit',
     anochecer: 'Apus',
     uvIndex: 'Indice UV', solRestante: 'Soare rămas', calidadAire: 'Calitatea aerului',
@@ -1258,6 +1280,7 @@ const TRADUCCIONES = {
     bajamar: 'Apály',
     olas: 'Hullámok',
     altitud: 'Magasság',
+    tuVelocidad: 'Sebességed', velMax: 'Max.', velMedia: 'Átlag',
     amanecer: 'Napkelte',
     anochecer: 'Napnyugta',
     uvIndex: 'UV-index', solRestante: 'Maradék napsütés', calidadAire: 'Levegőminőség',
@@ -2658,6 +2681,113 @@ function abrirEnGoogleMaps() {
   window.open(`https://www.google.com/maps?q=${currentCoords.lat},${currentCoords.lon}`, '_blank');
 }
 
+// ── Velocímetro ──────────────────────────────────────────────────────────────
+(function() {
+  const UMBRAL_MS = 0.6; // ~2 km/h, por debajo se considera parado
+  const MAX_VEL = 180;   // km/h para escala del arco (o 110 mph)
+  let velActual = 0, velMax = 0, velSuma = 0, velCount = 0;
+  let watchId = null;
+
+  function msToDisplay(ms) {
+    const usaMph = window.usaMph || false;
+    return usaMph ? (ms * 2.23694) : (ms * 3.6);
+  }
+
+  function unidad() {
+    return (window.usaMph || false) ? 'mph' : 'km/h';
+  }
+
+  function actualizarFila(ms) {
+    const row = document.getElementById('velocidadRow');
+    const txt = document.getElementById('velocidadTxt');
+    if (!row || !txt) return;
+    if (ms < UMBRAL_MS) {
+      row.style.display = 'none';
+      return;
+    }
+    const v = Math.round(msToDisplay(ms));
+    txt.textContent = v + ' ' + unidad();
+    row.style.display = 'flex';
+  }
+
+  function actualizarModal() {
+    const v = Math.round(msToDisplay(velActual));
+    const vMax = velMax > 0 ? Math.round(msToDisplay(velMax)) : null;
+    const vMedia = velCount > 0 ? Math.round(msToDisplay(velSuma / velCount)) : null;
+    const maxDisplay = (window.usaMph || false) ? 110 : MAX_VEL;
+
+    const numero = document.getElementById('velNumero');
+    const arco = document.getElementById('velArco');
+    const aguja = document.getElementById('velAguja');
+    const maxN = document.getElementById('velMaxNumero');
+    const mediaN = document.getElementById('velMediaNumero');
+    const unidadEl = document.getElementById('velUnidad');
+    const tituloEl = document.getElementById('velTitulo');
+    const maxLabel = document.getElementById('velMaxLabel');
+    const mediaLabel = document.getElementById('velMediaLabel');
+    const T = window.T || {};
+
+    if (tituloEl) tituloEl.textContent = T.tuVelocidad || 'Tu velocidad';
+    if (unidadEl) unidadEl.textContent = unidad();
+    if (maxLabel) maxLabel.textContent = T.velMax || 'Máx.';
+    if (mediaLabel) mediaLabel.textContent = T.velMedia || 'Media';
+
+    if (numero) numero.textContent = v;
+    if (maxN) maxN.textContent = vMax !== null ? vMax : '—';
+    if (mediaN) mediaN.textContent = vMedia !== null ? vMedia : '—';
+
+    // arco: 220px total, proporcional al % de maxDisplay
+    if (arco) {
+      const pct = Math.min(v / maxDisplay, 1);
+      const offset = 220 - pct * 220;
+      arco.style.strokeDashoffset = offset;
+    }
+    // aguja: de -90° (izq) a +90° (der)
+    if (aguja) {
+      const pct = Math.min(v / maxDisplay, 1);
+      const deg = -90 + pct * 180;
+      aguja.style.transform = `rotate(${deg}deg)`;
+    }
+  }
+
+  function onPos(pos) {
+    const ms = pos.coords.speed !== null ? pos.coords.speed : 0;
+    velActual = ms;
+    if (ms >= UMBRAL_MS) {
+      if (ms > velMax) velMax = ms;
+      velSuma += ms;
+      velCount++;
+    }
+    actualizarFila(ms);
+    const modal = document.getElementById('velModal');
+    if (modal && modal.style.display !== 'none') actualizarModal();
+  }
+
+  function iniciarWatch() {
+    if (watchId !== null || !navigator.geolocation) return;
+    watchId = navigator.geolocation.watchPosition(onPos, null, { enableHighAccuracy: true, maximumAge: 1000 });
+  }
+
+  window.abrirVelocimetro = function() {
+    const modal = document.getElementById('velModal');
+    if (!modal) return;
+    actualizarModal();
+    modal.style.display = 'flex';
+  };
+
+  window.cerrarVelocimetro = function() {
+    const modal = document.getElementById('velModal');
+    if (modal) modal.style.display = 'none';
+  };
+
+  // Arrancar en cuanto el DOM esté listo
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', iniciarWatch);
+  } else {
+    iniciarWatch();
+  }
+})();
+
 (function() {
   const aguja = document.getElementById('brujulaAguja');
   if (!aguja) return;
@@ -2733,6 +2863,36 @@ function abrirEnGoogleMaps() {
     <iframe id="mapaIframe" src="" width="100%" height="280" style="border:none;display:block" loading="lazy" referrerpolicy="no-referrer"></iframe>
     <div style="padding:10px 18px 14px;display:flex;gap:10px">
       <button id="mapaAbrirGMaps" onclick="abrirEnGoogleMaps()" style="flex:1;padding:9px;border:none;border-radius:12px;background:rgba(255,255,255,0.1);color:inherit;font-size:0.9rem;cursor:pointer">Google Maps ↗</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal velocímetro -->
+<div id="velModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.65);backdrop-filter:blur(4px);align-items:center;justify-content:center" onclick="if(event.target===this)cerrarVelocimetro()">
+  <div style="background:var(--card-bg,#1e2330);border-radius:24px;padding:32px 36px;text-align:center;min-width:260px;box-shadow:0 8px 40px rgba(0,0,0,0.5);position:relative">
+    <button onclick="cerrarVelocimetro()" style="position:absolute;top:14px;right:14px;border:none;background:rgba(255,255,255,0.1);color:inherit;border-radius:50%;width:32px;height:32px;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+    <div id="velTitulo" style="font-size:1rem;font-weight:600;opacity:0.7;margin-bottom:18px"></div>
+    <!-- arco SVG -->
+    <svg width="180" height="110" viewBox="0 0 180 110" style="display:block;margin:0 auto 8px">
+      <!-- arco fondo -->
+      <path d="M20 100 A70 70 0 0 1 160 100" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="10" stroke-linecap="round"/>
+      <!-- arco velocidad -->
+      <path id="velArco" d="M20 100 A70 70 0 0 1 160 100" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="10" stroke-linecap="round" stroke-dasharray="220" stroke-dashoffset="220" style="transition:stroke-dashoffset 0.5s ease"/>
+      <!-- aguja -->
+      <line id="velAguja" x1="90" y1="100" x2="90" y2="38" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="transform-origin:90px 100px;transform:rotate(-90deg);transition:transform 0.5s ease"/>
+      <circle cx="90" cy="100" r="5" fill="currentColor"/>
+    </svg>
+    <div id="velNumero" style="font-size:3.2rem;font-weight:700;line-height:1;letter-spacing:-1px">0</div>
+    <div id="velUnidad" style="font-size:1rem;opacity:0.6;margin-top:4px"></div>
+    <div style="display:flex;justify-content:space-between;margin-top:20px;gap:16px">
+      <div style="flex:1;background:rgba(255,255,255,0.07);border-radius:12px;padding:10px 0">
+        <div id="velMaxLabel" style="font-size:0.7rem;opacity:0.5;margin-bottom:2px"></div>
+        <div id="velMaxNumero" style="font-size:1.3rem;font-weight:600">—</div>
+      </div>
+      <div style="flex:1;background:rgba(255,255,255,0.07);border-radius:12px;padding:10px 0">
+        <div id="velMediaLabel" style="font-size:0.7rem;opacity:0.5;margin-bottom:2px"></div>
+        <div id="velMediaNumero" style="font-size:1.3rem;font-weight:600">—</div>
+      </div>
     </div>
   </div>
 </div>
