@@ -378,6 +378,7 @@
         <span class="btn-buscar-texto" id="textoCambiarCiudad"></span>
       </button>
       <button class="btn-fav" id="btnFavorito" aria-label="Guardar favorito" hidden>☆</button>
+      <button id="btnMiUbicacion" hidden style="background:none;border:none;color:inherit;opacity:0.7;font-size:0.78rem;cursor:pointer;padding:0;display:flex;align-items:center;gap:3px;white-space:nowrap">📍 <span id="btnMiUbicacionTxt">Mi ubicación</span></button>
     </div>
     <div class="top-row">
       <div class="ciudad" id="ciudad">—<span id="ciudadSub"></span></div>
@@ -1450,10 +1451,16 @@ function esFavorito(lat, lon) {
 }
 function actualizarBtnFav() {
   const btn = document.getElementById('btnFavorito');
-  if (!currentCoords) { btn.hidden = true; return; }
+  const btnUbi = document.getElementById('btnMiUbicacion');
+  if (!currentCoords) { btn.hidden = true; if (btnUbi) btnUbi.hidden = true; return; }
   btn.hidden = false;
   const esFav = esFavorito(currentCoords.lat, currentCoords.lon);
   btn.innerHTML = `${esFav ? '★' : '☆'} <span class="btn-fav-texto">${(esFav ? FAV_REMOVE : FAV_ADD)[idioma] || (esFav ? 'Remove favorite' : 'Add to favorites')}</span>`;
+  if (btnUbi) {
+    btnUbi.hidden = !ubicacionManual;
+    const txt = document.getElementById('btnMiUbicacionTxt');
+    if (txt) txt.textContent = T.tuUbicacion || 'Mi ubicación';
+  }
 }
 function renderFavoritosLista() {
   const seccion = document.getElementById('favoritosSeccion');
@@ -2147,6 +2154,13 @@ inputCiudad.addEventListener('input', () => {
 btnUsarGps.addEventListener('click', () => {
   ubicacionManual = null;
   cerrarBuscador();
+  actualizar();
+});
+
+document.getElementById('btnMiUbicacion').addEventListener('click', () => {
+  ubicacionManual = null;
+  currentFavIdx = -1;
+  renderSwipeDots();
   actualizar();
 });
 
