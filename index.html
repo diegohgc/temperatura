@@ -383,7 +383,7 @@
       <div class="ciudad" id="ciudad">—<span id="ciudadSub"></span></div>
       <div class="top-info">
         <div id="altitudRow" style="display:flex;align-items:center;gap:5px;justify-content:flex-end">
-          <div id="altitud" style="font-size:0.95rem;font-weight:600"></div>
+          <div id="altitud" style="font-size:0.95rem;font-weight:600;cursor:pointer;touch-action:manipulation" onclick="abrirMapaAltitud()"></div>
           <svg id="brujula" width="28" height="28" viewBox="0 0 22 22" style="opacity:0.9;flex-shrink:0;cursor:pointer;touch-action:manipulation" aria-label="Abrir brújula">
             <circle cx="11" cy="11" r="10" fill="none" stroke="currentColor" stroke-width="1"/>
             <line x1="11" y1="2" x2="11" y2="20" stroke="currentColor" stroke-width="0.8" stroke-dasharray="1.5,2.2" opacity="0.35"/>
@@ -2516,6 +2516,29 @@ function renderModalMareaExtremost(mdata) {
   }).join('');
 }
 
+function abrirMapaAltitud() {
+  if (!currentCoords) return;
+  const { lat, lon } = currentCoords;
+  const modal = document.getElementById('mapaModal');
+  const iframe = document.getElementById('mapaIframe');
+  const altDiv = document.getElementById('mapaModalAltitud');
+  altDiv.textContent = document.getElementById('altitud').textContent;
+  const zoom = 14;
+  iframe.src = `https://www.openstreetmap.org/export/embed.html?bbox=${lon-0.02},${lat-0.01},${lon+0.02},${lat+0.01}&layer=mapnik&marker=${lat},${lon}`;
+  modal.style.display = 'flex';
+}
+
+function cerrarMapaAltitud() {
+  const modal = document.getElementById('mapaModal');
+  modal.style.display = 'none';
+  document.getElementById('mapaIframe').src = '';
+}
+
+function abrirEnGoogleMaps() {
+  if (!currentCoords) return;
+  window.open(`https://www.google.com/maps?q=${currentCoords.lat},${currentCoords.lon}`, '_blank');
+}
+
 (function() {
   const aguja = document.getElementById('brujulaAguja');
   if (!aguja) return;
@@ -2577,6 +2600,23 @@ function renderModalMareaExtremost(mdata) {
   }
 })();
 </script>
+
+<!-- Modal mapa altitud -->
+<div id="mapaModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.65);backdrop-filter:blur(4px);align-items:center;justify-content:center" onclick="if(event.target===this)cerrarMapaAltitud()">
+  <div style="background:var(--card-bg,#1e2330);border-radius:20px;overflow:hidden;width:90vw;max-width:400px;box-shadow:0 8px 40px rgba(0,0,0,0.5)">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px">
+      <div>
+        <div id="mapaModalTitulo" style="font-size:0.75rem;opacity:0.55;text-transform:uppercase;letter-spacing:1px">Ubicación</div>
+        <div id="mapaModalAltitud" style="font-size:1.1rem;font-weight:600;margin-top:2px"></div>
+      </div>
+      <button onclick="cerrarMapaAltitud()" style="border:none;background:rgba(255,255,255,0.1);color:inherit;border-radius:50%;width:32px;height:32px;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+    </div>
+    <iframe id="mapaIframe" src="" width="100%" height="280" style="border:none;display:block" loading="lazy" referrerpolicy="no-referrer"></iframe>
+    <div style="padding:10px 18px 14px;display:flex;gap:10px">
+      <button id="mapaAbrirGMaps" onclick="abrirEnGoogleMaps()" style="flex:1;padding:9px;border:none;border-radius:12px;background:rgba(255,255,255,0.1);color:inherit;font-size:0.9rem;cursor:pointer">Google Maps ↗</button>
+    </div>
+  </div>
+</div>
 
 <!-- Modal brújula grande — fuera del topbar para evitar stacking context -->
 <div id="brujulaModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.65);backdrop-filter:blur(4px);align-items:center;justify-content:center">
