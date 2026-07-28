@@ -2504,10 +2504,10 @@ function renderModalMareaExtremost(mdata) {
     if (heading !== null) {
       const h = Math.round(heading);
       aguja.style.transform = `rotate(${h}deg)`;
-      const ag = document.getElementById('brujulaAgujaGrande');
+      const ag = document.getElementById('brujulaRosa');
       const gt = document.getElementById('brujulaGradosTexto');
       const dt = document.getElementById('brujulaDireccionTexto');
-      if (ag) ag.style.transform = `rotate(${h}deg)`;
+      if (ag) ag.style.transform = `rotate(${-h}deg)`;
       if (gt) gt.textContent = h + '°';
       if (dt) dt.textContent = dirs[Math.round(h / 22.5) % 16];
     }
@@ -2555,19 +2555,22 @@ function renderModalMareaExtremost(mdata) {
   <div style="background:var(--card-bg,#1e2330);border-radius:20px;padding:32px 28px;text-align:center;min-width:260px;box-shadow:0 8px 40px rgba(0,0,0,0.5)">
     <div style="font-size:0.8rem;opacity:0.6;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">Brújula</div>
     <svg width="180" height="180" viewBox="0 0 100 100" style="display:block;margin:0 auto">
-      <circle cx="50" cy="50" r="46" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.3"/>
-      <line x1="50" y1="5" x2="50" y2="95" stroke="currentColor" stroke-width="1" stroke-dasharray="3,4" opacity="0.25"/>
-      <line x1="5" y1="50" x2="95" y2="50" stroke="currentColor" stroke-width="1" stroke-dasharray="3,4" opacity="0.25"/>
-      <text x="50" y="14" text-anchor="middle" font-size="9" fill="currentColor" font-family="sans-serif" font-weight="700" opacity="0.9">N</text>
-      <text x="50" y="93" text-anchor="middle" font-size="8" fill="currentColor" font-family="sans-serif" opacity="0.45">S</text>
-      <text x="91" y="53" text-anchor="middle" font-size="8" fill="currentColor" font-family="sans-serif" opacity="0.45">E</text>
-      <text x="9" y="53" text-anchor="middle" font-size="8" fill="currentColor" font-family="sans-serif" opacity="0.45">O</text>
-      <g id="brujulaAgujaGrande" style="transform-origin:50px 50px">
-        <path d="M50 18 L55 50 L50 45 L45 50 Z" fill="currentColor"/>
-        <path d="M50 82 L55 50 L50 55 L45 50 Z" fill="currentColor" opacity="0.2"/>
-        <circle cx="50" cy="50" r="4" fill="currentColor"/>
-        <circle cx="50" cy="50" r="2.5" fill="none" stroke="currentColor" stroke-width="1" opacity="0.4"/>
+      <!-- Rosa giratoria: gira -heading para que la dirección mirада quede arriba -->
+      <g id="brujulaRosa" style="transform-origin:50px 50px">
+        <circle cx="50" cy="50" r="46" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.3"/>
+        <line x1="50" y1="5" x2="50" y2="95" stroke="currentColor" stroke-width="1" stroke-dasharray="3,4" opacity="0.2"/>
+        <line x1="5" y1="50" x2="95" y2="50" stroke="currentColor" stroke-width="1" stroke-dasharray="3,4" opacity="0.2"/>
+        <text x="50" y="13" text-anchor="middle" font-size="9" fill="currentColor" font-family="sans-serif" font-weight="700">N</text>
+        <text x="50" y="94" text-anchor="middle" font-size="8" fill="currentColor" font-family="sans-serif" opacity="0.5">S</text>
+        <text x="92" y="53" text-anchor="middle" font-size="8" fill="currentColor" font-family="sans-serif" opacity="0.5">E</text>
+        <text x="8" y="53" text-anchor="middle" font-size="8" fill="currentColor" font-family="sans-serif" opacity="0.5">O</text>
       </g>
+      <!-- Flecha fija: siempre apunta hacia arriba = dirección que miras -->
+      <path d="M50 20 L54 48 L50 44 L46 48 Z" fill="currentColor"/>
+      <path d="M50 80 L54 52 L50 56 L46 52 Z" fill="currentColor" opacity="0.18"/>
+      <!-- Marca fija arriba para indicar "lo que miras" -->
+      <line x1="50" y1="2" x2="50" y2="7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="50" cy="50" r="3.5" fill="currentColor"/>
     </svg>
     <div id="brujulaGradosTexto" style="font-size:2rem;font-weight:700;margin-top:12px;letter-spacing:2px">—</div>
     <div id="brujulaDireccionTexto" style="font-size:0.9rem;opacity:0.6;margin-top:2px">sin señal</div>
