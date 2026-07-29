@@ -1985,6 +1985,10 @@ function renderPanelInterior(uvIndex, aireData, sunsetStr, tieneMarea, utcOffset
   _ultimoIsDay = isDay !== undefined ? isDay : true;
   _ultimoSunsetLocalHora  = sunsetStr  ? sunsetStr.substring(11, 16)  : null;
   _ultimoSunriseLocalHora = sunriseStr ? sunriseStr.substring(11, 16) : null;
+  const _sunsetCorr  = sunsetStr  ? corregirHoraLocal(sunsetStr,  utcOffsetSec || 0) : null;
+  const _sunriseCorr = sunriseStr ? corregirHoraLocal(sunriseStr, utcOffsetSec || 0) : null;
+  _ultimoSunset  = _sunsetCorr  ? _sunsetCorr.toISOString()  : null;
+  _ultimoSunrise = _sunriseCorr ? _sunriseCorr.toISOString() : null;
 
   const panel = document.getElementById('panelInterior');
   const aireExtra = document.getElementById('aireExtra');
@@ -1992,8 +1996,8 @@ function renderPanelInterior(uvIndex, aireData, sunsetStr, tieneMarea, utcOffset
   const uvVal = uvIndex !== null && uvIndex !== undefined ? Math.round(uvIndex) : null;
 
   const now = new Date();
-  const sunset  = sunsetStr  ? corregirHoraLocal(sunsetStr,  utcOffsetSec || 0) : null;
-  const sunrise = sunriseStr ? corregirHoraLocal(sunriseStr, utcOffsetSec || 0) : null;
+  const sunset  = _sunsetCorr;
+  const sunrise = _sunriseCorr;
 
   const NOCHE_RESTANTE = { es:'Noche restante', en:'Night remaining', de:'Verbleibende Nacht', fr:'Nuit restante', pt:'Noite restante', it:'Notte rimanente', zh:'剩余夜晚', ca:'Nit restant', eu:'Gauaren hondarrak', gl:'Noite restante', ar:'ليل متبقٍ', ru:'Ночи осталось', ja:'残りの夜', ko:'남은 밤', nl:'Resterende nacht', pl:'Pozostała noc', hi:'शेष रात', ro:'Noapte rămasă', hu:'Hátralévő éjszaka' };
   let solTexto = null, solLabel = null;
