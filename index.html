@@ -1987,7 +1987,7 @@ function renderPanelInterior(uvIndex, aireData, sunsetStr, tieneMarea, utcOffset
       let nextSunrise = new Date(sunrise);
       if (nextSunrise <= now) nextSunrise = new Date(nextSunrise.getTime() + 24 * 3600000);
       const diffSunrise = nextSunrise - now;
-      if (diffSunrise > 0 && diffSunrise < 24 * 3600000) {
+      if (diffSunrise > 0 && diffSunrise < 30 * 3600000) {
         const hrs = Math.floor(diffSunrise / 3600000);
         const mins = Math.floor((diffSunrise % 3600000) / 60000);
         solTexto = hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
@@ -2092,7 +2092,7 @@ function renderDatos(datos) {
   renderSol(tiempo.daily);
   renderDias(tiempo.daily);
   const tieneMarea = renderMarea(mdata);
-  renderPanelInterior(c.uv_index, aireData, tiempo.daily && tiempo.daily.sunset ? tiempo.daily.sunset[0] : null, tieneMarea, tiempo.utc_offset_seconds, tiempo.daily && tiempo.daily.sunrise ? tiempo.daily.sunrise[1] || tiempo.daily.sunrise[0] : null);
+  renderPanelInterior(c.uv_index, aireData, tiempo.daily && tiempo.daily.sunset ? tiempo.daily.sunset[0] : null, tieneMarea, tiempo.utc_offset_seconds, tiempo.daily && tiempo.daily.sunrise ? tiempo.daily.sunrise[0] : null);
   aplicarColorTemp(Math.round(c.temperature_2m));
   const max0 = tiempo.daily && tiempo.daily.temperature_2m_max ? tiempo.daily.temperature_2m_max[0] : null;
   const min0 = tiempo.daily && tiempo.daily.temperature_2m_min ? tiempo.daily.temperature_2m_min[0] : null;
