@@ -1755,7 +1755,7 @@ document.getElementById('modalDia').addEventListener('click', (e) => {
   if (e.target === document.getElementById('modalDia')) cerrarModalDia();
 });
 
-let _ultimoUV = null, _ultimoAireData = null, _ultimoSunset = null, _ultimoSunrise = null;
+let _ultimoUV = null, _ultimoAireData = null, _ultimoSunset = null, _ultimoSunrise = null, _ultimoSunsetLocalHora = null, _ultimoSunriseLocalHora = null;
 
 function abrirModalInterior(tipo) {
   const uvNiveles = [
@@ -1782,11 +1782,13 @@ function abrirModalInterior(tipo) {
     nivel = n ? `${n.emoji} ${n.nivel[lang] || n.nivel.es}` : '';
     detalle = n ? (n.consejo[lang] || n.consejo.es) : '';
   } else if (tipo === 'sol') {
-    titulo = '🌅 ' + (T.solRestante || 'Sol restante');
     const sunset = _ultimoSunset ? new Date(_ultimoSunset) : null;
     const now = new Date();
+    const esDeNoche = sunset && (sunset - now) <= 0;
+    const NOCHE = { es:'Noche', en:'Night', de:'Nacht', fr:'Nuit', pt:'Noite', it:'Notte', zh:'夜间', ca:'Nit', eu:'Gaua', gl:'Noite', ar:'ليل', ru:'Ночь', ja:'夜', ko:'밤', nl:'Nacht', pl:'Noc', hi:'रात', ro:'Noapte', hu:'Éjszaka' };
+    titulo = esDeNoche ? ('🌙 ' + (NOCHE[lang] || 'Noche')) : ('🌅 ' + (T.solRestante || 'Sol restante'));
     if (sunset) {
-      const hPuesta = sunset.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+      const hPuesta = _ultimoSunsetLocalHora || sunset.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
       const diffMs = sunset - now;
       if (diffMs > 0 && diffMs < 14 * 3600000) {
         const hrs = Math.floor(diffMs / 3600000);
@@ -2008,6 +2010,8 @@ function renderPanelInterior(uvIndex, aireData, sunsetStr, tieneMarea, utcOffset
   _ultimoAireData = aireData ?? null;
   _ultimoSunset = sunset ? sunset.toISOString() : null;
   _ultimoSunrise = sunrise ? sunrise.toISOString() : null;
+  _ultimoSunsetLocalHora = sunsetStr ? sunsetStr.substring(11, 16) : null;
+  _ultimoSunriseLocalHora = sunriseStr ? sunriseStr.substring(11, 16) : null;
 
   aireExtra.hidden = true;
   panel.hidden = false;
