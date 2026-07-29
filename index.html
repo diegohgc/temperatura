@@ -1758,6 +1758,7 @@ document.getElementById('modalDia').addEventListener('click', (e) => {
 let _ultimoUV = null, _ultimoAireData = null, _ultimoSunset = null, _ultimoSunrise = null, _ultimoSunsetLocalHora = null, _ultimoSunriseLocalHora = null, _ultimoIsDay = true;
 
 function abrirModalInterior(tipo) {
+  if (tipo === 'sol') console.log('[Modal sol] _ultimoIsDay=', _ultimoIsDay, '_ultimoSunsetLocalHora=', _ultimoSunsetLocalHora, '_ultimoSunriseLocalHora=', _ultimoSunriseLocalHora);
   const uvNiveles = [
     { max: 2,  nivel: { es:'Bajo', en:'Low', de:'Niedrig', fr:'Faible', pt:'Baixo', it:'Basso' }, emoji: '🟢',
       consejo: { es:'Sin riesgo especial. No se necesita protección.', en:'No special risk. No protection needed.', de:'Kein besonderes Risiko.', fr:'Pas de risque particulier.', pt:'Sem risco especial.', it:'Nessun rischio speciale.' } },
