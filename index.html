@@ -1955,14 +1955,21 @@ function renderMarea(datos) {
   return true;
 }
 
-function renderPanelInterior(uvIndex, aireData, sunsetStr, tieneMarea) {
+function corregirHoraLocal(isoStr, locationUTCOffsetSec) {
+  if (!isoStr) return null;
+  const parsed = new Date(isoStr).getTime();
+  const deviceOffsetSec = -new Date().getTimezoneOffset() * 60;
+  return new Date(parsed + (deviceOffsetSec - locationUTCOffsetSec) * 1000);
+}
+
+function renderPanelInterior(uvIndex, aireData, sunsetStr, tieneMarea, utcOffsetSec) {
   const panel = document.getElementById('panelInterior');
   const aireExtra = document.getElementById('aireExtra');
 
   const uvVal = uvIndex !== null && uvIndex !== undefined ? Math.round(uvIndex) : null;
 
   const now = new Date();
-  const sunset = sunsetStr ? new Date(sunsetStr) : null;
+  const sunset = sunsetStr ? corregirHoraLocal(sunsetStr, utcOffsetSec || 0) : null;
   let solTexto = null;
   if (sunset) {
     const diffMs = sunset - now;
@@ -1979,7 +1986,7 @@ function renderPanelInterior(uvIndex, aireData, sunsetStr, tieneMarea) {
 
   _ultimoUV = uvIndex ?? null;
   _ultimoAireData = aireData ?? null;
-  _ultimoSunset = sunsetStr ?? null;
+  _ultimoSunset = sunset ? sunset.toISOString() : null;
 
   aireExtra.hidden = true;
   panel.hidden = false;
@@ -2064,7 +2071,7 @@ function renderDatos(datos) {
   renderSol(tiempo.daily);
   renderDias(tiempo.daily);
   const tieneMarea = renderMarea(mdata);
-  renderPanelInterior(c.uv_index, aireData, tiempo.daily && tiempo.daily.sunset ? tiempo.daily.sunset[0] : null, tieneMarea);
+  renderPanelInterior(c.uv_index, aireData, tiempo.daily && tiempo.daily.sunset ? tiempo.daily.sunset[0] : null, tieneMarea, tiempo.utc_offset_seconds);
   aplicarColorTemp(Math.round(c.temperature_2m));
   const max0 = tiempo.daily && tiempo.daily.temperature_2m_max ? tiempo.daily.temperature_2m_max[0] : null;
   const min0 = tiempo.daily && tiempo.daily.temperature_2m_min ? tiempo.daily.temperature_2m_min[0] : null;
