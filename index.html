@@ -2667,6 +2667,7 @@ function abrirMapaAltitud() {
   const { lat, lon } = currentCoords;
   const modal = document.getElementById('mapaModal');
   const iframe = document.getElementById('mapaIframe');
+  document.getElementById('mapaModalTitulo').textContent = T.tuUbicacion || 'Ubicación';
   const altDiv = document.getElementById('mapaModalAltitud');
   altDiv.textContent = document.getElementById('altitud').textContent;
   const zoom = 14;
@@ -2859,7 +2860,7 @@ function abrirEnGoogleMaps() {
   <div style="background:var(--card-bg,#1e2330);border-radius:20px;overflow:hidden;width:90vw;max-width:400px;box-shadow:0 8px 40px rgba(0,0,0,0.5)">
     <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px">
       <div>
-        <div id="mapaModalTitulo" style="font-size:0.75rem;opacity:0.55;text-transform:uppercase;letter-spacing:1px">Ubicación</div>
+        <div id="mapaModalTitulo" style="font-size:0.75rem;opacity:0.55;text-transform:uppercase;letter-spacing:1px"></div>
         <div id="mapaModalAltitud" style="font-size:1.1rem;font-weight:600;margin-top:2px"></div>
       </div>
       <button onclick="cerrarMapaAltitud()" style="border:none;background:rgba(255,255,255,0.1);color:inherit;border-radius:50%;width:32px;height:32px;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
