@@ -1755,7 +1755,7 @@ document.getElementById('modalDia').addEventListener('click', (e) => {
   if (e.target === document.getElementById('modalDia')) cerrarModalDia();
 });
 
-let _ultimoUV = null, _ultimoAireData = null, _ultimoSunset = null, _ultimoSunrise = null, _ultimoSunsetLocalHora = null, _ultimoSunriseLocalHora = null;
+let _ultimoUV = null, _ultimoAireData = null, _ultimoSunset = null, _ultimoSunrise = null, _ultimoSunsetLocalHora = null, _ultimoSunriseLocalHora = null, _ultimoIsDay = true;
 
 function abrirModalInterior(tipo) {
   const uvNiveles = [
@@ -1784,21 +1784,37 @@ function abrirModalInterior(tipo) {
   } else if (tipo === 'sol') {
     const sunset = _ultimoSunset ? new Date(_ultimoSunset) : null;
     const now = new Date();
-    const esDeNoche = sunset && (sunset - now) <= 0;
     const NOCHE = { es:'Noche', en:'Night', de:'Nacht', fr:'Nuit', pt:'Noite', it:'Notte', zh:'夜间', ca:'Nit', eu:'Gaua', gl:'Noite', ar:'ليل', ru:'Ночь', ja:'夜', ko:'밤', nl:'Nacht', pl:'Noc', hi:'रात', ro:'Noapte', hu:'Éjszaka' };
-    titulo = esDeNoche ? ('🌙 ' + (NOCHE[lang] || 'Noche')) : ('🌅 ' + (T.solRestante || 'Sol restante'));
+    titulo = !_ultimoIsDay ? ('🌙 ' + (NOCHE[lang] || 'Noche')) : ('🌅 ' + (T.solRestante || 'Sol restante'));
     if (sunset) {
       const hPuesta = _ultimoSunsetLocalHora || sunset.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+      const HL = { es:'hora local', en:'local time', de:'Ortszeit', fr:'heure locale', pt:'hora local', it:'ora locale', zh:'当地时间', ca:'hora local', eu:'tokiko ordua', gl:'hora local', ar:'التوقيت المحلي', ru:'местное время', ja:'現地時間', ko:'현지 시간', nl:'lokale tijd', pl:'czas lokalny', hi:'स्थानीय समय', ro:'ora locală', hu:'helyi idő' }[lang] || 'hora local';
       const diffMs = sunset - now;
-      if (diffMs > 0 && diffMs < 14 * 3600000) {
+      if (!_ultimoIsDay) {
+        // Night: show time until sunrise
+        const hSalida = _ultimoSunriseLocalHora || '';
+        const sunrise2 = _ultimoSunrise ? new Date(_ultimoSunrise) : null;
+        if (sunrise2) {
+          let nextSunrise = new Date(sunrise2);
+          if (nextSunrise <= now) nextSunrise = new Date(nextSunrise.getTime() + 24 * 3600000);
+          const diffSunrise = nextSunrise - now;
+          if (diffSunrise > 0 && diffSunrise < 30 * 3600000) {
+            const hrs = Math.floor(diffSunrise / 3600000);
+            const mins = Math.floor((diffSunrise % 3600000) / 60000);
+            valor = hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
+          } else { valor = '🌙'; }
+        } else { valor = '🌙'; }
+        nivel = hSalida ? ({ es:`Amanecer a las ${hSalida} (${HL})`, en:`Sunrise at ${hSalida} (${HL})`, de:`Sonnenaufgang um ${hSalida} (${HL})`, fr:`Lever du soleil à ${hSalida} (${HL})`, pt:`Nascer do sol às ${hSalida} (${HL})`, it:`Alba alle ${hSalida} (${HL})`, zh:`日出时间 ${hSalida} (${HL})`, ca:`Alba a les ${hSalida} (${HL})`, eu:`Eguzkia ${hSalida}an aterako da (${HL})`, gl:`Amencer ás ${hSalida} (${HL})`, ar:`شروق الشمس الساعة ${hSalida} (${HL})`, ru:`Рассвет в ${hSalida} (${HL})`, ja:`日の出 ${hSalida} (${HL})`, ko:`일출 ${hSalida} (${HL})`, nl:`Zonsopgang om ${hSalida} (${HL})`, pl:`Wschód słońca o ${hSalida} (${HL})`, hi:`सूर्योदय ${hSalida} (${HL})`, ro:`Răsărit la ${hSalida} (${HL})`, hu:`Napkelte ${hSalida} (${HL})` }[lang] || `Amanecer a las ${hSalida} (${HL})`) : '';
+        detalle = { es:'Horas de noche hasta el próximo amanecer.', en:'Hours of night until the next sunrise.', de:'Nachtstunden bis zum nächsten Sonnenaufgang.', fr:'Heures de nuit jusqu\'au prochain lever du soleil.', pt:'Horas de noite até o próximo nascer do sol.', it:'Ore di notte fino al prossimo alba.', zh:'到下一次日出的夜晚时间。', ca:'Hores de nit fins a l\'alba.', eu:'Gaueko orduak hurrengo ilunabarreraino.', gl:'Horas de noite ata o próximo amencer.', ar:'ساعات الليل حتى شروق الشمس القادم.', ru:'Ночные часы до следующего рассвета.', ja:'次の日の出までの夜の時間。', ko:'다음 일출까지 남은 밤 시간.', nl:'Nachturen tot de volgende zonsopgang.', pl:'Godziny nocy do następnego wschodu słońca.', hi:'अगले सूर्योदय तक रात के घंटे।', ro:'Ore de noapte până la următorul răsărit.', hu:'Éjszakai órák a következő napkeltig.' }[lang] || '';
+      } else if (diffMs > 0 && diffMs < 14 * 3600000) {
         const hrs = Math.floor(diffMs / 3600000);
         const mins = Math.floor((diffMs % 3600000) / 60000);
         valor = hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
-        nivel = { es:`Puesta de sol a las ${hPuesta}`, en:`Sunset at ${hPuesta}`, de:`Sonnenuntergang um ${hPuesta}`, fr:`Coucher du soleil à ${hPuesta}`, pt:`Pôr do sol às ${hPuesta}`, it:`Tramonto alle ${hPuesta}`, zh:`日落时间 ${hPuesta}`, ca:`Posta de sol a les ${hPuesta}`, eu:`Ilunabarra ${hPuesta}an`, gl:`Solpor ás ${hPuesta}`, ar:`غروب الشمس الساعة ${hPuesta}`, ru:`Закат в ${hPuesta}`, ja:`日没 ${hPuesta}`, ko:`일몰 ${hPuesta}`, nl:`Zonsondergang om ${hPuesta}`, pl:`Zachód słońca o ${hPuesta}`, hi:`सूर्यास्त ${hPuesta}`, ro:`Apus la ${hPuesta}`, hu:`Naplemente ${hPuesta}` }[lang] || `Puesta de sol a las ${hPuesta}`;
+        nivel = { es:`Puesta de sol a las ${hPuesta} (${HL})`, en:`Sunset at ${hPuesta} (${HL})`, de:`Sonnenuntergang um ${hPuesta} (${HL})`, fr:`Coucher du soleil à ${hPuesta} (${HL})`, pt:`Pôr do sol às ${hPuesta} (${HL})`, it:`Tramonto alle ${hPuesta} (${HL})`, zh:`日落时间 ${hPuesta} (${HL})`, ca:`Posta de sol a les ${hPuesta} (${HL})`, eu:`Ilunabarra ${hPuesta}an (${HL})`, gl:`Solpor ás ${hPuesta} (${HL})`, ar:`غروب الشمس الساعة ${hPuesta} (${HL})`, ru:`Закат в ${hPuesta} (${HL})`, ja:`日没 ${hPuesta} (${HL})`, ko:`일몰 ${hPuesta} (${HL})`, nl:`Zonsondergang om ${hPuesta} (${HL})`, pl:`Zachód słońca o ${hPuesta} (${HL})`, hi:`सूर्यास्त ${hPuesta} (${HL})`, ro:`Apus la ${hPuesta} (${HL})`, hu:`Naplemente ${hPuesta} (${HL})` }[lang] || `Puesta de sol a las ${hPuesta} (${HL})`;
         detalle = { es:'Tiempo restante hasta que el sol se ponga hoy.', en:'Time remaining until sunset today.', de:'Verbleibende Zeit bis zum heutigen Sonnenuntergang.', fr:'Temps restant avant le coucher du soleil aujourd\'hui.', pt:'Tempo restante até o pôr do sol hoje.', it:'Tempo rimanente fino al tramonto di oggi.', zh:'距今日日落的剩余时间。', ca:'Temps restant fins a la posta de sol avui.', eu:'Gaurko ilunabarreraino geratzen den denbora.', gl:'Tempo restante ata o solpor hoxe.', ar:'الوقت المتبقي حتى غروب الشمس اليوم.', ru:'Оставшееся время до заката сегодня.', ja:'今日の日没までの残り時間。', ko:'오늘 일몰까지 남은 시간.', nl:'Resterende tijd tot zonsondergang vandaag.', pl:'Pozostały czas do zachodu słońca dzisiaj.', hi:'आज सूर्यास्त तक शेष समय।', ro:'Timp rămas până la apus azi.', hu:'Hátralévő idő a mai napnyugtáig.' }[lang] || '';
       } else {
-        valor = '🌙';
-        nivel = { es:`El sol se puso a las ${hPuesta}`, en:`Sun set at ${hPuesta}`, de:`Sonne unterging um ${hPuesta}`, fr:`Soleil couché à ${hPuesta}`, pt:`Sol se pôs às ${hPuesta}`, it:`Sole tramontato alle ${hPuesta}`, zh:`日落时间 ${hPuesta}`, ca:`El sol es va pondre a les ${hPuesta}`, eu:`Eguzkia ${hPuesta}an sartu zen`, gl:`O sol puxose ás ${hPuesta}`, ar:`غربت الشمس الساعة ${hPuesta}`, ru:`Солнце зашло в ${hPuesta}`, ja:`日没 ${hPuesta}`, ko:`일몰 ${hPuesta}`, nl:`Zon onderging om ${hPuesta}`, pl:`Słońce zaszło o ${hPuesta}`, hi:`सूर्यास्त ${hPuesta}`, ro:`Soarele a apus la ${hPuesta}`, hu:`A nap lenyugodott ${hPuesta}kor` }[lang] || '';
+        valor = '☀️';
+        nivel = { es:`Puesta de sol a las ${hPuesta} (${HL})`, en:`Sunset at ${hPuesta} (${HL})`, de:`Sonnenuntergang um ${hPuesta} (${HL})`, fr:`Coucher du soleil à ${hPuesta} (${HL})`, pt:`Pôr do sol às ${hPuesta} (${HL})`, it:`Tramonto alle ${hPuesta} (${HL})`, zh:`日落时间 ${hPuesta} (${HL})`, ca:`Posta de sol a les ${hPuesta} (${HL})`, eu:`Ilunabarra ${hPuesta}an (${HL})`, gl:`Solpor ás ${hPuesta} (${HL})`, ar:`غروب الشمس الساعة ${hPuesta} (${HL})`, ru:`Закат в ${hPuesta} (${HL})`, ja:`日没 ${hPuesta} (${HL})`, ko:`일몰 ${hPuesta} (${HL})`, nl:`Zonsondergang om ${hPuesta} (${HL})`, pl:`Zachód słońca o ${hPuesta} (${HL})`, hi:`सूर्यास्त ${hPuesta} (${HL})`, ro:`Apus la ${hPuesta} (${HL})`, hu:`Naplemente ${hPuesta} (${HL})` }[lang] || `Puesta de sol a las ${hPuesta} (${HL})`;
         detalle = { es:'El sol ya se ha puesto hoy.', en:'The sun has already set today.', de:'Die Sonne ist heute bereits untergegangen.', fr:'Le soleil s\'est déjà couché aujourd\'hui.', pt:'O sol já se pôs hoje.', it:'Il sole è già tramontato oggi.', zh:'今天太阳已经落山了。', ca:'El sol ja s\'ha post avui.', eu:'Eguzkia jada sartu da gaur.', gl:'O sol xa se puxo hoxe.', ar:'لقد غربت الشمس اليوم بالفعل.', ru:'Сегодня солнце уже зашло.', ja:'今日は既に日没を過ぎています。', ko:'오늘 이미 해가 졌습니다.', nl:'De zon is vandaag al ondergegaan.', pl:'Słońce już dziś zaszło.', hi:'आज सूर्य अस्त हो चुका है।', ro:'Soarele a apus deja azi.', hu:'A nap ma már lenyugodott.' }[lang] || '';
       }
     } else { valor = '--'; }
@@ -1964,7 +1980,7 @@ function corregirHoraLocal(isoStr, locationUTCOffsetSec) {
   return new Date(parsed + (deviceOffsetSec - locationUTCOffsetSec) * 1000);
 }
 
-function renderPanelInterior(uvIndex, aireData, sunsetStr, tieneMarea, utcOffsetSec, sunriseStr) {
+function renderPanelInterior(uvIndex, aireData, sunsetStr, tieneMarea, utcOffsetSec, sunriseStr, isDay) {
   const panel = document.getElementById('panelInterior');
   const aireExtra = document.getElementById('aireExtra');
 
@@ -1974,18 +1990,23 @@ function renderPanelInterior(uvIndex, aireData, sunsetStr, tieneMarea, utcOffset
   const sunset  = sunsetStr  ? corregirHoraLocal(sunsetStr,  utcOffsetSec || 0) : null;
   const sunrise = sunriseStr ? corregirHoraLocal(sunriseStr, utcOffsetSec || 0) : null;
 
+  const NOCHE_RESTANTE = { es:'Noche restante', en:'Night remaining', de:'Verbleibende Nacht', fr:'Nuit restante', pt:'Noite restante', it:'Notte rimanente', zh:'剩余夜晚', ca:'Nit restant', eu:'Gauaren hondarrak', gl:'Noite restante', ar:'ليل متبقٍ', ru:'Ночи осталось', ja:'残りの夜', ko:'남은 밤', nl:'Resterende nacht', pl:'Pozostała noc', hi:'शेष रात', ro:'Noapte rămasă', hu:'Hátralévő éjszaka' };
   let solTexto = null, solLabel = null;
-  if (sunset) {
-    const diffSunset = sunset - now;
-    if (diffSunset > 0 && diffSunset < 14 * 3600000) {
-      // Antes del ocaso: mostrar tiempo hasta el ocaso
-      const hrs = Math.floor(diffSunset / 3600000);
-      const mins = Math.floor((diffSunset % 3600000) / 60000);
-      solTexto = hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
-      solLabel = T.solRestante || 'Sol restante';
-    } else if (sunrise) {
-      // Ya es de noche: mostrar tiempo hasta el próximo amanecer
-      // El amanecer del día siguiente = amanecer de hoy + 24h si ya pasó
+  if (isDay) {
+    if (sunset) {
+      const diffSunset = sunset - now;
+      if (diffSunset > 0 && diffSunset < 14 * 3600000) {
+        const hrs = Math.floor(diffSunset / 3600000);
+        const mins = Math.floor((diffSunset % 3600000) / 60000);
+        solTexto = hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
+        solLabel = T.solRestante || 'Sol restante';
+      } else {
+        solTexto = '☀️';
+        solLabel = T.solRestante || 'Sol restante';
+      }
+    }
+  } else {
+    if (sunrise) {
       let nextSunrise = new Date(sunrise);
       if (nextSunrise <= now) nextSunrise = new Date(nextSunrise.getTime() + 24 * 3600000);
       const diffSunrise = nextSunrise - now;
@@ -1993,14 +2014,14 @@ function renderPanelInterior(uvIndex, aireData, sunsetStr, tieneMarea, utcOffset
         const hrs = Math.floor(diffSunrise / 3600000);
         const mins = Math.floor((diffSunrise % 3600000) / 60000);
         solTexto = hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
-        solLabel = T.paraAmanecer || 'Para amanecer';
+        solLabel = NOCHE_RESTANTE[lang] || 'Noche restante';
       } else {
         solTexto = '🌙';
-        solLabel = T.solRestante || 'Sol restante';
+        solLabel = NOCHE_RESTANTE[lang] || 'Noche restante';
       }
     } else {
       solTexto = '🌙';
-      solLabel = T.solRestante || 'Sol restante';
+      solLabel = NOCHE_RESTANTE[lang] || 'Noche restante';
     }
   }
 
@@ -2012,6 +2033,7 @@ function renderPanelInterior(uvIndex, aireData, sunsetStr, tieneMarea, utcOffset
   _ultimoSunrise = sunrise ? sunrise.toISOString() : null;
   _ultimoSunsetLocalHora = sunsetStr ? sunsetStr.substring(11, 16) : null;
   _ultimoSunriseLocalHora = sunriseStr ? sunriseStr.substring(11, 16) : null;
+  _ultimoIsDay = isDay !== undefined ? isDay : true;
 
   aireExtra.hidden = true;
   panel.hidden = false;
@@ -2096,7 +2118,7 @@ function renderDatos(datos) {
   renderSol(tiempo.daily);
   renderDias(tiempo.daily);
   const tieneMarea = renderMarea(mdata);
-  renderPanelInterior(c.uv_index, aireData, tiempo.daily && tiempo.daily.sunset ? tiempo.daily.sunset[0] : null, tieneMarea, tiempo.utc_offset_seconds, tiempo.daily && tiempo.daily.sunrise ? tiempo.daily.sunrise[0] : null);
+  renderPanelInterior(c.uv_index, aireData, tiempo.daily && tiempo.daily.sunset ? tiempo.daily.sunset[0] : null, tieneMarea, tiempo.utc_offset_seconds, tiempo.daily && tiempo.daily.sunrise ? tiempo.daily.sunrise[0] : null, c.is_day === 1);
   aplicarColorTemp(Math.round(c.temperature_2m));
   const max0 = tiempo.daily && tiempo.daily.temperature_2m_max ? tiempo.daily.temperature_2m_max[0] : null;
   const min0 = tiempo.daily && tiempo.daily.temperature_2m_min ? tiempo.daily.temperature_2m_min[0] : null;
