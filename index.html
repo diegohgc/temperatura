@@ -2023,14 +2023,14 @@ function renderPanelInterior(uvIndex, aireData, sunsetStr, tieneMarea, utcOffset
         const hrs = Math.floor(diffSunrise / 3600000);
         const mins = Math.floor((diffSunrise % 3600000) / 60000);
         solTexto = hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
-        solLabel = NOCHE_RESTANTE[lang] || 'Noche restante';
+        solLabel = NOCHE_RESTANTE[idioma] || 'Noche restante';
       } else {
         solTexto = '🌙';
-        solLabel = NOCHE_RESTANTE[lang] || 'Noche restante';
+        solLabel = NOCHE_RESTANTE[idioma] || 'Noche restante';
       }
     } else {
       solTexto = '🌙';
-      solLabel = NOCHE_RESTANTE[lang] || 'Noche restante';
+      solLabel = NOCHE_RESTANTE[idioma] || 'Noche restante';
     }
   }
 
