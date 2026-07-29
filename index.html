@@ -1981,6 +1981,7 @@ function corregirHoraLocal(isoStr, locationUTCOffsetSec) {
 }
 
 function renderPanelInterior(uvIndex, aireData, sunsetStr, tieneMarea, utcOffsetSec, sunriseStr, isDay) {
+  console.log('[Panel] isDay=', isDay, 'sunsetStr=', sunsetStr, 'sunriseStr=', sunriseStr);
   const panel = document.getElementById('panelInterior');
   const aireExtra = document.getElementById('aireExtra');
 
