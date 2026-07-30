@@ -2004,7 +2004,7 @@ function renderPanelInterior(uvIndex, aireData, sunsetStr, tieneMarea, utcOffset
   if (isDay) {
     if (sunset) {
       const diffSunset = sunset - now;
-      if (diffSunset > 0 && diffSunset < 14 * 3600000) {
+      if (diffSunset > 0 && diffSunset < 18 * 3600000) {
         const hrs = Math.floor(diffSunset / 3600000);
         const mins = Math.floor((diffSunset % 3600000) / 60000);
         solTexto = hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
