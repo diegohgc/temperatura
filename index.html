@@ -340,6 +340,8 @@
     .marea-extremo .me-icono svg { width: 20px; height: 20px; }
   }
 </style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
   <div id="pullIndicator"></div>
@@ -2725,23 +2727,33 @@ function animarSwipeEntrada() {
   }, { passive: true });
 })();
 
+let _mapaLeaflet = null;
 function abrirMapaAltitud() {
   if (!currentCoords) return;
   const { lat, lon } = currentCoords;
   const modal = document.getElementById('mapaModal');
-  const iframe = document.getElementById('mapaIframe');
   document.getElementById('mapaModalTitulo').textContent = T.tuUbicacion || 'Ubicación';
-  const altDiv = document.getElementById('mapaModalAltitud');
-  altDiv.textContent = document.getElementById('altitud').textContent;
-  const zoom = 14;
-  iframe.src = `https://www.openstreetmap.org/export/embed.html?bbox=${lon-0.02},${lat-0.01},${lon+0.02},${lat+0.01}&layer=mapnik&marker=${lat},${lon}`;
+  document.getElementById('mapaModalAltitud').textContent = document.getElementById('altitud').textContent;
   modal.style.display = 'flex';
+  setTimeout(() => {
+    if (!_mapaLeaflet) {
+      _mapaLeaflet = L.map('mapaLeaflet', { zoomControl: true }).setView([lat, lon], 14);
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        maxZoom: 19
+      }).addTo(_mapaLeaflet);
+      _mapaLeaflet._marker = L.marker([lat, lon]).addTo(_mapaLeaflet);
+    } else {
+      _mapaLeaflet.setView([lat, lon], 14);
+      if (_mapaLeaflet._marker) _mapaLeaflet._marker.setLatLng([lat, lon]);
+      _mapaLeaflet.invalidateSize();
+    }
+  }, 50);
 }
 
 function cerrarMapaAltitud() {
-  const modal = document.getElementById('mapaModal');
-  modal.style.display = 'none';
-  document.getElementById('mapaIframe').src = '';
+  document.getElementById('mapaModal').style.display = 'none';
+  if (_mapaLeaflet) _mapaLeaflet.invalidateSize();
 }
 
 function abrirEnGoogleMaps() {
@@ -2928,7 +2940,7 @@ function abrirEnGoogleMaps() {
       </div>
       <button onclick="cerrarMapaAltitud()" style="border:none;background:rgba(255,255,255,0.1);color:inherit;border-radius:50%;width:32px;height:32px;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
     </div>
-    <iframe id="mapaIframe" src="" width="100%" height="280" style="border:none;display:block" loading="lazy" referrerpolicy="no-referrer"></iframe>
+    <div id="mapaLeaflet" style="width:100%;height:280px"></div>
     <div style="padding:10px 18px 14px;display:flex;gap:10px">
       <button id="mapaAbrirGMaps" onclick="abrirEnGoogleMaps()" style="flex:1;padding:9px;border:none;border-radius:12px;background:rgba(255,255,255,0.1);color:inherit;font-size:0.9rem;cursor:pointer">Google Maps ↗</button>
     </div>
