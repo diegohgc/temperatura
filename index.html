@@ -2220,7 +2220,23 @@ async function actualizarPosicionYAltitud() {
   }, null, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
 }
 
+async function actualizarCiudad() {
+  if (ubicacionManual || !navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(async (pos) => {
+    const { latitude, longitude } = pos.coords;
+    try {
+      const ciudad = await obtenerCiudad(latitude, longitude);
+      elCiudad.firstChild.textContent = ciudad.principal;
+      document.getElementById('ciudadSub').textContent = ciudad.sub || '';
+      const nombreCiudad = ciudad.sub ? `${ciudad.principal}, ${ciudad.sub}` : ciudad.principal;
+      currentCoords = { ...currentCoords, lat: latitude, lon: longitude, nombre: nombreCiudad };
+      actualizarBtnFav();
+    } catch (e) {}
+  }, null, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+}
+
 setInterval(actualizarPosicionYAltitud, 10000);
+setInterval(actualizarCiudad, 180000);
 
 function cerrarBuscador() {
   elBuscador.hidden = true;
