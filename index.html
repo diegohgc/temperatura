@@ -2204,6 +2204,24 @@ async function actualizar() {
 
 let timeoutBusqueda = null;
 
+async function actualizarPosicionYAltitud() {
+  if (ubicacionManual || !navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(async (pos) => {
+    const { latitude, longitude } = pos.coords;
+    currentCoords = { ...currentCoords, lat: latitude, lon: longitude };
+    try {
+      const r = await fetch(`https://api.open-meteo.com/v1/elevation?latitude=${latitude}&longitude=${longitude}`);
+      const data = await r.json();
+      const alt = data.elevation && data.elevation.length ? data.elevation[0] : null;
+      if (alt !== null) {
+        elAltitud.textContent = usaMph ? `${T.altitud} ${Math.round(alt * 3.28084)} ft` : `${T.altitud} ${Math.round(alt)} m`;
+      }
+    } catch (e) {}
+  }, null, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+}
+
+setInterval(actualizarPosicionYAltitud, 60000);
+
 function cerrarBuscador() {
   elBuscador.hidden = true;
   inputCiudad.value = '';
