@@ -2923,7 +2923,7 @@ function abrirEnGoogleMaps() {
     }
     if (heading !== null) {
       const h = Math.round(heading);
-      aguja.style.transform = `rotate(${h}deg)`;
+      aguja.style.transform = `rotate(${-h}deg)`;
       const ag = document.getElementById('brujulaRosa');
       const gt = document.getElementById('brujulaGradosTexto');
       const dt = document.getElementById('brujulaDireccionTexto');
