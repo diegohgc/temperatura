@@ -2290,28 +2290,17 @@ async function actualizar() {
     setEstado(T.geoNoDisponible);
     return;
   }
-  // Estrategia en dos pasos:
-  // 1) Ubicación rápida por red/WiFi (sin GPS) — responde en <2s
-  // 2) Si falla, intentar con GPS de alta precisión con más tiempo
-  let cargado = false;
+  // Alta precisión (GPS real, inmune a VPN) con timeout generoso
+  // En arranque en frío Android el GPS puede tardar 15-20s
   navigator.geolocation.getCurrentPosition((pos) => {
-    if (cargado) return; // ya cargó el paso 2, ignorar
-    cargado = true;
     cargarDatos(pos.coords.latitude, pos.coords.longitude);
   }, (err) => {
-    if (cargado) return;
-    // Paso 1 falló — intentar con GPS directo
-    navigator.geolocation.getCurrentPosition((pos) => {
-      cargado = true;
-      cargarDatos(pos.coords.latitude, pos.coords.longitude);
-    }, (err2) => {
-      if (err2.code === err2.PERMISSION_DENIED || err.code === err.PERMISSION_DENIED) {
-        setEstado(T.permisoDenegado);
-      } else {
-        setEstado(T.errorUbicacion);
-      }
-    }, { enableHighAccuracy: true, timeout: 20000, maximumAge: 60000 });
-  }, { enableHighAccuracy: false, timeout: 5000, maximumAge: 120000 });
+    if (err.code === err.PERMISSION_DENIED) {
+      setEstado(T.permisoDenegado);
+    } else {
+      setEstado(T.errorUbicacion);
+    }
+  }, { enableHighAccuracy: true, timeout: 20000, maximumAge: 120000 });
 }
 
 let timeoutBusqueda = null;
