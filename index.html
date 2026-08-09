@@ -3170,9 +3170,9 @@ function abrirEnGoogleMaps() {
   // El eclipse entra en España por el norte (Asturias/Cantabria) y va hacia el SE
   const centralLine = [
     [75, -45, 1005], [65, -28, 1022], [58, -18, 1035],
-    [52, -12, 1046], [47,  -9, 1058], [44,  -7, 1088],
-    [43,  -5, 1106], [41,  -2, 1116], [39,   1, 1124],
-    [36,   5, 1118], [33,  12, 1124], [29,  20, 1130]
+    [52, -12, 1046], [47,  -9, 1058], [44,  -7, 1089],
+    [43,  -5, 1107], [41,  -2, 1117], [39,   1, 1125],
+    [36,   5, 1130], [33,  12, 1136], [29,  20, 1142]
   ];
   const TOTALITY_HALF_KM = 145;
 
@@ -3191,8 +3191,8 @@ function abrirEnGoogleMaps() {
     }
     const peakUTC = new Date('2026-08-12T00:00:00Z');
     peakUTC.setMinutes(bestSeg[2]);
-    const c1 = new Date(peakUTC.getTime() - 60*60000);
-    const c4 = new Date(peakUTC.getTime() + 60*60000);
+    const c1 = new Date(peakUTC.getTime() - 56*60000);
+    const c4 = new Date(peakUTC.getTime() + 53*60000);
     let obscuration;
     if (minDist <= TOTALITY_HALF_KM) {
       obscuration = 100;
