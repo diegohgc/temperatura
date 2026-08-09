@@ -558,8 +558,8 @@
     <div id="eclipseModal">
       <div class="ecl-modal-box">
         <button class="ecl-close-modal" id="eclModalClose">✕</button>
-        <h2>🌑 Solar Eclipse</h2>
-        <div class="ecl-date">August 12, 2026</div>
+        <h2 id="eclModalTitle">🌑 Solar Eclipse</h2>
+        <div class="ecl-date" id="eclModalDate">August 12, 2026</div>
         <div id="eclModalContent"></div>
         <div class="ecl-tip" id="eclTip"></div>
         <a id="eclExtLink" class="ecl-ext-btn" target="_blank">🔭 More details on timeanddate.com</a>
@@ -3083,6 +3083,7 @@ function abrirEnGoogleMaps() {
   const i18n = {
     es: {
       title:'Eclipse Solar · 12 agosto', sub:'Eclipse Solar Total',
+      modalTitle:'🌑 Eclipse Solar', modalDate:'12 agosto 2026',
       loading:'Cargando datos...', noVisible:'Eclipse no visible desde tu ubicación',
       noLocation:'Activa la ubicación para ver datos locales.',
       total:'¡Totalidad visible desde tu ubicación!', peak:'Pico',
@@ -3094,6 +3095,7 @@ function abrirEnGoogleMaps() {
     },
     en: {
       title:'Solar Eclipse · August 12', sub:'Total Solar Eclipse',
+      modalTitle:'🌑 Solar Eclipse', modalDate:'August 12, 2026',
       loading:'Loading data...', noVisible:'Eclipse not visible from your location',
       noLocation:'Enable location to see local data.',
       total:'Totality visible from your location!', peak:'Peak',
@@ -3105,6 +3107,7 @@ function abrirEnGoogleMaps() {
     },
     de: {
       title:'Sonnenfinsternis · 12. August', sub:'Totale Sonnenfinsternis',
+      modalTitle:'🌑 Sonnenfinsternis', modalDate:'12. August 2026',
       loading:'Daten werden geladen...', noVisible:'Sonnenfinsternis von Ihrem Standort nicht sichtbar',
       noLocation:'Standort aktivieren für lokale Daten.',
       total:'Totalität von Ihrem Standort sichtbar!', peak:'Maximum',
@@ -3116,6 +3119,7 @@ function abrirEnGoogleMaps() {
     },
     fr: {
       title:'Éclipse solaire · 12 août', sub:'Éclipse solaire totale',
+      modalTitle:'🌑 Éclipse solaire', modalDate:'12 août 2026',
       loading:'Chargement...', noVisible:'Éclipse non visible depuis votre position',
       noLocation:'Activez la localisation pour voir les données locales.',
       total:'Totalité visible depuis votre position!', peak:'Maximum',
@@ -3127,6 +3131,7 @@ function abrirEnGoogleMaps() {
     },
     pt: {
       title:'Eclipse Solar · 12 agosto', sub:'Eclipse Solar Total',
+      modalTitle:'🌑 Eclipse Solar', modalDate:'12 de agosto de 2026',
       loading:'Carregando dados...', noVisible:'Eclipse não visível da sua localização',
       noLocation:'Ative a localização para ver dados locais.',
       total:'Totalidade visível da sua localização!', peak:'Pico',
@@ -3138,6 +3143,7 @@ function abrirEnGoogleMaps() {
     },
     it: {
       title:'Eclisse solare · 12 agosto', sub:'Eclisse solare totale',
+      modalTitle:'🌑 Eclisse solare', modalDate:'12 agosto 2026',
       loading:'Caricamento...', noVisible:'Eclisse non visibile dalla tua posizione',
       noLocation:'Attiva la posizione per vedere i dati locali.',
       total:'Totalità visibile dalla tua posizione!', peak:'Picco',
@@ -3159,6 +3165,8 @@ function abrirEnGoogleMaps() {
   document.getElementById('eclInfo').textContent = T.loading;
   document.getElementById('eclMoreBtn').textContent = T.more;
   document.getElementById('eclExtLink').textContent = T.details;
+  document.getElementById('eclModalTitle').textContent = T.modalTitle;
+  document.getElementById('eclModalDate').textContent = T.modalDate;
 
   // Datos reales del IGN (Instituto Geográfico Nacional) — eclipse 12/08/2026
   // Formato: [lat, lon, c1, c2_o_null, max, c3_o_null, c4_o_null, magnitud, tieneTotalidad(0/1)]
