@@ -3166,12 +3166,13 @@ function abrirEnGoogleMaps() {
 
   // Datos del eclipse — línea central simplificada [lat, lon, minutos UTC desde 00:00]
   // Línea central: [lat, lon, minutos UTC desde 00:00 del 12-ago-2026]
-  // Calibrado con dato real: C2 totalidad España ~18:26 UTC (20:26 hora local UTC+2)
+  // Calibrado con dato real en Gijón (43.5N, 5.7W): C2=18:26 UTC (20:26 local UTC+2)
+  // El eclipse entra en España por el norte (Asturias/Cantabria) y va hacia el SE
   const centralLine = [
-    [75, -45, 1005], [65, -25, 1025], [58, -15, 1038],
-    [50, -10, 1048], [46,  -6, 1060], [43,  -2, 1090],
-    [40,   1, 1100], [38,   5, 1107], [35,  10, 1114],
-    [30,  18, 1121], [27,  25, 1127], [24,  30, 1132]
+    [75, -45, 1005], [65, -28, 1022], [58, -18, 1035],
+    [52, -12, 1046], [47,  -9, 1058], [44,  -7, 1080],
+    [43,  -5, 1093], [41,  -2, 1103], [39,   1, 1112],
+    [36,   5, 1118], [33,  12, 1124], [29,  20, 1130]
   ];
   const TOTALITY_HALF_KM = 145;
 
