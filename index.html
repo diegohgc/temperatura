@@ -3232,7 +3232,7 @@ function abrirEnGoogleMaps() {
     document.getElementById('eclTip').textContent = isTotal ? T.tipTotal : T.tipPartial;
 
     document.getElementById('eclExtLink').href =
-      `https://www.timeanddate.com/eclipse/solar/2026-august-12?n=,${lat},${lon}`;
+      `https://www.timeanddate.com/eclipse/map/2026-august-12?lat=${lat.toFixed(4)}&lon=${lon.toFixed(4)}`;
   }
 
   // Esperar coords de la app (con reintentos) o pedir GPS directamente
