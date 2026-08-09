@@ -3225,7 +3225,7 @@ function abrirEnGoogleMaps() {
       <div class="ecl-row"><span>${T.max}</span><span>${fmt(d.peakUTC)}</span></div>
       <div class="ecl-row"><span>${T.c4}</span><span>${fmt(d.c4)}</span></div>
       <div class="ecl-row"><span>${T.coverage}</span><span>${d.obscuration}%</span></div>
-      <div class="ecl-row"><span>${T.dist}</span><span>${d.distKm} km</span></div>
+      <div class="ecl-row"><span>${T.dist}</span><span>${d.obscuration === 100 ? (lng === 'es' ? 'Dentro ✓' : 'Inside ✓') : d.distKm + ' km'}</span></div>
     `;
     document.getElementById('eclTip').textContent = isTotal ? T.tipTotal : T.tipPartial;
 
