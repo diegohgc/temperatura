@@ -3235,7 +3235,7 @@ function abrirEnGoogleMaps() {
 
   // Esperar coords de la app (con reintentos) o pedir GPS directamente
   function tryCoords(attempts) {
-    if (typeof currentCoords !== 'undefined' && currentCoords.lat) {
+    if (currentCoords && currentCoords.lat) {
       usarCoords(currentCoords.lat, currentCoords.lon);
     } else if (attempts > 0) {
       setTimeout(() => tryCoords(attempts - 1), 1500);
