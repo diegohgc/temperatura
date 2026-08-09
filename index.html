@@ -3070,27 +3070,108 @@ function abrirEnGoogleMaps() {
 
 // ── Eclipse solar 12 agosto 2026 ──────────────────────────────────────────
 (function() {
-  // Solo mostrar del 10 al 14 de agosto 2026
   const now = new Date();
   const start = new Date('2026-08-09T00:00:00Z');
   const end   = new Date('2026-08-15T00:00:00Z');
   if (now < start || now > end) return;
-
   if (localStorage.getItem('eclipse2026closed')) return;
+
+  // Traducciones
+  const lng = (typeof idioma !== 'undefined' ? idioma : 'en').substring(0,2);
+  const i18n = {
+    es: {
+      title:'Eclipse Solar · 12 agosto', sub:'Eclipse Solar Total',
+      loading:'Cargando datos...', noVisible:'Eclipse no visible desde tu ubicación',
+      noLocation:'Activa la ubicación para ver datos locales.',
+      total:'¡Totalidad visible desde tu ubicación!', peak:'Pico',
+      coverage:'Cobertura estimada', more:'Más info para tu ubicación →',
+      c1:'Inicio (C1)', max:'Máximo', c4:'Fin (C4)',
+      dist:'Distancia a la franja total',
+      tipTotal:'⚠️ No mires el sol directamente excepto durante los segundos de totalidad.',
+      tipPartial:'⚠️ Usa gafas de eclipse certificadas durante todo el fenómeno.',
+      details:'🔭 Más detalles en timeanddate.com'
+    },
+    en: {
+      title:'Solar Eclipse · August 12', sub:'Total Solar Eclipse',
+      loading:'Loading data...', noVisible:'Eclipse not visible from your location',
+      noLocation:'Enable location to see local data.',
+      total:'Totality visible from your location!', peak:'Peak',
+      coverage:'Estimated coverage', more:'More info for your location →',
+      c1:'Start (C1)', max:'Maximum', c4:'End (C4)',
+      dist:'Distance to totality band',
+      tipTotal:'⚠️ Never look directly at the sun except during the seconds of totality.',
+      tipPartial:'⚠️ Use certified eclipse glasses throughout the event.',
+      details:'🔭 More details at timeanddate.com'
+    },
+    de: {
+      title:'Sonnenfinsternis · 12. August', sub:'Totale Sonnenfinsternis',
+      loading:'Daten werden geladen...', noVisible:'Sonnenfinsternis von Ihrem Standort nicht sichtbar',
+      noLocation:'Standort aktivieren für lokale Daten.',
+      total:'Totalität von Ihrem Standort sichtbar!', peak:'Maximum',
+      coverage:'Geschätzte Abdeckung', more:'Mehr Infos für Ihren Standort →',
+      c1:'Anfang (C1)', max:'Maximum', c4:'Ende (C4)',
+      dist:'Entfernung zur Totalitätszone',
+      tipTotal:'⚠️ Schauen Sie nie direkt in die Sonne, außer während der Totalität.',
+      tipPartial:'⚠️ Verwenden Sie zertifizierte Sonnenfinsternisbrillen.',
+      details:'🔭 Mehr Details auf timeanddate.com'
+    },
+    fr: {
+      title:'Éclipse solaire · 12 août', sub:'Éclipse solaire totale',
+      loading:'Chargement...', noVisible:'Éclipse non visible depuis votre position',
+      noLocation:'Activez la localisation pour voir les données locales.',
+      total:'Totalité visible depuis votre position!', peak:'Maximum',
+      coverage:'Couverture estimée', more:'Plus d\'infos pour votre position →',
+      c1:'Début (C1)', max:'Maximum', c4:'Fin (C4)',
+      dist:'Distance à la zone de totalité',
+      tipTotal:'⚠️ Ne regardez jamais directement le soleil sauf pendant les secondes de totalité.',
+      tipPartial:'⚠️ Utilisez des lunettes d\'éclipse certifiées.',
+      details:'🔭 Plus de détails sur timeanddate.com'
+    },
+    pt: {
+      title:'Eclipse Solar · 12 agosto', sub:'Eclipse Solar Total',
+      loading:'Carregando dados...', noVisible:'Eclipse não visível da sua localização',
+      noLocation:'Ative a localização para ver dados locais.',
+      total:'Totalidade visível da sua localização!', peak:'Pico',
+      coverage:'Cobertura estimada', more:'Mais info para a sua localização →',
+      c1:'Início (C1)', max:'Máximo', c4:'Fim (C4)',
+      dist:'Distância à faixa de totalidade',
+      tipTotal:'⚠️ Nunca olhe diretamente para o sol exceto durante os segundos de totalidade.',
+      tipPartial:'⚠️ Use óculos de eclipse certificados durante todo o fenômeno.',
+      details:'🔭 Mais detalhes em timeanddate.com'
+    },
+    it: {
+      title:'Eclisse solare · 12 agosto', sub:'Eclisse solare totale',
+      loading:'Caricamento...', noVisible:'Eclisse non visibile dalla tua posizione',
+      noLocation:'Attiva la posizione per vedere i dati locali.',
+      total:'Totalità visibile dalla tua posizione!', peak:'Picco',
+      coverage:'Copertura stimata', more:'Più info per la tua posizione →',
+      c1:'Inizio (C1)', max:'Massimo', c4:'Fine (C4)',
+      dist:'Distanza dalla fascia di totalità',
+      tipTotal:'⚠️ Non guardare mai direttamente il sole tranne durante i secondi di totalità.',
+      tipPartial:'⚠️ Usa occhiali per eclissi certificati durante tutto il fenomeno.',
+      details:'🔭 Più dettagli su timeanddate.com'
+    }
+  };
+  const T = i18n[lng] || i18n.en;
 
   const banner = document.getElementById('eclipseBanner');
   const modal  = document.getElementById('eclipseModal');
-  banner.classList.add('visible');
 
-  // Datos del eclipse (máximo eclíptico: 17:46 UTC sobre el Atlántico N)
-  // Línea central simplificada [lat, lon, hora UTC en min desde medianoche]
+  // Aplicar textos traducidos al banner
+  document.getElementById('eclTitle').textContent = T.title;
+  document.getElementById('eclSubtitle').textContent = T.sub;
+  document.getElementById('eclInfo').textContent = T.loading;
+  document.getElementById('eclMoreBtn').textContent = T.more;
+  document.getElementById('eclExtLink').textContent = T.details;
+
+  // Datos del eclipse — línea central simplificada [lat, lon, minutos UTC desde 00:00]
   const centralLine = [
     [75, -45, 1020], [65, -25, 1040], [58, -15, 1048],
     [50, -10, 1054], [43,  -4, 1060], [40,   0, 1063],
     [38,   5, 1066], [35,  10, 1070], [30,  18, 1076],
     [27,  25, 1080], [24,  30, 1084]
   ];
-  const TOTALITY_HALF_KM = 95; // semiancho aprox. de la franja de totalidad
+  const TOTALITY_HALF_KM = 95;
 
   function distKm(lat1, lon1, lat2, lon2) {
     const R = 6371, r = Math.PI/180;
@@ -3100,30 +3181,21 @@ function abrirEnGoogleMaps() {
   }
 
   function eclipseDataForCoords(lat, lon) {
-    // Punto más cercano de la línea central
     let minDist = Infinity, bestSeg = null;
-    for (let i = 0; i < centralLine.length - 1; i++) {
-      const [la, lo, t] = centralLine[i];
-      const d = distKm(lat, lon, la, lo);
-      if (d < minDist) { minDist = d; bestSeg = centralLine[i]; }
+    for (const seg of centralLine) {
+      const d = distKm(lat, lon, seg[0], seg[1]);
+      if (d < minDist) { minDist = d; bestSeg = seg; }
     }
-    const [cLat, cLon, peakMin] = bestSeg;
-    // Duración de contactos: C1 ~-60min, C2 (inicio totalidad) ~-1.5min, C3 ~+1.5min, C4 ~+60min desde pico
     const peakUTC = new Date('2026-08-12T00:00:00Z');
-    peakUTC.setMinutes(peakMin);
+    peakUTC.setMinutes(bestSeg[2]);
     const c1 = new Date(peakUTC.getTime() - 60*60000);
     const c4 = new Date(peakUTC.getTime() + 60*60000);
-
-    // Oscurecimiento según distancia a línea central
     let obscuration;
     if (minDist <= TOTALITY_HALF_KM) {
       obscuration = 100;
     } else {
-      // Disminuye rápidamente fuera de la franja
-      const ratio = Math.max(0, 1 - (minDist - TOTALITY_HALF_KM) / 1200);
-      obscuration = Math.round(ratio * 100);
+      obscuration = Math.round(Math.max(0, 1 - (minDist - TOTALITY_HALF_KM) / 1200) * 100);
     }
-
     return { peakUTC, c1, c4, obscuration, distKm: Math.round(minDist) };
   }
 
@@ -3131,55 +3203,61 @@ function abrirEnGoogleMaps() {
     return date.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
   }
 
-  // Intentar obtener coords del usuario (usa las de la app si ya las tiene)
   function usarCoords(lat, lon) {
     const d = eclipseDataForCoords(lat, lon);
+
+    // Ocultar banner si el eclipse no es visible en la zona
+    if (d.obscuration < 5) {
+      banner.classList.remove('visible');
+      return;
+    }
+
+    banner.classList.add('visible');
     const eclInfo = document.getElementById('eclInfo');
     const isTotal = d.obscuration === 100;
 
     eclInfo.innerHTML = isTotal
-      ? `<strong>¡Totalidad visible desde tu ubicación!</strong> Pico: <strong>${fmt(d.peakUTC)}</strong> hora local`
-      : d.obscuration > 5
-        ? `Cobertura estimada: <strong>${d.obscuration}%</strong> · Pico: <strong>${fmt(d.peakUTC)}</strong>`
-        : `Eclipse <strong>no visible</strong> desde tu ubicación`;
+      ? `<strong>${T.total}</strong> ${T.peak}: <strong>${fmt(d.peakUTC)}</strong>`
+      : `${T.coverage}: <strong>${d.obscuration}%</strong> · ${T.peak}: <strong>${fmt(d.peakUTC)}</strong>`;
 
-    // Modal
     document.getElementById('eclModalContent').innerHTML = `
-      <div class="ecl-row"><span>Inicio (C1)</span><span>${fmt(d.c1)}</span></div>
-      <div class="ecl-row"><span>Máximo</span><span>${fmt(d.peakUTC)}</span></div>
-      <div class="ecl-row"><span>Fin (C4)</span><span>${fmt(d.c4)}</span></div>
-      <div class="ecl-row"><span>Cobertura estimada</span><span>${d.obscuration}%</span></div>
-      <div class="ecl-row"><span>Distancia a la franja total</span><span>${d.distKm} km</span></div>
+      <div class="ecl-row"><span>${T.c1}</span><span>${fmt(d.c1)}</span></div>
+      <div class="ecl-row"><span>${T.max}</span><span>${fmt(d.peakUTC)}</span></div>
+      <div class="ecl-row"><span>${T.c4}</span><span>${fmt(d.c4)}</span></div>
+      <div class="ecl-row"><span>${T.coverage}</span><span>${d.obscuration}%</span></div>
+      <div class="ecl-row"><span>${T.dist}</span><span>${d.distKm} km</span></div>
     `;
-    document.getElementById('eclTip').textContent = isTotal
-      ? '⚠️ Nunca mires el sol directamente excepto durante los segundos de totalidad.'
-      : '⚠️ Usa gafas de eclipse certificadas durante todo el fenómeno.';
+    document.getElementById('eclTip').textContent = isTotal ? T.tipTotal : T.tipPartial;
 
-    const extUrl = `https://www.timeanddate.com/eclipse/solar/2026-august-12?n=,${lat},${lon}`;
-    document.getElementById('eclExtLink').href = extUrl;
+    document.getElementById('eclExtLink').href =
+      `https://www.timeanddate.com/eclipse/solar/2026-august-12?n=,${lat},${lon}`;
   }
 
-  // Usar coords actuales de la app o pedir GPS
-  if (typeof currentCoords !== 'undefined' && currentCoords.lat) {
-    usarCoords(currentCoords.lat, currentCoords.lon);
-  } else if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      p => usarCoords(p.coords.latitude, p.coords.longitude),
-      () => {
-        document.getElementById('eclInfo').textContent = 'Activa la ubicación para ver datos locales.';
-      },
-      { timeout: 8000, maximumAge: 60000 }
-    );
+  // Esperar coords de la app (con reintentos) o pedir GPS directamente
+  function tryCoords(attempts) {
+    if (typeof currentCoords !== 'undefined' && currentCoords.lat) {
+      usarCoords(currentCoords.lat, currentCoords.lon);
+    } else if (attempts > 0) {
+      setTimeout(() => tryCoords(attempts - 1), 1500);
+    } else if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        p => usarCoords(p.coords.latitude, p.coords.longitude),
+        () => { document.getElementById('eclInfo').textContent = T.noLocation; banner.classList.add('visible'); },
+        { timeout: 8000, maximumAge: 60000 }
+      );
+    }
   }
+  tryCoords(5); // intenta hasta 5 veces cada 1.5s
 
-  // Eventos
+  // Banner entero abre el modal
+  banner.addEventListener('click', e => {
+    if (e.target.id === 'eclipseClose') return;
+    modal.classList.add('open');
+  });
   document.getElementById('eclipseClose').addEventListener('click', e => {
     e.stopPropagation();
     banner.classList.remove('visible');
     localStorage.setItem('eclipse2026closed', '1');
-  });
-  document.getElementById('eclMoreBtn').addEventListener('click', () => {
-    modal.classList.add('open');
   });
   document.getElementById('eclModalClose').addEventListener('click', () => {
     modal.classList.remove('open');
