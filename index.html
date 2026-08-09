@@ -2273,6 +2273,7 @@ async function cargarDatos(latitude, longitude, nombreFijo) {
     ultimaActualizacion = Date.now();
     setEstado(T.actualizado + ' ' + new Date(ultimaActualizacion).toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' }));
     localStorage.setItem('ql_ultima_act', Date.now().toString());
+    if (window.eclipseActualizar) window.eclipseActualizar(latitude, longitude);
   } catch (e) {
     setEstado(T.errorTemperatura);
   }
@@ -3294,6 +3295,9 @@ function abrirEnGoogleMaps() {
       );
     }
   }
+  // Exponer función para que cargarDatos la llame cuando cambie la ciudad
+  window.eclipseActualizar = usarCoords;
+
   tryCoords(5);
 
   // Banner entero abre el modal
