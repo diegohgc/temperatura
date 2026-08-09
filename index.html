@@ -3280,7 +3280,9 @@ function abrirEnGoogleMaps() {
 
   // Esperar coords de la app (con reintentos) o pedir GPS directamente
   function tryCoords(attempts) {
-    if (currentCoords && currentCoords.lat) {
+    if (ubicacionManual && ubicacionManual.lat) {
+      usarCoords(ubicacionManual.lat, ubicacionManual.lon);
+    } else if (currentCoords && currentCoords.lat) {
       usarCoords(currentCoords.lat, currentCoords.lon);
     } else if (attempts > 0) {
       setTimeout(() => tryCoords(attempts - 1), 1500);
