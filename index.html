@@ -2290,15 +2290,35 @@ async function actualizar() {
     setEstado(T.geoNoDisponible);
     return;
   }
+  // Estrategia en dos pasos:
+  // 1) Ubicación rápida por red/WiFi (sin GPS) — responde en <2s
+  // 2) Si falla, intentar con GPS de alta precisión con más tiempo
+  let cargado = false;
   navigator.geolocation.getCurrentPosition((pos) => {
+    if (cargado) return; // ya cargó el paso 2, ignorar
+    cargado = true;
     cargarDatos(pos.coords.latitude, pos.coords.longitude);
+    // Intentar refinar con GPS en segundo plano (sin bloquear UI)
+    navigator.geolocation.getCurrentPosition((pos2) => {
+      if (Math.abs(pos2.coords.latitude - pos.coords.latitude) > 0.001 ||
+          Math.abs(pos2.coords.longitude - pos.coords.longitude) > 0.001) {
+        cargarDatos(pos2.coords.latitude, pos2.coords.longitude);
+      }
+    }, null, { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 });
   }, (err) => {
-    if (err.code === err.PERMISSION_DENIED) {
-      setEstado(T.permisoDenegado);
-    } else {
-      setEstado(T.errorUbicacion);
-    }
-  }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 });
+    if (cargado) return;
+    // Paso 1 falló — intentar con GPS directo
+    navigator.geolocation.getCurrentPosition((pos) => {
+      cargado = true;
+      cargarDatos(pos.coords.latitude, pos.coords.longitude);
+    }, (err2) => {
+      if (err2.code === err2.PERMISSION_DENIED || err.code === err.PERMISSION_DENIED) {
+        setEstado(T.permisoDenegado);
+      } else {
+        setEstado(T.errorUbicacion);
+      }
+    }, { enableHighAccuracy: true, timeout: 20000, maximumAge: 60000 });
+  }, { enableHighAccuracy: false, timeout: 5000, maximumAge: 120000 });
 }
 
 let timeoutBusqueda = null;
