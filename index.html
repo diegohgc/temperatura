@@ -3226,6 +3226,8 @@ function abrirEnGoogleMaps() {
       const d = distKm(lat, lon, c[0], c[1]);
       if (d < bestDist) { bestDist = d; best = c; }
     }
+    // Si está a más de 1500 km de España, el eclipse no es visible
+    if (bestDist > 1500) return null;
     const hasTot = best[8] === 1;
     return {
       c1:          best[2],
@@ -3245,7 +3247,7 @@ function abrirEnGoogleMaps() {
   function usarCoords(lat, lon) {
     const d = eclipseDataForCoords(lat, lon);
 
-    if (d.obscuration < 5) { banner.classList.remove('visible'); return; }
+    if (!d || d.obscuration < 5) { banner.classList.remove('visible'); return; }
 
     banner.classList.add('visible');
     const eclInfo = document.getElementById('eclInfo');
