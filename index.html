@@ -3218,12 +3218,6 @@ function abrirEnGoogleMaps() {
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   }
 
-  function timeToDate(hhmm) {
-    if (!hhmm) return null;
-    const parts = hhmm.split(':');
-    return new Date(Date.UTC(2026, 7, 12, +parts[0], +parts[1]));
-  }
-
   function eclipseDataForCoords(lat, lon) {
     let best = null, bestDist = Infinity;
     for (const c of ECLIPSE_CITIES) {
@@ -3231,21 +3225,19 @@ function abrirEnGoogleMaps() {
       if (d < bestDist) { bestDist = d; best = c; }
     }
     const hasTot = best[8] === 1;
-    const mag = best[7];
     return {
-      c1:         timeToDate(best[2]),
-      c2:         timeToDate(best[3]),
-      peakUTC:    timeToDate(best[4]),
-      c3:         timeToDate(best[5]),
-      c4:         timeToDate(best[6]),
+      c1:          best[2],
+      c2:          best[3],
+      peakUTC:     best[4],
+      c3:          best[5],
+      c4:          best[6],
       hasTotality: hasTot,
-      obscuration: hasTot ? 100 : Math.round(mag * 100),
+      obscuration: hasTot ? 100 : Math.round(best[7] * 100),
     };
   }
 
-  function fmt(date) {
-    if (!date) return '—';
-    return date.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  function fmt(hhmm) {
+    return hhmm || '—';
   }
 
   function usarCoords(lat, lon) {
