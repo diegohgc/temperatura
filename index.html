@@ -3085,8 +3085,7 @@ function abrirEnGoogleMaps() {
       noLocation:'Activa la ubicación para ver datos locales.',
       total:'¡Totalidad visible desde tu ubicación!', peak:'Pico',
       coverage:'Cobertura estimada', more:'Más info para tu ubicación →',
-      c1:'Inicio (C1)', max:'Máximo', c4:'Fin (C4)',
-      dist:'Distancia a la franja total',
+      c1:'Inicio parcial (C1)', c2:'Inicio totalidad (C2)', max:'Máximo', c3:'Fin totalidad (C3)', c4:'Fin parcial (C4)',
       tipTotal:'⚠️ No mires el sol directamente excepto durante los segundos de totalidad.',
       tipPartial:'⚠️ Usa gafas de eclipse certificadas durante todo el fenómeno.',
       details:'🔭 Más detalles en timeanddate.com'
@@ -3097,8 +3096,7 @@ function abrirEnGoogleMaps() {
       noLocation:'Enable location to see local data.',
       total:'Totality visible from your location!', peak:'Peak',
       coverage:'Estimated coverage', more:'More info for your location →',
-      c1:'Start (C1)', max:'Maximum', c4:'End (C4)',
-      dist:'Distance to totality band',
+      c1:'Partial start (C1)', c2:'Totality start (C2)', max:'Maximum', c3:'Totality end (C3)', c4:'Partial end (C4)',
       tipTotal:'⚠️ Never look directly at the sun except during the seconds of totality.',
       tipPartial:'⚠️ Use certified eclipse glasses throughout the event.',
       details:'🔭 More details at timeanddate.com'
@@ -3109,8 +3107,7 @@ function abrirEnGoogleMaps() {
       noLocation:'Standort aktivieren für lokale Daten.',
       total:'Totalität von Ihrem Standort sichtbar!', peak:'Maximum',
       coverage:'Geschätzte Abdeckung', more:'Mehr Infos für Ihren Standort →',
-      c1:'Anfang (C1)', max:'Maximum', c4:'Ende (C4)',
-      dist:'Entfernung zur Totalitätszone',
+      c1:'Partieller Beginn (C1)', c2:'Totalitätsbeginn (C2)', max:'Maximum', c3:'Totalitätsende (C3)', c4:'Partielles Ende (C4)',
       tipTotal:'⚠️ Schauen Sie nie direkt in die Sonne, außer während der Totalität.',
       tipPartial:'⚠️ Verwenden Sie zertifizierte Sonnenfinsternisbrillen.',
       details:'🔭 Mehr Details auf timeanddate.com'
@@ -3121,8 +3118,7 @@ function abrirEnGoogleMaps() {
       noLocation:'Activez la localisation pour voir les données locales.',
       total:'Totalité visible depuis votre position!', peak:'Maximum',
       coverage:'Couverture estimée', more:'Plus d\'infos pour votre position →',
-      c1:'Début (C1)', max:'Maximum', c4:'Fin (C4)',
-      dist:'Distance à la zone de totalité',
+      c1:'Début partiel (C1)', c2:'Début totalité (C2)', max:'Maximum', c3:'Fin totalité (C3)', c4:'Fin partielle (C4)',
       tipTotal:'⚠️ Ne regardez jamais directement le soleil sauf pendant les secondes de totalité.',
       tipPartial:'⚠️ Utilisez des lunettes d\'éclipse certifiées.',
       details:'🔭 Plus de détails sur timeanddate.com'
@@ -3133,8 +3129,7 @@ function abrirEnGoogleMaps() {
       noLocation:'Ative a localização para ver dados locais.',
       total:'Totalidade visível da sua localização!', peak:'Pico',
       coverage:'Cobertura estimada', more:'Mais info para a sua localização →',
-      c1:'Início (C1)', max:'Máximo', c4:'Fim (C4)',
-      dist:'Distância à faixa de totalidade',
+      c1:'Início parcial (C1)', c2:'Início totalidade (C2)', max:'Máximo', c3:'Fim totalidade (C3)', c4:'Fim parcial (C4)',
       tipTotal:'⚠️ Nunca olhe diretamente para o sol exceto durante os segundos de totalidade.',
       tipPartial:'⚠️ Use óculos de eclipse certificados durante todo o fenômeno.',
       details:'🔭 Mais detalhes em timeanddate.com'
@@ -3145,8 +3140,7 @@ function abrirEnGoogleMaps() {
       noLocation:'Attiva la posizione per vedere i dati locali.',
       total:'Totalità visibile dalla tua posizione!', peak:'Picco',
       coverage:'Copertura stimata', more:'Più info per la tua posizione →',
-      c1:'Inizio (C1)', max:'Massimo', c4:'Fine (C4)',
-      dist:'Distanza dalla fascia di totalità',
+      c1:'Inizio parziale (C1)', c2:'Inizio totalità (C2)', max:'Massimo', c3:'Fine totalità (C3)', c4:'Fine parziale (C4)',
       tipTotal:'⚠️ Non guardare mai direttamente il sole tranne durante i secondi di totalità.',
       tipPartial:'⚠️ Usa occhiali per eclissi certificati durante tutto il fenomeno.',
       details:'🔭 Più dettagli su timeanddate.com'
@@ -3164,20 +3158,58 @@ function abrirEnGoogleMaps() {
   document.getElementById('eclMoreBtn').textContent = T.more;
   document.getElementById('eclExtLink').textContent = T.details;
 
-  // Datos del eclipse — línea central simplificada [lat, lon, minutos UTC desde 00:00]
-  // Línea central: [lat, lon, minutos UTC desde 00:00 del 12-ago-2026]
-  // Calibrado con dato real en Gijón (43.5N, 5.7W): C2=18:26 UTC (20:26 local UTC+2)
-  // El eclipse entra en España por el norte (Asturias/Cantabria) y va hacia el SE
-  const centralLine = [
-    [75, -45, 1005], [65, -28, 1022], [58, -18, 1035],
-    [52, -12, 1046], [47,  -9, 1058], [44,  -8, 1087],
-    // España calibrada con datos IGN: A Coruña(43.4,-8.4)=1108, Gijón(43.5,-5.7)=1108, Burgos(42.3,-3.7)=1109, Palma(39.6,+2.7)=1112
-    [43,  -8, 1108], [43,  -6, 1108], [43,  -4, 1108],
-    [42,  -2, 1109], [41,   0, 1109], [40,   2, 1110],
-    [39,   3, 1112], [37,   5, 1114], [35,   8, 1117],
-    [33,  12, 1122], [30,  18, 1128], [27,  24, 1134]
+  // Datos reales del IGN (Instituto Geográfico Nacional) — eclipse 12/08/2026
+  // Formato: [lat, lon, c1, c2_o_null, max, c3_o_null, c4_o_null, magnitud, tieneTotalidad(0/1)]
+  // Horas en UTC (España peninsular = UTC+2 en verano; sumar 2h para hora local)
+  const ECLIPSE_CITIES = [
+    [43.535,-5.663,'19:31','20:26','20:27','20:28','21:20',1.03,1], // Gijón
+    [43.362,-5.849,'19:31','20:27','20:28','20:28','21:21',1.03,1], // Oviedo
+    [43.371,-8.396,'19:30','20:27','20:28','20:28','21:22',1.03,1], // A Coruña
+    [42.878,-8.545,'19:31',null,'20:29',null,'21:22',1.0,0],        // Santiago de Compostela
+    [43.010,-7.557,'19:31','20:28','20:28','20:29','21:22',1.03,1], // Lugo
+    [42.431,-8.644,'19:32',null,'20:29',null,'21:23',0.99,0],       // Pontevedra
+    [42.231,-8.712,'19:33',null,'20:30',null,'21:23',0.99,0],       // Vigo
+    [42.336,-7.864,'19:32',null,'20:30',null,'21:23',1.0,0],        // Ourense
+    [43.263,-2.925,'19:31','20:27','20:27','20:27',null,1.03,1],    // Bilbao
+    [42.847,-2.673,'19:32','20:27','20:28','20:28',null,1.03,1],    // Vitoria-Gasteiz
+    [43.318,-1.981,'19:31',null,'20:27',null,null,1.0,0],           // Donostia/San Sebastián
+    [42.817,-1.643,'19:32',null,'20:28',null,null,1.0,0],           // Pamplona/Iruña
+    [43.462,-3.810,'19:31','20:26','20:27','20:28','21:20',1.03,1], // Santander
+    [42.344,-3.697,'19:33','20:28','20:29','20:30',null,1.03,1],    // Burgos
+    [42.599,-5.567,'19:32','20:28','20:29','20:30','21:22',1.03,1], // León
+    [41.503,-5.744,'19:34','20:30','20:31','20:31','21:23',1.03,1], // Zamora
+    [41.653,-4.724,'19:34','20:29','20:30','20:31',null,1.03,1],    // Valladolid
+    [42.010,-4.528,'19:33','20:29','20:30','20:30','21:22',1.03,1], // Palencia
+    [42.467,-2.450,'19:33','20:28','20:28','20:29',null,1.03,1],    // Logroño
+    [41.649,-0.889,'19:34','20:29','20:29','20:30',null,1.03,1],    // Zaragoza
+    [42.136,-0.408,'19:33',null,'20:28',null,null,1.0,0],           // Huesca
+    [41.615, 0.624,'19:34','20:29','20:29','20:29',null,1.03,1],    // Lleida
+    [41.389, 2.178,'19:35',null,'20:29',null,null,1.0,0],           // Barcelona
+    [41.984, 2.820,'19:34',null,'20:28',null,null,0.99,0],          // Girona
+    [40.417,-3.703,'19:36',null,'20:32',null,null,1.0,0],           // Madrid
+    [40.634,-3.162,'19:36','20:31','20:31','20:32',null,1.03,1],    // Guadalajara
+    [39.857,-4.024,'19:37',null,'20:33',null,null,0.99,0],          // Toledo
+    [40.069,-2.132,'19:37','20:32','20:32','20:33',null,1.03,1],    // Cuenca
+    [40.657,-4.699,'19:36',null,'20:32',null,null,1.0,0],           // Ávila
+    [40.948,-4.118,'19:35','20:31','20:31','20:32',null,1.03,1],    // Segovia
+    [41.767,-2.467,'19:34','20:29','20:29','20:30',null,1.03,1],    // Soria
+    [40.347,-1.106,'19:36','20:31','20:31','20:32',null,1.03,1],    // Teruel
+    [41.117, 1.250,'19:35','20:29','20:30','20:30',null,1.03,1],    // Tarragona
+    [39.470,-0.376,'19:38','20:32','20:33','20:33',null,1.03,1],    // València
+    [38.345,-0.482,'19:40',null,'20:34',null,null,0.99,0],          // Alicante
+    [37.992,-1.131,'19:40',null,'20:35',null,null,0.98,0],          // Murcia
+    [37.177,-3.599,'19:42',null,'20:37',null,null,0.96,0],          // Granada
+    [37.389,-5.985,'19:41',null,'20:37',null,null,0.95,0],          // Sevilla
+    [36.720,-4.420,'19:43',null,'20:38',null,null,0.95,0],          // Málaga
+    [36.838,-2.460,'19:42',null,'20:37',null,null,0.96,0],          // Almería
+    [37.888,-4.779,'19:41',null,'20:36',null,null,0.96,0],          // Córdoba
+    [36.530,-6.292,'19:43',null,'20:39',null,null,0.94,0],          // Cádiz
+    [37.261,-6.945,'19:42',null,'20:38',null,null,0.94,0],          // Huelva
+    [38.879,-6.971,'19:39',null,'20:35',null,null,0.96,0],          // Badajoz
+    [38.917,-6.340,'19:39',null,'20:35',null,null,0.97,0],          // Mérida
+    [40.965,-5.664,'19:35',null,'20:31',null,'21:24',1.0,0],        // Salamanca
+    [38.994,-1.856,'19:39',null,'20:34',null,null,0.99,0],          // Albacete
   ];
-  const TOTALITY_HALF_KM = 145;
 
   function distKm(lat1, lon1, lat2, lon2) {
     const R = 6371, r = Math.PI/180;
@@ -3186,55 +3218,58 @@ function abrirEnGoogleMaps() {
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   }
 
+  function timeToDate(hhmm) {
+    if (!hhmm) return null;
+    const parts = hhmm.split(':');
+    return new Date(Date.UTC(2026, 7, 12, +parts[0], +parts[1]));
+  }
+
   function eclipseDataForCoords(lat, lon) {
-    let minDist = Infinity, bestSeg = null;
-    for (const seg of centralLine) {
-      const d = distKm(lat, lon, seg[0], seg[1]);
-      if (d < minDist) { minDist = d; bestSeg = seg; }
+    let best = null, bestDist = Infinity;
+    for (const c of ECLIPSE_CITIES) {
+      const d = distKm(lat, lon, c[0], c[1]);
+      if (d < bestDist) { bestDist = d; best = c; }
     }
-    const peakUTC = new Date('2026-08-12T00:00:00Z');
-    peakUTC.setMinutes(bestSeg[2]);
-    const c1 = new Date(peakUTC.getTime() - 56*60000);
-    const c4 = new Date(peakUTC.getTime() + 53*60000);
-    let obscuration;
-    if (minDist <= TOTALITY_HALF_KM) {
-      obscuration = 100;
-    } else {
-      obscuration = Math.round(Math.max(0, 1 - (minDist - TOTALITY_HALF_KM) / 1200) * 100);
-    }
-    return { peakUTC, c1, c4, obscuration, distKm: Math.round(minDist) };
+    const hasTot = best[8] === 1;
+    const mag = best[7];
+    return {
+      c1:         timeToDate(best[2]),
+      c2:         timeToDate(best[3]),
+      peakUTC:    timeToDate(best[4]),
+      c3:         timeToDate(best[5]),
+      c4:         timeToDate(best[6]),
+      hasTotality: hasTot,
+      obscuration: hasTot ? 100 : Math.round(mag * 100),
+    };
   }
 
   function fmt(date) {
+    if (!date) return '—';
     return date.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
   }
 
   function usarCoords(lat, lon) {
     const d = eclipseDataForCoords(lat, lon);
 
-    // Ocultar banner si el eclipse no es visible en la zona
-    if (d.obscuration < 5) {
-      banner.classList.remove('visible');
-      return;
-    }
+    if (d.obscuration < 5) { banner.classList.remove('visible'); return; }
 
     banner.classList.add('visible');
     const eclInfo = document.getElementById('eclInfo');
-    const isTotal = d.obscuration === 100;
+    const isTotal = d.hasTotality;
 
     eclInfo.innerHTML = isTotal
       ? `<strong>${T.total}</strong> ${T.peak}: <strong>${fmt(d.peakUTC)}</strong>`
       : `${T.coverage}: <strong>${d.obscuration}%</strong> · ${T.peak}: <strong>${fmt(d.peakUTC)}</strong>`;
 
-    document.getElementById('eclModalContent').innerHTML = `
-      <div class="ecl-row"><span>${T.c1}</span><span>${fmt(d.c1)}</span></div>
-      <div class="ecl-row"><span>${T.max}</span><span>${fmt(d.peakUTC)}</span></div>
-      <div class="ecl-row"><span>${T.c4}</span><span>${fmt(d.c4)}</span></div>
-      <div class="ecl-row"><span>${T.coverage}</span><span>${d.obscuration}%</span></div>
-      <div class="ecl-row"><span>${T.dist}</span><span>${d.obscuration === 100 ? (lng === 'es' ? 'Dentro ✓' : 'Inside ✓') : d.distKm + ' km'}</span></div>
-    `;
-    document.getElementById('eclTip').textContent = isTotal ? T.tipTotal : T.tipPartial;
+    let rows = `<div class="ecl-row"><span>${T.c1}</span><span>${fmt(d.c1)}</span></div>`;
+    if (isTotal && d.c2) rows += `<div class="ecl-row"><span>${T.c2}</span><span>${fmt(d.c2)}</span></div>`;
+    rows += `<div class="ecl-row"><span>${T.max}</span><span>${fmt(d.peakUTC)}</span></div>`;
+    if (isTotal && d.c3) rows += `<div class="ecl-row"><span>${T.c3}</span><span>${fmt(d.c3)}</span></div>`;
+    if (d.c4) rows += `<div class="ecl-row"><span>${T.c4}</span><span>${fmt(d.c4)}</span></div>`;
+    rows += `<div class="ecl-row"><span>${T.coverage}</span><span>${d.obscuration}%</span></div>`;
 
+    document.getElementById('eclModalContent').innerHTML = rows;
+    document.getElementById('eclTip').textContent = isTotal ? T.tipTotal : T.tipPartial;
     document.getElementById('eclExtLink').href =
       `https://www.timeanddate.com/eclipse/map/2026-august-12?lat=${lat.toFixed(4)}&lon=${lon.toFixed(4)}`;
   }
@@ -3253,7 +3288,7 @@ function abrirEnGoogleMaps() {
       );
     }
   }
-  tryCoords(5); // intenta hasta 5 veces cada 1.5s
+  tryCoords(5);
 
   // Banner entero abre el modal
   banner.addEventListener('click', e => {
