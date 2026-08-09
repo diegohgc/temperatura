@@ -3165,11 +3165,13 @@ function abrirEnGoogleMaps() {
   document.getElementById('eclExtLink').textContent = T.details;
 
   // Datos del eclipse — línea central simplificada [lat, lon, minutos UTC desde 00:00]
+  // Línea central: [lat, lon, minutos UTC desde 00:00 del 12-ago-2026]
+  // La sombra avanza hacia el este; España ~18:18 UTC = 20:18 hora local (UTC+2)
   const centralLine = [
-    [75, -45, 1020], [65, -25, 1040], [58, -15, 1048],
-    [50, -10, 1054], [43,  -4, 1060], [40,   0, 1063],
-    [38,   5, 1066], [35,  10, 1070], [30,  18, 1076],
-    [27,  25, 1080], [24,  30, 1084]
+    [75, -45, 1005], [65, -25, 1025], [58, -15, 1038],
+    [50, -10, 1048], [46,  -6, 1058], [43,  -2, 1082],
+    [40,   1, 1093], [38,   5, 1100], [35,  10, 1108],
+    [30,  18, 1116], [27,  25, 1122], [24,  30, 1127]
   ];
   const TOTALITY_HALF_KM = 145;
 
