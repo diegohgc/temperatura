@@ -1907,7 +1907,7 @@ async function fetchClimaNormal(lat, lon, month, day) {
   const dd = String(day).padStart(2, '0');
   const anioActual = new Date().getFullYear();
   const anios = [];
-  for (let y = anioActual - 10; y < anioActual; y++) anios.push(y);
+  for (let y = anioActual - 30; y < anioActual; y++) anios.push(y);
   const fetches = anios.map(y =>
     fetch(`https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&start_date=${y}-${mm}-${dd}&end_date=${y}-${mm}-${dd}&daily=temperature_2m_max,temperature_2m_min&timezone=auto`)
       .then(r => r.ok ? r.json() : null).catch(() => null)
