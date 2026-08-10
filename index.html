@@ -1852,8 +1852,7 @@ function abrirModalDia(i) {
     const anioInicio = new Date().getFullYear() - 10, anioFin = new Date().getFullYear() - 1;
     fetchClimaNormal(lat, lon, mesN, diaNN).then(n => {
       if (!n) return;
-      const u = cfg.unidad === 'F' ? v => Math.round(v * 9/5 + 32) + '°F' : v => v + '°C';
-      elClima.textContent = `↑ ${u(n.max)} · ↓ ${u(n.min)}  ·  ${T.mediaHistorica || 'media histórica'} (${anioInicio}–${anioFin})`;
+      elClima.textContent = `↑ ${toTemp(n.max)} · ↓ ${toTemp(n.min)}  ·  ${T.mediaHistorica || 'media histórica'} (${anioInicio}–${anioFin})`;
     });
   }
   const diaHoras = document.getElementById('diaHoras');
