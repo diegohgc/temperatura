@@ -62,6 +62,20 @@
   .btn-fav:hover { opacity: 1; }
   .btn-ajustes { position: absolute; top: 10px; left: 1px; background: rgba(255,255,255,0.15); border: none; border-radius: 6px; color: inherit; font-size: 0.8rem; padding: 2px 6px; cursor: pointer; opacity: 0.8; transition: opacity 0.2s; line-height: 1; }
   .btn-ajustes:hover { opacity: 1; }
+  .btn-ayuda { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.15); border: none; border-radius: 50%; color: inherit; font-size: 0.85rem; font-weight: 700; width: 26px; height: 26px; cursor: pointer; opacity: 0.7; transition: opacity 0.2s; line-height: 1; display: flex; align-items: center; justify-content: center; }
+  .btn-ayuda:hover { opacity: 1; }
+  #ayudaModal { display: none; position: fixed; inset: 0; z-index: 9998; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); align-items: center; justify-content: center; }
+  #ayudaModal.open { display: flex; }
+  .ayuda-box { background: var(--card-bg,#1e2330); border-radius: 20px; padding: 24px 20px 20px; width: 88vw; max-width: 360px; position: relative; box-shadow: 0 8px 40px rgba(0,0,0,0.5); }
+  .ayuda-close { position: absolute; top: 12px; right: 14px; background: rgba(255,255,255,0.1); border: none; color: inherit; border-radius: 50%; width: 28px; height: 28px; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .ayuda-titulo { font-size: 1.1rem; font-weight: 800; margin-bottom: 4px; }
+  .ayuda-sub { font-size: 0.8rem; opacity: 0.6; margin-bottom: 16px; }
+  .ayuda-lista { display: flex; flex-direction: column; gap: 11px; }
+  .ayuda-item { display: flex; align-items: flex-start; gap: 10px; font-size: 0.85rem; line-height: 1.35; }
+  .ayuda-item-icon { font-size: 1.2rem; flex-shrink: 0; width: 24px; text-align: center; }
+  .ayuda-item-text b { display: block; font-weight: 700; }
+  .ayuda-item-text span { opacity: 0.65; font-size: 0.78rem; }
+  .ayuda-footer { margin-top: 18px; font-size: 0.75rem; opacity: 0.45; text-align: center; }
   .ajustes-panel { position: absolute; top: 38px; left: 12px; background: rgba(30,30,40,0.92); backdrop-filter: blur(8px); border-radius: 10px; padding: 10px 14px; z-index: 100; min-width: 180px; box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
   .ajustes-fila { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 5px 0; font-size: 0.82rem; opacity: 0.9; }
   .ajustes-fila:not(:last-child) { border-bottom: 1px solid rgba(255,255,255,0.1); }
@@ -430,6 +444,7 @@
   <div id="swipeClip" style="width:100%;max-width:420px;overflow:hidden">
   <div class="card" id="pageCard">
     <button class="btn-ajustes" id="btnAjustes"></button>
+    <button class="btn-ayuda" id="btnAyuda">?</button>
     <div id="ajustesPanel" hidden>
       <div class="ajustes-panel">
         <div class="ajustes-fila">
@@ -553,6 +568,16 @@
       </div>
       <div class="ecl-info" id="eclInfo">Loading eclipse data...</div>
       <button class="ecl-more" id="eclMoreBtn">More info for your location →</button>
+    </div>
+    <!-- Modal ayuda -->
+    <div id="ayudaModal">
+      <div class="ayuda-box">
+        <button class="ayuda-close" id="ayudaClose">✕</button>
+        <div class="ayuda-titulo" id="ayudaTitulo"></div>
+        <div class="ayuda-sub" id="ayudaSub"></div>
+        <div class="ayuda-lista" id="ayudaLista"></div>
+        <div class="ayuda-footer" id="ayudaFooter"></div>
+      </div>
     </div>
     <!-- Modal eclipse -->
     <div id="eclipseModal">
@@ -1857,6 +1882,10 @@ function cerrarModalDia() {
   document.getElementById('modalDia').classList.remove('abierto');
   document.body.style.overflow = '';
 }
+
+// Pulsar temperatura grande → previsión de hoy
+document.getElementById('temp').addEventListener('click', () => abrirModalDia(0));
+document.getElementById('temp').style.cursor = 'pointer';
 
 document.getElementById('modalDia').addEventListener('click', (e) => {
   if (e.target === document.getElementById('modalDia')) cerrarModalDia();
@@ -3316,6 +3345,119 @@ function abrirEnGoogleMaps() {
   modal.addEventListener('click', e => {
     if (e.target === modal) modal.classList.remove('open');
   });
+})();
+
+// ── Ayuda / tutorial ─────────────────────────────────────────────────────────
+(function() {
+  const lng = (typeof idioma !== 'undefined' ? idioma : 'en').substring(0,2);
+  const i18n = {
+    es: {
+      titulo: '💡 Todo es interactivo',
+      sub: 'Pulsa cualquier dato para ampliar la información',
+      items: [
+        ['🌡️', 'Temperatura', 'Pulsa el número grande para ver máximas, mínimas y lluvia de hoy'],
+        ['🧭', 'Brújula', 'Arriba a la derecha — ábrela para verla a pantalla completa'],
+        ['📍', 'Cambiar ciudad', 'Pulsa el nombre de la zona para buscar otra ciudad'],
+        ['☀️', 'Índice UV', 'Pulsa el dato UV para ver el nivel de riesgo solar'],
+        ['💨', 'Calidad del aire', 'Pulsa el dato de aire para ver los contaminantes'],
+        ['🌊', 'Mareas', 'Pulsa el panel de mareas para ver la gráfica del día'],
+        ['📅', 'Previsión diaria', 'Pulsa cualquier día de la semana para ver el detalle'],
+        ['⚙️', 'Ajustes', 'Cambia el idioma, °C/°F, km/h o mph arriba a la izquierda'],
+      ],
+      footer: 'Vuelve aquí cuando quieras pulsando el botón ?'
+    },
+    en: {
+      titulo: '💡 Everything is interactive',
+      sub: 'Tap any data to expand the information',
+      items: [
+        ['🌡️', 'Temperature', 'Tap the big number to see today\'s highs, lows and rain'],
+        ['🧭', 'Compass', 'Top right — tap to open it full screen'],
+        ['📍', 'Change city', 'Tap the location name to search another city'],
+        ['☀️', 'UV Index', 'Tap the UV value to see the solar risk level'],
+        ['💨', 'Air quality', 'Tap the air value to see pollutant details'],
+        ['🌊', 'Tides', 'Tap the tide panel to see the daily chart'],
+        ['📅', 'Daily forecast', 'Tap any day of the week for a detailed view'],
+        ['⚙️', 'Settings', 'Change language, °C/°F, km/h or mph — top left'],
+      ],
+      footer: 'Come back here anytime by tapping the ? button'
+    },
+    de: {
+      titulo: '💡 Alles ist interaktiv',
+      sub: 'Tippe auf beliebige Daten für mehr Informationen',
+      items: [
+        ['🌡️', 'Temperatur', 'Tippe auf die große Zahl für Höchst-, Tiefstwerte und Regen heute'],
+        ['🧭', 'Kompass', 'Oben rechts — tippen für Vollbildansicht'],
+        ['📍', 'Stadt wechseln', 'Tippe auf den Ortsnamen, um eine andere Stadt zu suchen'],
+        ['☀️', 'UV-Index', 'Tippe auf den UV-Wert für die Sonnengefährdung'],
+        ['💨', 'Luftqualität', 'Tippe auf den Luftwert für Schadstoffdetails'],
+        ['🌊', 'Gezeiten', 'Tippe auf das Gezeitenpanel für die Tageskurve'],
+        ['📅', 'Tagesvorhersage', 'Tippe auf einen Wochentag für Details'],
+        ['⚙️', 'Einstellungen', 'Sprache, °C/°F, km/h oder mph ändern — oben links'],
+      ],
+      footer: 'Jederzeit wieder öffnen mit dem ?-Button'
+    },
+    fr: {
+      titulo: '💡 Tout est interactif',
+      sub: 'Appuyez sur n\'importe quelle donnée pour l\'agrandir',
+      items: [
+        ['🌡️', 'Température', 'Appuyez sur le grand chiffre pour les max, min et pluie du jour'],
+        ['🧭', 'Boussole', 'En haut à droite — appuyez pour l\'ouvrir en plein écran'],
+        ['📍', 'Changer de ville', 'Appuyez sur le nom du lieu pour chercher une ville'],
+        ['☀️', 'Indice UV', 'Appuyez sur la valeur UV pour voir le risque solaire'],
+        ['💨', 'Qualité de l\'air', 'Appuyez sur la valeur air pour les détails'],
+        ['🌊', 'Marées', 'Appuyez sur le panneau marées pour le graphique'],
+        ['📅', 'Prévision journalière', 'Appuyez sur un jour pour le détail'],
+        ['⚙️', 'Paramètres', 'Langue, °C/°F, km/h ou mph — en haut à gauche'],
+      ],
+      footer: 'Revenez ici en appuyant sur le bouton ?'
+    },
+    pt: {
+      titulo: '💡 Tudo é interativo',
+      sub: 'Toque em qualquer dado para ampliar a informação',
+      items: [
+        ['🌡️', 'Temperatura', 'Toque no número grande para ver máximas, mínimas e chuva de hoje'],
+        ['🧭', 'Bússola', 'Canto superior direito — toque para abrir em ecrã completo'],
+        ['📍', 'Mudar cidade', 'Toque no nome do local para procurar outra cidade'],
+        ['☀️', 'Índice UV', 'Toque no valor UV para ver o nível de risco solar'],
+        ['💨', 'Qualidade do ar', 'Toque no valor do ar para ver os poluentes'],
+        ['🌊', 'Marés', 'Toque no painel de marés para ver o gráfico do dia'],
+        ['📅', 'Previsão diária', 'Toque em qualquer dia da semana para ver os detalhes'],
+        ['⚙️', 'Definições', 'Mude o idioma, °C/°F, km/h ou mph — canto superior esquerdo'],
+      ],
+      footer: 'Volte aqui quando quiser tocando no botão ?'
+    },
+    it: {
+      titulo: '💡 Tutto è interattivo',
+      sub: 'Tocca qualsiasi dato per espandere le informazioni',
+      items: [
+        ['🌡️', 'Temperatura', 'Tocca il numero grande per massime, minime e pioggia di oggi'],
+        ['🧭', 'Bussola', 'In alto a destra — tocca per aprirla a schermo intero'],
+        ['📍', 'Cambia città', 'Tocca il nome della posizione per cercare un\'altra città'],
+        ['☀️', 'Indice UV', 'Tocca il valore UV per vedere il livello di rischio solare'],
+        ['💨', 'Qualità dell\'aria', 'Tocca il valore aria per i dettagli sugli inquinanti'],
+        ['🌊', 'Maree', 'Tocca il pannello maree per vedere il grafico giornaliero'],
+        ['📅', 'Previsione giornaliera', 'Tocca qualsiasi giorno della settimana per i dettagli'],
+        ['⚙️', 'Impostazioni', 'Cambia lingua, °C/°F, km/h o mph — in alto a sinistra'],
+      ],
+      footer: 'Torna qui quando vuoi toccando il pulsante ?'
+    }
+  };
+  const T = i18n[lng] || i18n.en;
+  const modal = document.getElementById('ayudaModal');
+
+  document.getElementById('ayudaTitulo').textContent = T.titulo;
+  document.getElementById('ayudaSub').textContent = T.sub;
+  document.getElementById('ayudaLista').innerHTML = T.items.map(([icon, title, desc]) =>
+    `<div class="ayuda-item">
+      <div class="ayuda-item-icon">${icon}</div>
+      <div class="ayuda-item-text"><b>${title}</b><span>${desc}</span></div>
+    </div>`
+  ).join('');
+  document.getElementById('ayudaFooter').textContent = T.footer;
+
+  document.getElementById('btnAyuda').addEventListener('click', () => modal.classList.add('open'));
+  document.getElementById('ayudaClose').addEventListener('click', () => modal.classList.remove('open'));
+  modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('open'); });
 })();
 </script>
 
