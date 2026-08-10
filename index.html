@@ -2303,6 +2303,7 @@ async function cargarDatos(latitude, longitude, nombreFijo) {
     setEstado(T.actualizado + ' ' + new Date(ultimaActualizacion).toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' }));
     localStorage.setItem('ql_ultima_act', Date.now().toString());
     if (window.eclipseActualizar) window.eclipseActualizar(latitude, longitude);
+    if (window.ayudaCerrarAlCargar) { window.ayudaCerrarAlCargar(); window.ayudaCerrarAlCargar = null; }
   } catch (e) {
     setEstado(T.errorTemperatura);
   }
@@ -3462,8 +3463,19 @@ function abrirEnGoogleMaps() {
   document.getElementById('ayudaFooter').textContent = T.footer;
 
   document.getElementById('btnAyuda').addEventListener('click', () => modal.classList.add('open'));
-  document.getElementById('ayudaClose').addEventListener('click', () => modal.classList.remove('open'));
-  modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('open'); });
+
+  function cerrarAyuda() { modal.classList.remove('open'); }
+  document.getElementById('ayudaClose').addEventListener('click', cerrarAyuda);
+  modal.addEventListener('click', e => { if (e.target === modal) cerrarAyuda(); });
+
+  // Primera vez: abrir automáticamente mientras cargan los datos
+  if (!localStorage.getItem('ql_ayuda_vista')) {
+    modal.classList.add('open');
+    localStorage.setItem('ql_ayuda_vista', '1');
+  }
+
+  // Cerrar automáticamente cuando los datos terminen de cargar
+  window.ayudaCerrarAlCargar = cerrarAyuda;
 })();
 </script>
 
