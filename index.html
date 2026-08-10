@@ -1901,7 +1901,9 @@ function cerrarModalDia() {
 // Media histórica de temperatura para una fecha
 const _climaCache = {};
 async function fetchClimaNormal(lat, lon, month, day) {
-  const key = `${lat.toFixed(2)},${lon.toFixed(2)},${month},${day}`;
+  const anioFin = new Date().getFullYear() - 1;
+  const anioIni = anioFin - 29;
+  const key = `${lat.toFixed(2)},${lon.toFixed(2)},${month},${day},${anioIni}`;
   if (_climaCache[key]) return _climaCache[key];
   const mm = String(month).padStart(2, '0');
   const dd = String(day).padStart(2, '0');
