@@ -291,7 +291,8 @@
   #diaIconoGrande { width: 56px; height: 56px; margin: 0 auto 8px; }
   #diaIconoGrande svg { width: 100%; height: 100%; stroke: #fff; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
   #diaDesc { text-align: center; font-size: 0.9rem; opacity: 0.85; margin-bottom: 16px; }
-  .dia-temps { display: flex; justify-content: center; gap: 18px; margin-bottom: 18px; }
+  .dia-temps { display: flex; justify-content: center; gap: 18px; margin-bottom: 6px; }
+  .dia-clima-normal { text-align: center; font-size: 0.72rem; opacity: 0.5; margin-bottom: 16px; letter-spacing: 0.02em; min-height: 1em; }
   .dia-temp-max { font-size: 2rem; font-weight: 700; }
   .dia-temp-min { font-size: 2rem; font-weight: 400; opacity: 0.55; }
   .dia-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -643,6 +644,7 @@
       <div class="dia-temp-max" id="diaTempMax"></div>
       <div class="dia-temp-min" id="diaTempMin"></div>
     </div>
+    <div id="diaClimaNormal" class="dia-clima-normal"></div>
     <div class="horas" id="diaHoras" style="margin-bottom:18px"></div>
     <div class="dia-stats">
       <div class="dia-stat"><div class="dia-stat-lbl" id="diaLblLluvia"></div><div class="dia-stat-val" id="diaValLluvia"></div></div>
@@ -680,7 +682,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'No se pudo obtener tu ubicación.',
     errorTemperatura: 'No se pudo obtener la temperatura.',
     actualizado: 'Actualizado',
-    ajustes: 'Ajustes', idioma: 'Idioma', radar: '🌧 Radar de lluvia', probLluvia: 'Probabilidad de lluvia próxima hora', ajustesTemp: 'Temperatura', ajustesVel: 'Velocidad', diaViento: 'Velocidad del viento', diaPrecip: 'Precipitaciones', diaProbLluvia: 'Probabilidad de lluvia', ciudadesGuardadas: 'Ciudades guardadas',
+    ajustes: 'Ajustes', idioma: 'Idioma', radar: '🌧 Radar de lluvia', probLluvia: 'Probabilidad de lluvia próxima hora', ajustesTemp: 'Temperatura', ajustesVel: 'Velocidad', diaViento: 'Velocidad del viento', diaPrecip: 'Precipitaciones', diaProbLluvia: 'Probabilidad de lluvia', ciudadesGuardadas: 'Ciudades guardadas', mediaHistorica: 'media histórica',
     cambiarCiudad: 'Cambiar ciudad',
     tuUbicacion: 'Tu ubicación',
     sensacion: 'Sensación',
@@ -720,7 +722,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Could not get your location.',
     errorTemperatura: 'Could not get the temperature.',
     actualizado: 'Updated',
-    ajustes: 'Settings', idioma: 'Language', radar: '🌧 Rain radar', probLluvia: 'Rain probability next hour', ajustesTemp: 'Temperature', ajustesVel: 'Wind speed', diaViento: 'Wind speed', diaPrecip: 'Precipitation', diaProbLluvia: 'Rain probability', ciudadesGuardadas: 'Saved cities',
+    ajustes: 'Settings', idioma: 'Language', radar: '🌧 Rain radar', probLluvia: 'Rain probability next hour', ajustesTemp: 'Temperature', ajustesVel: 'Wind speed', diaViento: 'Wind speed', diaPrecip: 'Precipitation', diaProbLluvia: 'Rain probability', ciudadesGuardadas: 'Saved cities', mediaHistorica: 'historical avg',
     cambiarCiudad: 'Change city',
     tuUbicacion: 'Your location',
     sensacion: 'Feels like',
@@ -760,7 +762,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Standort konnte nicht ermittelt werden.',
     errorTemperatura: 'Temperatur konnte nicht abgerufen werden.',
     actualizado: 'Aktualisiert',
-    ajustes: 'Einstellungen', idioma: 'Sprache', radar: '🌧 Regenradar', probLluvia: 'Regenwahrscheinlichkeit nächste Stunde', ajustesTemp: 'Temperatur', ajustesVel: 'Windgeschwindigkeit', diaViento: 'Windgeschwindigkeit', diaPrecip: 'Niederschlag', diaProbLluvia: 'Regenwahrscheinlichkeit', ciudadesGuardadas: 'Gespeicherte Städte',
+    ajustes: 'Einstellungen', idioma: 'Sprache', radar: '🌧 Regenradar', probLluvia: 'Regenwahrscheinlichkeit nächste Stunde', ajustesTemp: 'Temperatur', ajustesVel: 'Windgeschwindigkeit', diaViento: 'Windgeschwindigkeit', diaPrecip: 'Niederschlag', diaProbLluvia: 'Regenwahrscheinlichkeit', ciudadesGuardadas: 'Gespeicherte Städte', mediaHistorica: 'hist. Durchschnitt',
     cambiarCiudad: 'Stadt ändern',
     tuUbicacion: 'Dein Standort',
     sensacion: 'Gefühlt',
@@ -1840,6 +1842,20 @@ function abrirModalDia(i) {
   document.getElementById('diaDesc').textContent = T.codigos[code] || '';
   document.getElementById('diaTempMax').textContent = toTemp(daily.temperature_2m_max[i]);
   document.getElementById('diaTempMin').textContent = toTemp(daily.temperature_2m_min[i]);
+  // Media histórica
+  const elClima = document.getElementById('diaClimaNormal');
+  elClima.textContent = '';
+  if (currentCoords && currentCoords.lat) {
+    const lat = ubicacionManual && ubicacionManual.lat ? ubicacionManual.lat : currentCoords.lat;
+    const lon = ubicacionManual && ubicacionManual.lat ? ubicacionManual.lon : currentCoords.lon;
+    const mesN = d.getMonth() + 1, diaNN = d.getDate();
+    const anioInicio = new Date().getFullYear() - 10, anioFin = new Date().getFullYear() - 1;
+    fetchClimaNormal(lat, lon, mesN, diaNN).then(n => {
+      if (!n) return;
+      const u = cfg.unidad === 'F' ? v => Math.round(v * 9/5 + 32) + '°F' : v => v + '°C';
+      elClima.textContent = `↑ ${u(n.max)} · ↓ ${u(n.min)}  ·  ${T.mediaHistorica || 'media histórica'} (${anioInicio}–${anioFin})`;
+    });
+  }
   const diaHoras = document.getElementById('diaHoras');
   diaHoras.innerHTML = '';
   const hourly = ultimosDatos && ultimosDatos.tiempo && ultimosDatos.tiempo.hourly;
@@ -1881,6 +1897,35 @@ function abrirModalDia(i) {
 function cerrarModalDia() {
   document.getElementById('modalDia').classList.remove('abierto');
   document.body.style.overflow = '';
+}
+
+// Media histórica de temperatura para una fecha
+const _climaCache = {};
+async function fetchClimaNormal(lat, lon, month, day) {
+  const key = `${lat.toFixed(2)},${lon.toFixed(2)},${month},${day}`;
+  if (_climaCache[key]) return _climaCache[key];
+  const mm = String(month).padStart(2, '0');
+  const dd = String(day).padStart(2, '0');
+  const anioActual = new Date().getFullYear();
+  const anios = [];
+  for (let y = anioActual - 10; y < anioActual; y++) anios.push(y);
+  const fetches = anios.map(y =>
+    fetch(`https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&start_date=${y}-${mm}-${dd}&end_date=${y}-${mm}-${dd}&daily=temperature_2m_max,temperature_2m_min&timezone=auto`)
+      .then(r => r.ok ? r.json() : null).catch(() => null)
+  );
+  const resultados = await Promise.all(fetches);
+  const maxVals = [], minVals = [];
+  for (const r of resultados) {
+    if (r && r.daily && r.daily.temperature_2m_max && r.daily.temperature_2m_max[0] != null) {
+      maxVals.push(r.daily.temperature_2m_max[0]);
+      minVals.push(r.daily.temperature_2m_min[0]);
+    }
+  }
+  if (!maxVals.length) return null;
+  const avg = arr => Math.round(arr.reduce((s, v) => s + v, 0) / arr.length);
+  const result = { max: avg(maxVals), min: avg(minVals), años: maxVals.length };
+  _climaCache[key] = result;
+  return result;
 }
 
 // Pulsar temperatura grande → previsión de hoy
