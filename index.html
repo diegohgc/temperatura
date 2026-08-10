@@ -1849,7 +1849,7 @@ function abrirModalDia(i) {
     const lat = ubicacionManual && ubicacionManual.lat ? ubicacionManual.lat : currentCoords.lat;
     const lon = ubicacionManual && ubicacionManual.lat ? ubicacionManual.lon : currentCoords.lon;
     const mesN = d.getMonth() + 1, diaNN = d.getDate();
-    const anioInicio = new Date().getFullYear() - 10, anioFin = new Date().getFullYear() - 1;
+    const anioInicio = new Date().getFullYear() - 30, anioFin = new Date().getFullYear() - 1;
     fetchClimaNormal(lat, lon, mesN, diaNN).then(n => {
       if (!n) return;
       elClima.textContent = `↑ ${toTemp(n.max)} · ↓ ${toTemp(n.min)}  ·  ${T.mediaHistorica || 'media histórica'} (${anioInicio}–${anioFin})`;
