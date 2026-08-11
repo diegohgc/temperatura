@@ -1463,6 +1463,8 @@ function detectarIdioma() {
 
 let idioma = localStorage.getItem('ql_idioma') || detectarIdioma();
 let T = TRADUCCIONES[idioma] || TRADUCCIONES['en'];
+// Flag: true mientras la pantalla de bienvenida esté activa (bloquea GPS)
+let _bienvenidaActiva = !localStorage.getItem('ql_bienvenida_vista');
 let ultimaActualizacion = null;
 const defaultF = (navigator.language || '').toLowerCase() === 'en-us';
 let usaFahrenheit = localStorage.getItem('ql_unidad') ? localStorage.getItem('ql_unidad') === 'F' : defaultF;
@@ -2376,9 +2378,7 @@ async function cargarDatos(latitude, longitude, nombreFijo) {
 }
 
 async function actualizar() {
-  // No actuar si la pantalla de bienvenida está visible
-  const elBienvenidaGuard = document.getElementById('modalBienvenida');
-  if (elBienvenidaGuard && elBienvenidaGuard.style.display === 'flex') return;
+  if (_bienvenidaActiva) return;
   setEstado(T.localizando);
   elTemp.textContent = '--°';
   elDesc.textContent = '';
@@ -2407,8 +2407,7 @@ async function actualizar() {
 let timeoutBusqueda = null;
 
 async function actualizarPosicionYAltitud() {
-  const _bv = document.getElementById('modalBienvenida');
-  if (_bv && _bv.style.display === 'flex') return;
+  if (_bienvenidaActiva) return;
   if (ubicacionManual || !navigator.geolocation) return;
   navigator.geolocation.getCurrentPosition(async (pos) => {
     const { latitude, longitude } = pos.coords;
@@ -2425,8 +2424,7 @@ async function actualizarPosicionYAltitud() {
 }
 
 async function actualizarCiudad() {
-  const _bv = document.getElementById('modalBienvenida');
-  if (_bv && _bv.style.display === 'flex') return;
+  if (_bienvenidaActiva) return;
   if (ubicacionManual || !navigator.geolocation) return;
   navigator.geolocation.getCurrentPosition(async (pos) => {
     const { latitude, longitude } = pos.coords;
@@ -2548,7 +2546,7 @@ document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') {
     const ahora = Date.now();
     const ultima = parseInt(localStorage.getItem('ql_ultima_act') || '0', 10);
-    if (ahora - ultima > 10 * 60 * 1000) actualizar();
+    if (!_bienvenidaActiva && ahora - ultima > 10 * 60 * 1000) actualizar();
   }
 });
 
@@ -3783,12 +3781,14 @@ function abrirEnGoogleMaps() {
 
   document.getElementById('btnBienvenidaPermitir').addEventListener('click', () => {
     localStorage.setItem(KEY, '1');
+    _bienvenidaActiva = false;
     elBienvenida.style.display = 'none';
     actualizar();
   });
 
   document.getElementById('btnBienvenidaCiudad').addEventListener('click', () => {
     localStorage.setItem(KEY, '1');
+    _bienvenidaActiva = false;
     elBienvenida.style.display = 'none';
     document.getElementById('buscador').classList.add('abierto');
   });
