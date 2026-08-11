@@ -2490,12 +2490,9 @@ document.getElementById('btnMiUbicacion').addEventListener('click', () => {
 });
 
 btn.addEventListener('click', actualizar);
-window.addEventListener('load', () => {
-  // No llamar a actualizar() si la pantalla de bienvenida está visible
-  const bienvenida = document.getElementById('modalBienvenida');
-  if (bienvenida && bienvenida.style.display === 'flex') return;
-  actualizar();
-});
+// El arranque lo gestiona el script de bienvenida al final del body:
+// si el usuario ya pasó la bienvenida, llama actualizar() desde allí.
+// Si es la primera vez, muestra la pantalla y espera que el usuario pulse.
 
 // Pull-to-refresh
 (function() {
@@ -3772,8 +3769,12 @@ function abrirEnGoogleMaps() {
   aplicarTraducciones();
 
   if (!localStorage.getItem(KEY)) {
+    // Primera vez: mostrar bienvenida, NO llamar actualizar()
     elBienvenida.style.display = 'flex';
     localStorage.setItem('ql_ayuda_vista', '1');
+  } else {
+    // Ya vio la bienvenida: arrancar directamente
+    actualizar();
   }
 
   document.getElementById('btnBienvenidaPermitir').addEventListener('click', () => {
