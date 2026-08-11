@@ -3090,9 +3090,12 @@ function abrirEnGoogleMaps() {
   }
 
   function iniciarWatch() {
+    if (_bienvenidaActiva) return;
     if (watchId !== null || !navigator.geolocation) return;
     watchId = navigator.geolocation.watchPosition(onPos, null, { enableHighAccuracy: true, maximumAge: 1000 });
   }
+  // Arrancar el velocímetro cuando el usuario pase la bienvenida
+  window._iniciarWatchVelocimetro = iniciarWatch;
 
   window.abrirVelocimetro = function() {
     const modal = document.getElementById('velModal');
@@ -3783,6 +3786,7 @@ function abrirEnGoogleMaps() {
     localStorage.setItem(KEY, '1');
     _bienvenidaActiva = false;
     elBienvenida.style.display = 'none';
+    if (window._iniciarWatchVelocimetro) window._iniciarWatchVelocimetro();
     actualizar();
   });
 
