@@ -2407,6 +2407,8 @@ async function actualizar() {
 let timeoutBusqueda = null;
 
 async function actualizarPosicionYAltitud() {
+  const _bv = document.getElementById('modalBienvenida');
+  if (_bv && _bv.style.display === 'flex') return;
   if (ubicacionManual || !navigator.geolocation) return;
   navigator.geolocation.getCurrentPosition(async (pos) => {
     const { latitude, longitude } = pos.coords;
@@ -2423,6 +2425,8 @@ async function actualizarPosicionYAltitud() {
 }
 
 async function actualizarCiudad() {
+  const _bv = document.getElementById('modalBienvenida');
+  if (_bv && _bv.style.display === 'flex') return;
   if (ubicacionManual || !navigator.geolocation) return;
   navigator.geolocation.getCurrentPosition(async (pos) => {
     const { latitude, longitude } = pos.coords;
