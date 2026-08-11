@@ -2350,6 +2350,7 @@ async function cargarDatos(latitude, longitude, nombreFijo) {
     localStorage.setItem('ql_ultima_act', Date.now().toString());
     if (window.eclipseActualizar) window.eclipseActualizar(latitude, longitude);
     if (window.ayudaCerrarAlCargar) { window.ayudaCerrarAlCargar(); window.ayudaCerrarAlCargar = null; }
+    if (window.ocultarPermisoDenegado) window.ocultarPermisoDenegado();
   } catch (e) {
     setEstado(T.errorTemperatura);
   }
@@ -2373,7 +2374,8 @@ async function actualizar() {
     cargarDatos(pos.coords.latitude, pos.coords.longitude);
   }, (err) => {
     if (err.code === err.PERMISSION_DENIED) {
-      setEstado(T.permisoDenegado);
+      if (window.mostrarPermisoDenegado) window.mostrarPermisoDenegado();
+      else setEstado(T.permisoDenegado);
     } else {
       setEstado(T.errorUbicacion);
     }
@@ -2466,7 +2468,12 @@ document.getElementById('btnMiUbicacion').addEventListener('click', () => {
 });
 
 btn.addEventListener('click', actualizar);
-window.addEventListener('load', actualizar);
+window.addEventListener('load', () => {
+  // No llamar a actualizar() si la pantalla de bienvenida está visible
+  const bienvenida = document.getElementById('modalBienvenida');
+  if (bienvenida && bienvenida.style.display === 'flex') return;
+  actualizar();
+});
 
 // Pull-to-refresh
 (function() {
@@ -3700,6 +3707,70 @@ function abrirEnGoogleMaps() {
     <button id="brujulaCerrarBtn" onclick="document.getElementById('brujulaModal').style.display='none'" style="margin-top:20px;padding:10px 32px;border:none;border-radius:30px;background:rgba(255,255,255,0.12);color:inherit;font-size:0.95rem;cursor:pointer">Cerrar</button>
   </div>
 </div>
+
+<!-- ── Pantalla de bienvenida (primera vez) ───────────────── -->
+<div id="modalBienvenida" style="display:none;position:fixed;inset:0;z-index:10000;background:linear-gradient(160deg,#1e3a5f,#3a6ea5);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 28px;color:#fff">
+  <div style="font-size:3.5rem;margin-bottom:12px">🌡️</div>
+  <h1 style="font-size:1.8rem;font-weight:700;margin:0 0 6px;letter-spacing:-0.5px">QuickTemp</h1>
+  <p style="font-size:1rem;opacity:0.7;margin:0 0 32px;font-weight:400">El tiempo real donde estás</p>
+  <p style="font-size:0.92rem;line-height:1.6;max-width:320px;opacity:0.85;margin:0 0 36px">Para mostrarte la temperatura, las mareas y la calidad del aire de tu zona necesitamos saber dónde estás.<br><br>Tu ubicación <strong>nunca sale de tu dispositivo</strong> ni la compartimos con nadie.</p>
+  <button id="btnBienvenidaPermitir" style="width:100%;max-width:300px;padding:16px;border:none;border-radius:16px;background:#fff;color:#1e3a5f;font-size:1rem;font-weight:700;cursor:pointer;margin-bottom:16px;letter-spacing:0.01em">Permitir ubicación</button>
+  <button id="btnBienvenidaCiudad" style="background:none;border:none;color:rgba(255,255,255,0.7);font-size:0.9rem;cursor:pointer;text-decoration:underline;padding:8px">Prefiero buscar mi ciudad →</button>
+</div>
+
+<!-- ── Pantalla de permiso denegado ──────────────────────── -->
+<div id="modalPermisoDenegado" style="display:none;position:fixed;inset:0;z-index:10000;background:linear-gradient(160deg,#1e3a5f,#3a6ea5);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 28px;color:#fff">
+  <div style="font-size:3rem;margin-bottom:12px">📍</div>
+  <h2 style="font-size:1.4rem;font-weight:700;margin:0 0 12px">Sin ubicación</h2>
+  <p style="font-size:0.92rem;line-height:1.6;max-width:300px;opacity:0.85;margin:0 0 32px">No podemos detectar tu posición automáticamente, pero puedes usar la app igualmente buscando tu ciudad.</p>
+  <button id="btnDenegadoBuscar" style="width:100%;max-width:300px;padding:16px;border:none;border-radius:16px;background:#fff;color:#1e3a5f;font-size:1rem;font-weight:700;cursor:pointer;margin-bottom:16px">🔍 Buscar mi ciudad</button>
+  <button id="btnDenegadoAjustes" style="width:100%;max-width:300px;padding:14px;border:2px solid rgba(255,255,255,0.3);border-radius:16px;background:transparent;color:#fff;font-size:0.9rem;cursor:pointer;margin-bottom:12px">Ir a Ajustes del sistema</button>
+  <div id="instruccionesAjustes" style="display:none;background:rgba(0,0,0,0.25);border-radius:14px;padding:14px 18px;max-width:300px;font-size:0.82rem;line-height:1.7;opacity:0.9;text-align:left">
+    Ajustes → Aplicaciones → QuickTemp → Permisos → Ubicación → Activar
+  </div>
+</div>
+
+<script>
+(function() {
+  const KEY = 'ql_bienvenida_vista';
+  const elBienvenida = document.getElementById('modalBienvenida');
+  const elDenegado = document.getElementById('modalPermisoDenegado');
+
+  if (!localStorage.getItem(KEY)) {
+    elBienvenida.style.display = 'flex';
+    localStorage.setItem('ql_ayuda_vista', '1');
+  }
+
+  document.getElementById('btnBienvenidaPermitir').addEventListener('click', () => {
+    localStorage.setItem(KEY, '1');
+    elBienvenida.style.display = 'none';
+    actualizar();
+  });
+
+  document.getElementById('btnBienvenidaCiudad').addEventListener('click', () => {
+    localStorage.setItem(KEY, '1');
+    elBienvenida.style.display = 'none';
+    document.getElementById('buscador').classList.add('abierto');
+  });
+
+  window.mostrarPermisoDenegado = function() {
+    elDenegado.style.display = 'flex';
+  };
+  window.ocultarPermisoDenegado = function() {
+    elDenegado.style.display = 'none';
+  };
+
+  document.getElementById('btnDenegadoBuscar').addEventListener('click', () => {
+    elDenegado.style.display = 'none';
+    document.getElementById('buscador').classList.add('abierto');
+  });
+
+  document.getElementById('btnDenegadoAjustes').addEventListener('click', () => {
+    const instr = document.getElementById('instruccionesAjustes');
+    instr.style.display = instr.style.display === 'none' ? 'block' : 'none';
+  });
+})();
+</script>
 
 </body>
 </html>
