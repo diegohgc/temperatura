@@ -2357,6 +2357,9 @@ async function cargarDatos(latitude, longitude, nombreFijo) {
 }
 
 async function actualizar() {
+  // No actuar si la pantalla de bienvenida está visible
+  const elBienvenidaGuard = document.getElementById('modalBienvenida');
+  if (elBienvenidaGuard && elBienvenidaGuard.style.display === 'flex') return;
   setEstado(T.localizando);
   elTemp.textContent = '--°';
   elDesc.textContent = '';
