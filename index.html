@@ -3207,6 +3207,8 @@ function abrirEnGoogleMaps() {
       hu: ['Hogyan kalibrálj:','Mozgasd a telefont nyolcast rajzolva a levegőben (∞) többször, amíg a leolvasás stabilizálódik.','Egyes eszközökön:','Beállítások → Érzékelők → Iránytű → Kalibrálás'],
     };
     const _cal = _CALIBRAR[_lang] || _CALIBRAR['es'];
+    const _bsb = document.getElementById('brujulaCerrarBtn');
+    if (_bsb) _bsb.textContent = (typeof T !== 'undefined' && T.cerrar) ? T.cerrar : 'Cerrar';
     const _bcb = document.getElementById('brujulaCalibrarBtn');
     if (_bcb) _bcb.textContent = (typeof T !== 'undefined' && T.calibrarBrujula) ? T.calibrarBrujula : 'Recuerda tener la brújula calibrada';
     const _ct1 = document.getElementById('brujulaCalibrarTit');  if (_ct1) _ct1.textContent = _cal[0];
