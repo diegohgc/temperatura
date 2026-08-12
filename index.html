@@ -3183,6 +3183,36 @@ function abrirEnGoogleMaps() {
   function abrirModal() {
     const m = document.getElementById('brujulaModal');
     if (m) m.style.display = 'flex';
+    // Aplicar traducciones del calibrador al abrir el modal
+    const _lang = (typeof idioma !== 'undefined') ? idioma : 'es';
+    const _CALIBRAR = {
+      es: ['Cómo calibrar:','Mueve el móvil dibujando un ocho en el aire (∞) varias veces hasta que la lectura se estabilice.','En algunos dispositivos:','Ajustes → Sensores → Brújula → Calibrar'],
+      en: ['How to calibrate:','Move your phone in a figure-eight (∞) pattern several times until the reading stabilizes.','On some devices:','Settings → Sensors → Compass → Calibrate'],
+      de: ['Kalibrierung:','Bewege das Handy in einer Acht-Bewegung (∞) mehrmals, bis die Anzeige stabil ist.','Auf einigen Geräten:','Einstellungen → Sensoren → Kompass → Kalibrieren'],
+      fr: ['Comment calibrer :','Faites bouger votre téléphone en dessinant un huit (∞) dans l\'air plusieurs fois jusqu\'à stabilisation.','Sur certains appareils :','Paramètres → Capteurs → Boussole → Calibrer'],
+      pt: ['Como calibrar:','Mova o telemóvel desenhando um oito no ar (∞) várias vezes até a leitura estabilizar.','Em alguns dispositivos:','Definições → Sensores → Bússola → Calibrar'],
+      it: ['Come calibrare:','Muovi il telefono disegnando un otto nell\'aria (∞) più volte finché la lettura si stabilizza.','Su alcuni dispositivi:','Impostazioni → Sensori → Bussola → Calibra'],
+      zh: ['如何校准：','在空中画"8"字形（∞）移动手机，重复几次直到读数稳定。','部分设备：','设置 → 传感器 → 指南针 → 校准'],
+      ca: ['Com calibrar:','Mou el mòbil dibuixant un vuit a l\'aire (∞) diverses vegades fins que la lectura s\'estabilitzi.','En alguns dispositius:','Configuració → Sensors → Brúixola → Calibrar'],
+      eu: ['Nola kalibratu:','Mugitu mugikorra airean zortzi figura bat (∞) marraztuz, irakurketa egonkortu arte.','Zenbait gailutan:','Ezarpenak → Sentsoreak → Iparrorratz → Kalibratu'],
+      gl: ['Como calibrar:','Move o móbil debuxando un oito no aire (∞) varias veces ata que a lectura se estabilice.','Nalgúns dispositivos:','Axustes → Sensores → Compás → Calibrar'],
+      ar: ['كيفية المعايرة:','حرّك الهاتف برسم شكل ثمانية (∞) في الهواء عدة مرات حتى تستقر القراءة.','في بعض الأجهزة:','الإعدادات ← المستشعرات ← البوصلة ← معايرة'],
+      ru: ['Как откалибровать:','Двигайте телефон, рисуя восьмёрку (∞) в воздухе несколько раз, пока показания не стабилизируются.','На некоторых устройствах:','Настройки → Датчики → Компас → Калибровка'],
+      ja: ['キャリブレーション方法:','空中で8の字（∞）を描くようにスマホを動かし、読み取り値が安定するまで繰り返します。','一部の端末では:','設定 → センサー → コンパス → キャリブレーション'],
+      ko: ['보정 방법:','공중에서 8자 모양(∞)으로 스마트폰을 움직여 읽기 값이 안정될 때까지 반복하세요.','일부 기기의 경우:','설정 → 센서 → 나침반 → 보정'],
+      nl: ['Hoe te kalibreren:','Beweeg de telefoon in een acht-patroon (∞) in de lucht totdat de weergave stabiel is.','Op sommige toestellen:','Instellingen → Sensoren → Kompas → Kalibreren'],
+      pl: ['Jak kalibrować:','Poruszaj telefonem, rysując ósemkę (∞) w powietrzu kilka razy, aż odczyt się ustabilizuje.','Na niektórych urządzeniach:','Ustawienia → Czujniki → Kompas → Kalibruj'],
+      hi: ['कैसे कैलिब्रेट करें:','फोन को हवा में आठ का आकार (∞) बनाते हुए कई बार घुमाएं जब तक रीडिंग स्थिर न हो जाए।','कुछ डिवाइस पर:','सेटिंग्स → सेंसर → कम्पास → कैलिब्रेट'],
+      ro: ['Cum să calibrezi:','Mișcă telefonul desenând un opt în aer (∞) de mai multe ori până se stabilizează citirea.','Pe unele dispozitive:','Setări → Senzori → Busolă → Calibrare'],
+      hu: ['Hogyan kalibrálj:','Mozgasd a telefont nyolcast rajzolva a levegőben (∞) többször, amíg a leolvasás stabilizálódik.','Egyes eszközökön:','Beállítások → Érzékelők → Iránytű → Kalibrálás'],
+    };
+    const _cal = _CALIBRAR[_lang] || _CALIBRAR['es'];
+    const _bcb = document.getElementById('brujulaCalibrarBtn');
+    if (_bcb) _bcb.textContent = (typeof T !== 'undefined' && T.calibrarBrujula) ? T.calibrarBrujula : 'Recuerda tener la brújula calibrada';
+    const _ct1 = document.getElementById('brujulaCalibrarTit');  if (_ct1) _ct1.textContent = _cal[0];
+    const _ct2 = document.getElementById('brujulaCalibrarTxt');  if (_ct2) _ct2.textContent = _cal[1];
+    const _ct3 = document.getElementById('brujulaCalibrarTit2'); if (_ct3) _ct3.textContent = _cal[2];
+    const _ct4 = document.getElementById('brujulaCalibrarTxt2'); if (_ct4) _ct4.textContent = _cal[3];
   }
 
   function iniciarSensor() {
