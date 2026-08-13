@@ -360,81 +360,6 @@
     .marea-extremo .me-label { font-size: 0.6rem; }
     .marea-extremo .me-icono svg { width: 20px; height: 20px; }
   }
-
-  /* ── Eclipse banner ── */
-  #eclipseBanner {
-    background: linear-gradient(135deg, #1a0a2e 0%, #0d1a3a 60%, #2a1505 100%);
-    border: 1px solid rgba(255,180,0,0.35);
-    border-radius: 14px;
-    padding: 12px 14px;
-    margin: 8px 0 10px;
-    position: relative;
-    text-align: left;
-    cursor: pointer;
-    display: none;
-  }
-  #eclipseBanner.visible { display: block; }
-  #eclipseBanner .ecl-close {
-    position: absolute; top: 8px; right: 10px;
-    background: none; border: none; color: rgba(255,255,255,0.5);
-    font-size: 1.1rem; cursor: pointer; padding: 0; line-height: 1;
-  }
-  #eclipseBanner .ecl-header {
-    display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
-  }
-  #eclipseBanner .ecl-icon { font-size: 1.5rem; }
-  #eclipseBanner .ecl-title {
-    font-size: 0.85rem; font-weight: 700; color: #ffd060; line-height: 1.2;
-  }
-  #eclipseBanner .ecl-subtitle {
-    font-size: 0.7rem; color: rgba(255,208,96,0.7); margin-top: 1px;
-  }
-  #eclipseBanner .ecl-info {
-    font-size: 0.78rem; color: rgba(255,255,255,0.85); line-height: 1.5;
-  }
-  #eclipseBanner .ecl-info strong { color: #ffd060; }
-  #eclipseBanner .ecl-more {
-    display: inline-block; margin-top: 8px;
-    font-size: 0.72rem; color: #ffd060;
-    text-decoration: underline; background: none; border: none; cursor: pointer; padding: 0;
-  }
-
-  /* Modal eclipse */
-  #eclipseModal {
-    display: none; position: fixed; inset: 0; z-index: 9000;
-    background: rgba(0,0,0,0.75); align-items: center; justify-content: center;
-  }
-  #eclipseModal.open { display: flex; }
-  #eclipseModal .ecl-modal-box {
-    background: linear-gradient(160deg, #12082a, #0d1a3a);
-    border: 1px solid rgba(255,180,0,0.4);
-    border-radius: 18px; padding: 24px 20px;
-    max-width: 340px; width: 90%; position: relative; color: #fff;
-  }
-  #eclipseModal h2 { font-size: 1.1rem; color: #ffd060; margin-bottom: 4px; }
-  #eclipseModal .ecl-date { font-size: 0.75rem; color: rgba(255,208,96,0.7); margin-bottom: 16px; }
-  #eclipseModal .ecl-row {
-    display: flex; justify-content: space-between; align-items: baseline;
-    padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.08);
-    font-size: 0.82rem;
-  }
-  #eclipseModal .ecl-row:last-of-type { border-bottom: none; }
-  #eclipseModal .ecl-row span:last-child { font-weight: 700; color: #ffd060; }
-  #eclipseModal .ecl-tip {
-    font-size: 0.7rem; color: rgba(255,255,255,0.5);
-    margin-top: 12px; line-height: 1.4;
-  }
-  #eclipseModal .ecl-ext-btn {
-    display: block; margin-top: 14px; text-align: center;
-    background: rgba(255,208,96,0.15); border: 1px solid rgba(255,208,96,0.4);
-    border-radius: 8px; padding: 10px; color: #ffd060;
-    font-size: 0.8rem; font-weight: 700; text-decoration: none;
-  }
-  #eclipseModal .ecl-close-modal {
-    position: absolute; top: 12px; right: 14px;
-    background: none; border: none; color: rgba(255,255,255,0.45);
-    font-size: 1.3rem; cursor: pointer;
-  }
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -557,19 +482,6 @@
       <div class="marea-estado" id="marea"></div>
       <div class="marea-agua" id="mareaAgua"></div>
     </div>
-    <!-- Eclipse banner -->
-    <div id="eclipseBanner">
-      <button class="ecl-close" id="eclipseClose">✕</button>
-      <div class="ecl-header">
-        <span class="ecl-icon">🌑</span>
-        <div>
-          <div class="ecl-title" id="eclTitle">Solar Eclipse · August 12</div>
-          <div class="ecl-subtitle" id="eclSubtitle">Total Solar Eclipse</div>
-        </div>
-      </div>
-      <div class="ecl-info" id="eclInfo">Loading eclipse data...</div>
-      <button class="ecl-more" id="eclMoreBtn">More info for your location →</button>
-    </div>
     <!-- Modal ayuda -->
     <div id="ayudaModal">
       <div class="ayuda-box">
@@ -578,17 +490,6 @@
         <div class="ayuda-sub" id="ayudaSub"></div>
         <div class="ayuda-lista" id="ayudaLista"></div>
         <div class="ayuda-footer" id="ayudaFooter"></div>
-      </div>
-    </div>
-    <!-- Modal eclipse -->
-    <div id="eclipseModal">
-      <div class="ecl-modal-box">
-        <button class="ecl-close-modal" id="eclModalClose">✕</button>
-        <h2 id="eclModalTitle">🌑 Solar Eclipse</h2>
-        <div class="ecl-date" id="eclModalDate">August 12, 2026</div>
-        <div id="eclModalContent"></div>
-        <div class="ecl-tip" id="eclTip"></div>
-        <a id="eclExtLink" class="ecl-ext-btn" target="_blank">🔭 More details on timeanddate.com</a>
       </div>
     </div>
     <div class="bottom-row">
@@ -2407,8 +2308,7 @@ async function cargarDatos(latitude, longitude, nombreFijo) {
     ultimaActualizacion = Date.now();
     setEstado(T.actualizado + ' ' + new Date(ultimaActualizacion).toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' }));
     localStorage.setItem('ql_ultima_act', Date.now().toString());
-    if (window.eclipseActualizar) window.eclipseActualizar(latitude, longitude);
-    if (window.ayudaCerrarAlCargar) { window.ayudaCerrarAlCargar(); window.ayudaCerrarAlCargar = null; }
+if (window.ayudaCerrarAlCargar) { window.ayudaCerrarAlCargar(); window.ayudaCerrarAlCargar = null; }
     if (window.ocultarPermisoDenegado) window.ocultarPermisoDenegado();
   } catch (e) {
     setEstado(T.errorTemperatura);
@@ -3248,13 +3148,9 @@ function abrirEnGoogleMaps() {
   }
 })();
 
-// ── Eclipse solar 12 agosto 2026 ──────────────────────────────────────────
+// ── Eclipse solar 12 agosto 2026 — eliminado tras el evento ──────────────
 (function() {
-  const now = new Date();
-  const start = new Date('2026-08-09T00:00:00Z');
-  const end   = new Date('2026-08-15T00:00:00Z');
-  if (now < start || now > end) return;
-  if (localStorage.getItem('eclipse2026closed')) return;
+  return; // eclipse pasado, bloque desactivado
 
   // Traducciones
   const lng = (typeof idioma !== 'undefined' ? idioma : 'en').substring(0,2);
