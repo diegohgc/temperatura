@@ -2951,6 +2951,48 @@ function abrirEnGoogleMaps() {
   const MAX_VEL = 180;   // km/h para escala del arco (o 110 mph)
   let velActual = 0, velMax = 0, velSuma = 0, velCount = 0;
   let watchId = null;
+  let distMetros = 0, lastLat = null, lastLon = null;
+
+  function haversineM(lat1, lon1, lat2, lon2) {
+    const R = 6371000, r = Math.PI / 180;
+    const dLat = (lat2 - lat1) * r, dLon = (lon2 - lon1) * r;
+    const a = Math.sin(dLat/2)**2 + Math.cos(lat1*r)*Math.cos(lat2*r)*Math.sin(dLon/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
+
+  function formatDist(m) {
+    const usaMph = window.usaMph || false;
+    if (usaMph) {
+      const miles = m / 1609.34;
+      return miles < 0.1 ? [Math.round(m * 3.28084) + '', 'ft'] : [miles.toFixed(2), 'mi'];
+    }
+    return m < 1000 ? [Math.round(m) + '', 'm'] : [(m / 1000).toFixed(2), 'km'];
+  }
+
+  function actualizarPanelBrujula() {
+    const T = window.T || {};
+    const velLabel = document.getElementById('brjVelLabel');
+    const velNum   = document.getElementById('brjVelNum');
+    const velUnit  = document.getElementById('brjVelUnit');
+    const distLabel = document.getElementById('brjDistLabel');
+    const distNum  = document.getElementById('brjDistNum');
+    const distUnit = document.getElementById('brjDistUnit');
+    const resetBtn = document.getElementById('brjDistReset');
+    if (velLabel) velLabel.textContent = T.tuVelocidad || 'Velocidad';
+    if (distLabel) distLabel.textContent = T.distancia || 'Distancia';
+    if (resetBtn) resetBtn.textContent = T.resetDist || 'Reset';
+    if (velNum) velNum.textContent = Math.round(msToDisplay(velActual));
+    if (velUnit) velUnit.textContent = unidad();
+    const [dVal, dUnit] = formatDist(distMetros);
+    if (distNum) distNum.textContent = dVal;
+    if (distUnit) distUnit.textContent = dUnit;
+  }
+
+  window.resetDistancia = function() {
+    distMetros = 0; lastLat = null; lastLon = null;
+    actualizarPanelBrujula();
+  };
+  window.actualizarPanelBrujula = actualizarPanelBrujula;
 
   function msToDisplay(ms) {
     const usaMph = window.usaMph || false;
@@ -3022,9 +3064,18 @@ function abrirEnGoogleMaps() {
       velSuma += ms;
       velCount++;
     }
+    // Acumular distancia
+    const lat = pos.coords.latitude, lon = pos.coords.longitude;
+    if (lastLat !== null && ms >= UMBRAL_MS) {
+      distMetros += haversineM(lastLat, lastLon, lat, lon);
+    }
+    lastLat = lat; lastLon = lon;
+
     actualizarFila(ms);
     const modal = document.getElementById('velModal');
     if (modal && modal.style.display !== 'none') actualizarModal();
+    // Actualizar panel en modal brújula siempre
+    actualizarPanelBrujula();
   }
 
   function iniciarWatch() {
@@ -3083,6 +3134,7 @@ function abrirEnGoogleMaps() {
   function abrirModal() {
     const m = document.getElementById('brujulaModal');
     if (m) m.style.display = 'flex';
+    if (window.actualizarPanelBrujula) window.actualizarPanelBrujula();
     // Aplicar traducciones del calibrador al abrir el modal
     const _lang = (typeof idioma !== 'undefined') ? idioma : 'es';
     const _CALIBRAR = {
@@ -3694,7 +3746,21 @@ function abrirEnGoogleMaps() {
     </svg>
     <div id="brujulaGradosTexto" style="font-size:2rem;font-weight:700;margin-top:12px;letter-spacing:2px">—</div>
     <div id="brujulaDireccionTexto" style="font-size:0.9rem;opacity:0.6;margin-top:2px">sin señal</div>
-    <button id="brujulaCerrarBtn" onclick="document.getElementById('brujulaModal').style.display='none'" style="margin-top:20px;padding:10px 32px;border:none;border-radius:30px;background:rgba(255,255,255,0.12);color:inherit;font-size:0.95rem;cursor:pointer">Cerrar</button>
+    <!-- Panel velocidad + distancia -->
+    <div style="display:flex;gap:10px;margin-top:18px">
+      <div style="flex:1;background:rgba(255,255,255,0.07);border-radius:14px;padding:10px 8px;text-align:center">
+        <div id="brjVelLabel" style="font-size:0.65rem;opacity:0.5;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:3px">Velocidad</div>
+        <div id="brjVelNum" style="font-size:1.4rem;font-weight:700;line-height:1">0</div>
+        <div id="brjVelUnit" style="font-size:0.7rem;opacity:0.55;margin-top:2px">km/h</div>
+      </div>
+      <div style="flex:1;background:rgba(255,255,255,0.07);border-radius:14px;padding:10px 8px;text-align:center">
+        <div id="brjDistLabel" style="font-size:0.65rem;opacity:0.5;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:3px">Distancia</div>
+        <div id="brjDistNum" style="font-size:1.4rem;font-weight:700;line-height:1">0</div>
+        <div id="brjDistUnit" style="font-size:0.7rem;opacity:0.55;margin-top:2px">m</div>
+        <button id="brjDistReset" onclick="window.resetDistancia && window.resetDistancia()" style="margin-top:6px;background:none;border:none;color:inherit;opacity:0.4;font-size:0.65rem;cursor:pointer;text-decoration:underline;padding:0">Reset</button>
+      </div>
+    </div>
+    <button id="brujulaCerrarBtn" onclick="document.getElementById('brujulaModal').style.display='none'" style="margin-top:16px;padding:10px 32px;border:none;border-radius:30px;background:rgba(255,255,255,0.12);color:inherit;font-size:0.95rem;cursor:pointer">Cerrar</button>
     <div style="margin-top:14px">
       <button id="brujulaCalibrarBtn" onclick="document.getElementById('brujulaCalibrarInfo').style.display=document.getElementById('brujulaCalibrarInfo').style.display==='none'?'block':'none'" style="background:none;border:none;color:inherit;opacity:0.5;font-size:0.78rem;cursor:pointer;text-decoration:underline">Recuerda tener la brújula calibrada</button>
       <div id="brujulaCalibrarInfo" style="display:none;margin-top:10px;background:rgba(255,255,255,0.07);border-radius:12px;padding:12px 14px;font-size:0.78rem;line-height:1.6;opacity:0.85;text-align:left">
