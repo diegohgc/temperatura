@@ -1364,6 +1364,7 @@ function detectarIdioma() {
 
 let idioma = localStorage.getItem('ql_idioma') || detectarIdioma();
 let T = TRADUCCIONES[idioma] || TRADUCCIONES['en'];
+window.T = T;
 // Flag: true mientras la pantalla de bienvenida esté activa (bloquea GPS)
 let _bienvenidaActiva = !localStorage.getItem('ql_bienvenida_vista');
 let ultimaActualizacion = null;
@@ -1402,6 +1403,7 @@ document.getElementById('selectIdioma').addEventListener('change', (e) => {
   idioma = e.target.value;
   localStorage.setItem('ql_idioma', idioma);
   T = TRADUCCIONES[idioma] || TRADUCCIONES['en'];
+  window.T = T;
   actualizarAjustes();
   if (ultimosDatos) renderDatos(ultimosDatos);
   actualizarBtnFav();
