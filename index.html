@@ -1370,6 +1370,7 @@ let ultimaActualizacion = null;
 const defaultF = (navigator.language || '').toLowerCase() === 'en-us';
 let usaFahrenheit = localStorage.getItem('ql_unidad') ? localStorage.getItem('ql_unidad') === 'F' : defaultF;
 let usaMph = localStorage.getItem('ql_velocidad') === 'mph';
+window.usaMph = usaMph;
 function toTemp(c) {
   return usaFahrenheit ? Math.round(c * 9 / 5 + 32) + '°F' : Math.round(c) + '°';
 }
@@ -1508,8 +1509,8 @@ document.addEventListener('click', () => { document.getElementById('ajustesPanel
 document.getElementById('ajustesPanel').addEventListener('click', (e) => e.stopPropagation());
 document.getElementById('btnC').addEventListener('click', () => { usaFahrenheit = false; localStorage.setItem('ql_unidad', 'C'); actualizarAjustes(); if (ultimosDatos) renderDatos(ultimosDatos); });
 document.getElementById('btnF').addEventListener('click', () => { usaFahrenheit = true; localStorage.setItem('ql_unidad', 'F'); actualizarAjustes(); if (ultimosDatos) renderDatos(ultimosDatos); });
-document.getElementById('btnKmh').addEventListener('click', () => { usaMph = false; localStorage.setItem('ql_velocidad', 'kmh'); actualizarAjustes(); if (ultimosDatos) renderDatos(ultimosDatos); if (window.actualizarPanelBrujula) window.actualizarPanelBrujula(); });
-document.getElementById('btnMph').addEventListener('click', () => { usaMph = true; localStorage.setItem('ql_velocidad', 'mph'); actualizarAjustes(); if (ultimosDatos) renderDatos(ultimosDatos); if (window.actualizarPanelBrujula) window.actualizarPanelBrujula(); });
+document.getElementById('btnKmh').addEventListener('click', () => { usaMph = false; window.usaMph = false; localStorage.setItem('ql_velocidad', 'kmh'); actualizarAjustes(); if (ultimosDatos) renderDatos(ultimosDatos); if (window.actualizarPanelBrujula) window.actualizarPanelBrujula(); });
+document.getElementById('btnMph').addEventListener('click', () => { usaMph = true; window.usaMph = true; localStorage.setItem('ql_velocidad', 'mph'); actualizarAjustes(); if (ultimosDatos) renderDatos(ultimosDatos); if (window.actualizarPanelBrujula) window.actualizarPanelBrujula(); });
 actualizarAjustes();
 
 const elTemp = document.getElementById('temp');
