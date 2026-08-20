@@ -1707,7 +1707,7 @@ async function obtenerCiudad(lat, lon) {
 async function obtenerTiempo(lat, lon) {
   // ICON seamless: mejor nubosidad local. UV se pide aparte (ICON no lo incluye).
   const [r, rUv] = await Promise.all([
-    fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,is_day,cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high&hourly=temperature_2m,precipitation_probability,weather_code,is_day&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max,wind_speed_10m_max,wind_direction_10m_dominant,precipitation_sum&forecast_days=7&timezone=auto&minutely_15=weather_code,is_day&models=icon_seamless`),
+    fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,is_day,cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high,precipitation&hourly=temperature_2m,precipitation_probability,weather_code,is_day&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max,wind_speed_10m_max,wind_direction_10m_dominant,precipitation_sum&forecast_days=7&timezone=auto&minutely_15=weather_code,is_day&models=icon_seamless`),
     fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=uv_index&daily=uv_index_max&forecast_days=7&timezone=auto`)
   ]);
   if (!r.ok) throw new Error('Error al consultar el tiempo');
@@ -2267,6 +2267,9 @@ function renderDatos(datos) {
     else if (owmId >= 600 && owmId < 700 && weatherCode < 71) weatherCode = 71;   // nieve
     else if (owmId >= 700 && owmId < 800 && weatherCode < 45) weatherCode = 45;   // niebla
   }
+  // Si hay precipitación real ahora mismo y el código no lo refleja, forzar llovizna
+  const precipActual = c.precipitation ?? 0;
+  if (precipActual > 0 && weatherCode < 51) weatherCode = 51;
   if (weatherCode <= 1 && cloudCover >= 75) weatherCode = 3;
   else if (weatherCode <= 1 && cloudCover >= 50) weatherCode = 2;
   elTemp.textContent = toTemp(c.temperature_2m);
