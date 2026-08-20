@@ -1715,16 +1715,21 @@ function esEspaña(lat, lon) {
   return false;
 }
 
+let _aemetMunicipiosCache = null; // caché en memoria para la sesión
+
 async function obtenerMunicipioAEMET(lat, lon) {
-  // Busca el municipio AEMET más cercano a las coordenadas dadas
-  const url = `https://opendata.aemet.es/opendata/api/maestro/municipios?api_key=${AEMET_KEY}`;
-  const r1 = await fetch(url);
-  if (!r1.ok) return null;
-  const j1 = await r1.json();
-  if (j1.estado !== 200 || !j1.datos) return null;
-  const r2 = await fetch(j1.datos);
-  if (!r2.ok) return null;
-  const municipios = await r2.json();
+  // Busca el municipio AEMET más cercano — la lista se cachea en memoria
+  if (!_aemetMunicipiosCache) {
+    const url = `https://opendata.aemet.es/opendata/api/maestro/municipios?api_key=${AEMET_KEY}`;
+    const r1 = await fetch(url);
+    if (!r1.ok) return null;
+    const j1 = await r1.json();
+    if (j1.estado !== 200 || !j1.datos) return null;
+    const r2 = await fetch(j1.datos);
+    if (!r2.ok) return null;
+    _aemetMunicipiosCache = await r2.json();
+  }
+  const municipios = _aemetMunicipiosCache;
   // Encontrar el más cercano por distancia euclídea (suficiente para esto)
   let mejor = null, mejorDist = Infinity;
   for (const m of municipios) {
