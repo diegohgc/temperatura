@@ -1836,6 +1836,48 @@ function aemetDatosActuales(aemetData) {
     viento: viento !== null ? parseFloat(viento) : null,
   };
 }
+function aemetHorasProximas(aemetData) {
+  // Devuelve array de hasta 8 horas próximas en formato compatible con renderHoras
+  if (!aemetData || !aemetData.prediccion || !aemetData.prediccion.dia) return null;
+  const ahora = new Date();
+  const horaActual = ahora.getHours();
+  const hoy = ahora.toISOString().slice(0, 10);
+  const manana = new Date(ahora); manana.setDate(manana.getDate() + 1);
+  const mananaStr = manana.toISOString().slice(0, 10);
+
+  // Recopilar horas de hoy y mañana
+  const horas = [];
+  for (const diaData of aemetData.prediccion.dia) {
+    const esDia = diaData.fecha && diaData.fecha.startsWith(hoy);
+    const esManana = diaData.fecha && diaData.fecha.startsWith(mananaStr);
+    if (!esDia && !esManana) continue;
+
+    const estadoCielo = diaData.estadoCielo || [];
+    const probPrec = diaData.probPrecipitacion || [];
+    const temperaturas = diaData.temperatura || [];
+
+    for (const cielo of estadoCielo) {
+      const h = parseInt(cielo.periodo || cielo.hora || '0');
+      if (esDia && h < horaActual) continue; // solo horas futuras de hoy
+      const fecha = new Date(ahora);
+      if (esManana) { fecha.setDate(fecha.getDate() + 1); }
+      fecha.setHours(h, 0, 0, 0);
+
+      // Buscar prob y temp para esta hora
+      const probItem = probPrec.find(p => parseInt(p.periodo || p.hora || '0') === h);
+      const tempItem = temperaturas.find(t => parseInt(t.periodo || t.hora || '0') === h);
+      const prob = probItem ? parseInt(probItem.value ?? probItem.descripcion ?? 0) : 0;
+      const temp = tempItem ? parseFloat(tempItem.value ?? tempItem.descripcion ?? 0) : null;
+      const wmo = cielo.value ? aemetCodigoAWMO(cielo.value) : 3;
+
+      horas.push({ time: fecha.toISOString(), weather_code: wmo, prob, temp, is_day: h >= 7 && h < 21 });
+      if (horas.length >= 8) break;
+    }
+    if (horas.length >= 8) break;
+  }
+  return horas.length ? horas : null;
+}
+
 // ── NWS — EEUU y Canadá ──────────────────────────────────────────────────────
 function esNWS(lat, lon) {
   // Cobertura aproximada de NWS: EEUU continental, Alaska, Hawaii, Puerto Rico
@@ -1942,6 +1984,23 @@ function renderHoras(hourly) {
       <div class="icono-hora">${iconoConProb(hourly.weather_code[i], prob, hourly.is_day ? hourly.is_day[i] === 1 : true)}</div>
       <div class="t">${toTemp(temp)}</div>
       ${prob !== null ? `<div class="p">${prob}%</div>` : ''}
+    `;
+    elHoras.appendChild(div);
+  }
+}
+
+function renderHorasAEMET(horas) {
+  elHoras.innerHTML = '';
+  if (!horas || !horas.length) return;
+  for (const h of horas) {
+    const hora = new Date(h.time).getHours() + 'h';
+    const div = document.createElement('div');
+    div.className = 'hora';
+    div.innerHTML = `
+      <div class="h">${hora}</div>
+      <div class="icono-hora">${iconoConProb(h.weather_code, h.prob, h.is_day)}</div>
+      <div class="t">${h.temp !== null ? toTemp(h.temp) : '--'}</div>
+      ${h.prob !== null ? `<div class="p">${h.prob}%</div>` : ''}
     `;
     elHoras.appendChild(div);
   }
@@ -2443,7 +2502,7 @@ async function obtenerCalidadAire(lat, lon) {
 }
 
 function renderDatos(datos) {
-  const { tiempo, ciudad, mdata, elevacion, aireData, owmData, aemetActual, nwsActual } = datos;
+  const { tiempo, ciudad, mdata, elevacion, aireData, owmData, aemetActual, aemetHoras, nwsActual } = datos;
   const c = tiempo.current;
   const m15 = tiempo.minutely_15;
   let weatherCode = c.weather_code;
@@ -2484,16 +2543,22 @@ function renderDatos(datos) {
   elDesc.textContent = T.codigos[weatherCode] || '';
   elIcono.innerHTML = iconoParaCodigo(weatherCode, isDay);
   const elLluvia = document.getElementById('lluvia');
-  const hourly = tiempo.hourly;
-  if (hourly && hourly.time && hourly.precipitation_probability) {
-    const now = new Date();
-    const idx = hourly.time.findIndex(t => new Date(t) >= now);
-    const prob = idx >= 0 ? hourly.precipitation_probability[idx] : null;
-    elLluvia.textContent = prob !== null ? `🌧 ${T.probLluvia || 'Rain probability next hour'}: ${prob}%` : '';
+  // Probabilidad lluvia: AEMET tiene prioridad en España
+  let probLluviaActual = null;
+  if (aemetActual && aemetActual.probPrecip !== null) {
+    probLluviaActual = aemetActual.probPrecip;
   } else {
-    elLluvia.textContent = '';
+    const hourly = tiempo.hourly;
+    if (hourly && hourly.time && hourly.precipitation_probability) {
+      const now = new Date();
+      const idx = hourly.time.findIndex(t => new Date(t) >= now);
+      probLluviaActual = idx >= 0 ? hourly.precipitation_probability[idx] : null;
+    }
   }
-  renderHoras(tiempo.hourly);
+  elLluvia.textContent = probLluviaActual !== null ? `🌧 ${T.probLluvia || 'Rain probability next hour'}: ${probLluviaActual}%` : '';
+  // Previsión horaria: AEMET tiene prioridad en España si tiene datos
+  if (aemetHoras && aemetHoras.length) renderHorasAEMET(aemetHoras);
+  else renderHoras(tiempo.hourly);
   renderSol(tiempo.daily);
   renderDias(tiempo.daily);
   const tieneMarea = renderMarea(mdata);
@@ -2542,13 +2607,14 @@ async function cargarDatos(latitude, longitude, nombreFijo) {
       nwsPromise
     ]);
     const aemetActual = aemetRaw ? aemetDatosActuales(aemetRaw) : null;
+    const aemetHoras = aemetRaw ? aemetHorasProximas(aemetRaw) : null;
     elCiudad.firstChild.textContent = ciudad.principal;
     document.getElementById('ciudadSub').textContent = ciudad.sub || '';
     const nombreCiudad = ciudad.sub ? `${ciudad.principal}, ${ciudad.sub}` : ciudad.principal;
     currentCoords = { lat: latitude, lon: longitude, nombre: nombreCiudad };
     actualizarBtnFav();
     actualizarFavIdx();
-    ultimosDatos = { tiempo, ciudad, mdata, elevacion, aireData, owmData, aemetActual, nwsActual };
+    ultimosDatos = { tiempo, ciudad, mdata, elevacion, aireData, owmData, aemetActual, aemetHoras, nwsActual };
     renderDatos(ultimosDatos);
     ultimaActualizacion = Date.now();
     setEstado(T.actualizado + ' ' + new Date(ultimaActualizacion).toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' }));
