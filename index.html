@@ -1704,6 +1704,114 @@ async function obtenerCiudad(lat, lon) {
   return { principal: T.tuUbicacion, sub: null };
 }
 
+// ── AEMET — solo para España ─────────────────────────────────────────────────
+const AEMET_KEY = 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkaWVnb2hnNzJAZ21haWwuY29tIiwianRpIjoiMTFjZjc5ZmYtYTNlNC00YjgyLWE4ODYtMTkyNjZjODE1NWJmIiwiZXhwIjoxNzk1ODc1NjI5LCJpc3MiOiJBRU1FVCIsImlhdCI6MTc4NzIzNTYyOSwidXNlcklkIjoiMTFjZjc5ZmYtYTNlNC00YjgyLWE4ODYtMTkyNjZjODE1NWJmIiwicm9sZSI6IiJ9.vaEWjXZlkWPvplBVdlhV1b4nt4cSNuZNq3daNiERqVs';
+
+function esEspaña(lat, lon) {
+  // Península + Baleares + Canarias + Ceuta/Melilla
+  if (lat >= 35.9 && lat <= 43.8 && lon >= -9.3 && lon <= 4.4) return true;  // Península + Baleares
+  if (lat >= 27.6 && lat <= 29.5 && lon >= -18.2 && lon <= -13.4) return true; // Canarias
+  if (lat >= 35.8 && lat <= 35.95 && lon >= -5.4 && lon <= -2.1) return true; // Ceuta/Melilla
+  return false;
+}
+
+async function obtenerMunicipioAEMET(lat, lon) {
+  // Busca el municipio AEMET más cercano a las coordenadas dadas
+  const url = `https://opendata.aemet.es/opendata/api/maestro/municipios?api_key=${AEMET_KEY}`;
+  const r1 = await fetch(url);
+  if (!r1.ok) return null;
+  const j1 = await r1.json();
+  if (j1.estado !== 200 || !j1.datos) return null;
+  const r2 = await fetch(j1.datos);
+  if (!r2.ok) return null;
+  const municipios = await r2.json();
+  // Encontrar el más cercano por distancia euclídea (suficiente para esto)
+  let mejor = null, mejorDist = Infinity;
+  for (const m of municipios) {
+    const mlat = parseFloat(m.latitud_dec);
+    const mlon = parseFloat(m.longitud_dec);
+    if (isNaN(mlat) || isNaN(mlon)) continue;
+    const d = Math.pow(mlat - lat, 2) + Math.pow(mlon - lon, 2);
+    if (d < mejorDist) { mejorDist = d; mejor = m; }
+  }
+  return mejor ? mejor.id : null; // id tipo "id33024"
+}
+
+async function obtenerTiempoAEMET(codMunicipio) {
+  // codMunicipio: string tipo "id33024"
+  const cod = codMunicipio.replace('id', '');
+  const url = `https://opendata.aemet.es/opendata/api/prediccion/especifica/municipio/horaria/${cod}?api_key=${AEMET_KEY}`;
+  const r1 = await fetch(url);
+  if (!r1.ok) return null;
+  const j1 = await r1.json();
+  if (j1.estado !== 200 || !j1.datos) return null;
+  const r2 = await fetch(j1.datos);
+  if (!r2.ok) return null;
+  const data = await r2.json();
+  return data && data[0] ? data[0] : null;
+}
+
+function aemetCodigoAWMO(skyCode) {
+  // Convierte el código de cielo de AEMET a código WMO aproximado
+  // Códigos AEMET: 11=despejado, 12=poco nuboso, 13=intervalos nubosos,
+  // 14=nuboso, 15=muy nuboso, 16=cubierto, 17=nubes altas,
+  // 23=intervalos nubosos con lluvia, 24=nuboso con lluvia, 25=muy nuboso con lluvia,
+  // 26=cubierto con lluvia, 33=intervalos nubosos con nieve, 34=nuboso con nieve,
+  // 43=intervalos nubosos con lluvia y nieve, 44=nuboso con lluvia y nieve,
+  // 51=intervalos nubosos con tormenta, 52=nuboso con tormenta, 53=muy nuboso con tormenta, 54=cubierto con tormenta
+  const c = parseInt(skyCode);
+  if (c === 11) return 0;
+  if (c === 12) return 1;
+  if (c === 13) return 2;
+  if (c === 14 || c === 15 || c === 17) return 2;
+  if (c === 16) return 3;
+  if (c >= 23 && c <= 26) return 61;
+  if (c >= 33 && c <= 36) return 71;
+  if (c >= 43 && c <= 46) return 61;
+  if (c >= 51 && c <= 54) return 95;
+  if (c >= 61 && c <= 64) return 51; // llovizna
+  if (c >= 71 && c <= 74) return 71; // nieve débil
+  return 3; // por defecto nublado
+}
+
+function aemetDatosActuales(aemetData) {
+  // Extrae los datos de la hora más cercana del JSON de AEMET
+  if (!aemetData || !aemetData.prediccion || !aemetData.prediccion.dia) return null;
+  const ahora = new Date();
+  const horaActual = ahora.getHours();
+  // Buscar el día de hoy
+  const hoy = ahora.toISOString().slice(0, 10);
+  let diaData = aemetData.prediccion.dia.find(d => d.fecha && d.fecha.startsWith(hoy));
+  if (!diaData) diaData = aemetData.prediccion.dia[0];
+  if (!diaData) return null;
+
+  // Función para buscar el valor de la hora más cercana en un array de periodos
+  function valorHora(arr, campo) {
+    if (!arr || !arr.length) return null;
+    // Periodos pueden ser objetos con atributo "periodo" o "hora"
+    let mejor = null, mejorDif = Infinity;
+    for (const item of arr) {
+      const p = parseInt(item.periodo || item.hora || '0');
+      const dif = Math.abs(p - horaActual);
+      if (dif < mejorDif) { mejorDif = dif; mejor = item; }
+    }
+    return mejor ? (campo ? mejor[campo] : mejor.value ?? mejor.descripcion) : null;
+  }
+
+  const cielo = valorHora(diaData.estadoCielo, 'value');
+  const prob = valorHora(diaData.probPrecipitacion);
+  const temp = valorHora(diaData.temperatura);
+  const viento = valorHora(diaData.viento, 'velocidad');
+
+  return {
+    weatherCode: cielo ? aemetCodigoAWMO(cielo) : null,
+    probPrecip: prob !== null ? parseInt(prob) : null,
+    temperatura: temp !== null ? parseFloat(temp) : null,
+    viento: viento !== null ? parseFloat(viento) : null,
+  };
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 async function obtenerTiempo(lat, lon) {
   // ICON seamless: mejor nubosidad local. UV se pide aparte (ICON no lo incluye).
   const [r, rUv] = await Promise.all([
@@ -2242,7 +2350,7 @@ async function obtenerCalidadAire(lat, lon) {
 }
 
 function renderDatos(datos) {
-  const { tiempo, ciudad, mdata, elevacion, aireData, owmData } = datos;
+  const { tiempo, ciudad, mdata, elevacion, aireData, owmData, aemetActual } = datos;
   const c = tiempo.current;
   const m15 = tiempo.minutely_15;
   let weatherCode = c.weather_code;
@@ -2251,6 +2359,11 @@ function renderDatos(datos) {
     const now = new Date();
     const idx = m15.time.reduce((best, t, i) => new Date(t) <= now ? i : best, 0);
     if (idx >= 0) { weatherCode = m15.weather_code[idx]; isDay = m15.is_day ? m15.is_day[idx] === 1 : isDay; }
+  }
+  // Corregir icono con AEMET (España) — máxima prioridad
+  if (aemetActual && aemetActual.weatherCode !== null) {
+    // AEMET siempre gana sobre Open-Meteo para el icono actual en España
+    weatherCode = aemetActual.weatherCode;
   }
   // Corregir icono con OWM
   const owmClouds = owmData?.clouds?.all ?? null;
@@ -2309,21 +2422,31 @@ function renderDatos(datos) {
 async function cargarDatos(latitude, longitude, nombreFijo) {
   setEstado(T.consultando);
   try {
-    const [tiempo, ciudad, mdata, elevacion, aireData, owmData] = await Promise.all([
+    // Si estamos en España, lanzar AEMET en paralelo
+    const enEspaña = esEspaña(latitude, longitude);
+    const aemetPromise = enEspaña
+      ? obtenerMunicipioAEMET(latitude, longitude)
+          .then(cod => cod ? obtenerTiempoAEMET(cod) : null)
+          .catch(() => null)
+      : Promise.resolve(null);
+
+    const [tiempo, ciudad, mdata, elevacion, aireData, owmData, aemetRaw] = await Promise.all([
       obtenerTiempo(latitude, longitude),
       nombreFijo ? Promise.resolve({ principal: nombreFijo, sub: null }) : obtenerCiudad(latitude, longitude),
       obtenerMarea(latitude, longitude).catch(() => null),
       fetch(`https://api.open-meteo.com/v1/elevation?latitude=${latitude}&longitude=${longitude}`).then(r => r.json()).catch(() => null),
       obtenerCalidadAire(latitude, longitude).catch(() => null),
-      fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=ee01a14dca6430b5ddb8b0fed708d4ba`).then(r => r.json()).catch(() => null)
+      fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=ee01a14dca6430b5ddb8b0fed708d4ba`).then(r => r.json()).catch(() => null),
+      aemetPromise
     ]);
+    const aemetActual = aemetRaw ? aemetDatosActuales(aemetRaw) : null;
     elCiudad.firstChild.textContent = ciudad.principal;
     document.getElementById('ciudadSub').textContent = ciudad.sub || '';
     const nombreCiudad = ciudad.sub ? `${ciudad.principal}, ${ciudad.sub}` : ciudad.principal;
     currentCoords = { lat: latitude, lon: longitude, nombre: nombreCiudad };
     actualizarBtnFav();
     actualizarFavIdx();
-    ultimosDatos = { tiempo, ciudad, mdata, elevacion, aireData, owmData };
+    ultimosDatos = { tiempo, ciudad, mdata, elevacion, aireData, owmData, aemetActual };
     renderDatos(ultimosDatos);
     ultimaActualizacion = Date.now();
     setEstado(T.actualizado + ' ' + new Date(ultimaActualizacion).toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' }));
