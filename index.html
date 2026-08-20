@@ -1717,8 +1717,18 @@ function esEspaña(lat, lon) {
 
 let _aemetMunicipiosCache = null; // caché en memoria para la sesión
 
+function _aemetCacheKey(lat, lon) {
+  // Clave redondeada a 2 decimales (~1km) para localStorage
+  return `ql_aemet_${lat.toFixed(2)}_${lon.toFixed(2)}`;
+}
+
 async function obtenerMunicipioAEMET(lat, lon) {
-  // Busca el municipio AEMET más cercano — la lista se cachea en memoria
+  // 1. Buscar en localStorage (persiste entre sesiones)
+  const lsKey = _aemetCacheKey(lat, lon);
+  const cached = localStorage.getItem(lsKey);
+  if (cached) return cached;
+
+  // 2. Si no está, descargar lista (cacheada en memoria para la sesión)
   if (!_aemetMunicipiosCache) {
     const url = `https://opendata.aemet.es/opendata/api/maestro/municipios?api_key=${AEMET_KEY}`;
     const r1 = await fetch(url);
@@ -1739,7 +1749,10 @@ async function obtenerMunicipioAEMET(lat, lon) {
     const d = Math.pow(mlat - lat, 2) + Math.pow(mlon - lon, 2);
     if (d < mejorDist) { mejorDist = d; mejor = m; }
   }
-  return mejor ? mejor.id : null; // id tipo "id33024"
+  const id = mejor ? mejor.id : null;
+  // 3. Guardar en localStorage para próximas sesiones
+  if (id) localStorage.setItem(lsKey, id);
+  return id; // id tipo "id33024"
 }
 
 async function obtenerTiempoAEMET(codMunicipio) {
