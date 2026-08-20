@@ -1756,7 +1756,7 @@ async function obtenerMunicipioAEMET(lat, lon) {
 }
 
 const _aemetPredCache = {}; // { codMunicipio: { data, ts } }
-const AEMET_TTL = 30 * 60 * 1000; // 30 minutos
+const AEMET_TTL = 5 * 60 * 1000; // 5 minutos
 
 async function obtenerTiempoAEMET(codMunicipio) {
   // Usar caché si el dato tiene menos de 30 min
