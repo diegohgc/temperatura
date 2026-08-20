@@ -1738,7 +1738,7 @@ function renderHoras(hourly) {
     div.className = 'hora';
     div.innerHTML = `
       <div class="h">${hora}</div>
-      <div class="icono-hora">${iconoParaCodigo(hourly.weather_code[i], hourly.is_day ? hourly.is_day[i] === 1 : true)}</div>
+      <div class="icono-hora">${iconoConProb(hourly.weather_code[i], prob, hourly.is_day ? hourly.is_day[i] === 1 : true)}</div>
       <div class="t">${toTemp(temp)}</div>
       ${prob !== null ? `<div class="p">${prob}%</div>` : ''}
     `;
@@ -1760,6 +1760,17 @@ function codigoSinLluvia(code, prob) {
   return esLluvia ? 3 : code;
 }
 
+const UMBRAL_LLUVIA = 35; // % a partir del cual forzar icono de lluvia
+
+function iconoConProb(code, prob, esDia = true) {
+  // Si prob >= umbral y el código no indica lluvia/tormenta ya, forzar llovizna
+  const yaEsLluvia = (code >= 51 && code <= 99);
+  if ((prob ?? 0) >= UMBRAL_LLUVIA && !yaEsLluvia) {
+    return iconoParaCodigo(51, esDia); // llovizna ligera
+  }
+  return iconoParaCodigo(codigoSinLluvia(code, prob ?? 0), esDia);
+}
+
 let _ultimoDaily = null;
 
 function renderDias(daily) {
@@ -1778,7 +1789,7 @@ function renderDias(daily) {
     div.dataset.index = i;
     div.innerHTML = `
       <div class="d">${nombreDia}</div>
-      <div class="icono-dia">${iconoParaCodigo(codigoSinLluvia(daily.weather_code[i], daily.precipitation_probability_max ? (daily.precipitation_probability_max[i] ?? 0) : 0), true)}</div>
+      <div class="icono-dia">${iconoConProb(daily.weather_code[i], daily.precipitation_probability_max ? (daily.precipitation_probability_max[i] ?? 0) : 0, true)}</div>
       <div class="max">${toTemp(max)}</div>
       <div class="min">${toTemp(min)}</div>
       <div class="dia-lluvia">${daily.precipitation_probability_max ? (daily.precipitation_probability_max[i] ?? 0) : 0}%</div>
@@ -1801,7 +1812,7 @@ function abrirModalDia(i) {
   document.getElementById('diaNombreFecha').textContent = `${nombreDia} · ${fechaStr}`;
   const code = daily.weather_code[i];
   const prob = daily.precipitation_probability_max ? (daily.precipitation_probability_max[i] ?? 0) : 0;
-  document.getElementById('diaIconoGrande').innerHTML = iconoParaCodigo(codigoSinLluvia(code, prob), true);
+  document.getElementById('diaIconoGrande').innerHTML = iconoConProb(code, prob, true);
   document.getElementById('diaDesc').textContent = T.codigos[code] || '';
   document.getElementById('diaTempMax').textContent = toTemp(daily.temperature_2m_max[i]);
   document.getElementById('diaTempMin').textContent = toTemp(daily.temperature_2m_min[i]);
@@ -1832,7 +1843,7 @@ function abrirModalDia(i) {
       div.className = 'hora';
       div.innerHTML = `
         <div class="h">${hora}</div>
-        <div class="icono-hora">${iconoParaCodigo(hourly.weather_code[hi], hourly.is_day ? hourly.is_day[hi] === 1 : true)}</div>
+        <div class="icono-hora">${iconoConProb(hourly.weather_code[hi], probH, hourly.is_day ? hourly.is_day[hi] === 1 : true)}</div>
         <div class="t">${toTemp(temp)}</div>
         ${probH !== null ? `<div class="p">${probH}%</div>` : ''}
       `;
