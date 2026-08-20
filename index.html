@@ -1760,12 +1760,17 @@ function codigoSinLluvia(code, prob) {
   return esLluvia ? 3 : code;
 }
 
-const UMBRAL_LLUVIA = 35; // % a partir del cual forzar icono de lluvia
+const UMBRAL_LLOVIZNA = 30; // % a partir del cual forzar icono de llovizna
+const UMBRAL_LLUVIA = 50;   // % a partir del cual forzar icono de lluvia
 
 function iconoConProb(code, prob, esDia = true) {
-  // Si prob >= umbral y el código no indica lluvia/tormenta ya, forzar llovizna
+  // Si prob >= umbral y el código no indica lluvia/tormenta ya, forzar icono
   const yaEsLluvia = (code >= 51 && code <= 99);
-  if ((prob ?? 0) >= UMBRAL_LLUVIA && !yaEsLluvia) {
+  const p = prob ?? 0;
+  if (p >= UMBRAL_LLUVIA && !yaEsLluvia) {
+    return iconoParaCodigo(61, esDia); // lluvia moderada
+  }
+  if (p >= UMBRAL_LLOVIZNA && !yaEsLluvia) {
     return iconoParaCodigo(51, esDia); // llovizna ligera
   }
   return iconoParaCodigo(codigoSinLluvia(code, prob ?? 0), esDia);
