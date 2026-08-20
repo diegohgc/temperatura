@@ -1764,16 +1764,14 @@ const UMBRAL_LLOVIZNA = 30; // % a partir del cual forzar icono de llovizna
 const UMBRAL_LLUVIA = 50;   // % a partir del cual forzar icono de lluvia
 
 function iconoConProb(code, prob, esDia = true) {
-  // Si prob >= umbral y el código no indica lluvia/tormenta ya, forzar icono
-  const yaEsLluvia = (code >= 51 && code <= 99);
+  // El icono de precipitación siempre depende de la probabilidad,
+  // independientemente de lo que diga el código WMO
   const p = prob ?? 0;
-  if (p >= UMBRAL_LLUVIA && !yaEsLluvia) {
-    return iconoParaCodigo(61, esDia); // lluvia moderada
-  }
-  if (p >= UMBRAL_LLOVIZNA && !yaEsLluvia) {
-    return iconoParaCodigo(51, esDia); // llovizna ligera
-  }
-  return iconoParaCodigo(codigoSinLluvia(code, prob ?? 0), esDia);
+  const esTormenta = (code >= 95);
+  if (esTormenta) return iconoParaCodigo(code, esDia); // tormenta siempre se respeta
+  if (p >= UMBRAL_LLUVIA) return iconoParaCodigo(61, esDia);    // >=50% → lluvia
+  if (p >= UMBRAL_LLOVIZNA) return iconoParaCodigo(51, esDia);  // >=30% → llovizna
+  return iconoParaCodigo(codigoSinLluvia(code, p), esDia);      // <30% → sin lluvia
 }
 
 let _ultimoDaily = null;
