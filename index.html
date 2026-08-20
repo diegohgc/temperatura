@@ -2073,8 +2073,12 @@ function abrirModalDia(i) {
   const nombreDia = esHoy ? T.hoy : d.toLocaleDateString(T.locale, { weekday: 'long' });
   const fechaStr = d.toLocaleDateString(T.locale, { day: 'numeric', month: 'long' });
   document.getElementById('diaNombreFecha').textContent = `${nombreDia} · ${fechaStr}`;
-  const code = daily.weather_code[i];
+  let code = daily.weather_code[i];
   const prob = daily.precipitation_probability_max ? (daily.precipitation_probability_max[i] ?? 0) : 0;
+  // Para hoy usar el código de AEMET si está disponible (más preciso)
+  if (esHoy && ultimosDatos && ultimosDatos.aemetActual && ultimosDatos.aemetActual.weatherCode !== null) {
+    code = ultimosDatos.aemetActual.weatherCode;
+  }
   document.getElementById('diaIconoGrande').innerHTML = iconoConProb(code, prob, true);
   document.getElementById('diaDesc').textContent = T.codigos[code] || '';
   document.getElementById('diaTempMax').textContent = toTemp(daily.temperature_2m_max[i]);
