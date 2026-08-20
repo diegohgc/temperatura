@@ -1810,6 +1810,73 @@ function aemetDatosActuales(aemetData) {
     viento: viento !== null ? parseFloat(viento) : null,
   };
 }
+// ── NWS — EEUU y Canadá ──────────────────────────────────────────────────────
+function esNWS(lat, lon) {
+  // Cobertura aproximada de NWS: EEUU continental, Alaska, Hawaii, Puerto Rico
+  if (lat >= 24 && lat <= 50 && lon >= -125 && lon <= -66) return true;  // EEUU continental
+  if (lat >= 51 && lat <= 72 && lon >= -170 && lon <= -130) return true; // Alaska
+  if (lat >= 18 && lat <= 23 && lon >= -161 && lon <= -154) return true; // Hawaii
+  if (lat >= 17 && lat <= 19 && lon >= -68 && lon <= -65) return true;   // Puerto Rico
+  return false;
+}
+
+function nwsForecastAWMO(shortForecast, prob) {
+  const f = (shortForecast || '').toLowerCase();
+  if (f.includes('thunderstorm')) return 95;
+  if (f.includes('blizzard') || f.includes('heavy snow')) return 75;
+  if (f.includes('snow') || f.includes('flurries')) return 71;
+  if (f.includes('sleet') || f.includes('freezing rain') || f.includes('wintry mix')) return 67;
+  if (f.includes('heavy rain') || f.includes('heavy shower')) return 65;
+  if (f.includes('rain') || f.includes('shower')) {
+    if (prob !== null && prob >= 50) return 61;
+    return 51;
+  }
+  if (f.includes('drizzle')) return 51;
+  if (f.includes('fog') || f.includes('mist')) return 45;
+  if (f.includes('overcast') || f.includes('cloudy')) return 3;
+  if (f.includes('mostly cloudy') || f.includes('partly cloudy')) return 2;
+  if (f.includes('mostly sunny') || f.includes('partly sunny')) return 1;
+  if (f.includes('sunny') || f.includes('clear')) return 0;
+  return 3;
+}
+
+async function obtenerTiempoNWS(lat, lon) {
+  // Paso 1: obtener URLs de predicción
+  const r1 = await fetch(`https://api.weather.gov/points/${lat.toFixed(4)},${lon.toFixed(4)}`, {
+    headers: { 'User-Agent': 'QuickTemp/1.8 (diegohg72@gmail.com)' }
+  });
+  if (!r1.ok) return null;
+  const j1 = await r1.json();
+  const hourlyUrl = j1.properties && j1.properties.forecastHourly;
+  if (!hourlyUrl) return null;
+
+  // Paso 2: obtener predicción horaria
+  const r2 = await fetch(hourlyUrl, {
+    headers: { 'User-Agent': 'QuickTemp/1.8 (diegohg72@gmail.com)' }
+  });
+  if (!r2.ok) return null;
+  const j2 = await r2.json();
+  const periods = j2.properties && j2.properties.periods;
+  if (!periods || !periods.length) return null;
+
+  // El primer periodo es la hora actual
+  const now = periods[0];
+  const prob = now.probabilityOfPrecipitation && now.probabilityOfPrecipitation.value !== null
+    ? now.probabilityOfPrecipitation.value : null;
+  const tempF = now.temperature; // NWS siempre devuelve °F
+  const tempC = (tempF - 32) * 5 / 9;
+  const windStr = now.windSpeed || ''; // "3 mph"
+  const windKmh = parseFloat(windStr) * 1.60934 || null;
+
+  return {
+    weatherCode: nwsForecastAWMO(now.shortForecast, prob),
+    probPrecip: prob,
+    temperatura: tempC,
+    viento: windKmh,
+    isDay: now.isDaytime,
+    shortForecast: now.shortForecast,
+  };
+}
 // ─────────────────────────────────────────────────────────────────────────────
 
 async function obtenerTiempo(lat, lon) {
@@ -2350,7 +2417,7 @@ async function obtenerCalidadAire(lat, lon) {
 }
 
 function renderDatos(datos) {
-  const { tiempo, ciudad, mdata, elevacion, aireData, owmData, aemetActual } = datos;
+  const { tiempo, ciudad, mdata, elevacion, aireData, owmData, aemetActual, nwsActual } = datos;
   const c = tiempo.current;
   const m15 = tiempo.minutely_15;
   let weatherCode = c.weather_code;
@@ -2360,10 +2427,12 @@ function renderDatos(datos) {
     const idx = m15.time.reduce((best, t, i) => new Date(t) <= now ? i : best, 0);
     if (idx >= 0) { weatherCode = m15.weather_code[idx]; isDay = m15.is_day ? m15.is_day[idx] === 1 : isDay; }
   }
-  // Corregir icono con AEMET (España) — máxima prioridad
+  // Corregir icono con API regional — máxima prioridad
   if (aemetActual && aemetActual.weatherCode !== null) {
-    // AEMET siempre gana sobre Open-Meteo para el icono actual en España
-    weatherCode = aemetActual.weatherCode;
+    weatherCode = aemetActual.weatherCode; // España: AEMET
+  } else if (nwsActual && nwsActual.weatherCode !== null) {
+    weatherCode = nwsActual.weatherCode;   // EEUU: NWS
+    if (nwsActual.isDay !== undefined) isDay = nwsActual.isDay;
   }
   // Corregir icono con OWM
   const owmClouds = owmData?.clouds?.all ?? null;
@@ -2422,22 +2491,29 @@ function renderDatos(datos) {
 async function cargarDatos(latitude, longitude, nombreFijo) {
   setEstado(T.consultando);
   try {
-    // Si estamos en España, lanzar AEMET en paralelo
+    // APIs regionales en paralelo según ubicación
     const enEspaña = esEspaña(latitude, longitude);
+    const enNWS = !enEspaña && esNWS(latitude, longitude);
+
     const aemetPromise = enEspaña
       ? obtenerMunicipioAEMET(latitude, longitude)
           .then(cod => cod ? obtenerTiempoAEMET(cod) : null)
           .catch(() => null)
       : Promise.resolve(null);
 
-    const [tiempo, ciudad, mdata, elevacion, aireData, owmData, aemetRaw] = await Promise.all([
+    const nwsPromise = enNWS
+      ? obtenerTiempoNWS(latitude, longitude).catch(() => null)
+      : Promise.resolve(null);
+
+    const [tiempo, ciudad, mdata, elevacion, aireData, owmData, aemetRaw, nwsActual] = await Promise.all([
       obtenerTiempo(latitude, longitude),
       nombreFijo ? Promise.resolve({ principal: nombreFijo, sub: null }) : obtenerCiudad(latitude, longitude),
       obtenerMarea(latitude, longitude).catch(() => null),
       fetch(`https://api.open-meteo.com/v1/elevation?latitude=${latitude}&longitude=${longitude}`).then(r => r.json()).catch(() => null),
       obtenerCalidadAire(latitude, longitude).catch(() => null),
       fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=ee01a14dca6430b5ddb8b0fed708d4ba`).then(r => r.json()).catch(() => null),
-      aemetPromise
+      aemetPromise,
+      nwsPromise
     ]);
     const aemetActual = aemetRaw ? aemetDatosActuales(aemetRaw) : null;
     elCiudad.firstChild.textContent = ciudad.principal;
@@ -2446,7 +2522,7 @@ async function cargarDatos(latitude, longitude, nombreFijo) {
     currentCoords = { lat: latitude, lon: longitude, nombre: nombreCiudad };
     actualizarBtnFav();
     actualizarFavIdx();
-    ultimosDatos = { tiempo, ciudad, mdata, elevacion, aireData, owmData, aemetActual };
+    ultimosDatos = { tiempo, ciudad, mdata, elevacion, aireData, owmData, aemetActual, nwsActual };
     renderDatos(ultimosDatos);
     ultimaActualizacion = Date.now();
     setEstado(T.actualizado + ' ' + new Date(ultimaActualizacion).toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' }));
