@@ -2536,6 +2536,22 @@ function renderDatos(datos) {
     weatherCode = nwsActual.weatherCode;   // EEUU: NWS
     if (nwsActual.isDay !== undefined) isDay = nwsActual.isDay;
   }
+  // Validación cruzada: si AEMET/NWS dice lluvia pero Open-Meteo dice 0% y 0 precipitación,
+  // la predicción regional probablemente falló → quitar lluvia del icono
+  if (weatherCode >= 51 && weatherCode < 95) {
+    const precipActualOM = c.precipitation ?? 0;
+    const hourlyProb = (() => {
+      const h = tiempo.hourly;
+      if (!h || !h.time || !h.precipitation_probability) return null;
+      const now = new Date();
+      const idx = h.time.findIndex(t => new Date(t) >= now);
+      return idx >= 0 ? h.precipitation_probability[idx] : null;
+    })();
+    if (precipActualOM === 0 && (hourlyProb === 0 || hourlyProb === null)) {
+      weatherCode = codigoSinLluvia(weatherCode, 0); // degradar a nublado
+    }
+  }
+
   // Corregir icono con OWM (solo si no hay API regional más fiable)
   const owmClouds = owmData?.clouds?.all ?? null;
   const owmId = owmData?.weather?.[0]?.id ?? null;
