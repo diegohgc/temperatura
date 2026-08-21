@@ -2183,9 +2183,9 @@ function abrirModalDia(i) {
   document.getElementById('diaNombreFecha').textContent = `${nombreDia} · ${fechaStr}`;
   let code = daily.weather_code[i];
   const prob = daily.precipitation_probability_max ? (daily.precipitation_probability_max[i] ?? 0) : 0;
-  // Para hoy usar el código de AEMET si está disponible (más preciso)
-  if (esHoy && ultimosDatos && ultimosDatos.aemetActual && ultimosDatos.aemetActual.weatherCode !== null) {
-    code = ultimosDatos.aemetActual.weatherCode;
+  // Para hoy usar el código ya validado (con observaciones reales) de la pantalla principal
+  if (esHoy && ultimosDatos && ultimosDatos.weatherCodeValidado != null) {
+    code = ultimosDatos.weatherCodeValidado;
   }
   document.getElementById('diaIconoGrande').innerHTML = iconoConProb(code, prob, true);
   document.getElementById('diaDesc').textContent = T.codigos[code] || '';
@@ -2681,6 +2681,8 @@ function renderDatos(datos) {
   elTemp.textContent = toTemp(c.temperature_2m);
   elDesc.textContent = T.codigos[weatherCode] || '';
   elIcono.innerHTML = iconoParaCodigo(weatherCode, isDay);
+  // Guardar el código ya validado para que el modal de hoy lo use
+  datos.weatherCodeValidado = weatherCode;
   const elLluvia = document.getElementById('lluvia');
   // Probabilidad lluvia: Open-Meteo hora a hora (AEMET da bloques 6h, no es preciso para "próxima hora")
   let probLluviaActual = null;
