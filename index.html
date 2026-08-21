@@ -1946,6 +1946,46 @@ function aemetHorasProximas(aemetData) {
   return horas.length ? horas : null;
 }
 
+// ── DWD / BrightSky — Alemania ───────────────────────────────────────────────
+function esDWD(lat, lon) {
+  return lat >= 47.3 && lat <= 55.1 && lon >= 5.8 && lon <= 15.1;
+}
+
+const _dwdObsCache = {}; // { key: { data, ts } }
+const DWD_OBS_TTL = 10 * 60 * 1000;
+
+async function obtenerObservacionDWD(lat, lon) {
+  const key = `${lat.toFixed(2)}_${lon.toFixed(2)}`;
+  const cached = _dwdObsCache[key];
+  if (cached && (Date.now() - cached.ts) < DWD_OBS_TTL) return cached.data;
+
+  const url = `https://api.brightsky.dev/current_weather?lat=${lat}&lon=${lon}`;
+  const r = await fetch(url, { headers: { 'User-Agent': 'QuickTemp/1.9 (diegohg72@gmail.com)' } });
+  if (!r.ok) return cached ? cached.data : null;
+  const json = await r.json();
+  const obs = json.weather || null;
+  if (obs) _dwdObsCache[key] = { data: obs, ts: Date.now() };
+  return obs;
+}
+
+function dwdCondicionAWMO(condition, icon) {
+  // BrightSky condition: "dry","fog","rain","sleet","snow","hail","thunderstorm"
+  // icon: "clear-day","clear-night","partly-cloudy-day","partly-cloudy-night","cloudy","fog","wind","rain","sleet","snow","hail","thunderstorm"
+  if (!condition && !icon) return null;
+  const c = (condition || '').toLowerCase();
+  const ic = (icon || '').toLowerCase();
+  if (c === 'thunderstorm' || ic === 'thunderstorm') return 95;
+  if (c === 'hail') return 67;
+  if (c === 'snow' || ic === 'snow') return 71;
+  if (c === 'sleet' || ic === 'sleet') return 67;
+  if (c === 'rain' || ic === 'rain') return 61;
+  if (c === 'fog' || ic === 'fog') return 45;
+  if (ic === 'cloudy') return 3;
+  if (ic.includes('partly-cloudy')) return 2;
+  if (ic.includes('clear')) return 0;
+  return null; // "dry" con icon desconocido → dejar que Open-Meteo decida
+}
+
 // ── NWS — EEUU y Canadá ──────────────────────────────────────────────────────
 function esNWS(lat, lon) {
   // Cobertura aproximada de NWS: EEUU continental, Alaska, Hawaii, Puerto Rico
@@ -2574,7 +2614,7 @@ async function obtenerCalidadAire(lat, lon) {
 }
 
 function renderDatos(datos) {
-  const { tiempo, ciudad, mdata, elevacion, aireData, owmData, aemetActual, aemetHoras, nwsActual } = datos;
+  const { tiempo, ciudad, mdata, elevacion, aireData, owmData, aemetActual, aemetHoras, aemetObs, nwsActual, dwdObs } = datos;
   const c = tiempo.current;
   const m15 = tiempo.minutely_15;
   let weatherCode = c.weather_code;
@@ -2586,23 +2626,26 @@ function renderDatos(datos) {
   }
   // Corregir icono con API regional — máxima prioridad
   if (aemetActual && aemetActual.weatherCode !== null) {
-    weatherCode = aemetActual.weatherCode; // España: AEMET
+    weatherCode = aemetActual.weatherCode; // España: AEMET predicción
   } else if (nwsActual && nwsActual.weatherCode !== null) {
     weatherCode = nwsActual.weatherCode;   // EEUU: NWS
     if (nwsActual.isDay !== undefined) isDay = nwsActual.isDay;
+  } else if (dwdObs) {
+    // Alemania: DWD/BrightSky observación real
+    const dwdCode = dwdCondicionAWMO(dwdObs.condition, dwdObs.icon);
+    if (dwdCode !== null) weatherCode = dwdCode;
   }
-  // Validación con observación real de estación AEMET
-  // Si la estación dice que no está lloviendo (prec=0 o sin dato), anular lluvia de la predicción
+  // Validación con observación real: si la estación dice que no llueve, anular lluvia de la predicción
   if (weatherCode >= 51 && weatherCode < 95) {
-    const { aemetObs } = datos;
     if (aemetObs) {
-      // prec es mm en la última hora; si es 0 o no existe, no está lloviendo ahora mismo
+      // AEMET observaciones: prec en mm última hora
       const precipObs = parseFloat(aemetObs.prec ?? '0');
-      if (!precipObs || precipObs === 0) {
-        weatherCode = codigoSinLluvia(weatherCode, 0);
-      }
+      if (!precipObs || precipObs === 0) weatherCode = codigoSinLluvia(weatherCode, 0);
+    } else if (dwdObs && dwdObs.condition) {
+      // DWD ya aplica directamente su código real, no necesita validación adicional
+      // (la observación ES la realidad, no una predicción)
     } else {
-      // Sin observación AEMET: fallback con Open-Meteo
+      // Sin observación regional: fallback con Open-Meteo
       const precipActualOM = c.precipitation ?? 0;
       const h = tiempo.hourly;
       const hourlyProb = h && h.time && h.precipitation_probability
@@ -2688,11 +2731,17 @@ async function cargarDatos(latitude, longitude, nombreFijo) {
       ? obtenerObservacionAEMET(latitude, longitude).catch(() => null)
       : Promise.resolve(null);
 
+    const enDWD = !enEspaña && !enNWS && esDWD(latitude, longitude);
+
     const nwsPromise = enNWS
       ? obtenerTiempoNWS(latitude, longitude).catch(() => null)
       : Promise.resolve(null);
 
-    const [tiempo, ciudad, mdata, elevacion, aireData, owmData, aemetRaw, aemetObs, nwsActual] = await Promise.all([
+    const dwdObsPromise = enDWD
+      ? obtenerObservacionDWD(latitude, longitude).catch(() => null)
+      : Promise.resolve(null);
+
+    const [tiempo, ciudad, mdata, elevacion, aireData, owmData, aemetRaw, aemetObs, nwsActual, dwdObs] = await Promise.all([
       obtenerTiempo(latitude, longitude),
       nombreFijo ? Promise.resolve({ principal: nombreFijo, sub: null }) : obtenerCiudad(latitude, longitude),
       obtenerMarea(latitude, longitude).catch(() => null),
@@ -2701,7 +2750,8 @@ async function cargarDatos(latitude, longitude, nombreFijo) {
       fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=ee01a14dca6430b5ddb8b0fed708d4ba`).then(r => r.json()).catch(() => null),
       aemetPromise,
       aemetObsPromise,
-      nwsPromise
+      nwsPromise,
+      dwdObsPromise
     ]);
     const aemetActual = aemetRaw ? aemetDatosActuales(aemetRaw) : null;
     const aemetHoras = aemetRaw ? aemetHorasProximas(aemetRaw) : null;
@@ -2711,7 +2761,7 @@ async function cargarDatos(latitude, longitude, nombreFijo) {
     currentCoords = { lat: latitude, lon: longitude, nombre: nombreCiudad };
     actualizarBtnFav();
     actualizarFavIdx();
-    ultimosDatos = { tiempo, ciudad, mdata, elevacion, aireData, owmData, aemetActual, aemetHoras, aemetObs, nwsActual };
+    ultimosDatos = { tiempo, ciudad, mdata, elevacion, aireData, owmData, aemetActual, aemetHoras, aemetObs, nwsActual, dwdObs };
     renderDatos(ultimosDatos);
     ultimaActualizacion = Date.now();
     setEstado(T.actualizado + ' ' + new Date(ultimaActualizacion).toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' }));
