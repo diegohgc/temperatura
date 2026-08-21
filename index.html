@@ -2560,17 +2560,13 @@ function renderDatos(datos) {
   elDesc.textContent = T.codigos[weatherCode] || '';
   elIcono.innerHTML = iconoParaCodigo(weatherCode, isDay);
   const elLluvia = document.getElementById('lluvia');
-  // Probabilidad lluvia: AEMET tiene prioridad en España
+  // Probabilidad lluvia: Open-Meteo hora a hora (AEMET da bloques 6h, no es preciso para "próxima hora")
   let probLluviaActual = null;
-  if (aemetActual && aemetActual.probPrecip !== null) {
-    probLluviaActual = aemetActual.probPrecip;
-  } else {
-    const hourly = tiempo.hourly;
-    if (hourly && hourly.time && hourly.precipitation_probability) {
-      const now = new Date();
-      const idx = hourly.time.findIndex(t => new Date(t) >= now);
-      probLluviaActual = idx >= 0 ? hourly.precipitation_probability[idx] : null;
-    }
+  const hourly = tiempo.hourly;
+  if (hourly && hourly.time && hourly.precipitation_probability) {
+    const now = new Date();
+    const idx = hourly.time.findIndex(t => new Date(t) >= now);
+    probLluviaActual = idx >= 0 ? hourly.precipitation_probability[idx] : null;
   }
   elLluvia.textContent = probLluviaActual !== null ? `🌧 ${T.probLluvia || 'Rain probability next hour'}: ${probLluviaActual}%` : '';
   // Previsión horaria: AEMET tiene prioridad en España si tiene datos
