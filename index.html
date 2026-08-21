@@ -1811,10 +1811,23 @@ function aemetDatosActuales(aemetData) {
   if (!diaData) diaData = aemetData.prediccion.dia[0];
   if (!diaData) return null;
 
-  // Función para buscar el valor de la hora más cercana en un array de periodos
+  // Función para buscar el valor del periodo que contiene la hora actual
+  // Soporta periodos horarios ("10") y franjas ("06-12", "12-18", etc.)
   function valorHora(arr, campo) {
     if (!arr || !arr.length) return null;
-    // Periodos pueden ser objetos con atributo "periodo" o "hora"
+    // Primero intentar encontrar el periodo que contiene horaActual (para franjas tipo "06-12")
+    for (const item of arr) {
+      const periodo = item.periodo || item.hora || '';
+      if (periodo.includes('-')) {
+        const partes = periodo.split('-');
+        const inicio = parseInt(partes[0]);
+        const fin = parseInt(partes[1]);
+        if (horaActual >= inicio && horaActual < fin) {
+          return campo ? item[campo] : item.value ?? item.descripcion;
+        }
+      }
+    }
+    // Fallback: buscar el periodo horario más cercano (para estadoCielo y temperatura)
     let mejor = null, mejorDif = Infinity;
     for (const item of arr) {
       const p = parseInt(item.periodo || item.hora || '0');
