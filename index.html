@@ -2536,11 +2536,12 @@ function renderDatos(datos) {
     weatherCode = nwsActual.weatherCode;   // EEUU: NWS
     if (nwsActual.isDay !== undefined) isDay = nwsActual.isDay;
   }
-  // Corregir icono con OWM
+  // Corregir icono con OWM (solo si no hay API regional más fiable)
   const owmClouds = owmData?.clouds?.all ?? null;
   const owmId = owmData?.weather?.[0]?.id ?? null;
   const cloudCover = owmClouds !== null ? owmClouds : Math.max(c.cloud_cover ?? 0, c.cloud_cover_low ?? 0, c.cloud_cover_mid ?? 0, c.cloud_cover_high ?? 0);
-  if (owmId !== null) {
+  const tieneAPIRegional = (aemetActual && aemetActual.weatherCode !== null) || (nwsActual && nwsActual.weatherCode !== null);
+  if (owmId !== null && !tieneAPIRegional) {
     if (owmId >= 200 && owmId < 300 && weatherCode < 95) weatherCode = 95;        // tormenta
     else if (owmId >= 300 && owmId < 400 && weatherCode < 51) weatherCode = 51;   // llovizna
     else if (owmId >= 500 && owmId < 600 && weatherCode < 61) {
