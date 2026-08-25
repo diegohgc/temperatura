@@ -2167,8 +2167,9 @@ function generarArcoSolar() {
   const amanecerDate = new Date(_ultimoSunrise);
   const anochecerDate = new Date(_ultimoSunset);
   const ahora = new Date();
-  const amanecerStr = amanecerDate.toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' });
-  const anochecerStr = anochecerDate.toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' });
+  // Horas locales de la ciudad (guardadas directamente del string de Open-Meteo)
+  const amanecerStr = _ultimoSunriseLocalHora || amanecerDate.toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' });
+  const anochecerStr = _ultimoSunsetLocalHora || anochecerDate.toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' });
 
   const lat = currentCoords?.lat ?? 40;
   const latRad = lat * Math.PI / 180;
@@ -2178,7 +2179,6 @@ function generarArcoSolar() {
   const declRad = decl * Math.PI / 180;
   const altMax = Math.max(5, Math.min(90, 90 - Math.abs(lat - decl)));
 
-  // Altitud solar actual (ángulo horario desde mediodía solar)
   const mediodia = new Date((amanecerDate.getTime() + anochecerDate.getTime()) / 2);
   const hAngle = ((ahora - mediodia) / 3600000) * 15 * Math.PI / 180;
   const altActualRad = Math.asin(
@@ -2192,66 +2192,71 @@ function generarArcoSolar() {
   const t = Math.max(0, Math.min(1, transcMs / totalMs));
   const esDeNoche = ahora < amanecerDate || ahora > anochecerDate;
 
-  // SVG con arco elíptico real
-  // SVG: de día horizonte en y=70 (espacio para arco arriba)
-  //      de noche horizonte en y=55 (espacio para arco arriba Y abajo)
   const W = 260;
-  const horizY = esDeNoche ? 55 : 70;
-  const H = esDeNoche ? 155 : 115;
-  const x0 = 20, x1 = W - 20;
+  const horizY = esDeNoche ? 55 : 72;
+  const H = esDeNoche ? 155 : 118;
+  const x0 = 22, x1 = W - 22;
   const rx = (x1 - x0) / 2;
-  const ry = Math.max(30, (altMax / 90) * 60);
+  const ry = Math.max(32, (altMax / 90) * 62);
   const cx = (x0 + x1) / 2;
 
-  // Posición diurna del sol
   const angle = Math.PI * t;
   const sunX = cx - rx * Math.cos(angle);
   const sunY = horizY - ry * Math.sin(angle);
   const largeArc = t > 0.5 ? 1 : 0;
 
-  // Posición nocturna: sol continúa por debajo del horizonte
-  // Noche: desde anochecer (x1) hasta amanecer siguiente (x0), tn=0→1
   const nextSunrise = new Date(amanecerDate.getTime() + 24 * 3600000);
   const nightTotal = nextSunrise - anochecerDate;
   let tn = 0;
   if (ahora > anochecerDate) tn = (ahora - anochecerDate) / nightTotal;
-  else if (ahora < amanecerDate) tn = (ahora + (nextSunrise - anochecerDate)) / nightTotal; // madrugada
+  else if (ahora < amanecerDate) tn = (ahora + (nextSunrise - anochecerDate)) / nightTotal;
   tn = Math.max(0, Math.min(1, tn));
   const nightAngle = Math.PI * tn;
-  // Noche: empieza en x1 (derecha=anochecer) y va hacia x0 (izquierda=amanecer)
   const nightSunX = cx + rx * Math.cos(nightAngle);
   const nightSunY = horizY + ry * Math.sin(nightAngle);
   const nightLargeArc = tn > 0.5 ? 1 : 0;
-  const nextSunriseStr = nextSunrise.toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' });
+
+  // Rayos del sol (8 direcciones)
+  const RI = 9.5, RO = 13.5, RDI = 6.8, RDO = 9.8;
+  const sx = +sunX.toFixed(1), sy = +sunY.toFixed(1);
+  const rayos = [
+    [sx, sy-RI, sx, sy-RO], [sx, sy+RI, sx, sy+RO],
+    [sx+RI, sy, sx+RO, sy], [sx-RI, sy, sx-RO, sy],
+    [sx+RDI, sy-RDI, sx+RDO, sy-RDO], [sx-RDI, sy-RDI, sx-RDO, sy-RDO],
+    [sx+RDI, sy+RDI, sx+RDO, sy+RDO], [sx-RDI, sy+RDI, sx-RDO, sy+RDO],
+  ].map(([ax,ay,bx,by]) => `<line x1="${ax.toFixed(1)}" y1="${ay.toFixed(1)}" x2="${bx.toFixed(1)}" y2="${by.toFixed(1)}"/>`).join('');
+
+  const altLabelY = Math.min(sy - 18, horizY - 10);
+  const nx = +nightSunX.toFixed(1), ny = +nightSunY.toFixed(1);
+
+  if (esDeNoche) {
+    return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"
+         style="width:100%;max-width:280px;display:block;margin:16px auto 0;overflow:visible">
+      <line x1="${x0}" y1="${horizY}" x2="${x1}" y2="${horizY}" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+      <path d="M ${x0},${horizY} A ${rx},${ry} 0 0 1 ${x1},${horizY}" fill="none" stroke="rgba(255,200,50,0.06)" stroke-width="1.5"/>
+      <path d="M ${x1},${horizY} A ${rx},${ry} 0 0 1 ${x0},${horizY}" fill="none" stroke="rgba(160,200,255,0.09)" stroke-width="1.5"/>
+      <path d="M ${x1},${horizY} A ${rx},${ry} 0 ${nightLargeArc} 1 ${nx},${ny}" fill="none" stroke="rgba(160,200,255,0.35)" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="${nx}" cy="${ny}" r="16" fill="rgba(160,200,255,0.07)"/>
+      <circle cx="${nx}" cy="${ny}" r="10" fill="rgba(160,200,255,0.14)"/>
+      <path d="M${(nx+4).toFixed(1)} ${(ny-5.5).toFixed(1)}A5.5 5.5 0 1 1 ${(nx+4).toFixed(1)} ${(ny+5.5).toFixed(1)}A4.2 4.2 0 0 0 ${(nx+4).toFixed(1)} ${(ny-5.5).toFixed(1)}z" fill="#C0D8EC"/>
+      <text x="${x0}" y="${(horizY+ry+18).toFixed(1)}" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.4)">${amanecerStr}</text>
+      <text x="${x1}" y="${(horizY+14).toFixed(1)}" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.4)">${anochecerStr}</text>
+    </svg>`;
+  }
 
   return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"
        style="width:100%;max-width:280px;display:block;margin:16px auto 0;overflow:visible">
-    <!-- Horizonte -->
-    <line x1="${x0}" y1="${horizY}" x2="${x1}" y2="${horizY}" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
-    <!-- Arco diurno completo (tenue) -->
-    <path d="M ${x0},${horizY} A ${rx},${ry} 0 0 1 ${x1},${horizY}"
-          fill="none" stroke="rgba(255,200,50,${esDeNoche ? '0.08' : '0.2'})" stroke-width="2" stroke-dasharray="5,4"/>
-    ${esDeNoche ? `
-    <!-- Arco nocturno completo (tenue) -->
-    <path d="M ${x1},${horizY} A ${rx},${ry} 0 0 1 ${x0},${horizY}"
-          fill="none" stroke="rgba(180,210,255,0.12)" stroke-width="2" stroke-dasharray="5,4"/>
-    <!-- Arco nocturno recorrido -->
-    <path d="M ${x1},${horizY} A ${rx},${ry} 0 ${nightLargeArc} 1 ${nightSunX},${nightSunY}"
-          fill="none" stroke="rgba(180,210,255,0.45)" stroke-width="2"/>
-    <!-- Sol bajo el horizonte -->
-    <circle cx="${nightSunX}" cy="${nightSunY}" r="8" fill="#b0c8ff" opacity="0.35"/>
-    <text x="${x0}" y="${horizY + ry + 18}" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.4)">${amanecerStr}</text>
-    <text x="${x1}" y="${horizY + 14}" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.4)">${anochecerStr}</text>
-    ` : `
-    <!-- Arco diurno recorrido -->
-    <path d="M ${x0},${horizY} A ${rx},${ry} 0 ${largeArc} 1 ${sunX},${sunY}"
-          fill="none" stroke="rgba(255,200,50,0.7)" stroke-width="2.5"/>
-    <circle cx="${sunX}" cy="${sunY}" r="15" fill="#FFD700" opacity="0.15"/>
-    <circle cx="${sunX}" cy="${sunY}" r="9" fill="${t < 0.1 || t > 0.9 ? '#ffb347' : '#FFD700'}"/>
-    <text x="${sunX}" y="${Math.min(sunY - 14, horizY - 8)}" text-anchor="middle" font-size="9.5" fill="rgba(255,220,80,0.85)">${Math.round(altActual)}°</text>
-    <text x="${x0}" y="${horizY + 16}" text-anchor="middle" font-size="9.5" fill="rgba(255,255,255,0.5)">${amanecerStr}</text>
-    <text x="${x1}" y="${horizY + 16}" text-anchor="middle" font-size="9.5" fill="rgba(255,255,255,0.5)">${anochecerStr}</text>
-    `}
+    <line x1="${x0}" y1="${horizY}" x2="${x1}" y2="${horizY}" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+    <path d="M ${x0},${horizY} A ${rx},${ry} 0 0 1 ${x1},${horizY}" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1.5"/>
+    <path d="M ${x0},${horizY} A ${rx},${ry} 0 ${largeArc} 1 ${sx},${sy}" fill="none" stroke="rgba(255,190,30,0.2)" stroke-width="8" stroke-linecap="round"/>
+    <path d="M ${x0},${horizY} A ${rx},${ry} 0 ${largeArc} 1 ${sx},${sy}" fill="none" stroke="rgba(255,205,50,0.85)" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="${sx}" cy="${sy}" r="20" fill="rgba(255,210,50,0.08)"/>
+    <circle cx="${sx}" cy="${sy}" r="12" fill="rgba(255,200,50,0.18)"/>
+    <circle cx="${sx}" cy="${sy}" r="7" fill="#FFD740"/>
+    <g stroke="#FFAA00" stroke-width="1.4" stroke-linecap="round">${rayos}</g>
+    <text x="${sx}" y="${altLabelY.toFixed(1)}" text-anchor="middle" font-size="9.5" fill="rgba(255,220,80,0.85)">${Math.round(altActual)}°</text>
+    <text x="${x0}" y="${(horizY+16).toFixed(1)}" text-anchor="middle" font-size="9.5" fill="rgba(255,255,255,0.5)">${amanecerStr}</text>
+    <text x="${x1}" y="${(horizY+16).toFixed(1)}" text-anchor="middle" font-size="9.5" fill="rgba(255,255,255,0.5)">${anochecerStr}</text>
   </svg>`;
 }
 
