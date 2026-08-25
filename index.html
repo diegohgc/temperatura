@@ -2117,9 +2117,68 @@ function renderHorasAEMET(horas) {
 function renderSol(daily) {
   elSolInfo.innerHTML = '';
   if (!daily || !daily.sunrise || !daily.sunrise[0]) return;
-  const amanecer = new Date(daily.sunrise[0]).toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' });
-  const anochecer = new Date(daily.sunset[0]).toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' });
-  elSolInfo.innerHTML = `${T.amanecer} ${amanecer}<br>${T.anochecer} ${anochecer}`;
+
+  const amanecerDate = new Date(daily.sunrise[0]);
+  const anochecerDate = new Date(daily.sunset[0]);
+  const ahora = new Date();
+  const amanecerStr = amanecerDate.toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' });
+  const anochecerStr = anochecerDate.toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' });
+
+  // Calcular altitud máxima solar real según latitud y época del año
+  const lat = currentCoords?.lat ?? 40;
+  const ahd = amanecerDate;
+  const inicioAño = new Date(ahd.getFullYear(), 0, 0);
+  const diaAño = Math.floor((ahd - inicioAño) / 86400000);
+  const declinacion = -23.45 * Math.cos((2 * Math.PI / 365) * (diaAño + 10)); // grados
+  const altMax = 90 - Math.abs(lat - declinacion); // altitud máxima al mediodía solar
+  const altMaxClamped = Math.max(5, Math.min(90, altMax));
+
+  // Posición actual del sol en el arco (0=amanecer, 1=anochecer)
+  const totalMs = anochecerDate - amanecerDate;
+  const transcMs = ahora - amanecerDate;
+  const t = Math.max(0, Math.min(1, transcMs / totalMs));
+  const esDeNoche = ahora < amanecerDate || ahora > anochecerDate;
+
+  // SVG: viewBox 220x90, horizonte en y=72
+  const W = 220, H = 90, horizY = 72;
+  const x0 = 14, x1 = W - 14; // puntos amanecer/anochecer
+  const xMid = W / 2;
+  // Altura del arco proporcional a la altitud máxima real
+  const arcHeight = (altMaxClamped / 90) * 58;
+  const peakY = horizY - arcHeight;
+
+  // Punto del sol sobre la curva bezier cuadrática
+  const sunX = (1-t)*(1-t)*x0 + 2*(1-t)*t*xMid + t*t*x1;
+  const sunY = (1-t)*(1-t)*horizY + 2*(1-t)*t*peakY + t*t*horizY;
+
+  // Color del sol según posición
+  const solColor = esDeNoche ? '#aaa' : (t < 0.15 || t > 0.85 ? '#ffb347' : '#FFD700');
+  const solOpacity = esDeNoche ? 0.35 : 1;
+
+  elSolInfo.innerHTML = `
+    <svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"
+         style="width:100%;max-width:260px;display:block;margin:0 auto;overflow:visible">
+      <!-- Horizonte -->
+      <line x1="${x0}" y1="${horizY}" x2="${x1}" y2="${horizY}"
+            stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+      <!-- Arco trayectoria (fondo, tenue) -->
+      <path d="M ${x0},${horizY} Q ${xMid},${peakY} ${x1},${horizY}"
+            fill="none" stroke="rgba(255,200,50,0.2)" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <!-- Arco recorrido (parte ya transcurrida) -->
+      ${!esDeNoche ? `<path d="M ${x0},${horizY} Q ${xMid},${peakY} ${sunX},${sunY}"
+            fill="none" stroke="rgba(255,200,50,0.55)" stroke-width="2"/>` : ''}
+      <!-- Sol -->
+      <circle cx="${sunX}" cy="${sunY}" r="7" fill="${solColor}" opacity="${solOpacity}"/>
+      ${!esDeNoche ? `<circle cx="${sunX}" cy="${sunY}" r="11" fill="${solColor}" opacity="0.18"/>` : ''}
+      <!-- Etiquetas -->
+      <text x="${x0}" y="${horizY + 12}" text-anchor="middle"
+            font-size="8" fill="rgba(255,255,255,0.6)">${amanecerStr}</text>
+      <text x="${x1}" y="${horizY + 12}" text-anchor="middle"
+            font-size="8" fill="rgba(255,255,255,0.6)">${anochecerStr}</text>
+      <!-- Altitud máxima (info discreta) -->
+      <text x="${xMid}" y="${peakY - 6}" text-anchor="middle"
+            font-size="7.5" fill="rgba(255,200,50,0.5)">${Math.round(altMaxClamped)}°</text>
+    </svg>`;
 }
 
 function codigoSinLluvia(code, prob) {
