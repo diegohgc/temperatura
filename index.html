@@ -129,7 +129,7 @@
   }
   .icono { width: 64px; height: 64px; }
   .icono svg {
-    width: 100%; height: 100%; stroke: #fff; fill: none;
+    width: 100%; height: 100%;
     stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
   }
   .temp-wrap { position: relative; display: flex; align-items: center; }
@@ -255,7 +255,7 @@
   .hora .h { font-size: 0.8rem; opacity: 0.75; margin-bottom: 4px; }
   .hora .icono-hora { width: 28px; height: 28px; margin: 0 auto 4px; }
   .hora .icono-hora svg {
-    width: 100%; height: 100%; stroke: #fff; fill: none;
+    width: 100%; height: 100%;
     stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
   }
   .hora .t { font-size: 0.9rem; font-weight: 600; }
@@ -264,7 +264,7 @@
   .dia .d { font-size: 0.8rem; opacity: 0.75; margin-bottom: 4px; text-transform: capitalize; }
   .dia .icono-dia { width: 28px; height: 28px; margin: 0 auto 4px; }
   .dia .icono-dia svg {
-    width: 100%; height: 100%; stroke: #fff; fill: none;
+    width: 100%; height: 100%;
     stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
   }
   .dia .max { font-size: 0.9rem; font-weight: 600; }
@@ -289,7 +289,7 @@
   #modalDia.abierto { display: flex; }
   #diaNombreFecha { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.6; margin-bottom: 12px; text-align: center; }
   #diaIconoGrande { width: 56px; height: 56px; margin: 0 auto 8px; }
-  #diaIconoGrande svg { width: 100%; height: 100%; stroke: #fff; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  #diaIconoGrande svg { width: 100%; height: 100%; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
   #diaDesc { text-align: center; font-size: 0.9rem; opacity: 0.85; margin-bottom: 16px; }
   .dia-temps { display: flex; justify-content: center; gap: 18px; margin-bottom: 6px; }
   .dia-clima-normal { text-align: center; font-size: 0.72rem; opacity: 0.5; margin-bottom: 16px; letter-spacing: 0.02em; min-height: 1em; }
@@ -365,6 +365,45 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
+<!-- Gradientes globales para iconos de clima en color -->
+<svg id="ql-defs" style="display:none;position:absolute;width:0;height:0" aria-hidden="true">
+  <defs>
+    <radialGradient id="ql-sun" cx="38%" cy="32%" r="65%">
+      <stop offset="0%" stop-color="#FFFDE0"/>
+      <stop offset="55%" stop-color="#FFD740"/>
+      <stop offset="100%" stop-color="#FF9800"/>
+    </radialGradient>
+    <linearGradient id="ql-cloud-fair" x1="10%" y1="0%" x2="30%" y2="100%">
+      <stop offset="0%" stop-color="#D4EAF6"/>
+      <stop offset="100%" stop-color="#96B8CC"/>
+    </linearGradient>
+    <linearGradient id="ql-cloud-over" x1="10%" y1="0%" x2="30%" y2="100%">
+      <stop offset="0%" stop-color="#BBC8D6"/>
+      <stop offset="100%" stop-color="#7A9AAA"/>
+    </linearGradient>
+    <linearGradient id="ql-cloud-fog" x1="10%" y1="0%" x2="30%" y2="100%">
+      <stop offset="0%" stop-color="#B8CCDA"/>
+      <stop offset="100%" stop-color="#8AAABB"/>
+    </linearGradient>
+    <linearGradient id="ql-cloud-rain" x1="10%" y1="0%" x2="30%" y2="100%">
+      <stop offset="0%" stop-color="#9AB8C8"/>
+      <stop offset="100%" stop-color="#607898"/>
+    </linearGradient>
+    <linearGradient id="ql-cloud-snow" x1="10%" y1="0%" x2="30%" y2="100%">
+      <stop offset="0%" stop-color="#C0D8EA"/>
+      <stop offset="100%" stop-color="#88AABB"/>
+    </linearGradient>
+    <linearGradient id="ql-cloud-storm" x1="10%" y1="0%" x2="30%" y2="100%">
+      <stop offset="0%" stop-color="#68808E"/>
+      <stop offset="100%" stop-color="#445566"/>
+    </linearGradient>
+    <radialGradient id="ql-moon" cx="32%" cy="28%" r="68%">
+      <stop offset="0%" stop-color="#EEF6FF"/>
+      <stop offset="65%" stop-color="#C0D8EC"/>
+      <stop offset="100%" stop-color="#88AACC"/>
+    </radialGradient>
+  </defs>
+</svg>
   <div id="pullIndicator"></div>
   <div id="bg"></div>
   <div id="swipeClip" style="width:100%;max-width:420px;overflow:hidden">
@@ -1621,16 +1660,16 @@ document.getElementById('btnFavorito').addEventListener('click', () => {
 });
 
 const ICONOS = {
-  sol: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5"/><path d="M12 1.5v3M12 19.5v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M1.5 12h3M19.5 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>',
-  solNube: '<svg viewBox="0 0 24 24"><path d="M8.5 4a4 4 0 0 1 3.9 3.1"/><circle cx="8.5" cy="8" r="3.5"/><path d="M7 19.5h10.5a3.5 3.5 0 0 0 .5-6.96A5 5 0 0 0 8.6 11.2 4 4 0 0 0 7 19.5z"/></svg>',
-  nube: '<svg viewBox="0 0 24 24"><path d="M6.5 18.5h11a3.5 3.5 0 0 0 .5-6.96 5 5 0 0 0-9.62-1.65A4 4 0 0 0 6.5 18.5z"/></svg>',
-  niebla: '<svg viewBox="0 0 24 24"><path d="M5 9.5h11a3.2 3.2 0 0 0 0-6.4 4.6 4.6 0 0 0-8.6-1.5A3.6 3.6 0 0 0 5 9.5z"/><path d="M3 14h18M3 17.5h18M3 21h18"/></svg>',
-  llovizna: '<svg viewBox="0 0 24 24"><path d="M6.5 13.5h11a3.5 3.5 0 0 0 .5-6.96A5 5 0 0 0 8.6 5.85 4 4 0 0 0 6.5 13.5z"/><path d="M9 17v3M13 17v3M17 17v3"/></svg>',
-  lluvia: '<svg viewBox="0 0 24 24"><path d="M6.5 12.5h11a3.5 3.5 0 0 0 .5-6.96A5 5 0 0 0 8.6 4.85 4 4 0 0 0 6.5 12.5z"/><path d="M8 16l-1.5 4M13 16l-1.5 4M18 16l-1.5 4"/></svg>',
-  nieve: '<svg viewBox="0 0 24 24"><path d="M6.5 12.5h11a3.5 3.5 0 0 0 .5-6.96A5 5 0 0 0 8.6 4.85 4 4 0 0 0 6.5 12.5z"/><path d="M9 17v4M7.3 18.2l3.4 1.6M11.3 18.2l-3.4 1.6M15 17v4M13.3 18.2l3.4 1.6M17.3 18.2l-3.4 1.6"/></svg>',
-  tormenta: '<svg viewBox="0 0 24 24"><path d="M6.5 11.5h11a3.5 3.5 0 0 0 .5-6.96A5 5 0 0 0 8.6 3.85 4 4 0 0 0 6.5 11.5z"/><path d="M13 11.5l-3 5h3l-2 4.5 5.5-6.5h-3z"/></svg>',
-  luna: '<svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>',
-  lunaNube: '<svg viewBox="0 0 24 24"><path d="M8.8 9.3a3.3 3.3 0 0 1 2.1-5.5 2.4 2.4 0 0 0 2.4 3.3 4.7 4.7 0 0 1-1.6 4.9"/><path d="M7 19.5h10.5a3.5 3.5 0 0 0 .5-6.96A5 5 0 0 0 8.6 11.2 4 4 0 0 0 7 19.5z"/></svg>',
+  sol: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5" fill="url(#ql-sun)" stroke="none"/><path d="M12 1.5v3M12 19.5v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M1.5 12h3M19.5 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" stroke="#FFAA00" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg>',
+  solNube: '<svg viewBox="0 0 24 24"><circle cx="8.5" cy="8" r="3.5" fill="url(#ql-sun)" stroke="none"/><path d="M8.5 4a4 4 0 0 1 3.9 3.1" stroke="#FFAA00" stroke-width="1.5" stroke-linecap="round" fill="none"/><path d="M7 19.5h10.5a3.5 3.5 0 0 0 .5-6.96A5 5 0 0 0 8.6 11.2 4 4 0 0 0 7 19.5z" fill="url(#ql-cloud-fair)" stroke="none"/></svg>',
+  nube: '<svg viewBox="0 0 24 24"><path d="M6.5 18.5h11a3.5 3.5 0 0 0 .5-6.96 5 5 0 0 0-9.62-1.65A4 4 0 0 0 6.5 18.5z" fill="url(#ql-cloud-over)" stroke="none"/></svg>',
+  niebla: '<svg viewBox="0 0 24 24"><path d="M5 9.5h11a3.2 3.2 0 0 0 0-6.4 4.6 4.6 0 0 0-8.6-1.5A3.6 3.6 0 0 0 5 9.5z" fill="url(#ql-cloud-fog)" stroke="none"/><path d="M3 14h18M3 17.5h18M3 21h18" stroke="#7AABBA" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.8"/></svg>',
+  llovizna: '<svg viewBox="0 0 24 24"><path d="M6.5 13.5h11a3.5 3.5 0 0 0 .5-6.96A5 5 0 0 0 8.6 5.85 4 4 0 0 0 6.5 13.5z" fill="url(#ql-cloud-rain)" stroke="none"/><path d="M9 17v3M13 17v3M17 17v3" stroke="#68C8F8" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg>',
+  lluvia: '<svg viewBox="0 0 24 24"><path d="M6.5 12.5h11a3.5 3.5 0 0 0 .5-6.96A5 5 0 0 0 8.6 4.85 4 4 0 0 0 6.5 12.5z" fill="url(#ql-cloud-rain)" stroke="none"/><path d="M8 16l-1.5 4M13 16l-1.5 4M18 16l-1.5 4" stroke="#3AB8F8" stroke-width="1.7" stroke-linecap="round" fill="none"/></svg>',
+  nieve: '<svg viewBox="0 0 24 24"><path d="M6.5 12.5h11a3.5 3.5 0 0 0 .5-6.96A5 5 0 0 0 8.6 4.85 4 4 0 0 0 6.5 12.5z" fill="url(#ql-cloud-snow)" stroke="none"/><path d="M9 17v4M7.3 18.2l3.4 1.6M11.3 18.2l-3.4 1.6M15 17v4M13.3 18.2l3.4 1.6M17.3 18.2l-3.4 1.6" stroke="#B8DCFF" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg>',
+  tormenta: '<svg viewBox="0 0 24 24"><path d="M6.5 11.5h11a3.5 3.5 0 0 0 .5-6.96A5 5 0 0 0 8.6 3.85 4 4 0 0 0 6.5 11.5z" fill="url(#ql-cloud-storm)" stroke="none"/><path d="M13 11.5l-3 5h3l-2 4.5 5.5-6.5h-3z" fill="#FFE040" stroke="#FFC000" stroke-width="0.5" stroke-linejoin="round"/></svg>',
+  luna: '<svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z" fill="url(#ql-moon)" stroke="none"/></svg>',
+  lunaNube: '<svg viewBox="0 0 24 24"><path d="M8.8 9.3a3.3 3.3 0 0 1 2.1-5.5 2.4 2.4 0 0 0 2.4 3.3 4.7 4.7 0 0 1-1.6 4.9" fill="url(#ql-moon)" stroke="none"/><path d="M7 19.5h10.5a3.5 3.5 0 0 0 .5-6.96A5 5 0 0 0 8.6 11.2 4 4 0 0 0 7 19.5z" fill="url(#ql-cloud-fair)" stroke="none"/></svg>',
 };
 
 const ICONO_PLEAMAR = '<svg viewBox="0 0 24 24"><path d="M3 17c1.5-2 3-3 4.5-3s3 2 4.5 2 3-2 4.5-2 3 1 4.5 3"/><line x1="12" y1="14" x2="12" y2="6"/><polyline points="9,9 12,6 15,9"/></svg>';
