@@ -2200,13 +2200,22 @@ function generarArcoSolar() {
   const ry = Math.max(50, (altMax / 90) * 85);
   const cx = (x0 + x1) / 2;
 
-  // Función para generar puntos de la elipse (evita el comando A que distorsiona)
+  // Altitud solar real para un momento dado (en grados)
+  const altReal = (fecha) => {
+    const hAng = ((fecha - mediodia) / 3600000) * 15 * Math.PI / 180;
+    return Math.asin(Math.sin(latRad)*Math.sin(declRad) + Math.cos(latRad)*Math.cos(declRad)*Math.cos(hAng)) * 180 / Math.PI;
+  };
+
+  // Puntos del arco usando altitud real (X = tiempo lineal, Y = altitud real)
   const ptsDia = (tDesde, tHasta, pasos) => {
     const pts = [];
     for (let i = 0; i <= pasos; i++) {
       const ti = tDesde + (tHasta - tDesde) * (i / pasos);
-      const ai = Math.PI * ti;
-      pts.push(`${(cx - rx * Math.cos(ai)).toFixed(1)},${(horizY - ry * Math.sin(ai)).toFixed(1)}`);
+      const xi = x0 + (x1 - x0) * ti;
+      const fecha = new Date(amanecerDate.getTime() + ti * totalMs);
+      const alt = Math.max(0, altReal(fecha));
+      const yi = horizY - (alt / altMax) * ry;
+      pts.push(`${xi.toFixed(1)},${yi.toFixed(1)}`);
     }
     return pts;
   };
@@ -2214,15 +2223,19 @@ function generarArcoSolar() {
     const pts = [];
     for (let i = 0; i <= pasos; i++) {
       const ti = tDesde + (tHasta - tDesde) * (i / pasos);
-      const ai = Math.PI * ti;
-      pts.push(`${(cx + rx * Math.cos(ai)).toFixed(1)},${(horizY + ry * Math.sin(ai)).toFixed(1)}`);
+      const fecha = new Date(anochecerDate.getTime() + ti * nightTotal);
+      const alt = Math.min(0, altReal(fecha)); // negativo = bajo el horizonte
+      const xi = x1 + (x0 - x1) * ti;         // de derecha (anochecer) a izquierda (amanecer)
+      const yi = horizY - (alt / altMax) * ry; // alt negativo → por debajo del horizonte
+      pts.push(`${xi.toFixed(1)},${yi.toFixed(1)}`);
     }
     return pts;
   };
 
-  const angle = Math.PI * t;
-  const sunX = cx - rx * Math.cos(angle);
-  const sunY = horizY - ry * Math.sin(angle);
+  // Posición actual del sol usando altitud real
+  const altSolActual = Math.max(0, altReal(ahora));
+  const sunX = x0 + (x1 - x0) * t;
+  const sunY = horizY - (altSolActual / altMax) * ry;
   const sx = +sunX.toFixed(1), sy = +sunY.toFixed(1);
 
   const nextSunrise = new Date(amanecerDate.getTime() + 24 * 3600000);
@@ -2231,9 +2244,9 @@ function generarArcoSolar() {
   if (ahora > anochecerDate) tn = (ahora - anochecerDate) / nightTotal;
   else if (ahora < amanecerDate) tn = (ahora + (nextSunrise - anochecerDate)) / nightTotal;
   tn = Math.max(0, Math.min(1, tn));
-  const nightAngle = Math.PI * tn;
-  const nightSunX = cx + rx * Math.cos(nightAngle);
-  const nightSunY = horizY + ry * Math.sin(nightAngle);
+  const altNocheActual = Math.min(0, altReal(ahora));
+  const nightSunX = x1 + (x0 - x1) * tn;
+  const nightSunY = horizY - (altNocheActual / altMax) * ry;
   const nx = +nightSunX.toFixed(1), ny = +nightSunY.toFixed(1);
 
   // Rayos del sol (8 direcciones)
