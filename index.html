@@ -2153,42 +2153,33 @@ function generarArcoSolar() {
   const t = Math.max(0, Math.min(1, transcMs / totalMs));
   const esDeNoche = ahora < amanecerDate || ahora > anochecerDate;
 
-  // SVG con arco elíptico real (más redondeado que bezier cuadrático)
-  const W = 260, H = 110, horizY = 88;
-  const x0 = 18, x1 = W - 18;
+  // SVG con arco elíptico real
+  const W = 260, H = 115, horizY = 85;
+  const x0 = 20, x1 = W - 20;
   const rx = (x1 - x0) / 2;
-  const ry = (altMax / 90) * 75; // radio vertical proporcional a altitud máxima
-
-  // Posición del sol sobre el arco elíptico
-  // Ángulo: 0=izquierda (amanecer), PI=derecha (anochecer), midpoint=arriba
-  const angle = Math.PI * (1 - t); // va de PI (izq) a 0 (der)
+  const ry = Math.max(30, (altMax / 90) * 70);
   const cx = (x0 + x1) / 2;
-  const sunX = cx + rx * Math.cos(angle) * -1; // invertido para ir de izq a der
+
+  // Posición del sol: t=0 → amanecer (izq), t=1 → anochecer (der)
+  // Ángulo en elipse: PI (izq) → 0 (der), pasando por PI/2 (cima)
+  const angle = Math.PI * (1 - t);
+  const sunX = cx - rx * Math.cos(angle); // sin invertir: PI→izq, 0→der
   const sunY = horizY - ry * Math.sin(angle);
   const solColor = esDeNoche ? '#888' : (t < 0.1 || t > 0.9 ? '#ffb347' : '#FFD700');
-
-  // Arco recorrido: de x0,horizY hasta sunX,sunY (parte ya transcurrida)
-  const arcRecorridoFlag = t > 0.5 ? 1 : 0;
-  const arcTotalFlag = 0; // siempre semicírculo superior
+  const largeArc = t > 0.5 ? 1 : 0;
 
   return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"
-       style="width:100%;max-width:280px;display:block;margin:18px auto 4px;overflow:visible">
-    <!-- Horizonte -->
+       style="width:100%;max-width:280px;display:block;margin:16px auto 0;overflow:visible">
     <line x1="${x0}" y1="${horizY}" x2="${x1}" y2="${horizY}" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
-    <!-- Arco completo tenue -->
     <path d="M ${x0},${horizY} A ${rx},${ry} 0 0 1 ${x1},${horizY}"
-          fill="none" stroke="rgba(255,200,50,0.18)" stroke-width="2" stroke-dasharray="5,4"/>
-    <!-- Arco recorrido -->
-    ${!esDeNoche ? `<path d="M ${x0},${horizY} A ${rx},${ry} 0 ${arcRecorridoFlag} 1 ${sunX},${sunY}"
-          fill="none" stroke="rgba(255,200,50,0.65)" stroke-width="2.5"/>` : ''}
-    <!-- Halo y sol -->
-    ${!esDeNoche ? `<circle cx="${sunX}" cy="${sunY}" r="16" fill="${solColor}" opacity="0.14"/>` : ''}
+          fill="none" stroke="rgba(255,200,50,0.2)" stroke-width="2" stroke-dasharray="5,4"/>
+    ${!esDeNoche ? `<path d="M ${x0},${horizY} A ${rx},${ry} 0 ${largeArc} 1 ${sunX},${sunY}"
+          fill="none" stroke="rgba(255,200,50,0.7)" stroke-width="2.5"/>` : ''}
+    ${!esDeNoche ? `<circle cx="${sunX}" cy="${sunY}" r="15" fill="${solColor}" opacity="0.15"/>` : ''}
     <circle cx="${sunX}" cy="${sunY}" r="9" fill="${solColor}" opacity="${esDeNoche ? 0.3 : 1}"/>
-    <!-- Etiquetas amanecer/anochecer -->
-    <text x="${x0}" y="${horizY + 15}" text-anchor="middle" font-size="9.5" fill="rgba(255,255,255,0.55)">${amanecerStr}</text>
-    <text x="${x1}" y="${horizY + 15}" text-anchor="middle" font-size="9.5" fill="rgba(255,255,255,0.55)">${anochecerStr}</text>
-    <!-- Altitud actual (no la máxima) -->
-    ${!esDeNoche ? `<text x="${sunX}" y="${sunY - 16}" text-anchor="middle" font-size="9.5" fill="rgba(255,220,80,0.8)">${Math.round(altActual)}°</text>` : ''}
+    <text x="${x0}" y="${horizY + 16}" text-anchor="middle" font-size="9.5" fill="rgba(255,255,255,0.5)">${amanecerStr}</text>
+    <text x="${x1}" y="${horizY + 16}" text-anchor="middle" font-size="9.5" fill="rgba(255,255,255,0.5)">${anochecerStr}</text>
+    ${!esDeNoche ? `<text x="${sunX}" y="${Math.min(sunY - 14, horizY - 8)}" text-anchor="middle" font-size="9.5" fill="rgba(255,220,80,0.85)">${Math.round(altActual)}°</text>` : ''}
   </svg>`;
 }
 
