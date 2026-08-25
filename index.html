@@ -2162,8 +2162,8 @@ function generarArcoSolar() {
 
   // Posición del sol: t=0 → amanecer (izq), t=1 → anochecer (der)
   // Ángulo en elipse: PI (izq) → 0 (der), pasando por PI/2 (cima)
-  const angle = Math.PI * (1 - t);
-  const sunX = cx - rx * Math.cos(angle); // sin invertir: PI→izq, 0→der
+  const angle = Math.PI * t; // t=0 (amanecer,izq) → 0; t=1 (anochecer,der) → PI
+  const sunX = cx - rx * Math.cos(angle); // cos(0)=1→izq, cos(PI)=-1→der
   const sunY = horizY - ry * Math.sin(angle);
   const solColor = esDeNoche ? '#888' : (t < 0.1 || t > 0.9 ? '#ffb347' : '#FFD700');
   const largeArc = t > 0.5 ? 1 : 0;
