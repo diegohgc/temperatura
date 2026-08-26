@@ -1884,18 +1884,20 @@ function aemetCodigoAWMO(skyCode) {
   // 43=intervalos nubosos con lluvia y nieve, 44=nuboso con lluvia y nieve,
   // 51=intervalos nubosos con tormenta, 52=nuboso con tormenta, 53=muy nuboso con tormenta, 54=cubierto con tormenta
   const c = parseInt(skyCode);
-  if (c === 11) return 0;
-  if (c === 12) return 1;
-  if (c === 13) return 2;
-  if (c === 14 || c === 15 || c === 17) return 2;
-  if (c === 16) return 3;
+  if (c === 11) return 0;  // despejado
+  if (c === 12) return 1;  // poco nuboso → principalmente despejado
+  if (c === 13) return 1;  // intervalos nubosos → parcialmente soleado
+  if (c === 14) return 2;  // nuboso
+  if (c === 15) return 3;  // muy nuboso → cubierto
+  if (c === 16) return 3;  // cubierto
+  if (c === 17) return 1;  // nubes altas (cirros) → casi despejado
   if (c >= 23 && c <= 26) return 61;
   if (c >= 33 && c <= 36) return 71;
   if (c >= 43 && c <= 46) return 61;
   if (c >= 51 && c <= 54) return 95;
   if (c >= 61 && c <= 64) return 51; // llovizna
   if (c >= 71 && c <= 74) return 71; // nieve débil
-  return 3; // por defecto nublado
+  return null; // código no reconocido → no sobreescribir Open-Meteo
 }
 
 function aemetDatosActuales(aemetData) {
