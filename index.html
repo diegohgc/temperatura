@@ -2836,7 +2836,8 @@ function renderDatos(datos) {
   // Corregir icono con OWM (solo si no hay API regional más fiable)
   const owmClouds = owmData?.clouds?.all ?? null;
   const owmId = owmData?.weather?.[0]?.id ?? null;
-  const cloudCover = owmClouds !== null ? owmClouds : Math.max(c.cloud_cover ?? 0, c.cloud_cover_low ?? 0, c.cloud_cover_mid ?? 0, c.cloud_cover_high ?? 0);
+  // Solo nubes bajas+medias para no penalizar por cirros que no tapan el sol
+  const cloudCover = owmClouds !== null ? owmClouds : Math.max(c.cloud_cover_low ?? 0, c.cloud_cover_mid ?? 0);
   const tieneAPIRegional = (aemetActual && aemetActual.weatherCode !== null) || (nwsActual && nwsActual.weatherCode !== null);
   if (owmId !== null && !tieneAPIRegional) {
     if (owmId >= 200 && owmId < 300 && weatherCode < 95) weatherCode = 95;        // tormenta
@@ -2852,8 +2853,8 @@ function renderDatos(datos) {
   // Si hay precipitación real ahora mismo y el código no lo refleja, forzar llovizna
   const precipActual = c.precipitation ?? 0;
   if (precipActual > 0 && weatherCode < 51) weatherCode = 51;
-  if (weatherCode <= 1 && cloudCover >= 75) weatherCode = 3;
-  else if (weatherCode <= 1 && cloudCover >= 50) weatherCode = 2;
+  if (weatherCode <= 1 && cloudCover >= 80) weatherCode = 3;
+  else if (weatherCode <= 1 && cloudCover >= 60) weatherCode = 2;
   elTemp.textContent = toTemp(c.temperature_2m);
   elDesc.textContent = T.codigos[weatherCode] || '';
   elIcono.innerHTML = iconoParaCodigo(weatherCode, isDay);
