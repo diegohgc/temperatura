@@ -66,7 +66,8 @@
   .btn-ayuda:hover { opacity: 1; }
   #ayudaModal { display: none; position: fixed; inset: 0; z-index: 9998; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); align-items: center; justify-content: center; }
   #ayudaModal.open { display: flex; }
-  .ayuda-box { background: var(--card-bg,#1e2330); border-radius: 20px; padding: 24px 20px 20px; width: 88vw; max-width: 360px; position: relative; box-shadow: 0 8px 40px rgba(0,0,0,0.5); }
+  .ayuda-box { background: var(--card-bg,#1e2330); border-radius: 20px; padding: 24px 20px 20px; width: 88vw; max-width: 360px; max-height: 85vh; overflow-y: auto; position: relative; box-shadow: 0 8px 40px rgba(0,0,0,0.5); }
+  #ayudaModal { align-items: flex-start; padding-top: max(5vh, 20px); }
   .ayuda-close { position: absolute; top: 12px; right: 14px; background: rgba(255,255,255,0.1); border: none; color: inherit; border-radius: 50%; width: 28px; height: 28px; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
   .ayuda-titulo { font-size: 1.1rem; font-weight: 800; margin-bottom: 4px; }
   .ayuda-sub { font-size: 0.8rem; opacity: 0.6; margin-bottom: 16px; }
