@@ -2847,16 +2847,32 @@ function renderDatos(datos) {
   // Solo nubes bajas+medias para no penalizar por cirros que no tapan el sol
   const cloudCover = owmClouds !== null ? owmClouds : Math.max(c.cloud_cover_low ?? 0, c.cloud_cover_mid ?? 0);
   const tieneAPIRegional = (aemetActual && aemetActual.weatherCode !== null) || (nwsActual && nwsActual.weatherCode !== null);
-  if (owmId !== null && !tieneAPIRegional) {
-    if (owmId >= 200 && owmId < 300 && weatherCode < 95) weatherCode = 95;        // tormenta
-    else if (owmId >= 300 && owmId < 400 && weatherCode < 51) weatherCode = 51;   // llovizna
-    else if (owmId >= 500 && owmId < 600 && weatherCode < 61) {
-      if (owmId === 500) weatherCode = 61;
-      else if (owmId === 501) weatherCode = 63;
-      else weatherCode = 65;
+  if (owmId !== null) {
+    // OWM 800-804: cielo claro→nublado — mezcla estaciones reales, usarlo siempre para nubosidad
+    if (owmId === 800) {
+      weatherCode = 0; // despejado — OWM manda sobre cualquier modelo
+    } else if (owmId === 801) {
+      if (weatherCode > 1) weatherCode = 1; // pocas nubes → no peor que parcialmente despejado
+    } else if (owmId === 802) {
+      if (weatherCode > 2) weatherCode = 2; // nubes dispersas → no peor que parcialmente nublado
+      else if (weatherCode < 1) weatherCode = 1;
+    } else if (owmId === 803 && weatherCode < 2) {
+      weatherCode = 2; // nubes rotas → al menos parcialmente nublado
+    } else if (owmId === 804 && weatherCode < 3) {
+      weatherCode = 3; // cubierto
     }
-    else if (owmId >= 600 && owmId < 700 && weatherCode < 71) weatherCode = 71;   // nieve
-    else if (owmId >= 700 && owmId < 800 && weatherCode < 45) weatherCode = 45;   // niebla
+    // Precipitación: solo si no hay API regional más fiable
+    if (!tieneAPIRegional) {
+      if (owmId >= 200 && owmId < 300 && weatherCode < 95) weatherCode = 95;
+      else if (owmId >= 300 && owmId < 400 && weatherCode < 51) weatherCode = 51;
+      else if (owmId >= 500 && owmId < 600 && weatherCode < 61) {
+        if (owmId === 500) weatherCode = 61;
+        else if (owmId === 501) weatherCode = 63;
+        else weatherCode = 65;
+      }
+      else if (owmId >= 600 && owmId < 700 && weatherCode < 71) weatherCode = 71;
+      else if (owmId >= 700 && owmId < 800 && weatherCode < 45) weatherCode = 45;
+    }
   }
   // Si hay precipitación real ahora mismo y el código no lo refleja, forzar llovizna
   const precipActual = c.precipitation ?? 0;
