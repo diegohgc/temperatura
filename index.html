@@ -2802,7 +2802,15 @@ function renderDatos(datos) {
   }
   // Corregir icono con API regional — máxima prioridad
   if (aemetActual && aemetActual.weatherCode !== null) {
-    weatherCode = aemetActual.weatherCode; // España: AEMET predicción
+    const aemetCode = aemetActual.weatherCode;
+    // Si AEMET predice nublado pero OM minutely_15 dice despejado con 0% lluvia,
+    // confiar en OM (más actualizado; AEMET da bloques horarios de predicción)
+    const omDespejado = weatherCode <= 1 && (c.precipitation ?? 0) === 0;
+    if (aemetCode >= 2 && omDespejado) {
+      // mantener weatherCode de Open-Meteo, más actualizado
+    } else {
+      weatherCode = aemetCode; // España: AEMET predicción
+    }
   } else if (nwsActual && nwsActual.weatherCode !== null) {
     weatherCode = nwsActual.weatherCode;   // EEUU: NWS
     if (nwsActual.isDay !== undefined) isDay = nwsActual.isDay;
