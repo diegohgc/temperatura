@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap">
 <meta name="theme-color" content="#1e3a5f">
 <title>Temperatura</title>
 <link rel="manifest" href="manifest.json">
@@ -4380,16 +4382,22 @@ function abrirEnGoogleMaps() {
     <div id="brujulaDireccionTexto" style="font-size:0.9rem;opacity:0.6;margin-top:2px">sin señal</div>
     <!-- Panel velocidad + distancia -->
     <div style="display:flex;gap:10px;margin-top:18px">
-      <div style="flex:1;background:rgba(255,255,255,0.07);border-radius:14px;padding:10px 8px;text-align:center">
-        <div id="brjVelLabel" style="font-size:0.65rem;opacity:0.5;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:3px">Velocidad</div>
-        <div id="brjVelNum" style="font-size:1.4rem;font-weight:700;line-height:1">0</div>
-        <div id="brjVelUnit" style="font-size:0.7rem;opacity:0.55;margin-top:2px">km/h</div>
+      <div style="flex:1;background:rgba(255,255,255,0.05);border-radius:14px;overflow:hidden">
+        <div style="height:3px;background:#4A9EFF"></div>
+        <div style="padding:10px 10px 12px;text-align:center">
+          <div id="brjVelLabel" style="font-size:0.6rem;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.38);margin-bottom:6px">Velocidad</div>
+          <div id="brjVelNum" style="font-family:'DM Mono',monospace;font-size:2rem;font-weight:500;line-height:1;color:#4A9EFF;font-variant-numeric:tabular-nums">0</div>
+          <div id="brjVelUnit" style="font-size:0.65rem;font-weight:500;letter-spacing:0.06em;margin-top:3px;color:#4A9EFF;opacity:0.55">km/h</div>
+        </div>
       </div>
-      <div style="flex:1;background:rgba(255,255,255,0.07);border-radius:14px;padding:10px 8px;text-align:center">
-        <div id="brjDistLabel" style="font-size:0.65rem;opacity:0.5;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:3px">Distancia</div>
-        <div id="brjDistNum" style="font-size:1.4rem;font-weight:700;line-height:1">0</div>
-        <div id="brjDistUnit" style="font-size:0.7rem;opacity:0.55;margin-top:2px">m</div>
-        <button id="brjDistReset" onclick="window.resetDistancia && window.resetDistancia()" style="margin-top:6px;background:none;border:none;color:inherit;opacity:0.4;font-size:0.65rem;cursor:pointer;text-decoration:underline;padding:0">Reset</button>
+      <div style="flex:1;background:rgba(255,255,255,0.05);border-radius:14px;overflow:hidden">
+        <div style="height:3px;background:#34C98A"></div>
+        <div style="padding:10px 10px 12px;text-align:center">
+          <div id="brjDistLabel" style="font-size:0.6rem;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.38);margin-bottom:6px">Distancia</div>
+          <div id="brjDistNum" style="font-family:'DM Mono',monospace;font-size:2rem;font-weight:500;line-height:1;color:#34C98A;font-variant-numeric:tabular-nums">0</div>
+          <div id="brjDistUnit" style="font-size:0.65rem;font-weight:500;letter-spacing:0.06em;margin-top:3px;color:#34C98A;opacity:0.55">m</div>
+          <button id="brjDistReset" onclick="window.resetDistancia && window.resetDistancia()" style="margin-top:7px;background:none;border:none;color:rgba(255,255,255,0.3);font-size:0.6rem;cursor:pointer;text-decoration:underline;padding:0">Reset</button>
+        </div>
       </div>
     </div>
     <button id="brujulaCerrarBtn" onclick="document.getElementById('brujulaModal').style.display='none'" style="margin-top:16px;padding:10px 32px;border:none;border-radius:30px;background:rgba(255,255,255,0.12);color:inherit;font-size:0.95rem;cursor:pointer">Cerrar</button>
