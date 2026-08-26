@@ -2355,10 +2355,9 @@ function abrirModalDia(i) {
   if (esHoy && ultimosDatos && ultimosDatos.weatherCodeValidado != null) {
     code = ultimosDatos.weatherCodeValidado;
   }
-  // Para hoy: código ya validado con observaciones → usar directamente sin ajuste de prob diaria
-  document.getElementById('diaIconoGrande').innerHTML = (esHoy && ultimosDatos && ultimosDatos.weatherCodeValidado != null)
-    ? iconoParaCodigo(code, true)
-    : iconoConProb(code, prob, true);
+  // Icono siempre directo: hoy usa código validado con obs reales, otros días el WMO previsto
+  // La prob se muestra aparte como número — no la aplicamos al icono para evitar sobreescrituras
+  document.getElementById('diaIconoGrande').innerHTML = iconoParaCodigo(code, true);
   document.getElementById('diaDesc').textContent = T.codigos[code] || '';
   document.getElementById('diaTempMax').textContent = toTemp(daily.temperature_2m_max[i]);
   document.getElementById('diaTempMin').textContent = toTemp(daily.temperature_2m_min[i]);
