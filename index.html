@@ -2159,6 +2159,44 @@ function renderHorasAEMET(horas) {
   }
 }
 
+function wapiCodeToWMO(code) {
+  if (code === 1000) return 0;
+  if (code === 1003) return 1;
+  if (code === 1006) return 2;
+  if (code === 1009) return 3;
+  if (code === 1030 || code === 1135 || code === 1147) return 45;
+  if ([1063,1150,1153,1180,1183].includes(code)) return 51;
+  if ([1186,1189,1192,1195,1240,1243].includes(code)) return 61;
+  if ([1066,1210,1213,1216,1219,1255].includes(code)) return 71;
+  if ([1087,1273,1276,1279,1282].includes(code)) return 95;
+  return 2; // fallback parcialmente nublado
+}
+
+function renderHorasWAPI(wapiData) {
+  elHoras.innerHTML = '';
+  if (!wapiData?.forecast?.forecastday) return;
+  // Juntar todas las horas de hoy + mañana
+  const todasHoras = wapiData.forecast.forecastday.flatMap(d => d.hour);
+  const ahoraEpoch = Date.now() / 1000;
+  const proximas = todasHoras
+    .filter(h => h.time_epoch >= ahoraEpoch)
+    .slice(0, 8);
+  for (const h of proximas) {
+    const hora = new Date(h.time_epoch * 1000).getHours() + 'h';
+    const wmo = wapiCodeToWMO(h.condition.code);
+    const prob = h.chance_of_rain ?? null;
+    const div = document.createElement('div');
+    div.className = 'hora';
+    div.innerHTML = `
+      <div class="h">${hora}</div>
+      <div class="icono-hora">${iconoConProb(wmo, prob, h.is_day === 1)}</div>
+      <div class="t">${toTemp(h.temp_c)}</div>
+      ${prob !== null ? `<div class="p">${prob}%</div>` : ''}
+    `;
+    elHoras.appendChild(div);
+  }
+}
+
 function renderSol(daily) {
   elSolInfo.innerHTML = '';
   if (!daily || !daily.sunrise || !daily.sunrise[0]) return;
@@ -2912,8 +2950,9 @@ function renderDatos(datos) {
     probLluviaActual = idx >= 0 ? hourly.precipitation_probability[idx] : null;
   }
   elLluvia.textContent = probLluviaActual !== null ? `🌧 ${T.probLluvia || 'Rain probability next hour'}: ${probLluviaActual}%` : '';
-  // Previsión horaria: AEMET tiene prioridad en España si tiene datos
-  if (aemetHoras && aemetHoras.length) renderHorasAEMET(aemetHoras);
+  // Previsión horaria: WeatherAPI > AEMET > Open-Meteo
+  if (wapiData?.forecast?.forecastday) renderHorasWAPI(wapiData);
+  else if (aemetHoras && aemetHoras.length) renderHorasAEMET(aemetHoras);
   else renderHoras(tiempo.hourly);
   renderSol(tiempo.daily);
   renderDias(tiempo.daily);
@@ -2969,7 +3008,7 @@ async function cargarDatos(latitude, longitude, nombreFijo) {
       fetch(`https://api.open-meteo.com/v1/elevation?latitude=${latitude}&longitude=${longitude}`).then(r => r.json()).catch(() => null),
       obtenerCalidadAire(latitude, longitude).catch(() => null),
       fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=ee01a14dca6430b5ddb8b0fed708d4ba`).then(r => r.json()).catch(() => null),
-      fetch(`https://api.weatherapi.com/v1/current.json?key=df2620108c794b40a68181321262708&q=${latitude},${longitude}&aqi=no`).then(r => r.json()).catch(() => null),
+      fetch(`https://api.weatherapi.com/v1/forecast.json?key=df2620108c794b40a68181321262708&q=${latitude},${longitude}&days=2&aqi=no&alerts=no`).then(r => r.json()).catch(() => null),
       aemetPromise,
       aemetObsPromise,
       nwsPromise,
