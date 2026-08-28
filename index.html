@@ -2801,13 +2801,18 @@ function renderPanelInterior(uvIndex, aireData, sunsetStr, tieneMarea, utcOffset
   if (aireData) {
     aireEl.textContent = aireData.aqi;
     const aqi = aireData.aqi;
-    const aireColor = aqi <= 20 ? '#4ade80' : aqi <= 40 ? '#a3e635' : aqi <= 60 ? '#facc15' : aqi <= 80 ? '#fb923c' : '#f87171';
-    aireEl.style.color = aireColor;
-    aireLabelEl.style.color = aireColor;
+    const aireColor = aqi <= 20 ? 'rgba(74,222,128,0.18)' : aqi <= 40 ? 'rgba(163,230,53,0.18)' : aqi <= 60 ? 'rgba(250,204,21,0.18)' : aqi <= 80 ? 'rgba(251,146,60,0.22)' : 'rgba(248,113,113,0.22)';
+    const aireBorder = aqi <= 20 ? 'rgba(74,222,128,0.4)' : aqi <= 40 ? 'rgba(163,230,53,0.4)' : aqi <= 60 ? 'rgba(250,204,21,0.4)' : aqi <= 80 ? 'rgba(251,146,60,0.45)' : 'rgba(248,113,113,0.45)';
+    const aireCard = aireEl.closest('.interior-item');
+    if (aireCard) { aireCard.style.background = aireColor; aireCard.style.boxShadow = `0 0 0 1px ${aireBorder}`; }
+    aireEl.style.color = '';
+    aireLabelEl.style.color = '';
   } else {
     aireEl.textContent = '--';
     aireEl.style.color = '';
     aireLabelEl.style.color = '';
+    const aireCard = aireEl.closest('.interior-item');
+    if (aireCard) { aireCard.style.background = ''; aireCard.style.boxShadow = ''; }
   }
   aireLabelEl.textContent = T.calidadAire || 'Air quality';
 
