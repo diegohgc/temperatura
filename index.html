@@ -166,6 +166,7 @@
   .interior-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; flex: 1;
     background: rgba(255,255,255,0.07); border-radius: 16px; padding: 14px 8px; }
   .interior-valor { font-size: 1.6rem; font-weight: 700; line-height: 1; }
+  #intSol { font-size: 1.1rem; }
   .interior-label { font-size: 0.6rem; opacity: 0.55; text-transform: uppercase; letter-spacing: 0.08em; text-align: center; }
   .panel-titulo {
     font-size: 0.72rem; opacity: 0.65;
@@ -2798,13 +2799,10 @@ function renderPanelInterior(uvIndex, aireData, sunsetStr, tieneMarea, utcOffset
   uvLabelEl.textContent = T.uvIndex || 'UV Index';
   const uvCard = uvEl.closest('.interior-item');
   if (uvVal !== null && uvCard) {
-    const uvBg = uvVal <= 2 ? 'rgba(74,222,128,0.18)' : uvVal <= 5 ? 'rgba(250,204,21,0.18)' : uvVal <= 7 ? 'rgba(251,146,60,0.22)' : uvVal <= 10 ? 'rgba(248,113,113,0.22)' : 'rgba(216,80,240,0.22)';
-    const uvBorder = uvVal <= 2 ? 'rgba(74,222,128,0.4)' : uvVal <= 5 ? 'rgba(250,204,21,0.4)' : uvVal <= 7 ? 'rgba(251,146,60,0.45)' : uvVal <= 10 ? 'rgba(248,113,113,0.45)' : 'rgba(216,80,240,0.45)';
-    uvCard.style.background = uvBg;
-    uvCard.style.boxShadow = `0 0 0 1px ${uvBorder}`;
+    const uvColor = uvVal <= 2 ? '#4ade80' : uvVal <= 5 ? '#facc15' : uvVal <= 7 ? '#fb923c' : uvVal <= 10 ? '#f87171' : '#d050f0';
+    uvEl.style.color = uvColor;
   } else if (uvCard) {
-    uvCard.style.background = '';
-    uvCard.style.boxShadow = '';
+    uvEl.style.color = '';
   }
   document.getElementById('intSol').textContent = solTexto ?? '--';
   document.getElementById('intSolLabel').textContent = solLabel || T.solRestante || 'Sol restante';
@@ -2813,18 +2811,11 @@ function renderPanelInterior(uvIndex, aireData, sunsetStr, tieneMarea, utcOffset
   if (aireData) {
     aireEl.textContent = aireData.aqi;
     const aqi = aireData.aqi;
-    const aireColor = aqi <= 20 ? 'rgba(74,222,128,0.18)' : aqi <= 40 ? 'rgba(163,230,53,0.18)' : aqi <= 60 ? 'rgba(250,204,21,0.18)' : aqi <= 80 ? 'rgba(251,146,60,0.22)' : 'rgba(248,113,113,0.22)';
-    const aireBorder = aqi <= 20 ? 'rgba(74,222,128,0.4)' : aqi <= 40 ? 'rgba(163,230,53,0.4)' : aqi <= 60 ? 'rgba(250,204,21,0.4)' : aqi <= 80 ? 'rgba(251,146,60,0.45)' : 'rgba(248,113,113,0.45)';
-    const aireCard = aireEl.closest('.interior-item');
-    if (aireCard) { aireCard.style.background = aireColor; aireCard.style.boxShadow = `0 0 0 1px ${aireBorder}`; }
-    aireEl.style.color = '';
-    aireLabelEl.style.color = '';
+    const aireColor = aqi <= 20 ? '#4ade80' : aqi <= 40 ? '#a3e635' : aqi <= 60 ? '#facc15' : aqi <= 80 ? '#fb923c' : '#f87171';
+    aireEl.style.color = aireColor;
   } else {
     aireEl.textContent = '--';
     aireEl.style.color = '';
-    aireLabelEl.style.color = '';
-    const aireCard = aireEl.closest('.interior-item');
-    if (aireCard) { aireCard.style.background = ''; aireCard.style.boxShadow = ''; }
   }
   aireLabelEl.textContent = T.calidadAire || 'Air quality';
 
