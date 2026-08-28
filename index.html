@@ -161,11 +161,12 @@
     background: rgba(255,255,255,0.12);
     border-radius: 16px; padding: 12px 14px; margin-bottom: 10px;
   }
-  .panel-interior { display: flex; justify-content: space-around; align-items: center; }
+  .panel-interior { display: flex; gap: 10px; background: none; padding: 0; box-shadow: none; }
   .panel-interior[hidden] { display: none; }
-  .interior-item { display: flex; flex-direction: column; align-items: center; gap: 2px; flex: 1; }
-  .interior-valor { font-size: 1.5rem; font-weight: 600; }
-  .interior-label { font-size: 0.65rem; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.05em; text-align: center; }
+  .interior-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; flex: 1;
+    background: rgba(255,255,255,0.07); border-radius: 16px; padding: 14px 8px; }
+  .interior-valor { font-size: 1.6rem; font-weight: 700; line-height: 1; }
+  .interior-label { font-size: 0.6rem; opacity: 0.55; text-transform: uppercase; letter-spacing: 0.08em; text-align: center; }
   .panel-titulo {
     font-size: 0.72rem; opacity: 0.65;
     text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px;
