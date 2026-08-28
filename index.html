@@ -2941,13 +2941,21 @@ function renderDatos(datos) {
   // Guardar el código ya validado para que el modal de hoy lo use
   datos.weatherCodeValidado = weatherCode;
   const elLluvia = document.getElementById('lluvia');
-  // Probabilidad lluvia: Open-Meteo hora a hora (AEMET da bloques 6h, no es preciso para "próxima hora")
+  // Probabilidad lluvia: WeatherAPI hora actual > Open-Meteo
   let probLluviaActual = null;
-  const hourly = tiempo.hourly;
-  if (hourly && hourly.time && hourly.precipitation_probability) {
-    const now = new Date();
-    const idx = hourly.time.findIndex(t => new Date(t) >= now);
-    probLluviaActual = idx >= 0 ? hourly.precipitation_probability[idx] : null;
+  const ahoraEpoch = Date.now() / 1000;
+  if (wapiData?.forecast?.forecastday) {
+    const todasHoras = wapiData.forecast.forecastday.flatMap(d => d.hour);
+    const horaActual = todasHoras.find(h => h.time_epoch >= ahoraEpoch);
+    if (horaActual) probLluviaActual = horaActual.chance_of_rain ?? null;
+  }
+  if (probLluviaActual === null) {
+    const hourly = tiempo.hourly;
+    if (hourly && hourly.time && hourly.precipitation_probability) {
+      const now = new Date();
+      const idx = hourly.time.findIndex(t => new Date(t) >= now);
+      probLluviaActual = idx >= 0 ? hourly.precipitation_probability[idx] : null;
+    }
   }
   elLluvia.textContent = probLluviaActual !== null ? `🌧 ${T.probLluvia || 'Rain probability next hour'}: ${probLluviaActual}%` : '';
   // Previsión horaria: WeatherAPI > AEMET > Open-Meteo
