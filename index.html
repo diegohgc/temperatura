@@ -2795,8 +2795,20 @@ function renderPanelInterior(uvIndex, aireData, sunsetStr, tieneMarea, utcOffset
   document.getElementById('intUVLabel').textContent = T.uvIndex || 'UV Index';
   document.getElementById('intSol').textContent = solTexto ?? '--';
   document.getElementById('intSolLabel').textContent = solLabel || T.solRestante || 'Sol restante';
-  document.getElementById('intAire').textContent = aireData ? aireData.aqi : '--';
-  document.getElementById('intAireLabel').textContent = T.calidadAire || 'Air quality';
+  const aireEl = document.getElementById('intAire');
+  const aireLabelEl = document.getElementById('intAireLabel');
+  if (aireData) {
+    aireEl.textContent = aireData.aqi;
+    const aqi = aireData.aqi;
+    const aireColor = aqi <= 20 ? '#4ade80' : aqi <= 40 ? '#a3e635' : aqi <= 60 ? '#facc15' : aqi <= 80 ? '#fb923c' : '#f87171';
+    aireEl.style.color = aireColor;
+    aireLabelEl.style.color = aireColor;
+  } else {
+    aireEl.textContent = '--';
+    aireEl.style.color = '';
+    aireLabelEl.style.color = '';
+  }
+  aireLabelEl.textContent = T.calidadAire || 'Air quality';
 
   document.getElementById('intUV').closest('.interior-item').onclick = () => abrirModalInterior('uv');
   document.getElementById('intSol').closest('.interior-item').onclick = () => abrirModalInterior('sol');

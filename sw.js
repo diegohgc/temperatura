@@ -1,4 +1,4 @@
-const CACHE = 'temperatura-v43';
+const CACHE = 'temperatura-v44';
 const ASSETS = ['./manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', (e) => {
