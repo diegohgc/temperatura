@@ -2884,16 +2884,20 @@ function renderDatos(datos) {
   const wapiIsDay = wapiData?.current?.is_day ?? null;
   if (wapiCode !== null) {
     if (wapiIsDay !== null) isDay = wapiIsDay === 1;
+    // Validar lluvia: si Open-Meteo y WeatherAPI dicen 0mm reales, no forzar lluvia
+    const precipRealOM = c.precipitation ?? 0;
+    const precipRealWAPI = wapiData?.current?.precip_mm ?? 0;
+    const llueveDeVerdad = precipRealOM > 0 || precipRealWAPI > 0;
     // Mapeo WeatherAPI condition codes → WMO
     if (wapiCode === 1000) weatherCode = 0;                                    // Sunny/Clear
     else if (wapiCode === 1003) weatherCode = 1;                               // Partly cloudy
     else if (wapiCode === 1006) weatherCode = 2;                               // Cloudy
     else if (wapiCode === 1009) weatherCode = 3;                               // Overcast
     else if (wapiCode === 1030 || wapiCode === 1135 || wapiCode === 1147) weatherCode = 45; // Mist/Fog
-    else if ([1063,1150,1153,1180,1183].includes(wapiCode)) weatherCode = 51;  // Patchy/Light drizzle-rain
-    else if ([1186,1189,1192,1195,1240,1243].includes(wapiCode)) weatherCode = 61; // Moderate-heavy rain
-    else if ([1066,1210,1213,1216,1219,1255].includes(wapiCode)) weatherCode = 71; // Snow
-    else if ([1087,1273,1276,1279,1282].includes(wapiCode)) weatherCode = 95;  // Thunder/Storm
+    else if ([1063,1150,1153,1180,1183].includes(wapiCode)) { if (llueveDeVerdad) weatherCode = 51; } // Llovizna solo si llueve
+    else if ([1186,1189,1192,1195,1240,1243].includes(wapiCode)) { if (llueveDeVerdad) weatherCode = 61; } // Lluvia solo si llueve
+    else if ([1066,1210,1213,1216,1219,1255].includes(wapiCode)) weatherCode = 71; // Nieve
+    else if ([1087,1273,1276,1279,1282].includes(wapiCode)) weatherCode = 95;  // Tormenta
     // Para códigos no mapeados, no sobreescribir
   }
 
