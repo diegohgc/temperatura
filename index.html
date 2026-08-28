@@ -2792,8 +2792,20 @@ function renderPanelInterior(uvIndex, aireData, sunsetStr, tieneMarea, utcOffset
 
   aireExtra.hidden = true;
   panel.hidden = false;
-  document.getElementById('intUV').textContent = uvVal ?? '--';
-  document.getElementById('intUVLabel').textContent = T.uvIndex || 'UV Index';
+  const uvEl = document.getElementById('intUV');
+  const uvLabelEl = document.getElementById('intUVLabel');
+  uvEl.textContent = uvVal ?? '--';
+  uvLabelEl.textContent = T.uvIndex || 'UV Index';
+  const uvCard = uvEl.closest('.interior-item');
+  if (uvVal !== null && uvCard) {
+    const uvBg = uvVal <= 2 ? 'rgba(74,222,128,0.18)' : uvVal <= 5 ? 'rgba(250,204,21,0.18)' : uvVal <= 7 ? 'rgba(251,146,60,0.22)' : uvVal <= 10 ? 'rgba(248,113,113,0.22)' : 'rgba(216,80,240,0.22)';
+    const uvBorder = uvVal <= 2 ? 'rgba(74,222,128,0.4)' : uvVal <= 5 ? 'rgba(250,204,21,0.4)' : uvVal <= 7 ? 'rgba(251,146,60,0.45)' : uvVal <= 10 ? 'rgba(248,113,113,0.45)' : 'rgba(216,80,240,0.45)';
+    uvCard.style.background = uvBg;
+    uvCard.style.boxShadow = `0 0 0 1px ${uvBorder}`;
+  } else if (uvCard) {
+    uvCard.style.background = '';
+    uvCard.style.boxShadow = '';
+  }
   document.getElementById('intSol').textContent = solTexto ?? '--';
   document.getElementById('intSolLabel').textContent = solLabel || T.solRestante || 'Sol restante';
   const aireEl = document.getElementById('intAire');
