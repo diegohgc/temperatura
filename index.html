@@ -2799,8 +2799,6 @@ function renderPanelInterior(uvIndex, aireData, sunsetStr, tieneMarea, utcOffset
   uvLabelEl.textContent = T.uvIndex || 'UV Index';
   const uvCard = uvEl.closest('.interior-item');
   if (uvVal !== null && uvCard) {
-    const uvColor = uvVal <= 2 ? '#4ade80' : uvVal <= 5 ? '#facc15' : uvVal <= 7 ? '#fb923c' : uvVal <= 10 ? '#f87171' : '#d050f0';
-    uvEl.style.color = uvColor;
   } else if (uvCard) {
     uvEl.style.color = '';
   }
@@ -2811,8 +2809,6 @@ function renderPanelInterior(uvIndex, aireData, sunsetStr, tieneMarea, utcOffset
   if (aireData) {
     aireEl.textContent = aireData.aqi;
     const aqi = aireData.aqi;
-    const aireColor = aqi <= 20 ? '#4ade80' : aqi <= 40 ? '#a3e635' : aqi <= 60 ? '#facc15' : aqi <= 80 ? '#fb923c' : '#f87171';
-    aireEl.style.color = aireColor;
   } else {
     aireEl.textContent = '--';
     aireEl.style.color = '';
