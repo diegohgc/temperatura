@@ -2898,9 +2898,12 @@ function renderDatos(datos) {
     }
     // DWD no necesita corrección adicional (ya viene de observación)
   }
-  // Si hay precipitación real de OM y el código no lo refleja, forzar llovizna
-  if (precipRealOM > 0 && weatherCode < 51) weatherCode = 51;
-  elTemp.textContent = toTemp(c.temperature_2m);
+  // Si hay precipitación real de OM y WeatherAPI no está disponible, forzar llovizna
+  if (wapiCode === null && precipRealOM > 0 && weatherCode < 51) weatherCode = 51;
+  // Temperatura e icono siempre de WeatherAPI si está disponible
+  const tempActual = wapiData?.current?.temp_c ?? c.temperature_2m;
+  const sensacionActual = wapiData?.current?.feelslike_c ?? c.apparent_temperature;
+  elTemp.textContent = toTemp(tempActual);
   elDesc.textContent = T.codigos[weatherCode] || '';
   elIcono.innerHTML = iconoParaCodigo(weatherCode, isDay);
   // Guardar el código ya validado para que el modal de hoy lo use
@@ -2931,14 +2934,14 @@ function renderDatos(datos) {
   renderDias(tiempo.daily);
   const tieneMarea = renderMarea(mdata);
   renderPanelInterior(c.uv_index, aireData, tiempo.daily && tiempo.daily.sunset ? tiempo.daily.sunset[0] : null, tieneMarea, tiempo.utc_offset_seconds, tiempo.daily && tiempo.daily.sunrise ? tiempo.daily.sunrise[0] : null, c.is_day === 1);
-  aplicarColorTemp(Math.round(c.temperature_2m));
+  aplicarColorTemp(Math.round(tempActual));
   const max0 = tiempo.daily && tiempo.daily.temperature_2m_max ? tiempo.daily.temperature_2m_max[0] : null;
   const min0 = tiempo.daily && tiempo.daily.temperature_2m_min ? tiempo.daily.temperature_2m_min[0] : null;
   const elMinMax = document.getElementById('tempMinMax');
   if (max0 !== null && min0 !== null) {
     elMinMax.innerHTML = `<span class="tmx">${toTemp(max0)}</span><span class="tmn">${toTemp(min0)}</span>`;
   }
-  elSensacion.textContent = T.sensacion + ' ' + toTemp(c.apparent_temperature);
+  elSensacion.textContent = T.sensacion + ' ' + toTemp(sensacionActual);
   elViento.textContent = toViento(c.wind_speed_10m);
   elHumedad.textContent = c.relative_humidity_2m + T.humedad;
   const alt = elevacion && elevacion.elevation && elevacion.elevation[0];
