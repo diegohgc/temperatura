@@ -2872,14 +2872,6 @@ function renderDatos(datos) {
     else weatherCode = 2; // código WAPI no mapeado → nublado por defecto
   }
 
-  // AEMET: solo cancela lluvia si observación real dice 0mm (España)
-  if (weatherCode !== null && weatherCode >= 51 && weatherCode < 95) {
-    if (aemetObs) {
-      const precipObs = parseFloat(aemetObs.prec ?? '0');
-      if (!precipObs || precipObs === 0) weatherCode = codigoSinLluvia(weatherCode, 0);
-    }
-  }
-
   // Temperatura y sensación: solo WeatherAPI
   const tempActual = wapiData?.current?.temp_c ?? c.temperature_2m;
   const sensacionActual = wapiData?.current?.feelslike_c ?? c.apparent_temperature;
