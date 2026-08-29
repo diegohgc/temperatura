@@ -2848,20 +2848,16 @@ function renderDatos(datos) {
   const { tiempo, ciudad, mdata, elevacion, aireData, owmData, wapiData, aemetActual, aemetHoras, aemetObs, nwsActual, dwdObs } = datos;
   const c = tiempo.current;
   const m15 = tiempo.minutely_15;
-  let weatherCode = c.weather_code;
+  let weatherCode = null;
   let isDay = c.is_day === 1;
 
-  // Datos de apoyo
-  const owmClouds = owmData?.clouds?.all ?? null;
-  const owmId = owmData?.weather?.[0]?.id ?? null;
-  const cloudCover = owmClouds !== null ? owmClouds : Math.max(c.cloud_cover_low ?? 0, c.cloud_cover_mid ?? 0);
   const wapiCode = wapiData?.current?.condition?.code ?? null;
   const wapiIsDay = wapiData?.current?.is_day ?? null;
-  const precipRealOM = c.precipitation ?? 0;
   const precipRealWAPI = wapiData?.current?.precip_mm ?? 0;
+  const precipRealOM = c.precipitation ?? 0;
   const llueveDeVerdad = precipRealOM >= 0.1 || precipRealWAPI >= 0.1;
 
-  // ── 1. WEATHERAPI — fuente principal para el estado actual ──
+  // ── ÚNICA FUENTE: WEATHERAPI ──
   if (wapiCode !== null) {
     if (wapiIsDay !== null) isDay = wapiIsDay === 1;
     if (wapiCode === 1000) weatherCode = 0;
@@ -2873,39 +2869,25 @@ function renderDatos(datos) {
     else if ([1186,1189,1192,1195,1240,1243].includes(wapiCode)) weatherCode = llueveDeVerdad ? 61 : 2;
     else if ([1066,1210,1213,1216,1219,1255].includes(wapiCode)) weatherCode = 71;
     else if ([1087,1273,1276,1279,1282].includes(wapiCode)) weatherCode = 95;
-    else {
-      // Código WAPI no mapeado: usar Open-Meteo minutely_15 como base
-      if (m15 && m15.time && m15.weather_code) {
-        const now = new Date();
-        const idx = m15.time.reduce((best, t, i) => new Date(t) <= now ? i : best, 0);
-        if (idx >= 0) { weatherCode = m15.weather_code[idx]; isDay = m15.is_day ? m15.is_day[idx] === 1 : isDay; }
-      }
-    }
-  } else {
-    // Sin WeatherAPI: usar Open-Meteo minutely_15
-    if (m15 && m15.time && m15.weather_code) {
-      const now = new Date();
-      const idx = m15.time.reduce((best, t, i) => new Date(t) <= now ? i : best, 0);
-      if (idx >= 0) { weatherCode = m15.weather_code[idx]; isDay = m15.is_day ? m15.is_day[idx] === 1 : isDay; }
-    }
+    else weatherCode = 2; // código WAPI no mapeado → nublado por defecto
   }
 
-  // ── 2. AEMET/NWS/DWD — solo corrigen precipitación observada real ──
-  if (weatherCode >= 51 && weatherCode < 95) {
+  // AEMET: solo cancela lluvia si observación real dice 0mm (España)
+  if (weatherCode !== null && weatherCode >= 51 && weatherCode < 95) {
     if (aemetObs) {
       const precipObs = parseFloat(aemetObs.prec ?? '0');
       if (!precipObs || precipObs === 0) weatherCode = codigoSinLluvia(weatherCode, 0);
     }
-    // DWD no necesita corrección adicional (ya viene de observación)
   }
-  // Si hay precipitación real de OM y WeatherAPI no está disponible, forzar llovizna
-  if (wapiCode === null && precipRealOM > 0 && weatherCode < 51) weatherCode = 51;
-  // Temperatura e icono siempre de WeatherAPI si está disponible
+
+  // Temperatura y sensación: solo WeatherAPI
   const tempActual = wapiData?.current?.temp_c ?? c.temperature_2m;
   const sensacionActual = wapiData?.current?.feelslike_c ?? c.apparent_temperature;
   elTemp.textContent = toTemp(tempActual);
-  elDesc.textContent = T.codigos[weatherCode] || '';
-  elIcono.innerHTML = iconoParaCodigo(weatherCode, isDay);
+  if (weatherCode !== null) {
+    elDesc.textContent = T.codigos[weatherCode] || '';
+    elIcono.innerHTML = iconoParaCodigo(weatherCode, isDay);
+  }
   // Guardar el código ya validado para que el modal de hoy lo use
   datos.weatherCodeValidado = weatherCode;
   const elLluvia = document.getElementById('lluvia');
