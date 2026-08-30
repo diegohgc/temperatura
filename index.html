@@ -2725,6 +2725,7 @@ document.getElementById('modalDia').addEventListener('click', (e) => {
 
 let _ultimoUV = null, _ultimoAireData = null, _ultimoSunset = null, _ultimoSunrise = null, _ultimoSunsetLocalHora = null, _ultimoSunriseLocalHora = null, _ultimoIsDay = true;
 let _ultimaTempC = null;
+let _wapiDataGlobal = null;
 
 function abrirModalInterior(tipo) {
   const uvNiveles = [
@@ -2834,6 +2835,7 @@ document.getElementById('modalViento').addEventListener('click', (e) => {
 let _ultimoPrecipAcum = null;
 
 function abrirModalLluvia() {
+  const wapiData = _wapiDataGlobal;
   if (!wapiData?.forecast?.forecastday) return;
   const STR = {
     titulo:   { es:'Probabilidad de lluvia', en:'Rain probability', de:'Regenwahrscheinlichkeit', fr:'Probabilité de pluie', pt:'Probabilidade de chuva', it:'Probabilità di pioggia', zh:'降雨概率', ca:'Probabilitat de pluja', eu:'Euri-probabilitatea', gl:'Probabilidade de choiva', ar:'احتمالية الأمطار', ru:'Вероятность дождя', ja:'降水確率', ko:'강수 확률', nl:'Regenkans', pl:'Prawdopodobieństwo deszczu', hi:'वर्षा की संभावना', ro:'Probabilitate de ploaie', hu:'Esővalószínűség' },
@@ -3351,6 +3353,7 @@ async function obtenerCalidadAire(lat, lon) {
 
 function renderDatos(datos) {
   const { tiempo, ciudad, mdata, elevacion, aireData, owmData, wapiData, aemetActual, aemetHoras, aemetObs, nwsActual, dwdObs } = datos;
+  _wapiDataGlobal = wapiData ?? null;
   const c = tiempo.current;
   const m15 = tiempo.minutely_15;
   let weatherCode = null;
