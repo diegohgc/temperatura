@@ -168,6 +168,13 @@
   .interior-valor { font-size: 1.6rem; font-weight: 700; line-height: 1; white-space: nowrap; }
   .interior-label { font-size: 0.56rem; opacity: 0.5; text-transform: uppercase; letter-spacing: 0.1em; text-align: center; }
   /* ── Cards grid 2×2 ── */
+  .card-altbru { background: rgba(255,255,255,0.08); border-radius: 13px; display: flex; align-items: center; margin-bottom: 10px; overflow: hidden; }
+  .cab-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 9px 8px 8px; }
+  .cab-label { font-size: 0.52rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.45; }
+  .cab-value { font-size: 1rem; font-weight: 700; line-height: 1.1; }
+  .cab-divider { width: 1px; height: 34px; background: rgba(255,255,255,0.12); flex-shrink: 0; }
+  .cab-item-btn { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .cab-item-btn:active { opacity: 0.7; }
   .cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 10px; }
   .card { background: rgba(255,255,255,0.08); border-radius: 13px; padding: 9px 11px 8px; display: flex; flex-direction: column; gap: 3px; }
   .card-label { font-size: 0.56rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.5; }
@@ -483,7 +490,7 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="opacity:0.8"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 12 L18 6"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/></svg>
           <span id="velocidadTxt" style="font-size:0.85rem;font-weight:600;opacity:0.9"></span>
         </div>
-        <div id="altitudRow" style="display:flex;align-items:center;gap:5px;justify-content:flex-end">
+        <div id="altitudRow" style="display:none">
           <div id="altitud" style="font-size:0.95rem;font-weight:600;cursor:pointer;touch-action:manipulation" onclick="abrirMapaAltitud()"></div>
           <svg id="brujula" width="28" height="28" viewBox="0 0 22 22" style="opacity:0.9;flex-shrink:0;cursor:pointer;touch-action:manipulation" aria-label="Abrir brújula">
             <circle cx="11" cy="11" r="10" fill="none" stroke="currentColor" stroke-width="1"/>
@@ -518,6 +525,26 @@
       </div>
     </div>
     <div class="desc" id="desc"></div>
+    <div class="card-altbru" id="cardAltBru">
+      <div class="cab-item" onclick="abrirMapaAltitud()" style="cursor:pointer;-webkit-tap-highlight-color:transparent">
+        <div class="cab-label" id="cabLblAlt">Altitud</div>
+        <div class="cab-value" id="cabAlt">--</div>
+      </div>
+      <div class="cab-divider"></div>
+      <div class="cab-item cab-item-btn" id="cabBrujulaBtn">
+        <div class="cab-label" id="cabLblBru">Brújula</div>
+        <svg width="26" height="26" viewBox="0 0 22 22" fill="none" style="opacity:0.9">
+          <circle cx="11" cy="11" r="10" stroke="currentColor" stroke-width="1"/>
+          <line x1="11" y1="2" x2="11" y2="20" stroke="currentColor" stroke-width="0.8" stroke-dasharray="1.5,2.2" opacity="0.35"/>
+          <line x1="2" y1="11" x2="20" y2="11" stroke="currentColor" stroke-width="0.8" stroke-dasharray="1.5,2.2" opacity="0.35"/>
+          <g id="cabBrujulaAguja" style="transform-origin:11px 11px">
+            <path d="M11 3.5 L12.8 10 L11 8.8 L9.2 10 Z" fill="currentColor"/>
+            <path d="M11 18.5 L12.8 12 L11 13.2 L9.2 12 Z" fill="currentColor" opacity="0.25"/>
+            <circle cx="11" cy="11" r="1.8" fill="currentColor"/>
+          </g>
+        </svg>
+      </div>
+    </div>
     <div class="cards-grid">
       <div class="card">
         <div class="card-label" id="cLblLluvia">🌧 Lluvia</div>
@@ -1689,6 +1716,7 @@ const elViento = document.getElementById('viento');
 const elHumedad = document.getElementById('humedad');
 const elEstado = document.getElementById('estado');
 const elAltitud = document.getElementById('altitud');
+const elCabAlt = document.getElementById('cabAlt');
 const elIcono = document.getElementById('icono');
 const elHoras = document.getElementById('horas');
 const elDias = document.getElementById('dias');
@@ -3032,6 +3060,10 @@ function renderDatos(datos) {
   const windDirStr = wapiData?.current?.wind_dir ?? (windDeg !== null ? dirViento(windDeg) : '');
   const gustKmh = wapiData?.current?.gust_kph ?? c.wind_gusts_10m ?? null;
   // Actualizar labels de tarjetas según idioma
+  const cabLblAltEl = document.getElementById('cabLblAlt');
+  const cabLblBruEl = document.getElementById('cabLblBru');
+  if (cabLblAltEl) cabLblAltEl.textContent = T.altitud || 'Altitud';
+  if (cabLblBruEl) cabLblBruEl.textContent = T.brujula || 'Brújula';
   document.getElementById('cLblLluvia').textContent = getCardLabel('lluvia');
   document.getElementById('cLblSensacion').textContent = T.sensacion || 'Sensación';
   document.getElementById('cLblViento').textContent = getCardLabel('viento');
@@ -3070,7 +3102,9 @@ function renderDatos(datos) {
     elMinMax.innerHTML = `<span class="tmx">${toTemp(max0)}</span><span class="tmn">${toTemp(min0)}</span>`;
   }
   const alt = elevacion && elevacion.elevation && elevacion.elevation[0];
-  elAltitud.textContent = alt !== null && alt !== undefined ? (usaMph ? `${T.altitud} ${Math.round(alt * 3.28084)} ft` : `${T.altitud} ${Math.round(alt)} m`) : '';
+  const altTxt = alt !== null && alt !== undefined ? (usaMph ? `${Math.round(alt * 3.28084)} ft` : `${Math.round(alt)} m`) : '';
+  elAltitud.textContent = altTxt ? `${T.altitud} ${altTxt}` : '';
+  if (elCabAlt) elCabAlt.textContent = altTxt || '--';
   animarSwipeEntrada();
 }
 
@@ -3192,7 +3226,9 @@ async function actualizarPosicionYAltitud() {
       const data = await r.json();
       const alt = data.elevation && data.elevation.length ? data.elevation[0] : null;
       if (alt !== null) {
-        elAltitud.textContent = usaMph ? `${T.altitud} ${Math.round(alt * 3.28084)} ft` : `${T.altitud} ${Math.round(alt)} m`;
+        const altTxt2 = usaMph ? `${Math.round(alt * 3.28084)} ft` : `${Math.round(alt)} m`;
+        elAltitud.textContent = `${T.altitud} ${altTxt2}`;
+        if (elCabAlt) elCabAlt.textContent = altTxt2;
       }
     } catch (e) {}
   }, null, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
@@ -3948,7 +3984,8 @@ function abrirEnGoogleMaps() {
 
 (function() {
   const aguja = document.getElementById('brujulaAguja');
-  if (!aguja) return;
+  const aguja2 = document.getElementById('cabBrujulaAguja');
+  if (!aguja && !aguja2) return;
 
   const dirs = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSO','SO','OSO','O','ONO','NO','NNO'];
 
@@ -3961,7 +3998,8 @@ function abrirEnGoogleMaps() {
     }
     if (heading !== null) {
       const h = Math.round(heading);
-      aguja.style.transform = `rotate(${-h}deg)`;
+      if (aguja) aguja.style.transform = `rotate(${-h}deg)`;
+      if (aguja2) aguja2.style.transform = `rotate(${-h}deg)`;
       const ag = document.getElementById('brujulaRosa');
       const gt = document.getElementById('brujulaGradosTexto');
       const dt = document.getElementById('brujulaDireccionTexto');
@@ -4021,10 +4059,13 @@ function abrirEnGoogleMaps() {
     }
   }
 
-  // Abrir modal al pulsar la brújula pequeña
+  // Abrir modal al pulsar la brújula (header oculto o tarjeta nueva)
   document.getElementById('brujula').addEventListener('click', function() {
-    abrirModal();
-    iniciarSensor();
+    abrirModal(); iniciarSensor();
+  });
+  const cabBtn = document.getElementById('cabBrujulaBtn');
+  if (cabBtn) cabBtn.addEventListener('click', function() {
+    abrirModal(); iniciarSensor();
   });
 
   // Cerrar modal al pulsar fuera de la tarjeta (lazy)
