@@ -166,7 +166,7 @@
   .interior-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; flex: 1;
     background: rgba(255,255,255,0.07); border-radius: 16px; padding: 14px 8px; }
   .interior-valor { font-size: 1.6rem; font-weight: 700; line-height: 1; white-space: nowrap; }
-  .interior-label { font-size: 0.56rem; opacity: 0.5; text-transform: uppercase; letter-spacing: 0.1em; text-align: center; }
+  .interior-label { font-size: 0.56rem; opacity: 0.5; text-transform: uppercase; letter-spacing: 0.1em; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
   /* ── Cards grid 2×2 ── */
   .card-altbru { background: rgba(255,255,255,0.08); border-radius: 13px; display: flex; align-items: center; margin-bottom: 10px; overflow: hidden; }
   .cab-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 9px 8px 8px; }
@@ -3341,7 +3341,7 @@ function renderPanelInterior(uvIndex, aireData, sunsetStr, tieneMarea, utcOffset
   const uvEl = document.getElementById('intUV');
   const uvLabelEl = document.getElementById('intUVLabel');
   uvEl.textContent = uvVal ?? '--';
-  uvLabelEl.textContent = T.uvIndex || 'UV Index';
+  uvLabelEl.textContent = 'UV';
   const uvCard = uvEl.closest('.interior-item');
   if (uvVal !== null && uvCard) {
   } else if (uvCard) {
@@ -3352,7 +3352,8 @@ function renderPanelInterior(uvIndex, aireData, sunsetStr, tieneMarea, utcOffset
   const aireEl = document.getElementById('intAire');
   const aireLabelEl = document.getElementById('intAireLabel');
   if (aireData) {
-    const nivelFull = aireData.nivelTexto ? (aireData.nivelTexto[idioma] || aireData.nivelTexto['en']) : '--';
+    const nivelFull = aireData.textoCorto
+      || (aireData.nivelTexto ? (aireData.nivelTexto[idioma] || aireData.nivelTexto['en']) : '--');
     aireEl.textContent = nivelFull.includes(': ') ? nivelFull.split(': ').pop() : nivelFull;
   } else {
     aireEl.textContent = '--';
@@ -3394,7 +3395,7 @@ async function obtenerCalidadAire(lat, lon) {
   const nivelesUS = [
     { max: 50,  texto: { es:'Calidad del aire: Buena', en:'Air quality: Good', de:'Luftqualität: Gut', fr:"Qualité de l'air : Bonne", pt:'Qualidade do ar: Boa', it:"Qualità dell'aria: Buona", zh:'空气质量：优', ca:"Qualitat de l'aire: Bona", eu:'Airearen kalitatea: Ona', gl:'Calidade do aire: Boa', ar:'جودة الهواء: جيدة', ru:'Качество воздуха: Хорошее', ja:'大気質：良好', ko:'공기질: 좋음', nl:'Luchtkwaliteit: Goed', pl:'Jakość powietrza: Dobra', hi:'वायु गुणवत्ता: अच्छी', ro:'Calitatea aerului: Bună', hu:'Levegőminőség: Jó' } },
     { max: 100, texto: { es:'Calidad del aire: Moderada', en:'Air quality: Moderate', de:'Luftqualität: Mäßig', fr:"Qualité de l'air : Modérée", pt:'Qualidade do ar: Moderada', it:"Qualità dell'aria: Moderata", zh:'空气质量：中等', ca:"Qualitat de l'aire: Moderada", eu:'Airearen kalitatea: Moderatua', gl:'Calidade do aire: Moderada', ar:'جودة الهواء: معتدلة', ru:'Качество воздуха: Умеренное', ja:'大気質：普通', ko:'공기질: 보통', nl:'Luchtkwaliteit: Matig', pl:'Jakość powietrza: Umiarkowana', hi:'वायु गुणवत्ता: मध्यम', ro:'Calitatea aerului: Moderată', hu:'Levegőminőség: Mérsékelt' } },
-    { max: 150, texto: { es:'Calidad del aire: Dañina para grupos sensibles', en:'Air quality: Unhealthy for sensitive groups', de:'Luftqualität: Ungesund für Empfindliche', fr:"Qualité de l'air : Mauvaise pour groupes sensibles", pt:'Qualidade do ar: Prejudicial para grupos sensíveis', it:"Qualità dell'aria: Dannosa per gruppi sensibili", zh:'空气质量：对敏感人群不健康', ca:"Qualitat de l'aire: Dolenta per a grups sensibles", eu:'Airearen kalitatea: Talde sentikorrentzako kaltegarria', gl:'Calidade do aire: Prexudicial para grupos sensibles', ar:'جودة الهواء: ضارة للمجموعات الحساسة', ru:'Качество воздуха: Вредно для чувствительных групп', ja:'大気質：敏感な方に有害', ko:'공기질: 민감군에 해로움', nl:'Luchtkwaliteit: Ongezond voor gevoelige groepen', pl:'Jakość powietrza: Szkodliwa dla wrażliwych', hi:'वायु गुणवत्ता: संवेदनशील समूहों के लिए हानिकारक', ro:'Calitatea aerului: Dăunătoare pentru grupuri sensibile', hu:'Levegőminőség: Érzékeny csoportoknak egészségtelen' } },
+    { max: 150, textoCorto: { es:'Grupos sensibles', en:'Sensitive groups', de:'Empfindliche', fr:'Groupes sensibles', pt:'Grupos sensíveis', it:'Gruppi sensibili', zh:'敏感人群', ca:'Grups sensibles', eu:'Talde sentikorrak', gl:'Grupos sensibles', ar:'مجموعات حساسة', ru:'Чувствит. группы', ja:'敏感なグループ', ko:'민감군', nl:'Gevoelige groepen', pl:'Wrażliwe grupy', hi:'संवेदनशील समूह', ro:'Grupuri sensibile', hu:'Érzékeny csoportok' }, texto: { es:'Calidad del aire: Dañina para grupos sensibles', en:'Air quality: Unhealthy for sensitive groups', de:'Luftqualität: Ungesund für Empfindliche', fr:"Qualité de l'air : Mauvaise pour groupes sensibles", pt:'Qualidade do ar: Prejudicial para grupos sensíveis', it:"Qualità dell'aria: Dannosa per gruppi sensibili", zh:'空气质量：对敏感人群不健康', ca:"Qualitat de l'aire: Dolenta per a grups sensibles", eu:'Airearen kalitatea: Talde sentikorrentzako kaltegarria', gl:'Calidade do aire: Prexudicial para grupos sensibles', ar:'جودة الهواء: ضارة للمجموعات الحساسة', ru:'Качество воздуха: Вредно для чувствительных групп', ja:'大気質：敏感な方に有害', ko:'공기질: 민감군에 해로움', nl:'Luchtkwaliteit: Ongezond voor gevoelige groepen', pl:'Jakość powietrza: Szkodliwa dla wrażliwych', hi:'वायु गुणवत्ता: संवेदनशील समूहों के लिए हानिकारक', ro:'Calitatea aerului: Dăunătoare pentru grupuri sensibile', hu:'Levegőminőség: Érzékeny csoportoknak egészségtelen' } },
     { max: 200, texto: { es:'Calidad del aire: Dañina', en:'Air quality: Unhealthy', de:'Luftqualität: Ungesund', fr:"Qualité de l'air : Mauvaise", pt:'Qualidade do ar: Prejudicial', it:"Qualità dell'aria: Dannosa", zh:'空气质量：不健康', ca:"Qualitat de l'aire: Dolenta", eu:'Airearen kalitatea: Kaltegarria', gl:'Calidade do aire: Prexudicial', ar:'جودة الهواء: ضارة', ru:'Качество воздуха: Вредное', ja:'大気質：不健康', ko:'공기질: 해로움', nl:'Luchtkwaliteit: Ongezond', pl:'Jakość powietrza: Szkodliwa', hi:'वायु गुणवत्ता: हानिकारक', ro:'Calitatea aerului: Dăunătoare', hu:'Levegőminőség: Egészségtelen' } },
     { max: 300, texto: { es:'Calidad del aire: Muy dañina', en:'Air quality: Very unhealthy', de:'Luftqualität: Sehr ungesund', fr:"Qualité de l'air : Très mauvaise", pt:'Qualidade do ar: Muito prejudicial', it:"Qualità dell'aria: Molto dannosa", zh:'空气质量：非常不健康', ca:"Qualitat de l'aire: Molt dolenta", eu:'Airearen kalitatea: Oso kaltegarria', gl:'Calidade do aire: Moi prexudicial', ar:'جودة الهواء: سيئة جداً', ru:'Качество воздуха: Очень вредное', ja:'大気質：非常に不健康', ko:'공기질: 매우 해로움', nl:'Luchtkwaliteit: Zeer ongezond', pl:'Jakość powietrza: Bardzo szkodliwa', hi:'वायु गुणवत्ता: बहुत हानिकारक', ro:'Calitatea aerului: Foarte dăunătoare', hu:'Levegőminőség: Nagyon egészségtelen' } },
     { max: 999, texto: { es:'Calidad del aire: Peligrosa', en:'Air quality: Hazardous', de:'Luftqualität: Gefährlich', fr:"Qualité de l'air : Dangereuse", pt:'Qualidade do ar: Perigosa', it:"Qualità dell'aria: Pericolosa", zh:'空气质量：危险', ca:"Qualitat de l'aire: Perillosa", eu:'Airearen kalitatea: Arriskutsua', gl:'Calidade do aire: Perigosa', ar:'جودة الهواء: خطرة', ru:'Качество воздуха: Опасное', ja:'大気質：危険', ko:'공기질: 위험', nl:'Luchtkwaliteit: Gevaarlijk', pl:'Jakość powietrza: Niebezpieczna', hi:'वायु गुणवत्ता: खतरनाक', ro:'Calitatea aerului: Periculoasă', hu:'Levegőminőség: Veszélyes' } },
@@ -3402,7 +3403,8 @@ async function obtenerCalidadAire(lat, lon) {
 
   const niveles = tipo === 'eu' ? nivelesEU : nivelesUS;
   const nivel = niveles.find(n => aqi <= n.max) || niveles[niveles.length - 1];
-  return { texto: nivel.texto[idioma] || nivel.texto['en'], aqi, nivelTexto: nivel.texto, tipo };
+  const textoCorto = nivel.textoCorto ? (nivel.textoCorto[idioma] || nivel.textoCorto['en']) : null;
+  return { texto: nivel.texto[idioma] || nivel.texto['en'], textoCorto, aqi, nivelTexto: nivel.texto, tipo };
 }
 
 function renderDatos(datos) {
