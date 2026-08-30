@@ -651,8 +651,7 @@
     </div>
     <div>
       <div class="mvs-label" style="margin-bottom:8px" id="mlLblGrafico">Próximas 24h</div>
-      <div id="mlGrafico" style="display:flex;align-items:flex-end;gap:3px;height:56px;overflow:hidden"></div>
-      <div id="mlGraficoHoras" style="display:flex;gap:3px;margin-top:3px;overflow:hidden"></div>
+      <div id="mlGrafico" style="display:flex;align-items:stretch;gap:2px;overflow:hidden"></div>
     </div>
   </div>
 </div>
@@ -2887,24 +2886,37 @@ function abrirModalLluvia() {
   graf.innerHTML = '';
   grafHoras.innerHTML = '';
   const horas = proximas24.slice(0, 24);
-  const maxProb = Math.max(...horas.map(h => h.chance_of_rain ?? 0), 1);
+  graf.innerHTML = '';
   horas.forEach((h, i) => {
     const prob = h.chance_of_rain ?? 0;
-    const altura = Math.max(3, Math.round((prob / 100) * 52));
-    const color = prob >= 70 ? '#4A9EFF' : prob >= 40 ? 'rgba(74,158,255,0.55)' : 'rgba(255,255,255,0.15)';
-    const bar = document.createElement('div');
-    bar.style.cssText = `flex:1;height:${altura}px;background:${color};border-radius:3px 3px 0 0;min-width:0;align-self:flex-end`;
-    graf.appendChild(bar);
     const hh = new Date(h.time_epoch * 1000).getHours();
+    const altura = Math.max(2, Math.round((prob / 100) * 44));
+    const color = prob >= 70 ? '#4A9EFF' : prob >= 40 ? 'rgba(74,158,255,0.55)' : 'rgba(255,255,255,0.13)';
+
+    const col = document.createElement('div');
+    col.style.cssText = 'flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:2px';
+
+    // Zona de barra (altura fija 44px, barra pegada abajo)
+    const barWrap = document.createElement('div');
+    barWrap.style.cssText = 'width:100%;height:44px;display:flex;align-items:flex-end';
+    const bar = document.createElement('div');
+    bar.style.cssText = `width:100%;height:${altura}px;background:${color};border-radius:2px 2px 0 0`;
+    barWrap.appendChild(bar);
+    col.appendChild(barWrap);
+
+    // % debajo
+    const pct = document.createElement('div');
+    pct.style.cssText = 'font-size:0.5rem;opacity:' + (prob >= 40 ? '0.9' : '0.4') + ';font-weight:' + (prob >= 40 ? '600' : '400');
+    pct.textContent = prob + '%';
+    col.appendChild(pct);
+
+    // Hora (solo cada 6h)
     const horaLbl = document.createElement('div');
-    horaLbl.style.cssText = 'flex:1;text-align:center;font-size:0.55rem;opacity:0.45;min-width:0';
+    horaLbl.style.cssText = 'font-size:0.48rem;opacity:0.35;margin-top:1px';
     horaLbl.textContent = hh % 6 === 0 ? hh + 'h' : '';
-    grafHoras.appendChild(horaLbl);
-  });
-  // Tooltip: mostrar % al pulsar barra
-  graf.querySelectorAll('div').forEach((bar, i) => {
-    const prob = horas[i]?.chance_of_rain ?? 0;
-    if (prob > 0) bar.title = prob + '%';
+    col.appendChild(horaLbl);
+
+    graf.appendChild(col);
   });
 
   document.getElementById('modalLluvia').hidden = false;
