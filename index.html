@@ -168,6 +168,35 @@
   .interior-valor { font-size: 1.6rem; font-weight: 700; line-height: 1; }
   #intSol { font-size: 1.1rem; }
   .interior-label { font-size: 0.6rem; opacity: 0.55; text-transform: uppercase; letter-spacing: 0.08em; text-align: center; }
+  /* ── Cards grid 2×2 ── */
+  .cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 10px; }
+  .card { background: rgba(255,255,255,0.08); border-radius: 13px; padding: 9px 11px 8px; display: flex; flex-direction: column; gap: 3px; }
+  .card-label { font-size: 0.56rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.5; }
+  .card-value { font-size: 1.15rem; font-weight: 600; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .card-viento { flex-direction: row; align-items: center; gap: 8px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .card-viento:active { opacity: 0.7; }
+  .card-left { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0; }
+  .card-sub { font-size: 0.63rem; opacity: 0.55; }
+  .arrow-wrap { flex-shrink: 0; width: 32px; height: 32px; }
+  .arrow-wrap svg { width: 32px; height: 32px; transition: transform 0.5s ease; }
+  /* ── Modal viento ── */
+  #modalViento { position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(8px); display: flex; align-items: flex-end; justify-content: center; z-index: 200; }
+  #modalViento[hidden] { display: none; }
+  .modal-viento-sheet { width: 100%; max-width: 440px; background: #1a2240; border-radius: 24px 24px 0 0; padding: 16px 20px 44px; display: flex; flex-direction: column; gap: 14px; }
+  .modal-viento-titulo { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.45; text-align: center; }
+  .modal-compass { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .compass-ring { width: 100px; height: 100px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.04); position: relative; display: flex; align-items: center; justify-content: center; }
+  .compass-ring svg { width: 56px; height: 56px; transition: transform 0.5s ease; }
+  .compass-n,.compass-s,.compass-e,.compass-o { position: absolute; font-size: 0.6rem; font-weight: 600; opacity: 0.45; }
+  .compass-n { top: 5px; left: 50%; transform: translateX(-50%); opacity: 0.85; }
+  .compass-s { bottom: 5px; left: 50%; transform: translateX(-50%); }
+  .compass-e { right: 6px; top: 50%; transform: translateY(-50%); }
+  .compass-o { left: 6px; top: 50%; transform: translateY(-50%); }
+  .compass-dir-text { font-size: 1rem; font-weight: 600; letter-spacing: 0.04em; }
+  .modal-viento-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+  .modal-viento-stat { background: rgba(255,255,255,0.06); border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 3px; }
+  .mvs-label { font-size: 0.56rem; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.45; }
+  .mvs-value { font-size: 1.05rem; font-weight: 600; font-variant-numeric: tabular-nums; }
   .panel-titulo {
     font-size: 0.72rem; opacity: 0.65;
     text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px;
@@ -491,14 +520,36 @@
       </div>
     </div>
     <div class="desc" id="desc"></div>
-    <div class="lluvia" id="lluvia"></div>
-    <div class="detalles">
-      <span id="sensacion"></span>
-      <span id="viento"></span>
-      <span id="humedad"></span>
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-label" id="cLblLluvia">🌧 Lluvia</div>
+        <div class="card-value" id="lluvia">--</div>
+      </div>
+      <div class="card">
+        <div class="card-label" id="cLblSensacion">Sensación</div>
+        <div class="card-value" id="sensacion">--</div>
+      </div>
+      <div class="card card-viento" id="cardVientoBtn" role="button" tabindex="0">
+        <div class="card-left">
+          <div class="card-label" id="cLblViento">Viento</div>
+          <div class="card-value" id="viento">--</div>
+          <div class="card-sub" id="vientoDir"></div>
+        </div>
+        <div class="arrow-wrap">
+          <svg id="vientoFlecha" viewBox="0 0 34 34" fill="none">
+            <circle cx="17" cy="17" r="15" stroke="rgba(255,255,255,0.1)" stroke-width="1.2"/>
+            <path d="M17 5 L21 21 L17 18 L13 21 Z" fill="#4A9EFF" opacity="0.9"/>
+            <path d="M17 29 L13 13 L17 16 L21 13 Z" fill="rgba(255,255,255,0.18)"/>
+          </svg>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-label" id="cLblHumedad">Humedad</div>
+        <div class="card-value" id="humedad">--</div>
+      </div>
     </div>
-    <div class="aire" id="aire"></div>
-    <div class="aire" id="aireExtra" hidden></div>
+    <div id="aire" hidden></div>
+    <div id="aireExtra" hidden></div>
     <div class="panel panel-interior" id="panelInterior" hidden>
       <div class="interior-item">
         <div class="interior-valor" id="intUV">--</div>
@@ -559,6 +610,44 @@
       <div id="radarTimeLabel">—</div>
       <input id="radarSlider" type="range" min="0" value="0" step="1">
       <button id="radarPlayBtn">▶</button>
+    </div>
+  </div>
+</div>
+<!-- Modal viento -->
+<div id="modalViento" hidden>
+  <div class="modal-viento-sheet">
+    <div class="modal-handle" style="width:36px;height:4px;background:rgba(255,255,255,0.2);border-radius:2px;margin:0 auto 4px;"></div>
+    <div class="modal-viento-titulo" id="modalVientoTitulo">Viento</div>
+    <div class="modal-compass">
+      <div class="compass-ring">
+        <span class="compass-n">N</span>
+        <span class="compass-s">S</span>
+        <span class="compass-e">E</span>
+        <span class="compass-o">O</span>
+        <svg id="modalVientoFlecha" viewBox="0 0 56 56" fill="none">
+          <path d="M28 6 L33 36 L28 30 L23 36 Z" fill="#4A9EFF" opacity="0.9"/>
+          <path d="M28 50 L23 20 L28 26 L33 20 Z" fill="rgba(255,255,255,0.18)"/>
+        </svg>
+      </div>
+      <div class="compass-dir-text" id="modalVientoDirText">--</div>
+    </div>
+    <div class="modal-viento-stats">
+      <div class="modal-viento-stat">
+        <div class="mvs-label" id="mvLblVel">Velocidad</div>
+        <div class="mvs-value" id="mvVel">--</div>
+      </div>
+      <div class="modal-viento-stat">
+        <div class="mvs-label" id="mvLblRafagas">Ráfagas</div>
+        <div class="mvs-value" id="mvRafagas">--</div>
+      </div>
+      <div class="modal-viento-stat">
+        <div class="mvs-label" id="mvLblDir">Dirección</div>
+        <div class="mvs-value" id="mvDir">--</div>
+      </div>
+      <div class="modal-viento-stat">
+        <div class="mvs-label">Beaufort</div>
+        <div class="mvs-value" id="mvBeaufort">--</div>
+      </div>
     </div>
   </div>
 </div>
@@ -1430,6 +1519,23 @@ function dirViento(deg) {
   const dirs = ['N','NE','E','SE','S','SO','O','NO'];
   return dirs[Math.round(deg / 45) % 8];
 }
+function beaufort(kmh) {
+  if (kmh < 1) return 0; if (kmh < 6) return 1; if (kmh < 12) return 2;
+  if (kmh < 20) return 3; if (kmh < 29) return 4; if (kmh < 39) return 5;
+  if (kmh < 50) return 6; if (kmh < 62) return 7; if (kmh < 75) return 8;
+  if (kmh < 89) return 9; if (kmh < 103) return 10; if (kmh < 118) return 11;
+  return 12;
+}
+function getCardLabel(key) {
+  const L = {
+    lluvia: {es:'🌧 Lluvia',en:'🌧 Rain',de:'🌧 Regen',fr:'🌧 Pluie',pt:'🌧 Chuva',it:'🌧 Pioggia',zh:'🌧 降雨',ca:'🌧 Pluja',eu:'🌧 Euria',gl:'🌧 Choiva',ar:'🌧 مطر',ru:'🌧 Дождь',ja:'🌧 雨',ko:'🌧 비',nl:'🌧 Regen',pl:'🌧 Deszcz',hi:'🌧 बारिश',ro:'🌧 Ploaie',hu:'🌧 Eső'},
+    viento: {es:'Viento',en:'Wind',de:'Wind',fr:'Vent',pt:'Vento',it:'Vento',zh:'风',ca:'Vent',eu:'Haizea',gl:'Vento',ar:'الرياح',ru:'Ветер',ja:'風',ko:'바람',nl:'Wind',pl:'Wiatr',hi:'हवा',ro:'Vânt',hu:'Szél'},
+    humedad: {es:'Humedad',en:'Humidity',de:'Feuchte',fr:'Humidité',pt:'Umidade',it:'Umidità',zh:'湿度',ca:'Humitat',eu:'Hezetasuna',gl:'Humidade',ar:'الرطوبة',ru:'Влажность',ja:'湿度',ko:'습도',nl:'Vochtigheid',pl:'Wilgotność',hi:'आर्द्रता',ro:'Umiditate',hu:'Páratartalom'},
+    rafagas: {es:'Ráfagas',en:'Gusts',de:'Böen',fr:'Rafales',pt:'Rajadas',it:'Raffiche',zh:'阵风',ca:'Ratxes',eu:'Bolak',gl:'Vendavais',ar:'هبوب',ru:'Порывы',ja:'突風',ko:'돌풍',nl:'Windstoten',pl:'Porywy',hi:'झोंके',ro:'Rafale',hu:'Lökések'},
+    dir: {es:'Dirección',en:'Direction',de:'Richtung',fr:'Direction',pt:'Direção',it:'Direzione',zh:'方向',ca:'Direcció',eu:'Norabidea',gl:'Dirección',ar:'الاتجاه',ru:'Направление',ja:'方向',ko:'방향',nl:'Richting',pl:'Kierunek',hi:'दिशा',ro:'Direcție',hu:'Irány'},
+  };
+  return (L[key]||{})[idioma] || (L[key]||{})['en'] || key;
+}
 const NOMBRES_IDIOMA = {
   es:'Español', en:'English', de:'Deutsch', fr:'Français', pt:'Português',
   it:'Italiano', zh:'中文', ca:'Català', eu:'Euskara', gl:'Galego',
@@ -2105,7 +2211,7 @@ async function obtenerTiempoNWS(lat, lon) {
 async function obtenerTiempo(lat, lon) {
   // ICON seamless: mejor nubosidad local. UV se pide aparte (ICON no lo incluye).
   const [r, rUv] = await Promise.all([
-    fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,is_day,cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high,precipitation&hourly=temperature_2m,precipitation_probability,weather_code,is_day&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max,wind_speed_10m_max,wind_direction_10m_dominant,precipitation_sum&forecast_days=7&timezone=auto&minutely_15=weather_code,is_day&models=icon_seamless`),
+    fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,is_day,cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high,precipitation&hourly=temperature_2m,precipitation_probability,weather_code,is_day&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max,wind_speed_10m_max,wind_direction_10m_dominant,precipitation_sum&forecast_days=7&timezone=auto&minutely_15=weather_code,is_day&models=icon_seamless`),
     fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=uv_index&daily=uv_index_max&forecast_days=7&timezone=auto`)
   ]);
   if (!r.ok) throw new Error('Error al consultar el tiempo');
@@ -2602,6 +2708,12 @@ function cerrarModalInterior() {
 document.getElementById('modalInterior').addEventListener('click', (e) => {
   if (e.target === document.getElementById('modalInterior')) cerrarModalInterior();
 });
+document.getElementById('cardVientoBtn').addEventListener('click', () => {
+  document.getElementById('modalViento').hidden = false;
+});
+document.getElementById('modalViento').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('modalViento')) document.getElementById('modalViento').hidden = true;
+});
 
 async function obtenerMarea(lat, lon) {
   const url = `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&hourly=sea_level_height_msl,sea_surface_temperature,wave_height&forecast_days=2&timezone=auto`;
@@ -2809,11 +2921,11 @@ function renderPanelInterior(uvIndex, aireData, sunsetStr, tieneMarea, utcOffset
   const aireEl = document.getElementById('intAire');
   const aireLabelEl = document.getElementById('intAireLabel');
   if (aireData) {
-    aireEl.textContent = aireData.aqi;
-    const aqi = aireData.aqi;
+    aireEl.textContent = aireData.nivelTexto ? (aireData.nivelTexto[idioma] || aireData.nivelTexto['en']) : '--';
+    aireEl.style.fontSize = '0.9rem';
   } else {
     aireEl.textContent = '--';
-    aireEl.style.color = '';
+    aireEl.style.fontSize = '';
   }
   aireLabelEl.textContent = T.calidadAire || 'Air quality';
 
@@ -2884,7 +2996,6 @@ function renderDatos(datos) {
   }
   // Guardar el código ya validado para que el modal de hoy lo use
   datos.weatherCodeValidado = weatherCode;
-  const elLluvia = document.getElementById('lluvia');
   // Probabilidad lluvia: WeatherAPI hora actual > Open-Meteo
   let probLluviaActual = null;
   const ahoraEpoch = Date.now() / 1000;
@@ -2901,7 +3012,35 @@ function renderDatos(datos) {
       probLluviaActual = idx >= 0 ? hourly.precipitation_probability[idx] : null;
     }
   }
-  elLluvia.textContent = probLluviaActual !== null ? `🌧 ${T.probLluvia || 'Rain probability next hour'}: ${probLluviaActual}%` : '';
+  // Viento: WeatherAPI como fuente principal, OM como fallback
+  const windSpeedKmh = wapiData?.current?.wind_kph ?? c.wind_speed_10m;
+  const windDeg = wapiData?.current?.wind_degree ?? c.wind_direction_10m ?? null;
+  const windDirStr = wapiData?.current?.wind_dir ?? (windDeg !== null ? dirViento(windDeg) : '');
+  const gustKmh = wapiData?.current?.gust_kph ?? c.wind_gusts_10m ?? null;
+  // Actualizar labels de tarjetas según idioma
+  document.getElementById('cLblLluvia').textContent = getCardLabel('lluvia');
+  document.getElementById('cLblSensacion').textContent = T.sensacion || 'Sensación';
+  document.getElementById('cLblViento').textContent = getCardLabel('viento');
+  document.getElementById('cLblHumedad').textContent = getCardLabel('humedad');
+  // Valores de tarjetas
+  document.getElementById('lluvia').textContent = probLluviaActual !== null ? probLluviaActual + '%' : '--';
+  elSensacion.textContent = toTemp(sensacionActual);
+  elViento.textContent = toViento(windSpeedKmh);
+  elHumedad.textContent = c.relative_humidity_2m + '%';
+  // Tarjeta viento: dirección y flecha
+  document.getElementById('vientoDir').textContent = windDirStr;
+  if (windDeg !== null) document.getElementById('vientoFlecha').style.transform = `rotate(${windDeg}deg)`;
+  // Modal viento: rellenar datos
+  document.getElementById('modalVientoTitulo').textContent = T.diaViento || 'Viento';
+  document.getElementById('modalVientoDirText').textContent = windDirStr + (windDeg !== null ? ' · ' + Math.round(windDeg) + '°' : '');
+  if (windDeg !== null) document.getElementById('modalVientoFlecha').style.transform = `rotate(${windDeg}deg)`;
+  document.getElementById('mvLblVel').textContent = T.ajustesVel || 'Velocidad';
+  document.getElementById('mvVel').textContent = toViento(windSpeedKmh);
+  document.getElementById('mvLblRafagas').textContent = getCardLabel('rafagas');
+  document.getElementById('mvRafagas').textContent = gustKmh !== null ? toViento(gustKmh) : '--';
+  document.getElementById('mvLblDir').textContent = getCardLabel('dir');
+  document.getElementById('mvDir').textContent = windDirStr || '--';
+  document.getElementById('mvBeaufort').textContent = beaufort(windSpeedKmh);
   // Previsión horaria: WeatherAPI > AEMET > Open-Meteo
   if (wapiData?.forecast?.forecastday) renderHorasWAPI(wapiData);
   else if (aemetHoras && aemetHoras.length) renderHorasAEMET(aemetHoras);
@@ -2917,12 +3056,8 @@ function renderDatos(datos) {
   if (max0 !== null && min0 !== null) {
     elMinMax.innerHTML = `<span class="tmx">${toTemp(max0)}</span><span class="tmn">${toTemp(min0)}</span>`;
   }
-  elSensacion.textContent = T.sensacion + ' ' + toTemp(sensacionActual);
-  elViento.textContent = toViento(c.wind_speed_10m);
-  elHumedad.textContent = c.relative_humidity_2m + T.humedad;
   const alt = elevacion && elevacion.elevation && elevacion.elevation[0];
   elAltitud.textContent = alt !== null && alt !== undefined ? (usaMph ? `${T.altitud} ${Math.round(alt * 3.28084)} ft` : `${T.altitud} ${Math.round(alt)} m`) : '';
-  document.getElementById('aire').textContent = aireData ? (aireData.nivelTexto ? (aireData.nivelTexto[idioma] || aireData.nivelTexto['en']) : aireData.texto) : '';
   animarSwipeEntrada();
 }
 
