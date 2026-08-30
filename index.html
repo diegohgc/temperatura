@@ -166,7 +166,6 @@
   .interior-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; flex: 1;
     background: rgba(255,255,255,0.07); border-radius: 16px; padding: 14px 8px; }
   .interior-valor { font-size: 1.6rem; font-weight: 700; line-height: 1; }
-  #viento { font-size: 1.1rem; }
   .interior-label { font-size: 0.56rem; opacity: 0.5; text-transform: uppercase; letter-spacing: 0.1em; text-align: center; }
   /* ── Cards grid 2×2 ── */
   .cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 10px; }
@@ -530,18 +529,9 @@
         <div class="card-value" id="sensacion">--</div>
       </div>
       <div class="card card-viento" id="cardVientoBtn" role="button" tabindex="0">
-        <div class="card-left">
-          <div class="card-label" id="cLblViento">Viento</div>
-          <div class="card-value" id="viento">--</div>
-          <div class="card-sub" id="vientoDir"></div>
-        </div>
-        <div class="arrow-wrap">
-          <svg id="vientoFlecha" viewBox="0 0 34 34" fill="none">
-            <circle cx="17" cy="17" r="15" stroke="rgba(255,255,255,0.1)" stroke-width="1.2"/>
-            <path d="M17 5 L21 21 L17 18 L13 21 Z" fill="#4A9EFF" opacity="0.9"/>
-            <path d="M17 29 L13 13 L17 16 L21 13 Z" fill="rgba(255,255,255,0.18)"/>
-          </svg>
-        </div>
+        <div class="card-label" id="cLblViento">Viento</div>
+        <div class="card-value" id="viento">--</div>
+        <div class="card-sub" id="vientoDir"></div>
       </div>
       <div class="card">
         <div class="card-label" id="cLblHumedad">Humedad</div>
@@ -1518,6 +1508,32 @@ function toViento(kmh) {
 function dirViento(deg) {
   const dirs = ['N','NE','E','SE','S','SO','O','NO'];
   return dirs[Math.round(deg / 45) % 8];
+}
+function dirVientoTexto(dirStr, deg) {
+  const idx16 = {N:0,NNE:1,NE:2,ENE:3,E:4,ESE:5,SE:6,SSE:7,S:8,SSW:9,SW:10,WSW:11,W:12,WNW:13,NW:14,NNW:15};
+  const i = (dirStr && idx16[dirStr] !== undefined) ? Math.round(idx16[dirStr] / 2) % 8 : Math.round((deg ?? 0) / 45) % 8;
+  const D = {
+    es:['del Norte','del Nordeste','del Este','del Sudeste','del Sur','del Suroeste','del Oeste','del Noroeste'],
+    en:['from the North','from the Northeast','from the East','from the Southeast','from the South','from the Southwest','from the West','from the Northwest'],
+    de:['aus dem Norden','aus dem Nordosten','aus dem Osten','aus dem Südosten','aus dem Süden','aus dem Südwesten','aus dem Westen','aus dem Nordwesten'],
+    fr:['du Nord','du Nord-Est','de l\'Est','du Sud-Est','du Sud','du Sud-Ouest','de l\'Ouest','du Nord-Ouest'],
+    pt:['do Norte','do Nordeste','do Leste','do Sudeste','do Sul','do Sudoeste','do Oeste','do Noroeste'],
+    it:['dal Nord','dal Nord-Est','dall\'Est','dal Sud-Est','dal Sud','dal Sud-Ovest','dall\'Ovest','dal Nord-Ovest'],
+    zh:['北方','东北方','东方','东南方','南方','西南方','西方','西北方'],
+    ca:['del Nord','del Nord-Est','de l\'Est','del Sud-Est','del Sud','del Sud-Oest','de l\'Oest','del Nord-Oest'],
+    eu:['Iparraldetik','Ipar-Ekialdetik','Ekialdetik','Hego-Ekialdetik','Hegotik','Hego-Mendebaldetik','Mendebaldetik','Ipar-Mendebaldetik'],
+    gl:['do Norte','do Nordeste','do Leste','do Sueste','do Sur','do Suroeste','do Oeste','do Noroeste'],
+    ar:['من الشمال','من الشمال الشرقي','من الشرق','من الجنوب الشرقي','من الجنوب','من الجنوب الغربي','من الغرب','من الشمال الغربي'],
+    ru:['с Севера','с Северо-Востока','с Востока','с Юго-Востока','с Юга','с Юго-Запада','с Запада','с Северо-Запада'],
+    ja:['北から','北東から','東から','南東から','南から','南西から','西から','北西から'],
+    ko:['북쪽에서','북동쪽에서','동쪽에서','남동쪽에서','남쪽에서','남서쪽에서','서쪽에서','북서쪽에서'],
+    nl:['uit het Noorden','uit het Noordoosten','uit het Oosten','uit het Zuidoosten','uit het Zuiden','uit het Zuidwesten','uit het Westen','uit het Noordwesten'],
+    pl:['z Północy','z Północnego Wschodu','ze Wschodu','z Południowego Wschodu','z Południa','z Południowego Zachodu','z Zachodu','z Północnego Zachodu'],
+    hi:['उत्तर से','उत्तर-पूर्व से','पूर्व से','दक्षिण-पूर्व से','दक्षिण से','दक्षिण-पश्चिम से','पश्चिम से','उत्तर-पश्चिम से'],
+    ro:['din Nord','din Nord-Est','din Est','din Sud-Est','din Sud','din Sud-Vest','din Vest','din Nord-Vest'],
+    hu:['Északról','Északkeletről','Keletről','Délkeletről','Délről','Délnyugatról','Nyugatról','Északnyugatról'],
+  };
+  return (D[idioma] || D['en'])[i];
 }
 function beaufort(kmh) {
   if (kmh < 1) return 0; if (kmh < 6) return 1; if (kmh < 12) return 2;
@@ -3026,9 +3042,8 @@ function renderDatos(datos) {
   elSensacion.textContent = toTemp(sensacionActual);
   elViento.textContent = toViento(windSpeedKmh);
   elHumedad.textContent = c.relative_humidity_2m + '%';
-  // Tarjeta viento: dirección y flecha
-  document.getElementById('vientoDir').textContent = windDirStr;
-  if (windDeg !== null) document.getElementById('vientoFlecha').style.transform = `rotate(${windDeg + 180}deg)`;
+  // Tarjeta viento: dirección en texto largo
+  document.getElementById('vientoDir').textContent = dirVientoTexto(windDirStr, windDeg);
   // Modal viento: rellenar datos
   document.getElementById('modalVientoTitulo').textContent = T.diaViento || 'Viento';
   document.getElementById('modalVientoDirText').textContent = windDirStr + (windDeg !== null ? ' · ' + Math.round(windDeg) + '°' : '');
