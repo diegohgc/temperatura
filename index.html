@@ -177,7 +177,7 @@
   .cab-item-btn:active { opacity: 0.7; }
   .cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 10px; }
   .card { background: rgba(255,255,255,0.08); border-radius: 13px; padding: 9px 11px 8px; display: flex; flex-direction: column; gap: 3px; }
-  .card-label { font-size: 0.56rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.5; }
+  .card-label { font-size: 0.56rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .card-value { font-size: 1.6rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
   .card-viento { cursor: pointer; -webkit-tap-highlight-color: transparent; }
   .card-viento:active { opacity: 0.7; }
@@ -650,8 +650,8 @@
       </div>
     </div>
     <div>
-      <div class="mvs-label" style="margin-bottom:8px" id="mlLblGrafico">Próximas 24h</div>
-      <div id="mlGrafico" style="display:flex;align-items:stretch;gap:2px;overflow:hidden"></div>
+      <div class="mvs-label" style="margin-bottom:8px" id="mlLblGrafico">Lluvia prevista</div>
+      <div id="mlVentanas" style="display:flex;flex-direction:column;gap:6px"></div>
     </div>
   </div>
 </div>
@@ -1640,7 +1640,7 @@ function beaufort(kmh) {
 }
 function getCardLabel(key) {
   const L = {
-    lluvia: {es:'🌧 Lluvia',en:'🌧 Rain',de:'🌧 Regen',fr:'🌧 Pluie',pt:'🌧 Chuva',it:'🌧 Pioggia',zh:'🌧 降雨',ca:'🌧 Pluja',eu:'🌧 Euria',gl:'🌧 Choiva',ar:'🌧 مطر',ru:'🌧 Дождь',ja:'🌧 雨',ko:'🌧 비',nl:'🌧 Regen',pl:'🌧 Deszcz',hi:'🌧 बारिश',ro:'🌧 Ploaie',hu:'🌧 Eső'},
+    lluvia: {es:'🌧 Prob. lluvia',en:'🌧 Rain prob.',de:'🌧 Regenrisiko',fr:'🌧 Prob. pluie',pt:'🌧 Prob. chuva',it:'🌧 Prob. pioggia',zh:'🌧 降雨概率',ca:'🌧 Prob. pluja',eu:'🌧 Euriaren prob.',gl:'🌧 Prob. choiva',ar:'🌧 احتمال المطر',ru:'🌧 Веро. дождя',ja:'🌧 降水確率',ko:'🌧 강수 확률',nl:'🌧 Regenkans',pl:'🌧 Prob. deszczu',hi:'🌧 वर्षा संभाव.',ro:'🌧 Prob. ploaie',hu:'🌧 Esővalószínűség'},
     viento: {es:'Viento',en:'Wind',de:'Wind',fr:'Vent',pt:'Vento',it:'Vento',zh:'风',ca:'Vent',eu:'Haizea',gl:'Vento',ar:'الرياح',ru:'Ветер',ja:'風',ko:'바람',nl:'Wind',pl:'Wiatr',hi:'हवा',ro:'Vânt',hu:'Szél'},
     humedad: {es:'Humedad',en:'Humidity',de:'Feuchte',fr:'Humidité',pt:'Umidade',it:'Umidità',zh:'湿度',ca:'Humitat',eu:'Hezetasuna',gl:'Humidade',ar:'الرطوبة',ru:'Влажность',ja:'湿度',ko:'습도',nl:'Vochtigheid',pl:'Wilgotność',hi:'आर्द्रता',ro:'Umiditate',hu:'Páratartalom'},
     rafagas: {es:'Ráfagas',en:'Gusts',de:'Böen',fr:'Rafales',pt:'Rajadas',it:'Raffiche',zh:'阵风',ca:'Ratxes',eu:'Bolak',gl:'Vendavais',ar:'هبوب',ru:'Порывы',ja:'突風',ko:'돌풍',nl:'Windstoten',pl:'Porywy',hi:'झोंके',ro:'Rafale',hu:'Lökések'},
@@ -2838,10 +2838,12 @@ function abrirModalLluvia() {
   if (!wapiData?.forecast?.forecastday) return;
   const STR = {
     titulo:   { es:'Probabilidad de lluvia', en:'Rain probability', de:'Regenwahrscheinlichkeit', fr:'Probabilité de pluie', pt:'Probabilidade de chuva', it:'Probabilità di pioggia', zh:'降雨概率', ca:'Probabilitat de pluja', eu:'Euri-probabilitatea', gl:'Probabilidade de choiva', ar:'احتمالية الأمطار', ru:'Вероятность дождя', ja:'降水確率', ko:'강수 확률', nl:'Regenkans', pl:'Prawdopodobieństwo deszczu', hi:'वर्षा की संभावना', ro:'Probabilitate de ploaie', hu:'Esővalószínűség' },
-    probLbl:  { es:'Probabilidad', en:'Probability', de:'Wahrscheinlichkeit', fr:'Probabilité', pt:'Probabilidade', it:'Probabilità', zh:'概率', ca:'Probabilitat', eu:'Probabilitatea', gl:'Probabilidade', ar:'الاحتمالية', ru:'Вероятность', ja:'確率', ko:'확률', nl:'Kans', pl:'Prawdopodobieństwo', hi:'संभावना', ro:'Probabilitate', hu:'Valószínűség' },
+    probLbl:  { es:'Próxima hora', en:'Next hour', de:'Nächste Stunde', fr:'Prochaine heure', pt:'Próxima hora', it:'Prossima ora', zh:'下一小时', ca:'Propera hora', eu:'Hurrengo ordua', gl:'Próxima hora', ar:'الساعة القادمة', ru:'Следующий час', ja:'次の1時間', ko:'다음 시간', nl:'Komend uur', pl:'Następna godzina', hi:'अगला घंटा', ro:'Ora următoare', hu:'Következő óra' },
     acum:     { es:'Hoy desde las 0h', en:'Since midnight', de:'Seit Mitternacht', fr:'Depuis minuit', pt:'Desde meia-noite', it:'Dalla mezzanotte', zh:'自零时起', ca:'Des de les 0h', eu:'Gauerdietatik', gl:'Desde as 0h', ar:'منذ منتصف الليل', ru:'С полуночи', ja:'0時から', ko:'자정 이후', nl:'Sinds middernacht', pl:'Od północy', hi:'आधी रात से', ro:'De la miezul nopții', hu:'Éjféltől' },
     proxima:  { es:'Próxima lluvia', en:'Next rain', de:'Nächster Regen', fr:'Prochaine pluie', pt:'Próxima chuva', it:'Prossima pioggia', zh:'下次降雨', ca:'Propera pluja', eu:'Hurrengo euria', gl:'Próxima choiva', ar:'المطر القادم', ru:'Следующий дождь', ja:'次の雨', ko:'다음 비', nl:'Volgende regen', pl:'Następny deszcz', hi:'अगली बारिश', ro:'Următoarea ploaie', hu:'Következő eső' },
-    prox24:   { es:'Próximas 24h', en:'Next 24h', de:'Nächste 24h', fr:'Prochaines 24h', pt:'Próximas 24h', it:'Prossime 24h', zh:'未来24小时', ca:'Pròximes 24h', eu:'Hurrengo 24h', gl:'Próximas 24h', ar:'الـ24 ساعة القادمة', ru:'Следующие 24ч', ja:'今後24時間', ko:'향후 24시간', nl:'Komende 24u', pl:'Następne 24h', hi:'अगले 24 घंटे', ro:'Următoarele 24h', hu:'Következő 24ó' },
+    prox24:   { es:'Lluvia prevista', en:'Upcoming rain', de:'Regen erwartet', fr:'Pluie prévue', pt:'Chuva prevista', it:'Pioggia prevista', zh:'预计降雨', ca:'Pluja prevista', eu:'Itxarondako euria', gl:'Choiva prevista', ar:'الأمطار المتوقعة', ru:'Ожидаемый дождь', ja:'予想される雨', ko:'예상 강수', nl:'Verwachte regen', pl:'Przewidywany deszcz', hi:'अपेक्षित वर्षा', ro:'Ploaie prognozată', hu:'Várható eső' },
+    hoy:      { es:'Hoy', en:'Today', de:'Heute', fr:"Aujourd'hui", pt:'Hoje', it:'Oggi', zh:'今天', ca:'Avui', eu:'Gaur', gl:'Hoxe', ar:'اليوم', ru:'Сегодня', ja:'今日', ko:'오늘', nl:'Vandaag', pl:'Dzisiaj', hi:'आज', ro:'Azi', hu:'Ma' },
+    manana:   { es:'Mañana', en:'Tomorrow', de:'Morgen', fr:'Demain', pt:'Amanhã', it:'Domani', zh:'明天', ca:'Demà', eu:'Bihar', gl:'Mañá', ar:'غداً', ru:'Завтра', ja:'明日', ko:'내일', nl:'Morgen', pl:'Jutro', hi:'कल', ro:'Mâine', hu:'Holnap' },
     noLluvia: { es:'Sin lluvias previstas', en:'No rain expected', de:'Kein Regen erwartet', fr:'Pas de pluie prévue', pt:'Sem chuva prevista', it:'Nessuna pioggia prevista', zh:'无预计降雨', ca:'Sense pluja prevista', eu:'Ez da euririk espero', gl:'Sen choiva prevista', ar:'لا أمطار متوقعة', ru:'Дождей не ожидается', ja:'雨の予報なし', ko:'비 예보 없음', nl:'Geen regen verwacht', pl:'Brak spodziewanego deszczu', hi:'कोई बारिश अपेक्षित नहीं', ro:'Nicio ploaie așteptată', hu:'Nem várható eső' },
   };
   const lang = idioma in STR.titulo ? idioma : 'en';
@@ -2882,41 +2884,53 @@ function abrirModalLluvia() {
   proxEl.classList.toggle('mvs-text', !proxLluvia);
   document.getElementById('mlLblGrafico').textContent = STR.prox24[lang];
 
-  // Gráfico de barras
-  const graf = document.getElementById('mlGrafico');
-  graf.innerHTML = '';
-  const horas = proximas24.slice(0, 24);
-  horas.forEach((h, i) => {
+  // Ventanas de lluvia (franjas consecutivas con prob >= 20%)
+  const mlV = document.getElementById('mlVentanas');
+  mlV.innerHTML = '';
+  const ahoraD = new Date();
+  const mananaEpoch = new Date(ahoraD.getFullYear(), ahoraD.getMonth(), ahoraD.getDate() + 1).getTime() / 1000;
+  const ventanas = [];
+  let win = null;
+  proximas24.forEach(h => {
     const prob = h.chance_of_rain ?? 0;
-    const hh = new Date(h.time_epoch * 1000).getHours();
-    const altura = Math.max(2, Math.round((prob / 100) * 52));
-    const color = prob >= 70 ? '#4A9EFF' : prob >= 40 ? 'rgba(74,158,255,0.6)' : 'rgba(255,255,255,0.13)';
-
-    const col = document.createElement('div');
-    col.style.cssText = 'flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:0';
-
-    // % solo si >= 40% (arriba de la barra)
-    const pct = document.createElement('div');
-    pct.style.cssText = 'font-size:0.52rem;font-weight:600;line-height:1.2;min-height:10px;color:#4A9EFF';
-    pct.textContent = prob >= 40 ? prob + '%' : '';
-    col.appendChild(pct);
-
-    // Zona de barra (altura fija 52px, barra pegada abajo)
-    const barWrap = document.createElement('div');
-    barWrap.style.cssText = 'width:100%;height:52px;display:flex;align-items:flex-end';
-    const bar = document.createElement('div');
-    bar.style.cssText = `width:100%;height:${altura}px;background:${color};border-radius:2px 2px 0 0`;
-    barWrap.appendChild(bar);
-    col.appendChild(barWrap);
-
-    // Hora (solo cada 6h)
-    const horaLbl = document.createElement('div');
-    horaLbl.style.cssText = 'font-size:0.48rem;opacity:0.4;margin-top:2px;min-height:10px';
-    horaLbl.textContent = hh % 6 === 0 ? hh + 'h' : '';
-    col.appendChild(horaLbl);
-
-    graf.appendChild(col);
+    if (prob >= 20) {
+      if (!win) win = { startEpoch: h.time_epoch, endEpoch: h.time_epoch, maxProb: prob };
+      else { win.endEpoch = h.time_epoch; win.maxProb = Math.max(win.maxProb, prob); }
+    } else {
+      if (win) { ventanas.push(win); win = null; }
+    }
   });
+  if (win) ventanas.push(win);
+
+  if (ventanas.length === 0) {
+    const noEl = document.createElement('div');
+    noEl.style.cssText = 'text-align:center;padding:16px 0;opacity:0.4;font-size:0.82rem';
+    noEl.textContent = STR.noLluvia[lang];
+    mlV.appendChild(noEl);
+  } else {
+    ventanas.forEach(v => {
+      const dStart = new Date(v.startEpoch * 1000);
+      const dEnd = new Date(v.endEpoch * 1000);
+      const hStart = dStart.getHours();
+      const hEnd = dEnd.getHours();
+      const esManana = v.startEpoch >= mananaEpoch;
+      const diaStr = esManana ? STR.manana[lang] : STR.hoy[lang];
+      const rangoStr = hStart === hEnd ? `${hStart}h` : `${hStart}h – ${hEnd + 1}h`;
+      const prob = v.maxProb;
+      const color = prob >= 70 ? '#4A9EFF' : prob >= 40 ? 'rgba(74,158,255,0.8)' : 'rgba(255,255,255,0.55)';
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.07);border-radius:9px;padding:9px 13px';
+      const left = document.createElement('div');
+      left.style.cssText = 'line-height:1.35';
+      left.innerHTML = `<div style="font-size:0.65rem;opacity:0.45;text-transform:uppercase;letter-spacing:0.06em">${diaStr}</div><div style="font-size:0.88rem;font-weight:600">${rangoStr}</div>`;
+      const right = document.createElement('div');
+      right.style.cssText = `font-size:1.1rem;font-weight:700;color:${color}`;
+      right.textContent = prob + '%';
+      row.appendChild(left);
+      row.appendChild(right);
+      mlV.appendChild(row);
+    });
+  }
 
   document.getElementById('modalLluvia').hidden = false;
 }
