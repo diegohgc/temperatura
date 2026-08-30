@@ -2791,7 +2791,7 @@ function abrirModalInterior(tipo) {
     titulo = '💨 ' + (T.calidadAire || 'Calidad del aire');
     if (_ultimoAireData) {
       valor = _ultimoAireData.aqi;
-      nivel = _ultimoAireData.texto;
+      nivel = (_ultimoAireData.nivelTexto && (_ultimoAireData.nivelTexto[lang] || _ultimoAireData.nivelTexto['en'])) || _ultimoAireData.texto;
       const esEU = _ultimoAireData.tipo === 'eu';
       const consejos = esEU ? [
         { max: 20,  c: { es:'Aire excelente. Ideal para actividades al aire libre.', en:'Excellent air. Ideal for outdoor activities.', de:'Ausgezeichnete Luft. Ideal für Aktivitäten im Freien.', fr:"Air excellent. Idéal pour les activités en plein air.", pt:'Ar excelente. Ideal para atividades ao ar livre.', it:"Aria eccellente. Ideale per attività all'aperto.", zh:'空气优质，适合户外活动。', ca:"Aire excel·lent. Ideal per a activitats a l'aire lliure.", eu:'Aire bikaina. Kanpoko jardueretarako aproposa.', gl:'Aire excelente. Ideal para actividades ao aire libre.', ar:'هواء ممتاز. مثالي للأنشطة الخارجية.', ru:'Отличный воздух. Идеально для занятий на свежем воздухе.', ja:'非常に良好な空気です。屋外活動に最適です。', ko:'공기가 매우 좋습니다. 야외 활동에 이상적입니다.', nl:'Uitstekende lucht. Ideaal voor buitenactiviteiten.', pl:'Doskonałe powietrze. Idealne do aktywności na świeżym powietrzu.', hi:'उत्कृष्ट वायु। बाहरी गतिविधियों के लिए आदर्श।', ro:'Aer excelent. Ideal pentru activități în aer liber.', hu:'Kiváló levegő. Ideális szabadtéri tevékenységekhez.' } },
@@ -3353,8 +3353,11 @@ function renderPanelInterior(uvIndex, aireData, sunsetStr, tieneMarea, utcOffset
   const aireLabelEl = document.getElementById('intAireLabel');
   if (aireData) {
     const nivelFull = aireData.textoCorto
-      || (aireData.nivelTexto ? (aireData.nivelTexto[idioma] || aireData.nivelTexto['en']) : '--');
-    aireEl.textContent = nivelFull.includes(': ') ? nivelFull.split(': ').pop() : nivelFull;
+      || (aireData.nivelTexto && (aireData.nivelTexto[idioma] || aireData.nivelTexto['en']))
+      || aireData.texto
+      || '--';
+    // Quitar prefijo "Calidad del aire: " / "Air quality: " sea cual sea el separador
+    aireEl.textContent = nivelFull.replace(/^[^:：]+[:：]\s*/, '');
   } else {
     aireEl.textContent = '--';
   }
