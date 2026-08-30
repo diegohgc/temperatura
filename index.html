@@ -163,7 +163,7 @@
   }
   .panel-interior { display: flex; gap: 10px; background: none; padding: 0; box-shadow: none; }
   .panel-interior[hidden] { display: none; }
-  .interior-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; flex: 1;
+  .interior-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; flex: 1; min-width: 0;
     background: rgba(255,255,255,0.07); border-radius: 16px; padding: 14px 8px; }
   .interior-valor { font-size: 1.6rem; font-weight: 700; line-height: 1; white-space: nowrap; }
   .interior-label { font-size: 0.56rem; opacity: 0.5; text-transform: uppercase; letter-spacing: 0.1em; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
@@ -3365,21 +3365,19 @@ function renderPanelInterior(uvIndex, aireData, sunsetStr, tieneMarea, utcOffset
   document.getElementById('intAire').closest('.interior-item').onclick = () => abrirModalInterior('aire');
 
   // Auto-ajuste de tamaño: reduce font-size hasta que el texto quepa
-  requestAnimationFrame(() => {
+  requestAnimationFrame(() => requestAnimationFrame(() => {
     document.querySelectorAll('#panelInterior .interior-valor').forEach(el => {
-      el.style.fontSize = '';
+      el.style.fontSize = '1.6rem';
       const parent = el.closest('.interior-item');
-      if (!parent) return;
+      if (!parent || parent.clientWidth === 0) return;
       const maxW = parent.clientWidth - 16;
-      let iter = 0;
-      while (el.scrollWidth > maxW && iter < 30) {
+      while (el.scrollWidth > maxW) {
         const cur = parseFloat(getComputedStyle(el).fontSize);
         if (cur <= 10) break;
         el.style.fontSize = (cur - 1) + 'px';
-        iter++;
       }
     });
-  });
+  }));
 }
 
 async function obtenerElevacionTerreno(lat, lon) {
