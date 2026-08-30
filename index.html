@@ -184,9 +184,9 @@
   .card-sub { font-size: 0.63rem; opacity: 0.55; }
   .arrow-wrap { flex-shrink: 0; width: 32px; height: 32px; }
   .arrow-wrap svg { width: 32px; height: 32px; transition: transform 0.5s ease; }
-  /* ── Modal viento ── */
-  #modalViento { position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(8px); display: flex; align-items: flex-end; justify-content: center; z-index: 200; }
-  #modalViento[hidden] { display: none; }
+  /* ── Modales bottom-sheet (viento + humedad) ── */
+  #modalViento, #modalHumedad { position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(8px); display: flex; align-items: flex-end; justify-content: center; z-index: 200; }
+  #modalViento[hidden], #modalHumedad[hidden] { display: none; }
   .modal-viento-sheet { width: 100%; max-width: 440px; background: #1a2240; border-radius: 24px 24px 0 0; padding: 16px 20px 44px; display: flex; flex-direction: column; gap: 14px; }
   .modal-viento-titulo { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.45; text-align: center; }
   .modal-compass { display: flex; flex-direction: column; align-items: center; gap: 8px; }
@@ -559,7 +559,7 @@
         <div class="card-value" id="viento">--</div>
         <div class="card-sub" id="vientoDir"></div>
       </div>
-      <div class="card">
+      <div class="card card-viento" id="cardHumedadBtn" role="button" tabindex="0">
         <div class="card-label" id="cLblHumedad">Humedad</div>
         <div class="card-value" id="humedad">--</div>
       </div>
@@ -627,6 +627,28 @@
       <input id="radarSlider" type="range" min="0" value="0" step="1">
       <button id="radarPlayBtn">▶</button>
     </div>
+  </div>
+</div>
+<!-- Modal humedad -->
+<div id="modalHumedad" hidden>
+  <div class="modal-viento-sheet">
+    <div class="modal-handle" style="width:36px;height:4px;background:rgba(255,255,255,0.2);border-radius:2px;margin:0 auto 4px;"></div>
+    <div class="modal-viento-titulo" id="modalHumedadTitulo">Humedad</div>
+    <div style="text-align:center;padding:6px 0 2px">
+      <div style="font-size:3rem;font-weight:700;font-variant-numeric:tabular-nums;line-height:1" id="mhHumVal">--</div>
+      <div style="font-size:0.75rem;opacity:0.5;margin-top:4px;text-transform:uppercase;letter-spacing:0.08em" id="mhBochorno">--</div>
+    </div>
+    <div class="modal-viento-stats">
+      <div class="modal-viento-stat">
+        <div class="mvs-label" id="mhLblRocio">Punto de rocío</div>
+        <div class="mvs-value" id="mhRocio">--</div>
+      </div>
+      <div class="modal-viento-stat">
+        <div class="mvs-label" id="mhLblBochorno">Bochorno</div>
+        <div class="mvs-value" id="mhBochornoVal">--</div>
+      </div>
+    </div>
+    <div style="background:rgba(255,255,255,0.06);border-radius:12px;padding:11px 14px;font-size:0.82rem;opacity:0.75;line-height:1.45" id="mhConsejo"></div>
   </div>
 </div>
 <!-- Modal viento -->
@@ -2653,6 +2675,7 @@ document.getElementById('modalDia').addEventListener('click', (e) => {
 });
 
 let _ultimoUV = null, _ultimoAireData = null, _ultimoSunset = null, _ultimoSunrise = null, _ultimoSunsetLocalHora = null, _ultimoSunriseLocalHora = null, _ultimoIsDay = true;
+let _ultimaTempC = null;
 
 function abrirModalInterior(tipo) {
   const uvNiveles = [
@@ -2756,6 +2779,82 @@ document.getElementById('cardVientoBtn').addEventListener('click', () => {
 });
 document.getElementById('modalViento').addEventListener('click', (e) => {
   if (e.target === document.getElementById('modalViento')) document.getElementById('modalViento').hidden = true;
+});
+
+// ── Modal humedad ──
+function puntoDerociio(tempC, rh) {
+  const a = 17.625, b = 243.04;
+  const lnRH = Math.log(rh / 100);
+  const num = b * (lnRH + a * tempC / (b + tempC));
+  const den = a - lnRH - a * tempC / (b + tempC);
+  return num / den;
+}
+function bochornoTexto(tempC, rh) {
+  const dp = puntoDerociio(tempC, rh);
+  const NIVELES = {
+    es: ['Cómodo','Algo húmedo','Húmedo','Bochornoso','Muy bochornoso'],
+    en: ['Comfortable','Slightly humid','Humid','Muggy','Very muggy'],
+    de: ['Angenehm','Leicht feucht','Feucht','Schwül','Sehr schwül'],
+    fr: ['Confortable','Légèrement humide','Humide','Lourd','Très lourd'],
+    pt: ['Confortável','Ligeiramente húmido','Húmido','Abafado','Muito abafado'],
+    it: ['Confortevole','Leggermente umido','Umido','Afoso','Molto afoso'],
+    zh: ['舒适','略微潮湿','潮湿','闷热','非常闷热'],
+    ca: ['Confortable','Lleugerament humit','Humit','Xafogós','Molt xafogós'],
+    eu: ['Erosoa','Apur bat hezea','Hezea','Ito-giroa','Oso ito-giroa'],
+    gl: ['Confortable','Algo húmido','Húmido','Bochorento','Moi bochorento'],
+    ar: ['مريح','رطب قليلاً','رطب','خانق','خانق جداً'],
+    ru: ['Комфортно','Слегка влажно','Влажно','Душно','Очень душно'],
+    ja: ['快適','やや湿っぽい','湿っぽい','蒸し暑い','非常に蒸し暑い'],
+    ko: ['쾌적','약간 습함','습함','후텁지근','매우 후텁지근'],
+    nl: ['Comfortabel','Licht vochtig','Vochtig','Drukkend','Erg drukkend'],
+    pl: ['Komfortowo','Lekko wilgotno','Wilgotno','Parno','Bardzo parno'],
+    hi: ['आरामदायक','थोड़ा आर्द्र','आर्द्र','उमस भरा','बहुत उमस भरा'],
+    ro: ['Confortabil','Ușor umed','Umed','Înăbușitor','Foarte înăbușitor'],
+    hu: ['Kellemes','Enyhén párás','Párás','Fülledt','Nagyon fülledt'],
+  };
+  const L = NIVELES[idioma] || NIVELES['en'];
+  if (dp < 10) return L[0];
+  if (dp < 16) return L[1];
+  if (dp < 19) return L[2];
+  if (dp < 24) return L[3];
+  return L[4];
+}
+function consejoHumedad(tempC, rh) {
+  const dp = puntoDerociio(tempC, rh);
+  const diff = tempC - dp;
+  const CONSEJOS = {
+    niebla: { es:'Riesgo de niebla: el punto de rocío está cerca de la temperatura actual.', en:'Fog risk: dew point is close to the current temperature.', de:'Nebelgefahr: Taupunkt liegt nahe der aktuellen Temperatur.', fr:'Risque de brouillard : le point de rosée est proche de la température actuelle.', pt:'Risco de nevoeiro: o ponto de orvalho está próximo da temperatura atual.', it:'Rischio nebbia: il punto di rugiada è vicino alla temperatura attuale.', zh:'有雾风险：露点接近当前温度。', ca:'Risc de boira: el punt de rosada és proper a la temperatura actual.', eu:'Laino-arriskua: ihintz-puntua uneko tenperaturatik gertu dago.', gl:'Risco de néboa: o punto de orballo está preto da temperatura actual.', ar:'خطر الضباب: نقطة الندى قريبة من درجة الحرارة الحالية.', ru:'Риск тумана: точка росы близка к текущей температуре.', ja:'霧のリスク: 露点が現在の気温に近い。', ko:'안개 위험: 이슬점이 현재 기온에 가깝습니다.', nl:'Mistkans: dauwpunt ligt dicht bij de huidige temperatuur.', pl:'Ryzyko mgły: punkt rosy jest bliski bieżącej temperaturze.', hi:'कोहरे का खतरा: ओस बिंदु वर्तमान तापमान के करीब है।', ro:'Risc de ceață: punctul de rouă este aproape de temperatura actuală.', hu:'Köd veszélye: a harmatpont közel van az aktuális hőmérséklethez.' },
+    seco: { es:'Ambiente muy seco. Puede haber irritación de garganta o piel.', en:'Very dry air. Risk of throat or skin irritation.', de:'Sehr trockene Luft. Hals- oder Hautreizungen möglich.', fr:'Air très sec. Risque d\'irritation de la gorge ou de la peau.', pt:'Ar muito seco. Pode causar irritação na garganta ou pele.', it:'Aria molto secca. Possibile irritazione alla gola o alla pelle.', zh:'空气非常干燥，可能引起喉咙或皮肤刺激。', ca:'Ambient molt sec. Pot haver-hi irritació a la gola o la pell.', eu:'Oso giro lehorra. Eztarri edo azala min dezake.', gl:'Ambiente moi seco. Pode haber irritación na gorxa ou na pel.', ar:'هواء جاف جداً. قد يسبب تهيج الحلق أو الجلد.', ru:'Очень сухой воздух. Возможно раздражение горла или кожи.', ja:'非常に乾燥した空気。喉や肌の刺激が生じる可能性があります。', ko:'매우 건조한 공기입니다. 목이나 피부 자극이 생길 수 있습니다.', nl:'Zeer droge lucht. Kans op keel- of huidirritatie.', pl:'Bardzo suche powietrze. Możliwe podrażnienie gardła lub skóry.', hi:'बहुत शुष्क हवा। गले या त्वचा में जलन हो सकती है।', ro:'Aer foarte uscat. Posibil iritații ale gâtului sau pielii.', hu:'Nagyon száraz levegő. Torok- vagy bőrirritáció lehetséges.' },
+    hidra: { es:'Alta humedad con calor: mantente bien hidratado.', en:'High humidity and heat: stay well hydrated.', de:'Hohe Luftfeuchtigkeit und Hitze: gut hydriert bleiben.', fr:'Chaleur et humidité élevées : restez bien hydraté.', pt:'Alta humidade com calor: mantenha-se bem hidratado.', it:'Alta umidità e caldo: mantieniti ben idratato.', zh:'高温高湿：保持充足水分。', ca:'Alta humitat amb calor: manteniu-vos ben hidratat.', eu:'Hezetasun eta bero handia: ondo hidrataturik egon.', gl:'Alta humidade con calor: mantéñase ben hidratado.', ar:'رطوبة عالية مع الحرارة: ابق رطباً جيداً.', ru:'Высокая влажность и жара: пейте больше воды.', ja:'高温多湿: こまめに水分補給してください。', ko:'고온 다습: 충분한 수분을 섭취하세요.', nl:'Hoge luchtvochtigheid en hitte: blijf goed gehydrateerd.', pl:'Wysoka wilgotność i upał: nawadniaj się dobrze.', hi:'उच्च आर्द्रता और गर्मी: अच्छी तरह हाइड्रेटेड रहें।', ro:'Umiditate ridicată cu căldură: hidratați-vă bine.', hu:'Nagy páratartalom és meleg: maradj jól hidratált.' },
+    ideal: { es:'Condiciones ideales de humedad. Muy confortable.', en:'Ideal humidity conditions. Very comfortable.', de:'Ideale Feuchtigkeitsbedingungen. Sehr angenehm.', fr:'Conditions d\'humidité idéales. Très confortable.', pt:'Condições de humidade ideais. Muito confortável.', it:'Condizioni di umidità ideali. Molto confortevole.', zh:'湿度条件理想，非常舒适。', ca:'Condicions d\'humitat ideals. Molt confortable.', eu:'Hezetasun-baldintza ezin hobeak. Oso erosoa.', gl:'Condicións de humidade ideais. Moi confortable.', ar:'ظروف رطوبة مثالية. مريح جداً.', ru:'Идеальная влажность. Очень комфортно.', ja:'理想的な湿度条件。とても快適です。', ko:'이상적인 습도 조건입니다. 매우 쾌적합니다.', nl:'Ideale luchtvochtigheid. Zeer comfortabel.', pl:'Idealne warunki wilgotności. Bardzo komfortowo.', hi:'आदर्श आर्द्रता स्थितियाँ। बहुत आरामदायक।', ro:'Condiții ideale de umiditate. Foarte confortabil.', hu:'Ideális páratartalom. Nagyon kellemes.' },
+  };
+  const lang = idioma in CONSEJOS.ideal ? idioma : 'en';
+  if (diff < 3) return CONSEJOS.niebla[lang];
+  if (rh < 30) return CONSEJOS.seco[lang];
+  if (rh > 70 && tempC > 24) return CONSEJOS.hidra[lang];
+  return CONSEJOS.ideal[lang];
+}
+function abrirModalHumedad() {
+  const rh = parseFloat(document.getElementById('humedad').textContent) || null;
+  const tReal = _ultimaTempC ?? wapiData?.current?.temp_c ?? null;
+  if (rh === null || tReal === null) return;
+  document.getElementById('modalHumedadTitulo').textContent = getCardLabel('humedad');
+  document.getElementById('mhHumVal').textContent = rh + '%';
+  const dp = puntoDerociio(tReal, rh);
+  const dpStr = toTemp(dp);
+  document.getElementById('mhRocio').textContent = dpStr;
+  document.getElementById('mhBochorno').textContent = bochornoTexto(tReal, rh);
+  document.getElementById('mhBochornoVal').textContent = bochornoTexto(tReal, rh);
+  document.getElementById('mhConsejo').textContent = consejoHumedad(tReal, rh);
+  const ROCIO = { es:'Punto de rocío', en:'Dew point', de:'Taupunkt', fr:'Point de rosée', pt:'Ponto de orvalho', it:'Punto di rugiada', zh:'露点', ca:'Punt de rosada', eu:'Ihintz-puntua', gl:'Punto de orballo', ar:'نقطة الندى', ru:'Точка росы', ja:'露点', ko:'이슬점', nl:'Dauwpunt', pl:'Punkt rosy', hi:'ओस बिंदु', ro:'Punct de rouă', hu:'Harmatpont' };
+  const BOCH = { es:'Bochorno', en:'Discomfort', de:'Schwüle', fr:'Inconfort', pt:'Abafamento', it:'Afa', zh:'闷热感', ca:'Xafogor', eu:'Ito-maila', gl:'Bochor', ar:'الانزعاج', ru:'Духота', ja:'不快感', ko:'불쾌지수', nl:'Ongemak', pl:'Duszność', hi:'उमस', ro:'Disconfort', hu:'Párásság' };
+  document.getElementById('mhLblRocio').textContent = ROCIO[idioma] || ROCIO['en'];
+  document.getElementById('mhLblBochorno').textContent = BOCH[idioma] || BOCH['en'];
+  document.getElementById('modalHumedad').hidden = false;
+}
+document.getElementById('cardHumedadBtn').addEventListener('click', abrirModalHumedad);
+document.getElementById('modalHumedad').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('modalHumedad')) document.getElementById('modalHumedad').hidden = true;
 });
 
 async function obtenerMarea(lat, lon) {
@@ -3031,6 +3130,7 @@ function renderDatos(datos) {
   // Temperatura y sensación: solo WeatherAPI
   const tempActual = wapiData?.current?.temp_c ?? c.temperature_2m;
   const sensacionActual = wapiData?.current?.feelslike_c ?? c.apparent_temperature;
+  _ultimaTempC = tempActual;
   elTemp.textContent = toTemp(tempActual);
   if (weatherCode !== null) {
     elDesc.textContent = T.codigos[weatherCode] || '';
