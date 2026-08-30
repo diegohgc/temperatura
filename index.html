@@ -3363,6 +3363,23 @@ function renderPanelInterior(uvIndex, aireData, sunsetStr, tieneMarea, utcOffset
   document.getElementById('intUV').closest('.interior-item').onclick = () => abrirModalInterior('uv');
   document.getElementById('intSol').closest('.interior-item').onclick = () => abrirModalInterior('sol');
   document.getElementById('intAire').closest('.interior-item').onclick = () => abrirModalInterior('aire');
+
+  // Auto-ajuste de tamaño: reduce font-size hasta que el texto quepa
+  requestAnimationFrame(() => {
+    document.querySelectorAll('#panelInterior .interior-valor').forEach(el => {
+      el.style.fontSize = '';
+      const parent = el.closest('.interior-item');
+      if (!parent) return;
+      const maxW = parent.clientWidth - 16;
+      let iter = 0;
+      while (el.scrollWidth > maxW && iter < 30) {
+        const cur = parseFloat(getComputedStyle(el).fontSize);
+        if (cur <= 10) break;
+        el.style.fontSize = (cur - 1) + 'px';
+        iter++;
+      }
+    });
+  });
 }
 
 async function obtenerElevacionTerreno(lat, lon) {
