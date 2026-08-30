@@ -201,7 +201,8 @@
   .modal-viento-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
   .modal-viento-stat { background: rgba(255,255,255,0.06); border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 3px; }
   .mvs-label { font-size: 0.56rem; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.45; }
-  .mvs-value { font-size: 1.05rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .mvs-value { font-size: 1.05rem; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.2; }
+  .mvs-value.mvs-text { font-size: 0.78rem; font-weight: 500; opacity: 0.85; }
   .panel-titulo {
     font-size: 0.72rem; opacity: 0.65;
     text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px;
@@ -2902,8 +2903,14 @@ function abrirModalSensacion() {
   document.getElementById('msRealDiff').textContent = `${STRINGS.real[lang]}: ${toTemp(tReal)}  ·  ${diffSign}${diff}°`;
   document.getElementById('msLblViento').textContent = STRINGS.efVien[lang];
   document.getElementById('msLblHumedad').textContent = STRINGS.efHum[lang];
-  document.getElementById('msEfViento').textContent = efViento !== 0 ? `${efViento > 0 ? '+' : ''}${efViento}°` : '–';
-  document.getElementById('msEfHumedad').textContent = efHum !== 0 ? `+${efHum}°` : '–';
+  const SINEFECTO_V = { es:'Sin efecto del viento', en:'No wind effect', de:'Kein Windeffekt', fr:'Pas d\'effet du vent', pt:'Sem efeito do vento', it:'Nessun effetto del vento', zh:'无风效应', ca:'Sense efecte del vent', eu:'Haize-efekturik ez', gl:'Sen efecto do vento', ar:'لا تأثير للرياح', ru:'Нет эффекта ветра', ja:'風の影響なし', ko:'바람 영향 없음', nl:'Geen windeffect', pl:'Brak efektu wiatru', hi:'हवा का कोई प्रभाव नहीं', ro:'Fără efect al vântului', hu:'Nincs szélhatás' };
+  const SINEFECTO_H = { es:'Sin efecto de la humedad', en:'No humidity effect', de:'Kein Feuchtigkeitseffekt', fr:'Pas d\'effet de l\'humidité', pt:'Sem efeito da humidade', it:'Nessun effetto dell\'umidità', zh:'无湿度效应', ca:'Sense efecte de la humitat', eu:'Hezetasun-efekturik ez', gl:'Sen efecto da humidade', ar:'لا تأثير للرطوبة', ru:'Нет эффекта влажности', ja:'湿度の影響なし', ko:'습도 영향 없음', nl:'Geen vochteffect', pl:'Brak efektu wilgotności', hi:'आर्द्रता का कोई प्रभाव नहीं', ro:'Fără efect al umidității', hu:'Nincs párahatás' };
+  const elEfV = document.getElementById('msEfViento');
+  const elEfH = document.getElementById('msEfHumedad');
+  if (efViento !== 0) { elEfV.textContent = `${efViento > 0 ? '+' : ''}${efViento}°`; elEfV.classList.remove('mvs-text'); }
+  else { elEfV.textContent = SINEFECTO_V[lang] || SINEFECTO_V['en']; elEfV.classList.add('mvs-text'); }
+  if (efHum !== 0) { elEfH.textContent = `+${efHum}°`; elEfH.classList.remove('mvs-text'); }
+  else { elEfH.textContent = SINEFECTO_H[lang] || SINEFECTO_H['en']; elEfH.classList.add('mvs-text'); }
 
   let explicacion = '';
   if (efViento < -1) explicacion = STRINGS.explVien[lang];
