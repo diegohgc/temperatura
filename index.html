@@ -3147,18 +3147,36 @@ async function actualizar() {
     setEstado(T.geoNoDisponible);
     return;
   }
-  // Alta precisión (GPS real, inmune a VPN) con timeout generoso
-  // En arranque en frío Android el GPS puede tardar 15-20s
+  // Fase 1: ubicación rápida (red/WiFi, ~1s) → carga el tiempo inmediatamente
+  // Fase 2: GPS preciso en segundo plano → si difiere >500m, recarga silenciosamente
+  let fase1Cargada = false;
+
+  function distanciaM(lat1, lon1, lat2, lon2) {
+    const R = 6371000;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
+
   navigator.geolocation.getCurrentPosition((pos) => {
-    cargarDatos(pos.coords.latitude, pos.coords.longitude);
+    fase1Cargada = true;
+    const lat1 = pos.coords.latitude, lon1 = pos.coords.longitude;
+    cargarDatos(lat1, lon1);
+    // Fase 2: GPS preciso
+    navigator.geolocation.getCurrentPosition((pos2) => {
+      const lat2 = pos2.coords.latitude, lon2 = pos2.coords.longitude;
+      if (distanciaM(lat1, lon1, lat2, lon2) > 500) cargarDatos(lat2, lon2);
+    }, () => {}, { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 });
   }, (err) => {
+    if (fase1Cargada) return;
     if (err.code === err.PERMISSION_DENIED) {
       if (window.mostrarPermisoDenegado) window.mostrarPermisoDenegado();
       else setEstado(T.permisoDenegado);
     } else {
       setEstado(T.errorUbicacion);
     }
-  }, { enableHighAccuracy: true, timeout: 20000, maximumAge: 120000 });
+  }, { enableHighAccuracy: false, timeout: 5000, maximumAge: 120000 });
 }
 
 let timeoutBusqueda = null;
