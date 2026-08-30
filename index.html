@@ -2839,7 +2839,7 @@ function abrirModalLluvia() {
   const STR = {
     titulo:   { es:'Probabilidad de lluvia', en:'Rain probability', de:'Regenwahrscheinlichkeit', fr:'Probabilité de pluie', pt:'Probabilidade de chuva', it:'Probabilità di pioggia', zh:'降雨概率', ca:'Probabilitat de pluja', eu:'Euri-probabilitatea', gl:'Probabilidade de choiva', ar:'احتمالية الأمطار', ru:'Вероятность дождя', ja:'降水確率', ko:'강수 확률', nl:'Regenkans', pl:'Prawdopodobieństwo deszczu', hi:'वर्षा की संभावना', ro:'Probabilitate de ploaie', hu:'Esővalószínűség' },
     probLbl:  { es:'Probabilidad', en:'Probability', de:'Wahrscheinlichkeit', fr:'Probabilité', pt:'Probabilidade', it:'Probabilità', zh:'概率', ca:'Probabilitat', eu:'Probabilitatea', gl:'Probabilidade', ar:'الاحتمالية', ru:'Вероятность', ja:'確率', ko:'확률', nl:'Kans', pl:'Prawdopodobieństwo', hi:'संभावना', ro:'Probabilitate', hu:'Valószínűség' },
-    acum:     { es:'Últimas horas', en:'Recent total', de:'Zuletzt gefallen', fr:'Cumul récent', pt:'Total recente', it:'Recente totale', zh:'近期累计', ca:'Darreres hores', eu:'Azken orduak', gl:'Últimas horas', ar:'المجموع الأخير', ru:'За последние часы', ja:'直近の累計', ko:'최근 누계', nl:'Recente neerslag', pl:'Ostatnie godziny', hi:'हाल की वर्षा', ro:'Total recent', hu:'Közelmúlt' },
+    acum:     { es:'Hoy desde las 0h', en:'Since midnight', de:'Seit Mitternacht', fr:'Depuis minuit', pt:'Desde meia-noite', it:'Dalla mezzanotte', zh:'自零时起', ca:'Des de les 0h', eu:'Gauerdietatik', gl:'Desde as 0h', ar:'منذ منتصف الليل', ru:'С полуночи', ja:'0時から', ko:'자정 이후', nl:'Sinds middernacht', pl:'Od północy', hi:'आधी रात से', ro:'De la miezul nopții', hu:'Éjféltől' },
     proxima:  { es:'Próxima lluvia', en:'Next rain', de:'Nächster Regen', fr:'Prochaine pluie', pt:'Próxima chuva', it:'Prossima pioggia', zh:'下次降雨', ca:'Propera pluja', eu:'Hurrengo euria', gl:'Próxima choiva', ar:'المطر القادم', ru:'Следующий дождь', ja:'次の雨', ko:'다음 비', nl:'Volgende regen', pl:'Następny deszcz', hi:'अगली बारिश', ro:'Următoarea ploaie', hu:'Következő eső' },
     prox24:   { es:'Próximas 24h', en:'Next 24h', de:'Nächste 24h', fr:'Prochaines 24h', pt:'Próximas 24h', it:'Prossime 24h', zh:'未来24小时', ca:'Pròximes 24h', eu:'Hurrengo 24h', gl:'Próximas 24h', ar:'الـ24 ساعة القادمة', ru:'Следующие 24ч', ja:'今後24時間', ko:'향후 24시간', nl:'Komende 24u', pl:'Następne 24h', hi:'अगले 24 घंटे', ro:'Următoarele 24h', hu:'Következő 24ó' },
     noLluvia: { es:'Sin lluvias previstas', en:'No rain expected', de:'Kein Regen erwartet', fr:'Pas de pluie prévue', pt:'Sem chuva prevista', it:'Nessuna pioggia prevista', zh:'无预计降雨', ca:'Sense pluja prevista', eu:'Ez da euririk espero', gl:'Sen choiva prevista', ar:'لا أمطار متوقعة', ru:'Дождей не ожидается', ja:'雨の予報なし', ko:'비 예보 없음', nl:'Geen regen verwacht', pl:'Brak spodziewanego deszczu', hi:'कोई बारिश अपेक्षित नहीं', ro:'Nicio ploaie așteptată', hu:'Nem várható eső' },
@@ -2854,10 +2854,12 @@ function abrirModalLluvia() {
   const horaActual = todasHoras.find(h => h.time_epoch >= ahoraEpoch);
   const probActual = horaActual?.chance_of_rain ?? null;
 
-  // Acumulado: suma de precip_mm de las horas pasadas de hoy + ayer si disponible
-  const horasPasadas = todasHoras.filter(h => h.time_epoch < ahoraEpoch);
-  const acumHoy = horasPasadas.length
-    ? horasPasadas.reduce((s, h) => s + (h.precip_mm ?? 0), 0)
+  // Acumulado: solo las horas de hoy desde las 0h hasta ahora
+  const ahora = new Date();
+  const medianoche = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate(), 0, 0, 0).getTime() / 1000;
+  const horasHoy = todasHoras.filter(h => h.time_epoch >= medianoche && h.time_epoch < ahoraEpoch);
+  const acumHoy = horasHoy.length
+    ? horasHoy.reduce((s, h) => s + (h.precip_mm ?? 0), 0)
     : (wapiData.forecast.forecastday[0]?.day?.totalprecip_mm ?? null);
   const acumStr = acumHoy !== null ? (usaMph ? `${(acumHoy * 0.0393701).toFixed(2)} in` : `${acumHoy.toFixed(1)} mm`) : '--';
 
@@ -2882,33 +2884,34 @@ function abrirModalLluvia() {
 
   // Gráfico de barras
   const graf = document.getElementById('mlGrafico');
+  graf.innerHTML = '';
   const horas = proximas24.slice(0, 24);
   horas.forEach((h, i) => {
     const prob = h.chance_of_rain ?? 0;
     const hh = new Date(h.time_epoch * 1000).getHours();
-    const altura = Math.max(2, Math.round((prob / 100) * 44));
-    const color = prob >= 70 ? '#4A9EFF' : prob >= 40 ? 'rgba(74,158,255,0.55)' : 'rgba(255,255,255,0.13)';
+    const altura = Math.max(2, Math.round((prob / 100) * 52));
+    const color = prob >= 70 ? '#4A9EFF' : prob >= 40 ? 'rgba(74,158,255,0.6)' : 'rgba(255,255,255,0.13)';
 
     const col = document.createElement('div');
-    col.style.cssText = 'flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:2px';
+    col.style.cssText = 'flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:0';
 
-    // Zona de barra (altura fija 44px, barra pegada abajo)
+    // % solo si >= 40% (arriba de la barra)
+    const pct = document.createElement('div');
+    pct.style.cssText = 'font-size:0.52rem;font-weight:600;line-height:1.2;min-height:10px;color:#4A9EFF';
+    pct.textContent = prob >= 40 ? prob + '%' : '';
+    col.appendChild(pct);
+
+    // Zona de barra (altura fija 52px, barra pegada abajo)
     const barWrap = document.createElement('div');
-    barWrap.style.cssText = 'width:100%;height:44px;display:flex;align-items:flex-end';
+    barWrap.style.cssText = 'width:100%;height:52px;display:flex;align-items:flex-end';
     const bar = document.createElement('div');
     bar.style.cssText = `width:100%;height:${altura}px;background:${color};border-radius:2px 2px 0 0`;
     barWrap.appendChild(bar);
     col.appendChild(barWrap);
 
-    // % debajo
-    const pct = document.createElement('div');
-    pct.style.cssText = 'font-size:0.5rem;opacity:' + (prob >= 40 ? '0.9' : '0.4') + ';font-weight:' + (prob >= 40 ? '600' : '400');
-    pct.textContent = prob + '%';
-    col.appendChild(pct);
-
     // Hora (solo cada 6h)
     const horaLbl = document.createElement('div');
-    horaLbl.style.cssText = 'font-size:0.48rem;opacity:0.35;margin-top:1px';
+    horaLbl.style.cssText = 'font-size:0.48rem;opacity:0.4;margin-top:2px;min-height:10px';
     horaLbl.textContent = hh % 6 === 0 ? hh + 'h' : '';
     col.appendChild(horaLbl);
 
