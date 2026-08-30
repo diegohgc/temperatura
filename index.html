@@ -2882,11 +2882,7 @@ function abrirModalLluvia() {
 
   // Gráfico de barras
   const graf = document.getElementById('mlGrafico');
-  const grafHoras = document.getElementById('mlGraficoHoras');
-  graf.innerHTML = '';
-  grafHoras.innerHTML = '';
   const horas = proximas24.slice(0, 24);
-  graf.innerHTML = '';
   horas.forEach((h, i) => {
     const prob = h.chance_of_rain ?? 0;
     const hh = new Date(h.time_epoch * 1000).getHours();
