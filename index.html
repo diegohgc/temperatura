@@ -2185,8 +2185,10 @@ function renderHorasWAPI(wapiData) {
     .slice(0, 8);
   for (const h of proximas) {
     const hora = new Date(h.time_epoch * 1000).getHours() + 'h';
-    const wmo = wapiCodeToWMO(h.condition.code);
+    let wmo = wapiCodeToWMO(h.condition.code);
     const prob = h.chance_of_rain ?? null;
+    // Si probabilidad < 40% y el código indica lluvia, mostrar nublado
+    if ((prob === null || prob < 40) && wmo >= 51 && wmo < 95) wmo = 2;
     const div = document.createElement('div');
     div.className = 'hora';
     div.innerHTML = `
