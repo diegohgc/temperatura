@@ -185,8 +185,8 @@
   .arrow-wrap { flex-shrink: 0; width: 32px; height: 32px; }
   .arrow-wrap svg { width: 32px; height: 32px; transition: transform 0.5s ease; }
   /* ── Modales bottom-sheet (viento + humedad) ── */
-  #modalViento, #modalHumedad, #modalSensacion { position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(8px); display: flex; align-items: flex-end; justify-content: center; z-index: 200; }
-  #modalViento[hidden], #modalHumedad[hidden], #modalSensacion[hidden] { display: none; }
+  #modalViento, #modalHumedad, #modalSensacion, #modalLluvia { position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(8px); display: flex; align-items: flex-end; justify-content: center; z-index: 200; }
+  #modalViento[hidden], #modalHumedad[hidden], #modalSensacion[hidden], #modalLluvia[hidden] { display: none; }
   .modal-viento-sheet { width: 100%; max-width: 440px; background: #1a2240; border-radius: 24px 24px 0 0; padding: 16px 20px 44px; display: flex; flex-direction: column; gap: 14px; }
   .modal-viento-titulo { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.45; text-align: center; }
   .modal-compass { display: flex; flex-direction: column; align-items: center; gap: 8px; }
@@ -547,7 +547,7 @@
       </div>
     </div>
     <div class="cards-grid">
-      <div class="card">
+      <div class="card card-viento" id="cardLluviaBtn" role="button" tabindex="0">
         <div class="card-label" id="cLblLluvia">🌧 Lluvia</div>
         <div class="card-value" id="lluvia">--</div>
       </div>
@@ -627,6 +627,32 @@
       <div id="radarTimeLabel">—</div>
       <input id="radarSlider" type="range" min="0" value="0" step="1">
       <button id="radarPlayBtn">▶</button>
+    </div>
+  </div>
+</div>
+<!-- Modal lluvia -->
+<div id="modalLluvia" hidden>
+  <div class="modal-viento-sheet">
+    <div class="modal-handle" style="width:36px;height:4px;background:rgba(255,255,255,0.2);border-radius:2px;margin:0 auto 4px;"></div>
+    <div class="modal-viento-titulo" id="modalLluviaTitulo">Lluvia</div>
+    <div style="text-align:center;padding:6px 0 2px">
+      <div style="font-size:3rem;font-weight:700;line-height:1" id="mlProbVal">--</div>
+      <div style="font-size:0.75rem;opacity:0.5;margin-top:4px;text-transform:uppercase;letter-spacing:0.08em" id="mlProbLabel">Probabilidad</div>
+    </div>
+    <div class="modal-viento-stats">
+      <div class="modal-viento-stat">
+        <div class="mvs-label" id="mlLblAcum">Acumulado hoy</div>
+        <div class="mvs-value" id="mlAcum">--</div>
+      </div>
+      <div class="modal-viento-stat">
+        <div class="mvs-label" id="mlLblProxima">Próxima lluvia</div>
+        <div class="mvs-value mvs-text" id="mlProxima">--</div>
+      </div>
+    </div>
+    <div>
+      <div class="mvs-label" style="margin-bottom:8px" id="mlLblGrafico">Próximas 24h</div>
+      <div id="mlGrafico" style="display:flex;align-items:flex-end;gap:3px;height:56px;overflow:hidden"></div>
+      <div id="mlGraficoHoras" style="display:flex;gap:3px;margin-top:3px;overflow:hidden"></div>
     </div>
   </div>
 </div>
@@ -2802,6 +2828,86 @@ document.getElementById('cardVientoBtn').addEventListener('click', () => {
 });
 document.getElementById('modalViento').addEventListener('click', (e) => {
   if (e.target === document.getElementById('modalViento')) document.getElementById('modalViento').hidden = true;
+});
+
+// ── Modal lluvia ──
+let _ultimoPrecipAcum = null;
+
+function abrirModalLluvia() {
+  if (!wapiData?.forecast?.forecastday) return;
+  const STR = {
+    titulo:   { es:'Probabilidad de lluvia', en:'Rain probability', de:'Regenwahrscheinlichkeit', fr:'Probabilité de pluie', pt:'Probabilidade de chuva', it:'Probabilità di pioggia', zh:'降雨概率', ca:'Probabilitat de pluja', eu:'Euri-probabilitatea', gl:'Probabilidade de choiva', ar:'احتمالية الأمطار', ru:'Вероятность дождя', ja:'降水確率', ko:'강수 확률', nl:'Regenkans', pl:'Prawdopodobieństwo deszczu', hi:'वर्षा की संभावना', ro:'Probabilitate de ploaie', hu:'Esővalószínűség' },
+    probLbl:  { es:'Probabilidad', en:'Probability', de:'Wahrscheinlichkeit', fr:'Probabilité', pt:'Probabilidade', it:'Probabilità', zh:'概率', ca:'Probabilitat', eu:'Probabilitatea', gl:'Probabilidade', ar:'الاحتمالية', ru:'Вероятность', ja:'確率', ko:'확률', nl:'Kans', pl:'Prawdopodobieństwo', hi:'संभावना', ro:'Probabilitate', hu:'Valószínűség' },
+    acum:     { es:'Acumulado hoy', en:'Today\'s total', de:'Heute gefallen', fr:'Cumul aujourd\'hui', pt:'Acumulado hoje', it:'Accumulato oggi', zh:'今日累计', ca:'Acumulat avui', eu:'Gaur metatua', gl:'Acumulado hoxe', ar:'تراكم اليوم', ru:'Накоплено сегодня', ja:'本日累計', ko:'오늘 누계', nl:'Vandaag totaal', pl:'Suma dziś', hi:'आज का संचय', ro:'Acumulat azi', hu:'Mai összeg' },
+    proxima:  { es:'Próxima lluvia', en:'Next rain', de:'Nächster Regen', fr:'Prochaine pluie', pt:'Próxima chuva', it:'Prossima pioggia', zh:'下次降雨', ca:'Propera pluja', eu:'Hurrengo euria', gl:'Próxima choiva', ar:'المطر القادم', ru:'Следующий дождь', ja:'次の雨', ko:'다음 비', nl:'Volgende regen', pl:'Następny deszcz', hi:'अगली बारिश', ro:'Următoarea ploaie', hu:'Következő eső' },
+    prox24:   { es:'Próximas 24h', en:'Next 24h', de:'Nächste 24h', fr:'Prochaines 24h', pt:'Próximas 24h', it:'Prossime 24h', zh:'未来24小时', ca:'Pròximes 24h', eu:'Hurrengo 24h', gl:'Próximas 24h', ar:'الـ24 ساعة القادمة', ru:'Следующие 24ч', ja:'今後24時間', ko:'향후 24시간', nl:'Komende 24u', pl:'Następne 24h', hi:'अगले 24 घंटे', ro:'Următoarele 24h', hu:'Következő 24ó' },
+    noLluvia: { es:'Sin lluvias previstas', en:'No rain expected', de:'Kein Regen erwartet', fr:'Pas de pluie prévue', pt:'Sem chuva prevista', it:'Nessuna pioggia prevista', zh:'无预计降雨', ca:'Sense pluja prevista', eu:'Ez da euririk espero', gl:'Sen choiva prevista', ar:'لا أمطار متوقعة', ru:'Дождей не ожидается', ja:'雨の予報なし', ko:'비 예보 없음', nl:'Geen regen verwacht', pl:'Brak spodziewanego deszczu', hi:'कोई बारिश अपेक्षित नहीं', ro:'Nicio ploaie așteptată', hu:'Nem várható eső' },
+  };
+  const lang = idioma in STR.titulo ? idioma : 'en';
+
+  const todasHoras = wapiData.forecast.forecastday.flatMap(d => d.hour);
+  const ahoraEpoch = Date.now() / 1000;
+  const proximas24 = todasHoras.filter(h => h.time_epoch >= ahoraEpoch && h.time_epoch < ahoraEpoch + 86400);
+
+  // Probabilidad actual
+  const horaActual = todasHoras.find(h => h.time_epoch >= ahoraEpoch);
+  const probActual = horaActual?.chance_of_rain ?? null;
+
+  // Acumulado hoy (día 0 de WeatherAPI)
+  const acumHoy = wapiData.forecast.forecastday[0]?.day?.totalprecip_mm ?? _ultimoPrecipAcum ?? null;
+  const acumStr = acumHoy !== null ? (usaMph ? `${(acumHoy * 0.0393701).toFixed(2)} in` : `${acumHoy.toFixed(1)} mm`) : '--';
+
+  // Próxima hora con prob >= 40%
+  const proxLluvia = proximas24.find(h => (h.chance_of_rain ?? 0) >= 40);
+  let proxStr = STR.noLluvia[lang];
+  if (proxLluvia) {
+    const d = new Date(proxLluvia.time_epoch * 1000);
+    proxStr = d.toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' });
+  }
+
+  document.getElementById('modalLluviaTitulo').textContent = STR.titulo[lang];
+  document.getElementById('mlProbVal').textContent = probActual !== null ? probActual + '%' : '--';
+  document.getElementById('mlProbLabel').textContent = STR.probLbl[lang];
+  document.getElementById('mlLblAcum').textContent = STR.acum[lang];
+  document.getElementById('mlAcum').textContent = acumStr;
+  document.getElementById('mlLblProxima').textContent = STR.proxima[lang];
+  const proxEl = document.getElementById('mlProxima');
+  proxEl.textContent = proxStr;
+  proxEl.classList.toggle('mvs-text', !proxLluvia);
+  document.getElementById('mlLblGrafico').textContent = STR.prox24[lang];
+
+  // Gráfico de barras
+  const graf = document.getElementById('mlGrafico');
+  const grafHoras = document.getElementById('mlGraficoHoras');
+  graf.innerHTML = '';
+  grafHoras.innerHTML = '';
+  const horas = proximas24.slice(0, 24);
+  const colW = `${Math.floor(100 / horas.length)}%`;
+  horas.forEach(h => {
+    const prob = h.chance_of_rain ?? 0;
+    const altura = Math.max(3, Math.round(prob * 0.56)); // max 56px
+    const color = prob >= 70 ? '#4A9EFF' : prob >= 40 ? 'rgba(74,158,255,0.6)' : 'rgba(255,255,255,0.18)';
+    const bar = document.createElement('div');
+    bar.style.cssText = `flex:1;height:${altura}px;background:${color};border-radius:3px 3px 0 0;min-width:0;align-self:flex-end;position:relative`;
+    if (prob > 0) {
+      const lbl = document.createElement('div');
+      lbl.style.cssText = 'position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:0.42rem;opacity:0.7;white-space:nowrap';
+      lbl.textContent = prob + '%';
+      bar.appendChild(lbl);
+    }
+    graf.appendChild(bar);
+    const horaLbl = document.createElement('div');
+    const hh = new Date(h.time_epoch * 1000).getHours();
+    horaLbl.style.cssText = 'flex:1;text-align:center;font-size:0.48rem;opacity:0.45;min-width:0';
+    horaLbl.textContent = hh === 0 ? '0h' : (hh % 3 === 0 ? hh + 'h' : '');
+    grafHoras.appendChild(horaLbl);
+  });
+
+  document.getElementById('modalLluvia').hidden = false;
+}
+document.getElementById('cardLluviaBtn').addEventListener('click', abrirModalLluvia);
+document.getElementById('modalLluvia').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('modalLluvia')) document.getElementById('modalLluvia').hidden = true;
 });
 
 // ── Modal sensación ──
