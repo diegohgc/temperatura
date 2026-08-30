@@ -165,7 +165,7 @@
   .panel-interior[hidden] { display: none; }
   .interior-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; flex: 1;
     background: rgba(255,255,255,0.07); border-radius: 16px; padding: 14px 8px; }
-  .interior-valor { font-size: 1.6rem; font-weight: 700; line-height: 1; }
+  .interior-valor { font-size: 1.6rem; font-weight: 700; line-height: 1; white-space: nowrap; }
   .interior-label { font-size: 0.56rem; opacity: 0.5; text-transform: uppercase; letter-spacing: 0.1em; text-align: center; }
   /* ── Cards grid 2×2 ── */
   .cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 10px; }
@@ -2883,7 +2883,7 @@ function renderPanelInterior(uvIndex, aireData, sunsetStr, tieneMarea, utcOffset
       if (diffSunset > 0 && diffSunset < 18 * 3600000) {
         const hrs = Math.floor(diffSunset / 3600000);
         const mins = Math.floor((diffSunset % 3600000) / 60000);
-        solTexto = hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
+        solTexto = hrs > 0 ? `${hrs}h${mins}m` : `${mins}m`;
         solLabel = T.solRestante || 'Sol restante';
       } else {
         solTexto = '☀️';
@@ -2898,7 +2898,7 @@ function renderPanelInterior(uvIndex, aireData, sunsetStr, tieneMarea, utcOffset
       if (diffSunrise > 0 && diffSunrise < 30 * 3600000) {
         const hrs = Math.floor(diffSunrise / 3600000);
         const mins = Math.floor((diffSunrise % 3600000) / 60000);
-        solTexto = hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
+        solTexto = hrs > 0 ? `${hrs}h${mins}m` : `${mins}m`;
         solLabel = NOCHE_RESTANTE[idioma] || 'Noche restante';
       } else {
         solTexto = '🌙';
