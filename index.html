@@ -2921,7 +2921,8 @@ function renderPanelInterior(uvIndex, aireData, sunsetStr, tieneMarea, utcOffset
   const aireEl = document.getElementById('intAire');
   const aireLabelEl = document.getElementById('intAireLabel');
   if (aireData) {
-    aireEl.textContent = aireData.nivelTexto ? (aireData.nivelTexto[idioma] || aireData.nivelTexto['en']) : '--';
+    const nivelFull = aireData.nivelTexto ? (aireData.nivelTexto[idioma] || aireData.nivelTexto['en']) : '--';
+    aireEl.textContent = nivelFull.includes(': ') ? nivelFull.split(': ').pop() : nivelFull;
     aireEl.style.fontSize = '0.9rem';
   } else {
     aireEl.textContent = '--';
