@@ -185,8 +185,8 @@
   .arrow-wrap { flex-shrink: 0; width: 32px; height: 32px; }
   .arrow-wrap svg { width: 32px; height: 32px; transition: transform 0.5s ease; }
   /* ── Modales bottom-sheet (viento + humedad) ── */
-  #modalViento, #modalHumedad { position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(8px); display: flex; align-items: flex-end; justify-content: center; z-index: 200; }
-  #modalViento[hidden], #modalHumedad[hidden] { display: none; }
+  #modalViento, #modalHumedad, #modalSensacion { position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(8px); display: flex; align-items: flex-end; justify-content: center; z-index: 200; }
+  #modalViento[hidden], #modalHumedad[hidden], #modalSensacion[hidden] { display: none; }
   .modal-viento-sheet { width: 100%; max-width: 440px; background: #1a2240; border-radius: 24px 24px 0 0; padding: 16px 20px 44px; display: flex; flex-direction: column; gap: 14px; }
   .modal-viento-titulo { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.45; text-align: center; }
   .modal-compass { display: flex; flex-direction: column; align-items: center; gap: 8px; }
@@ -550,7 +550,7 @@
         <div class="card-label" id="cLblLluvia">🌧 Lluvia</div>
         <div class="card-value" id="lluvia">--</div>
       </div>
-      <div class="card">
+      <div class="card card-viento" id="cardSensacionBtn" role="button" tabindex="0">
         <div class="card-label" id="cLblSensacion">Sensación</div>
         <div class="card-value" id="sensacion">--</div>
       </div>
@@ -626,6 +626,28 @@
       <div id="radarTimeLabel">—</div>
       <input id="radarSlider" type="range" min="0" value="0" step="1">
       <button id="radarPlayBtn">▶</button>
+    </div>
+  </div>
+</div>
+<!-- Modal sensación -->
+<div id="modalSensacion" hidden>
+  <div class="modal-viento-sheet">
+    <div class="modal-handle" style="width:36px;height:4px;background:rgba(255,255,255,0.2);border-radius:2px;margin:0 auto 4px;"></div>
+    <div class="modal-viento-titulo" id="modalSensacionTitulo">Sensación</div>
+    <div style="text-align:center;padding:6px 0 2px">
+      <div style="font-size:3rem;font-weight:700;line-height:1" id="msSensVal">--</div>
+      <div style="font-size:0.82rem;opacity:0.55;margin-top:5px" id="msRealDiff">--</div>
+    </div>
+    <div style="background:rgba(255,255,255,0.06);border-radius:12px;padding:11px 14px;font-size:0.82rem;opacity:0.75;line-height:1.45" id="msExplicacion"></div>
+    <div class="modal-viento-stats">
+      <div class="modal-viento-stat">
+        <div class="mvs-label" id="msLblViento">Efecto viento</div>
+        <div class="mvs-value" id="msEfViento">--</div>
+      </div>
+      <div class="modal-viento-stat">
+        <div class="mvs-label" id="msLblHumedad">Efecto humedad</div>
+        <div class="mvs-value" id="msEfHumedad">--</div>
+      </div>
     </div>
   </div>
 </div>
@@ -2781,6 +2803,121 @@ document.getElementById('modalViento').addEventListener('click', (e) => {
   if (e.target === document.getElementById('modalViento')) document.getElementById('modalViento').hidden = true;
 });
 
+// ── Modal sensación ──
+let _ultimaSensacion = null;
+let _ultimoVientoKmh = null;
+
+function windChill(tC, vKmh) {
+  if (tC >= 10 || vKmh < 5) return null;
+  return 13.12 + 0.6215*tC - 11.37*Math.pow(vKmh, 0.16) + 0.3965*tC*Math.pow(vKmh, 0.16);
+}
+function heatIndex(tC, rh) {
+  if (tC < 27 || rh < 40) return null;
+  const T = tC * 9/5 + 32;
+  const hi = -42.379 + 2.04901523*T + 10.14333127*rh
+    - 0.22475541*T*rh - 0.00683783*T*T - 0.05481717*rh*rh
+    + 0.00122874*T*T*rh + 0.00085282*T*rh*rh - 0.00000199*T*T*rh*rh;
+  return (hi - 32) * 5/9;
+}
+function abrirModalSensacion() {
+  const tReal = _ultimaTempC;
+  const sens = _ultimaSensacion;
+  const vKmh = _ultimoVientoKmh;
+  const rh = parseFloat(document.getElementById('humedad').textContent) || null;
+  if (tReal === null || sens === null) return;
+
+  const diff = Math.round(sens - tReal);
+  const diffSign = diff > 0 ? '+' : '';
+
+  const efViento = vKmh !== null ? (windChill(tReal, vKmh) !== null ? Math.round(windChill(tReal, vKmh) - tReal) : 0) : 0;
+  const efHum = rh !== null ? (heatIndex(tReal, rh) !== null ? Math.round(heatIndex(tReal, rh) - tReal) : 0) : 0;
+
+  const STRINGS = {
+    titulo:  { es:'Sensación térmica', en:'Feels like', de:'Gefühlte Temperatur', fr:'Température ressentie', pt:'Sensação térmica', it:'Temperatura percepita', zh:'体感温度', ca:'Sensació tèrmica', eu:'Sentitzen den tenperatura', gl:'Sensación térmica', ar:'الحرارة المحسوسة', ru:'Ощущаемая температура', ja:'体感温度', ko:'체감 온도', nl:'Gevoelstemperatuur', pl:'Odczuwalna temperatura', hi:'महसूस होने वाला तापमान', ro:'Temperatura resimțită', hu:'Hőérzet' },
+    real:    { es:'Real', en:'Actual', de:'Echt', fr:'Réelle', pt:'Real', it:'Reale', zh:'实际', ca:'Real', eu:'Erreala', gl:'Real', ar:'الفعلية', ru:'Реальная', ja:'実際', ko:'실제', nl:'Werkelijk', pl:'Rzeczywista', hi:'वास्तविक', ro:'Reală', hu:'Tényleges' },
+    efVien:  { es:'Efecto viento', en:'Wind effect', de:'Windeffekt', fr:'Effet vent', pt:'Efeito vento', it:'Effetto vento', zh:'风效应', ca:'Efecte vent', eu:'Haize-efektua', gl:'Efecto vento', ar:'تأثير الرياح', ru:'Эффект ветра', ja:'風の効果', ko:'바람 효과', nl:'Windeffect', pl:'Efekt wiatru', hi:'हवा का प्रभाव', ro:'Efect vânt', hu:'Szélhatás' },
+    efHum:   { es:'Efecto humedad', en:'Humidity effect', de:'Feuchtigkeitseffekt', fr:'Effet humidité', pt:'Efeito humidade', it:'Effetto umidità', zh:'湿度效应', ca:'Efecte humitat', eu:'Hezetasun-efektua', gl:'Efecto humidade', ar:'تأثير الرطوبة', ru:'Эффект влажности', ja:'湿度の効果', ko:'습도 효과', nl:'Vochteffect', pl:'Efekt wilgotności', hi:'आर्द्रता का प्रभाव', ro:'Efect umiditate', hu:'Párahatás' },
+    explVien:{ es:`El viento de ${Math.round(vKmh ?? 0)} km/h reduce la sensación ${Math.abs(efViento)}° por debajo de la temperatura real.`,
+               en:`Wind of ${Math.round(vKmh ?? 0)} km/h lowers the feel by ${Math.abs(efViento)}° below the actual temperature.`,
+               de:`Wind von ${Math.round(vKmh ?? 0)} km/h senkt die gefühlte Temperatur um ${Math.abs(efViento)}°.`,
+               fr:`Le vent de ${Math.round(vKmh ?? 0)} km/h abaisse la sensation de ${Math.abs(efViento)}° sous la température réelle.`,
+               pt:`O vento de ${Math.round(vKmh ?? 0)} km/h reduz a sensação em ${Math.abs(efViento)}° abaixo da temperatura real.`,
+               it:`Il vento di ${Math.round(vKmh ?? 0)} km/h abbassa la sensazione di ${Math.abs(efViento)}° sotto la temperatura reale.`,
+               zh:`${Math.round(vKmh ?? 0)} km/h的风使体感温度比实际温度低${Math.abs(efViento)}°。`,
+               ca:`El vent de ${Math.round(vKmh ?? 0)} km/h redueix la sensació ${Math.abs(efViento)}° per sota de la temperatura real.`,
+               eu:`${Math.round(vKmh ?? 0)} km/h-ko haizeak ${Math.abs(efViento)}° jaisten du tenperatura sentitua.`,
+               gl:`O vento de ${Math.round(vKmh ?? 0)} km/h reduce a sensación ${Math.abs(efViento)}° por baixo da temperatura real.`,
+               ar:`الرياح بسرعة ${Math.round(vKmh ?? 0)} كم/س تخفض الإحساس بالحرارة بمقدار ${Math.abs(efViento)}° عن درجة الحرارة الفعلية.`,
+               ru:`Ветер ${Math.round(vKmh ?? 0)} км/ч снижает ощущаемую температуру на ${Math.abs(efViento)}° ниже фактической.`,
+               ja:`${Math.round(vKmh ?? 0)} km/hの風で体感温度が実際より${Math.abs(efViento)}°低くなります。`,
+               ko:`${Math.round(vKmh ?? 0)} km/h의 바람으로 체감 온도가 실제보다 ${Math.abs(efViento)}° 낮습니다.`,
+               nl:`Wind van ${Math.round(vKmh ?? 0)} km/h verlaagt de gevoelstemperatuur ${Math.abs(efViento)}° onder de werkelijke temperatuur.`,
+               pl:`Wiatr ${Math.round(vKmh ?? 0)} km/h obniża odczuwalną temperaturę o ${Math.abs(efViento)}° poniżej rzeczywistej.`,
+               hi:`${Math.round(vKmh ?? 0)} km/h की हवा से महसूस होने वाला तापमान वास्तविक से ${Math.abs(efViento)}° कम है।`,
+               ro:`Vântul de ${Math.round(vKmh ?? 0)} km/h coboară senzația cu ${Math.abs(efViento)}° sub temperatura reală.`,
+               hu:`A ${Math.round(vKmh ?? 0)} km/h-s szél ${Math.abs(efViento)}°-kal csökkenti az érzékelt hőmérsékletet.` },
+    explHum: { es:`La combinación de calor y humedad eleva la sensación ${Math.abs(efHum)}° por encima de la temperatura real.`,
+               en:`Heat and humidity combined raise the feel ${Math.abs(efHum)}° above the actual temperature.`,
+               de:`Hitze und Feuchtigkeit zusammen erhöhen die Wahrnehmung um ${Math.abs(efHum)}° über die tatsächliche Temperatur.`,
+               fr:`La combinaison chaleur-humidité élève la sensation de ${Math.abs(efHum)}° au-dessus de la température réelle.`,
+               pt:`A combinação de calor e humidade eleva a sensação ${Math.abs(efHum)}° acima da temperatura real.`,
+               it:`Caldo e umidità insieme alzano la sensazione di ${Math.abs(efHum)}° sopra la temperatura reale.`,
+               zh:`高温高湿使体感温度比实际高${Math.abs(efHum)}°。`,
+               ca:`La combinació calor-humitat eleva la sensació ${Math.abs(efHum)}° per sobre de la temperatura real.`,
+               eu:`Bero eta hezetasunak batera ${Math.abs(efHum)}° igotzen dute sentitzen den tenperatura.`,
+               gl:`A combinación de calor e humidade eleva a sensación ${Math.abs(efHum)}° por riba da temperatura real.`,
+               ar:`مزيج الحرارة والرطوبة يرفع الإحساس ${Math.abs(efHum)}° فوق درجة الحرارة الفعلية.`,
+               ru:`Жара и влажность повышают ощущаемую температуру на ${Math.abs(efHum)}° выше фактической.`,
+               ja:`暑さと湿度が重なり、体感温度が実際より${Math.abs(efHum)}°高くなります。`,
+               ko:`열기와 습도의 조합으로 체감 온도가 실제보다 ${Math.abs(efHum)}° 높습니다.`,
+               nl:`Hitte en vochtigheid verhogen de gevoelstemperatuur ${Math.abs(efHum)}° boven de werkelijke.`,
+               pl:`Połączenie upału i wilgotności podnosi odczuwalną temperaturę o ${Math.abs(efHum)}° powyżej rzeczywistej.`,
+               hi:`गर्मी और आर्द्रता मिलकर महसूस होने वाले तापमान को वास्तविक से ${Math.abs(efHum)}° बढ़ा देते हैं।`,
+               ro:`Căldura și umiditatea ridică senzația cu ${Math.abs(efHum)}° peste temperatura reală.`,
+               hu:`A meleg és páratartalom együtt ${Math.abs(efHum)}°-kal emeli az érzékelt hőmérsékletet.` },
+    explNorm:{ es:'La temperatura real y la sensación son prácticamente iguales. No hay factores que alteren significativamente la percepción.',
+               en:'The actual temperature and the feel are practically the same. No major factors are altering the perception.',
+               de:'Tatsächliche und gefühlte Temperatur sind nahezu gleich. Keine wesentlichen Einflussfaktoren.',
+               fr:'La température réelle et la sensation sont pratiquement identiques. Aucun facteur majeur n\'altère la perception.',
+               pt:'A temperatura real e a sensação são praticamente iguais. Nenhum fator altera significativamente a perceção.',
+               it:'La temperatura reale e la sensazione sono quasi uguali. Nessun fattore altera significativamente la percezione.',
+               zh:'实际温度与体感温度几乎相同，没有明显影响因素。',
+               ca:'La temperatura real i la sensació són pràcticament iguals. Cap factor altera significativament la percepció.',
+               eu:'Benetako tenperatura eta sentitzen dena ia berdinak dira. Ez dago pertzepzioa aldatzen duen faktore garrantzitsurik.',
+               gl:'A temperatura real e a sensación son practicamente iguais. Non hai factores que alteren significativamente a percepción.',
+               ar:'درجة الحرارة الفعلية والإحساس بها متطابقان تقريباً. لا توجد عوامل تؤثر بشكل كبير على الإحساس.',
+               ru:'Реальная температура и ощущаемая практически совпадают. Нет факторов, существенно влияющих на восприятие.',
+               ja:'実際の気温と体感温度はほぼ同じです。知覚に大きな影響を与える要因はありません。',
+               ko:'실제 온도와 체감 온도가 거의 동일합니다. 인식에 크게 영향을 미치는 요인이 없습니다.',
+               nl:'De werkelijke temperatuur en de gevoelstemperatuur zijn vrijwel gelijk. Er zijn geen grote factoren die de perceptie beïnvloeden.',
+               pl:'Rzeczywista temperatura i odczuwalna są praktycznie takie same. Brak czynników znacznie zmieniających percepcję.',
+               hi:'वास्तविक तापमान और महसूस होने वाला तापमान लगभग एक जैसे हैं। धारणा को प्रभावित करने वाले कोई बड़े कारक नहीं हैं।',
+               ro:'Temperatura reală și senzația sunt practic identice. Niciun factor major nu modifică percepția.',
+               hu:'A tényleges és az érzékelt hőmérséklet gyakorlatilag megegyezik. Nincs jelentős torzító tényező.' },
+  };
+  const lang = idioma in STRINGS.titulo ? idioma : 'en';
+
+  document.getElementById('modalSensacionTitulo').textContent = STRINGS.titulo[lang];
+  document.getElementById('msSensVal').textContent = toTemp(sens);
+  document.getElementById('msRealDiff').textContent = `${STRINGS.real[lang]}: ${toTemp(tReal)}  ·  ${diffSign}${diff}°`;
+  document.getElementById('msLblViento').textContent = STRINGS.efVien[lang];
+  document.getElementById('msLblHumedad').textContent = STRINGS.efHum[lang];
+  document.getElementById('msEfViento').textContent = efViento !== 0 ? `${efViento > 0 ? '+' : ''}${efViento}°` : '–';
+  document.getElementById('msEfHumedad').textContent = efHum !== 0 ? `+${efHum}°` : '–';
+
+  let explicacion = '';
+  if (efViento < -1) explicacion = STRINGS.explVien[lang];
+  else if (efHum > 1) explicacion = STRINGS.explHum[lang];
+  else explicacion = STRINGS.explNorm[lang];
+  document.getElementById('msExplicacion').textContent = explicacion;
+
+  document.getElementById('modalSensacion').hidden = false;
+}
+document.getElementById('cardSensacionBtn').addEventListener('click', abrirModalSensacion);
+document.getElementById('modalSensacion').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('modalSensacion')) document.getElementById('modalSensacion').hidden = true;
+});
+
 // ── Modal humedad ──
 function puntoDerociio(tempC, rh) {
   const a = 17.625, b = 243.04;
@@ -3131,6 +3268,7 @@ function renderDatos(datos) {
   const tempActual = wapiData?.current?.temp_c ?? c.temperature_2m;
   const sensacionActual = wapiData?.current?.feelslike_c ?? c.apparent_temperature;
   _ultimaTempC = tempActual;
+  _ultimaSensacion = sensacionActual;
   elTemp.textContent = toTemp(tempActual);
   if (weatherCode !== null) {
     elDesc.textContent = T.codigos[weatherCode] || '';
@@ -3156,6 +3294,7 @@ function renderDatos(datos) {
   }
   // Viento: WeatherAPI como fuente principal, OM como fallback
   const windSpeedKmh = wapiData?.current?.wind_kph ?? c.wind_speed_10m;
+  _ultimoVientoKmh = windSpeedKmh;
   const windDeg = wapiData?.current?.wind_degree ?? c.wind_direction_10m ?? null;
   const windDirStr = wapiData?.current?.wind_dir ?? (windDeg !== null ? dirViento(windDeg) : '');
   const gustKmh = wapiData?.current?.gust_kph ?? c.wind_gusts_10m ?? null;
