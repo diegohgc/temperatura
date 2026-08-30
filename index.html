@@ -2855,7 +2855,7 @@ function renderDatos(datos) {
   const wapiIsDay = wapiData?.current?.is_day ?? null;
   const precipRealWAPI = wapiData?.current?.precip_mm ?? 0;
   const precipRealOM = c.precipitation ?? 0;
-  const llueveDeVerdad = precipRealOM >= 0.1 || precipRealWAPI >= 0.1;
+  const llueveDeVerdad = precipRealOM >= 0.2 || precipRealWAPI >= 0.2;
 
   // ── ÚNICA FUENTE: WEATHERAPI ──
   if (wapiCode !== null) {
