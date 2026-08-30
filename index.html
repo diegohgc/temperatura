@@ -2928,7 +2928,7 @@ function renderPanelInterior(uvIndex, aireData, sunsetStr, tieneMarea, utcOffset
     aireEl.textContent = '--';
     aireEl.style.fontSize = '';
   }
-  aireLabelEl.textContent = T.calidadAire || 'Air quality';
+  aireLabelEl.innerHTML = (T.calidadAire || 'Air quality').replace(' ', '<br>');
 
   document.getElementById('intUV').closest('.interior-item').onclick = () => abrirModalInterior('uv');
   document.getElementById('intSol').closest('.interior-item').onclick = () => abrirModalInterior('sol');
