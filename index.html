@@ -3030,11 +3030,11 @@ function renderDatos(datos) {
   elHumedad.textContent = c.relative_humidity_2m + '%';
   // Tarjeta viento: dirección y flecha
   document.getElementById('vientoDir').textContent = windDirStr;
-  if (windDeg !== null) document.getElementById('vientoFlecha').style.transform = `rotate(${windDeg}deg)`;
+  if (windDeg !== null) document.getElementById('vientoFlecha').style.transform = `rotate(${windDeg + 180}deg)`;
   // Modal viento: rellenar datos
   document.getElementById('modalVientoTitulo').textContent = T.diaViento || 'Viento';
   document.getElementById('modalVientoDirText').textContent = windDirStr + (windDeg !== null ? ' · ' + Math.round(windDeg) + '°' : '');
-  if (windDeg !== null) document.getElementById('modalVientoFlecha').style.transform = `rotate(${windDeg}deg)`;
+  if (windDeg !== null) document.getElementById('modalVientoFlecha').style.transform = `rotate(${windDeg + 180}deg)`;
   document.getElementById('mvLblVel').textContent = T.ajustesVel || 'Velocidad';
   document.getElementById('mvVel').textContent = toViento(windSpeedKmh);
   document.getElementById('mvLblRafagas').textContent = getCardLabel('rafagas');
