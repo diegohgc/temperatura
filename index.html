@@ -2690,10 +2690,18 @@ function abrirModalDia(i) {
   }
   document.getElementById('diaLblLluvia').textContent = '🌧 ' + (T.diaProbLluvia || 'Probabilidad de lluvia');
   document.getElementById('diaValLluvia').textContent = prob + '%';
-  document.getElementById('diaLblViento').textContent = T.diaViento || T.ajustesVel || 'Velocidad del viento';
-  const vMax = daily.wind_speed_10m_max ? daily.wind_speed_10m_max[i] : null;
-  const vDir = daily.wind_direction_10m_dominant ? daily.wind_direction_10m_dominant[i] : null;
-  document.getElementById('diaValViento').textContent = vMax != null ? toViento(vMax) + (vDir != null ? ' ' + dirViento(vDir) : '') : '—';
+  const wapiCurrent = ultimosDatos && ultimosDatos.wapiData && ultimosDatos.wapiData.current;
+  if (esHoy && wapiCurrent) {
+    document.getElementById('diaLblViento').textContent = T.diaViento || T.ajustesVel || 'Velocidad del viento';
+    const vActual = wapiCurrent.wind_kph ?? null;
+    const vDirActual = wapiCurrent.wind_dir ?? null;
+    document.getElementById('diaValViento').textContent = vActual != null ? toViento(vActual) + (vDirActual ? ' ' + vDirActual : '') : '—';
+  } else {
+    document.getElementById('diaLblViento').textContent = (T.diaViento || T.ajustesVel || 'Velocidad del viento') + ' max';
+    const vMax = daily.wind_speed_10m_max ? daily.wind_speed_10m_max[i] : null;
+    const vDir = daily.wind_direction_10m_dominant ? daily.wind_direction_10m_dominant[i] : null;
+    document.getElementById('diaValViento').textContent = vMax != null ? toViento(vMax) + (vDir != null ? ' ' + dirViento(vDir) : '') : '—';
+  }
   const fmtHora = t => t ? new Date(t).toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' }) : '—';
   document.getElementById('diaLblSalida').textContent = T.amanecer || 'Amanecer';
   document.getElementById('diaValSalida').textContent = fmtHora(daily.sunrise ? daily.sunrise[i] : null);
