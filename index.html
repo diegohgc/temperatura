@@ -3591,6 +3591,7 @@ async function cargarDatos(latitude, longitude, nombreFijo) {
     setEstado(T.actualizado + ' ' + new Date(ultimaActualizacion).toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' }));
     localStorage.setItem('ql_ultima_act', Date.now().toString());
 if (window.ayudaCerrarAlCargar) { window.ayudaCerrarAlCargar(); window.ayudaCerrarAlCargar = null; }
+    if (window.ajustesCerrarAlCargar) { window.ajustesCerrarAlCargar(); window.ajustesCerrarAlCargar = null; }
     if (window.ocultarPermisoDenegado) window.ocultarPermisoDenegado();
   } catch (e) {
     setEstado(T.errorTemperatura);
@@ -5347,7 +5348,11 @@ function abrirEnGoogleMaps() {
     elBienvenida.style.display = 'flex';
     localStorage.setItem('ql_ayuda_vista', '1');
   } else {
-    // Ya vio la bienvenida: arrancar directamente
+    // Ya vio la bienvenida: mostrar ajustes mientras carga y arrancar
+    const panel = document.getElementById('ajustesPanel');
+    panel.hidden = false;
+    renderFavoritosLista();
+    window.ajustesCerrarAlCargar = () => { panel.hidden = true; };
     actualizar();
   }
 
