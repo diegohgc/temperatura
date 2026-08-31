@@ -4859,7 +4859,6 @@ function abrirEnGoogleMaps() {
 
 // ── Ayuda / tutorial ─────────────────────────────────────────────────────────
 (function() {
-  const lng = (typeof idioma !== 'undefined' ? idioma : 'en').substring(0,2);
   const i18n = {
     es: {
       titulo: '💡 Todo es interactivo',
@@ -4899,13 +4898,13 @@ function abrirEnGoogleMaps() {
       items: [
         ['🌡️', 'Temperatur', 'Tippe auf die große Zahl für Höchst-, Tiefstwerte und Regen heute'],
         ['🧭', 'Kompass', 'Oben rechts — tippen für Vollbildansicht'],
-        ['📍', 'Dein Standort', 'Tippe auf den Ortsnamen, um deinen genauen Standort auf der Karte zu sehen'],
+        ['📍', 'Dein Standort', 'Tippe auf den Ortsnamen für deine genaue Position auf der Karte'],
         ['☀️', 'UV-Index', 'Tippe auf den UV-Wert für die Sonnengefährdung'],
         ['💨', 'Luftqualität', 'Tippe auf den Luftwert für Schadstoffdetails'],
         ['🌊', 'Gezeiten', 'Tippe auf das Gezeitenpanel für die Tageskurve'],
         ['📅', 'Tagesvorhersage', 'Tippe auf einen Wochentag für Details'],
-        ['🌧', 'Regenradar', 'Tippe auf den Radarknopf, um die letzten Stunden Regen zu sehen und zu erkennen, was kommt'],
-        ['⚙️', 'Einstellungen', 'Sprache, °C/°F, km/h oder mph ändern — oben links'],
+        ['🌧', 'Regenradar', 'Tippe auf den Radarknopf für die letzten Stunden Regen'],
+        ['⚙️', 'Einstellungen', 'Sprache, °C/°F, km/h oder mph — oben links'],
       ],
       footer: 'Jederzeit wieder öffnen mit dem ?-Button'
     },
@@ -4915,12 +4914,12 @@ function abrirEnGoogleMaps() {
       items: [
         ['🌡️', 'Température', 'Appuyez sur le grand chiffre pour les max, min et pluie du jour'],
         ['🧭', 'Boussole', 'En haut à droite — appuyez pour l\'ouvrir en plein écran'],
-        ['📍', 'Votre position', 'Appuyez sur le nom du lieu pour voir votre position exacte sur la carte'],
+        ['📍', 'Votre position', 'Appuyez sur le nom du lieu pour votre position exacte sur la carte'],
         ['☀️', 'Indice UV', 'Appuyez sur la valeur UV pour voir le risque solaire'],
         ['💨', 'Qualité de l\'air', 'Appuyez sur la valeur air pour les détails'],
         ['🌊', 'Marées', 'Appuyez sur le panneau marées pour le graphique'],
         ['📅', 'Prévision journalière', 'Appuyez sur un jour pour le détail'],
-        ['🌧', 'Radar de pluie', 'Appuyez sur le bouton radar pour voir les dernières heures de pluie et anticiper ce qui arrive'],
+        ['🌧', 'Radar de pluie', 'Appuyez sur le bouton radar pour les dernières heures de pluie'],
         ['⚙️', 'Paramètres', 'Langue, °C/°F, km/h ou mph — en haut à gauche'],
       ],
       footer: 'Revenez ici en appuyant sur le bouton ?'
@@ -4936,7 +4935,7 @@ function abrirEnGoogleMaps() {
         ['💨', 'Qualidade do ar', 'Toque no valor do ar para ver os poluentes'],
         ['🌊', 'Marés', 'Toque no painel de marés para ver o gráfico do dia'],
         ['📅', 'Previsão diária', 'Toque em qualquer dia da semana para ver os detalhes'],
-        ['🌧', 'Radar de chuva', 'Toque no botão do radar para ver as últimas horas de chuva e antecipar o que aí vem'],
+        ['🌧', 'Radar de chuva', 'Toque no botão do radar para ver as últimas horas de chuva'],
         ['⚙️', 'Definições', 'Mude o idioma, °C/°F, km/h ou mph — canto superior esquerdo'],
       ],
       footer: 'Volte aqui quando quiser tocando no botão ?'
@@ -4947,31 +4946,243 @@ function abrirEnGoogleMaps() {
       items: [
         ['🌡️', 'Temperatura', 'Tocca il numero grande per massime, minime e pioggia di oggi'],
         ['🧭', 'Bussola', 'In alto a destra — tocca per aprirla a schermo intero'],
-        ['📍', 'La tua posizione', 'Tocca il nome del luogo per vedere la tua posizione esatta sulla mappa'],
-        ['☀️', 'Indice UV', 'Tocca il valore UV per vedere il livello di rischio solare'],
+        ['📍', 'La tua posizione', 'Tocca il nome del luogo per la tua posizione esatta sulla mappa'],
+        ['☀️', 'Indice UV', 'Tocca il valore UV per il livello di rischio solare'],
         ['💨', 'Qualità dell\'aria', 'Tocca il valore aria per i dettagli sugli inquinanti'],
-        ['🌊', 'Maree', 'Tocca il pannello maree per vedere il grafico giornaliero'],
+        ['🌊', 'Maree', 'Tocca il pannello maree per il grafico giornaliero'],
         ['📅', 'Previsione giornaliera', 'Tocca qualsiasi giorno della settimana per i dettagli'],
-        ['🌧', 'Radar pioggia', 'Tocca il pulsante radar per vedere le ultime ore di pioggia e anticipare quello che si avvicina'],
+        ['🌧', 'Radar pioggia', 'Tocca il pulsante radar per le ultime ore di pioggia'],
         ['⚙️', 'Impostazioni', 'Cambia lingua, °C/°F, km/h o mph — in alto a sinistra'],
       ],
       footer: 'Torna qui quando vuoi toccando il pulsante ?'
+    },
+    zh: {
+      titulo: '💡 一切都是交互式的',
+      sub: '点击任意数据以查看更多信息',
+      items: [
+        ['🌡️', '温度', '点击大数字查看今日最高、最低温及降雨'],
+        ['🧭', '指南针', '右上角 — 点击全屏查看'],
+        ['📍', '你的位置', '点击地名在地图上查看精确位置'],
+        ['☀️', '紫外线指数', '点击UV值查看日晒风险'],
+        ['💨', '空气质量', '点击空气数据查看污染详情'],
+        ['🌊', '潮汐', '点击潮汐面板查看全天图表'],
+        ['📅', '每日预报', '点击任意一天查看详情'],
+        ['🌧', '雨量雷达', '点击雷达按钮查看近期降雨'],
+        ['⚙️', '设置', '更改语言、°C/°F、km/h或mph — 左上角'],
+      ],
+      footer: '随时点击 ? 按钮返回此处'
+    },
+    ca: {
+      titulo: '💡 Tot és interactiu',
+      sub: 'Prem qualsevol dada per ampliar la informació',
+      items: [
+        ['🌡️', 'Temperatura', 'Prem el número gran per veure màximes, mínimes i pluja d\'avui'],
+        ['🧭', 'Brúixola', 'Dalt a la dreta — obre-la a pantalla completa'],
+        ['📍', 'La teva ubicació', 'Prem el nom del lloc per veure la teva posició exacta al mapa'],
+        ['☀️', 'Índex UV', 'Prem el valor UV per veure el risc solar'],
+        ['💨', 'Qualitat de l\'aire', 'Prem el valor de l\'aire per veure els contaminants'],
+        ['🌊', 'Marees', 'Prem el panell de marees per veure el gràfic del dia'],
+        ['📅', 'Previsió diària', 'Prem qualsevol dia de la setmana per veure el detall'],
+        ['🌧', 'Radar de pluja', 'Prem el botó del radar per veure les darreres hores de pluja'],
+        ['⚙️', 'Ajustos', 'Canvia l\'idioma, °C/°F, km/h o mph — dalt a l\'esquerra'],
+      ],
+      footer: 'Torna aquí quan vulguis prement el botó ?'
+    },
+    eu: {
+      titulo: '💡 Dena interaktiboa da',
+      sub: 'Sakatu edozein datu informazio gehiago ikusteko',
+      items: [
+        ['🌡️', 'Tenperatura', 'Sakatu zenbaki handia gaurko maximoak, minimoak eta euria ikusteko'],
+        ['🧭', 'Iparrorratz', 'Goian eskuinean — ireki pantaila osoan ikusteko'],
+        ['📍', 'Zure kokapena', 'Sakatu leku izena mapan zure kokapena ikusteko'],
+        ['☀️', 'UV indizea', 'Sakatu UV balioa eguzki-arriskua ikusteko'],
+        ['💨', 'Aire kalitatea', 'Sakatu aire balioa kutsatzaileen xehetasunak ikusteko'],
+        ['🌊', 'Itsasaldiak', 'Sakatu itsasaldi panela eguneko grafikoa ikusteko'],
+        ['📅', 'Eguneroko iragarpena', 'Sakatu edozein egun xehetasunak ikusteko'],
+        ['🌧', 'Euri radarra', 'Sakatu radar botoia azken euri orduak ikusteko'],
+        ['⚙️', 'Ezarpenak', 'Aldatu hizkuntza, °C/°F, km/h edo mph — goian ezkerrean'],
+      ],
+      footer: 'Itzuli hona nahi duzunean ? botoia sakatuz'
+    },
+    gl: {
+      titulo: '💡 Todo é interactivo',
+      sub: 'Preme calquera dato para ampliar a información',
+      items: [
+        ['🌡️', 'Temperatura', 'Preme o número grande para ver máximas, mínimas e choiva de hoxe'],
+        ['🧭', 'Compás', 'Arriba á dereita — ábreo a pantalla completa'],
+        ['📍', 'A túa localización', 'Preme o nome do lugar para ver a túa posición exacta no mapa'],
+        ['☀️', 'Índice UV', 'Preme o valor UV para ver o nivel de risco solar'],
+        ['💨', 'Calidade do aire', 'Preme o dato do aire para ver os contaminantes'],
+        ['🌊', 'Mareas', 'Preme o panel de mareas para ver a gráfica do día'],
+        ['📅', 'Previsión diaria', 'Preme calquera día da semana para ver o detalle'],
+        ['🌧', 'Radar de choiva', 'Preme o botón do radar para ver as últimas horas de choiva'],
+        ['⚙️', 'Axustes', 'Cambia o idioma, °C/°F, km/h ou mph — arriba á esquerda'],
+      ],
+      footer: 'Volve aquí cando queiras premendo o botón ?'
+    },
+    ar: {
+      titulo: '💡 كل شيء تفاعلي',
+      sub: 'اضغط على أي بيانات لتوسيع المعلومات',
+      items: [
+        ['🌡️', 'درجة الحرارة', 'اضغط على الرقم الكبير لرؤية الحد الأقصى والأدنى وأمطار اليوم'],
+        ['🧭', 'البوصلة', 'أعلى اليمين — افتحها على الشاشة الكاملة'],
+        ['📍', 'موقعك', 'اضغط على اسم المنطقة لرؤية موقعك الدقيق على الخريطة'],
+        ['☀️', 'مؤشر الأشعة فوق البنفسجية', 'اضغط على قيمة UV لرؤية مستوى الخطر الشمسي'],
+        ['💨', 'جودة الهواء', 'اضغط على بيانات الهواء لرؤية تفاصيل الملوثات'],
+        ['🌊', 'المد والجزر', 'اضغط على لوحة المد لرؤية الرسم البياني اليومي'],
+        ['📅', 'التوقعات اليومية', 'اضغط على أي يوم من الأسبوع للتفاصيل'],
+        ['🌧', 'رادار المطر', 'اضغط على زر الرادار لرؤية ساعات المطر الأخيرة'],
+        ['⚙️', 'الإعدادات', 'غيّر اللغة، °C/°F، km/h أو mph — أعلى اليسار'],
+      ],
+      footer: 'ارجع هنا في أي وقت بالضغط على زر ?'
+    },
+    ru: {
+      titulo: '💡 Всё интерактивно',
+      sub: 'Нажмите на любые данные для подробностей',
+      items: [
+        ['🌡️', 'Температура', 'Нажмите на большое число, чтобы увидеть максимум, минимум и осадки'],
+        ['🧭', 'Компас', 'Вверху справа — откройте на весь экран'],
+        ['📍', 'Ваше местоположение', 'Нажмите на название места, чтобы увидеть точное местоположение'],
+        ['☀️', 'УФ-индекс', 'Нажмите на значение UV для уровня солнечного риска'],
+        ['💨', 'Качество воздуха', 'Нажмите на данные воздуха для деталей загрязнения'],
+        ['🌊', 'Приливы', 'Нажмите на панель приливов для дневного графика'],
+        ['📅', 'Ежедневный прогноз', 'Нажмите на любой день недели для подробностей'],
+        ['🌧', 'Радар осадков', 'Нажмите кнопку радара для последних часов дождя'],
+        ['⚙️', 'Настройки', 'Язык, °C/°F, км/ч или миль/ч — вверху слева'],
+      ],
+      footer: 'Вернитесь сюда в любое время, нажав кнопку ?'
+    },
+    ja: {
+      titulo: '💡 すべてインタラクティブです',
+      sub: 'データをタップして詳細を表示',
+      items: [
+        ['🌡️', '気温', '大きな数字をタップして今日の最高・最低気温と雨を確認'],
+        ['🧭', 'コンパス', '右上 — タップしてフルスクリーン表示'],
+        ['📍', '現在地', '地名をタップして地図上の正確な位置を確認'],
+        ['☀️', 'UV指数', 'UV値をタップして日焼けリスクを確認'],
+        ['💨', '大気質', '大気データをタップして汚染物質の詳細を確認'],
+        ['🌊', '潮汐', '潮汐パネルをタップして一日のグラフを表示'],
+        ['📅', '日別予報', '曜日をタップして詳細を表示'],
+        ['🌧', '雨量レーダー', 'レーダーボタンをタップして直近の降雨を確認'],
+        ['⚙️', '設定', '言語・°C/°F・km/hまたはmphを変更 — 左上'],
+      ],
+      footer: '? ボタンをタップしていつでもここに戻れます'
+    },
+    ko: {
+      titulo: '💡 모든 것이 인터랙티브합니다',
+      sub: '데이터를 탭하여 자세한 정보를 확인하세요',
+      items: [
+        ['🌡️', '온도', '큰 숫자를 탭하여 오늘의 최고·최저기온과 강수량 확인'],
+        ['🧭', '나침반', '오른쪽 상단 — 탭하여 전체 화면으로 열기'],
+        ['📍', '내 위치', '지역 이름을 탭하여 지도에서 정확한 위치 확인'],
+        ['☀️', 'UV 지수', 'UV 값을 탭하여 자외선 위험 수준 확인'],
+        ['💨', '대기질', '대기 데이터를 탭하여 오염 물질 상세 확인'],
+        ['🌊', '조석', '조석 패널을 탭하여 하루 차트 확인'],
+        ['📅', '일별 예보', '요일을 탭하여 상세 정보 확인'],
+        ['🌧', '강수 레이더', '레이더 버튼을 탭하여 최근 강수량 확인'],
+        ['⚙️', '설정', '언어, °C/°F, km/h 또는 mph 변경 — 왼쪽 상단'],
+      ],
+      footer: '? 버튼을 탭하여 언제든지 여기로 돌아오세요'
+    },
+    nl: {
+      titulo: '💡 Alles is interactief',
+      sub: 'Tik op een gegeven voor meer informatie',
+      items: [
+        ['🌡️', 'Temperatuur', 'Tik op het grote getal voor de dagelijkse max, min en neerslag'],
+        ['🧭', 'Kompas', 'Rechtsboven — tik om op volledig scherm te openen'],
+        ['📍', 'Jouw locatie', 'Tik op de plaatsnaam om je exacte positie op de kaart te zien'],
+        ['☀️', 'UV-index', 'Tik op de UV-waarde voor het zonnebrandrisico'],
+        ['💨', 'Luchtkwaliteit', 'Tik op de luchtwaarde voor pollutiedetails'],
+        ['🌊', 'Getijden', 'Tik op het getijdenpaneel voor de daggrafiek'],
+        ['📅', 'Dagelijkse prognose', 'Tik op een weekdag voor details'],
+        ['🌧', 'Regenradar', 'Tik op de radarknop voor de laatste uren regen'],
+        ['⚙️', 'Instellingen', 'Taal, °C/°F, km/h of mph wijzigen — linksboven'],
+      ],
+      footer: 'Keer hier terug via de ? knop'
+    },
+    pl: {
+      titulo: '💡 Wszystko jest interaktywne',
+      sub: 'Dotknij dowolnych danych, aby rozwinąć informacje',
+      items: [
+        ['🌡️', 'Temperatura', 'Dotknij dużej liczby, aby zobaczyć max, min i opady dnia'],
+        ['🧭', 'Kompas', 'Prawy górny róg — dotknij, aby otworzyć na pełnym ekranie'],
+        ['📍', 'Twoja lokalizacja', 'Dotknij nazwy miejsca, aby zobaczyć dokładną pozycję na mapie'],
+        ['☀️', 'Indeks UV', 'Dotknij wartości UV, aby zobaczyć poziom ryzyka słonecznego'],
+        ['💨', 'Jakość powietrza', 'Dotknij danych powietrza, aby zobaczyć szczegóły zanieczyszczeń'],
+        ['🌊', 'Pływy', 'Dotknij panelu pływów, aby zobaczyć dzienny wykres'],
+        ['📅', 'Prognoza dzienna', 'Dotknij dowolnego dnia tygodnia, aby zobaczyć szczegóły'],
+        ['🌧', 'Radar deszczu', 'Dotknij przycisku radaru, aby zobaczyć ostatnie godziny deszczu'],
+        ['⚙️', 'Ustawienia', 'Zmień język, °C/°F, km/h lub mph — lewy górny róg'],
+      ],
+      footer: 'Wróć tu w dowolnym momencie, dotykając przycisku ?'
+    },
+    hi: {
+      titulo: '💡 सब कुछ इंटरैक्टिव है',
+      sub: 'अधिक जानकारी के लिए किसी भी डेटा पर टैप करें',
+      items: [
+        ['🌡️', 'तापमान', 'आज के अधिकतम, न्यूनतम और बारिश देखने के लिए बड़े अंक पर टैप करें'],
+        ['🧭', 'कम्पास', 'ऊपर दाईं ओर — फुल स्क्रीन में खोलने के लिए टैप करें'],
+        ['📍', 'आपका स्थान', 'मानचित्र पर सटीक स्थान देखने के लिए स्थान नाम पर टैप करें'],
+        ['☀️', 'UV सूचकांक', 'सूर्य जोखिम स्तर देखने के लिए UV मान पर टैप करें'],
+        ['💨', 'वायु गुणवत्ता', 'प्रदूषण विवरण देखने के लिए वायु डेटा पर टैप करें'],
+        ['🌊', 'ज्वार-भाटा', 'दैनिक चार्ट देखने के लिए ज्वार पैनल पर टैप करें'],
+        ['📅', 'दैनिक पूर्वानुमान', 'विवरण के लिए सप्ताह के किसी भी दिन पर टैप करें'],
+        ['🌧', 'वर्षा रडार', 'हालिया बारिश देखने के लिए रडार बटन पर टैप करें'],
+        ['⚙️', 'सेटिंग्स', 'भाषा, °C/°F, km/h या mph बदलें — ऊपर बाईं ओर'],
+      ],
+      footer: '? बटन दबाकर जब चाहें यहां वापस आएं'
+    },
+    ro: {
+      titulo: '💡 Totul este interactiv',
+      sub: 'Apasă pe orice date pentru a extinde informațiile',
+      items: [
+        ['🌡️', 'Temperatură', 'Apasă pe numărul mare pentru max, min și ploaia de azi'],
+        ['🧭', 'Busolă', 'Sus dreapta — deschide-o pe tot ecranul'],
+        ['📍', 'Locația ta', 'Apasă pe numele locului pentru a vedea poziția exactă pe hartă'],
+        ['☀️', 'Indice UV', 'Apasă pe valoarea UV pentru nivelul de risc solar'],
+        ['💨', 'Calitatea aerului', 'Apasă pe datele de aer pentru detalii despre poluanți'],
+        ['🌊', 'Maree', 'Apasă pe panoul de maree pentru graficul zilnic'],
+        ['📅', 'Prognoza zilnică', 'Apasă pe orice zi a săptămânii pentru detalii'],
+        ['🌧', 'Radar ploaie', 'Apasă butonul radar pentru ultimele ore de ploaie'],
+        ['⚙️', 'Setări', 'Schimbă limba, °C/°F, km/h sau mph — sus stânga'],
+      ],
+      footer: 'Revino aici oricând apăsând butonul ?'
+    },
+    hu: {
+      titulo: '💡 Minden interaktív',
+      sub: 'Koppints bármelyik adatra a részletekért',
+      items: [
+        ['🌡️', 'Hőmérséklet', 'Koppints a nagy számra a napi maximum, minimum és csapadék megtekintéséhez'],
+        ['🧭', 'Iránytű', 'Jobb felső sarok — koppints a teljes képernyős nézethez'],
+        ['📍', 'Tartózkodási helyed', 'Koppints a hely nevére a pontos pozíció megtekintéséhez a térképen'],
+        ['☀️', 'UV-index', 'Koppints az UV-értékre a napsugárzás kockázatának megtekintéséhez'],
+        ['💨', 'Levegőminőség', 'Koppints a levegőadatokra a szennyezőanyagok részleteihez'],
+        ['🌊', 'Árapály', 'Koppints az árapály-panelre a napi grafikonhoz'],
+        ['📅', 'Napi előrejelzés', 'Koppints bármelyik napra a részletekért'],
+        ['🌧', 'Esőradar', 'Koppints a radargombra az elmúlt órák csapadékáért'],
+        ['⚙️', 'Beállítások', 'Nyelv, °C/°F, km/h vagy mph módosítása — bal felső sarok'],
+      ],
+      footer: 'Térj vissza bármikor a ? gomb megnyomásával'
     }
   };
-  const T = i18n[lng] || i18n.en;
+
+  function renderAyuda() {
+    const lng = (typeof idioma !== 'undefined' ? idioma : 'en').substring(0,2);
+    const Tr = i18n[lng] || i18n.en;
+    document.getElementById('ayudaTitulo').textContent = Tr.titulo;
+    document.getElementById('ayudaSub').textContent = Tr.sub;
+    document.getElementById('ayudaLista').innerHTML = Tr.items.map(([icon, title, desc]) =>
+      `<div class="ayuda-item">
+        <div class="ayuda-item-icon">${icon}</div>
+        <div class="ayuda-item-text"><b>${title}</b><span>${desc}</span></div>
+      </div>`
+    ).join('');
+    document.getElementById('ayudaFooter').textContent = Tr.footer;
+  }
+
   const modal = document.getElementById('ayudaModal');
 
-  document.getElementById('ayudaTitulo').textContent = T.titulo;
-  document.getElementById('ayudaSub').textContent = T.sub;
-  document.getElementById('ayudaLista').innerHTML = T.items.map(([icon, title, desc]) =>
-    `<div class="ayuda-item">
-      <div class="ayuda-item-icon">${icon}</div>
-      <div class="ayuda-item-text"><b>${title}</b><span>${desc}</span></div>
-    </div>`
-  ).join('');
-  document.getElementById('ayudaFooter').textContent = T.footer;
-
-  document.getElementById('btnAyuda').addEventListener('click', () => modal.classList.add('open'));
+  document.getElementById('btnAyuda').addEventListener('click', () => { renderAyuda(); modal.classList.add('open'); });
 
   function cerrarAyuda() { modal.classList.remove('open'); }
   document.getElementById('ayudaClose').addEventListener('click', cerrarAyuda);
@@ -4979,6 +5190,7 @@ function abrirEnGoogleMaps() {
 
   // Primera vez: abrir automáticamente mientras cargan los datos
   if (!localStorage.getItem('ql_ayuda_vista')) {
+    renderAyuda();
     modal.classList.add('open');
     localStorage.setItem('ql_ayuda_vista', '1');
   }
