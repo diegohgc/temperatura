@@ -185,8 +185,12 @@
   .arrow-wrap { flex-shrink: 0; width: 32px; height: 32px; }
   .arrow-wrap svg { width: 32px; height: 32px; transition: transform 0.5s ease; }
   /* ── Modales bottom-sheet (viento + humedad) ── */
-  #modalViento, #modalHumedad, #modalSensacion, #modalLluvia { position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(8px); display: flex; align-items: flex-end; justify-content: center; z-index: 200; }
-  #modalViento[hidden], #modalHumedad[hidden], #modalSensacion[hidden], #modalLluvia[hidden] { display: none; }
+  #modalViento, #modalHumedad, #modalSensacion, #modalLluvia, #modalBeaufort { position: fixed; inset: 0; background: rgba(0,0,0,0.55); backdrop-filter: blur(8px); display: flex; align-items: flex-end; justify-content: center; z-index: 200; }
+  #modalViento[hidden], #modalHumedad[hidden], #modalSensacion[hidden], #modalLluvia[hidden], #modalBeaufort[hidden] { display: none; }
+  #modalBeaufort .modal-sheet { width: 100%; max-width: 440px; background: #1a2240; border-radius: 24px 24px 0 0; }
+  .mb-escala-item { flex: 1; height: 28px; border-radius: 4px; background: rgba(255,255,255,0.12); display: flex; align-items: flex-end; justify-content: center; padding-bottom: 3px; font-size: 0.5rem; opacity: 0.5; transition: background 0.2s; }
+  .mb-escala-item.activo { background: rgba(255,255,255,0.75); opacity: 1; color: #1a2240; font-weight: 700; }
+  .mvs-tap-hint { font-size: 0.5rem; opacity: 0.35; position: absolute; bottom: 5px; right: 8px; }
   .modal-viento-sheet { width: 100%; max-width: 440px; background: #1a2240; border-radius: 24px 24px 0 0; padding: 16px 20px 44px; display: flex; flex-direction: column; gap: 14px; }
   .modal-viento-titulo { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.45; text-align: center; }
   .modal-compass { display: flex; flex-direction: column; align-items: center; gap: 8px; }
@@ -730,9 +734,29 @@
         <div class="mvs-label" id="mvLblDir">Dirección</div>
         <div class="mvs-value" id="mvDir">--</div>
       </div>
-      <div class="modal-viento-stat">
-        <div class="mvs-label">Beaufort</div>
+      <div class="modal-viento-stat" id="mvBeaufortCard" onclick="abrirModalBeaufort()" style="cursor:pointer;position:relative">
+        <div class="mvs-label" id="mvLblBeaufort">Beaufort</div>
         <div class="mvs-value" id="mvBeaufort">--</div>
+        <div style="font-size:0.55rem;opacity:0.4;margin-top:2px" id="mvBeaufortNombre"></div>
+        <span class="mvs-tap-hint">▸</span>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal Beaufort -->
+<div id="modalBeaufort" role="dialog" aria-modal="true">
+  <div class="modal-sheet" style="padding-bottom:32px">
+    <div class="modal-handle-row"><div class="modal-handle"></div></div>
+    <div style="text-align:center;padding:0 20px">
+      <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.12em;opacity:0.5;margin-bottom:8px" id="mbTitulo">Beaufort Scale</div>
+      <div style="font-size:5rem;font-weight:900;line-height:1" id="mbNumero">--</div>
+      <div style="font-size:1.1rem;font-weight:700;margin:4px 0" id="mbNombre"></div>
+      <div style="font-size:0.8rem;opacity:0.6;margin-bottom:16px" id="mbRango"></div>
+      <div style="font-size:0.85rem;line-height:1.5;opacity:0.85;margin-bottom:20px;min-height:3em" id="mbDesc"></div>
+      <!-- Barra escala 0-12 -->
+      <div id="mbEscala" style="display:flex;gap:3px;justify-content:center;flex-wrap:nowrap"></div>
+      <div style="display:flex;justify-content:space-between;font-size:0.6rem;opacity:0.4;margin-top:4px;padding:0 2px">
+        <span>0</span><span>6</span><span>12</span>
       </div>
     </div>
   </div>
@@ -1637,6 +1661,64 @@ function beaufort(kmh) {
   if (kmh < 50) return 6; if (kmh < 62) return 7; if (kmh < 75) return 8;
   if (kmh < 89) return 9; if (kmh < 103) return 10; if (kmh < 118) return 11;
   return 12;
+}
+const BEAUFORT_DATA = [
+  { kmhMin:0,  kmhMax:1,   nombres:{es:'Calma',en:'Calm',de:'Windstille',fr:'Calme',pt:'Calmaria',it:'Calma',zh:'无风',ca:'Calma',eu:'Lasaitasuna',gl:'Calma',ar:'هادئ',ru:'Штиль',ja:'無風',ko:'고요',nl:'Windstil',pl:'Cisza',hi:'शांत',ro:'Calm',hu:'Szélcsend'},
+    desc:{es:'El humo sube en vertical. Mar en calma absoluta.',en:'Smoke rises vertically. Sea like a mirror.',de:'Rauch steigt senkrecht auf. Spiegelglatte See.',fr:'La fumée monte verticalement. Mer calme.',pt:'O fumo sobe verticalmente. Mar como espelho.',it:'Il fumo sale verticalmente. Mare come uno specchio.',zh:'烟雾垂直上升，海面如镜。',ca:'El fum puja verticalment. Mar com un mirall.',eu:'Kea bertikalki igotzen da. Itsasoa ispilu gisa.',gl:'O fume sobe verticalmente. Mar como espello.',ar:'الدخان يرتفع عمودياً. البحر كالمرآة.',ru:'Дым поднимается вертикально. Зеркальное море.',ja:'煙が垂直に立ち上る。鏡のような海面。',ko:'연기가 수직으로 올라감. 거울처럼 잔잔한 바다.',nl:'Rook stijgt verticaal. Spiegelglad water.',pl:'Dym unosi się pionowo. Morze jak lustro.',hi:'धुआँ सीधा ऊपर जाता है। समुद्र दर्पण जैसा।',ro:'Fumul se ridică vertical. Marea ca o oglindă.',hu:'A füst függőlegesen emelkedik. Tükörsimaság.'}},
+  { kmhMin:1,  kmhMax:5,   nombres:{es:'Ventolina',en:'Light air',de:'Leichte Brise',fr:'Calme/Bourrasque légère',pt:'Aragem',it:'Bava di vento',zh:'软风',ca:'Ventolina',eu:'Aire arina',gl:'Ventada suave',ar:'نسيم خفيف',ru:'Тихий ветер',ja:'静穏',ko:'실바람',nl:'Zwakke wind',pl:'Powiew',hi:'हल्की हवा',ro:'Adiere ușoară',hu:'Enyhe szellő'},
+    desc:{es:'El viento mueve el humo. Pequeñas olas sin romper.',en:'Wind felt on face. Small wavelets, no crests.',de:'Wind im Gesicht spürbar. Kleine Kräuselwellen.',fr:'Vent senti sur le visage. Petits flots sans crête.',pt:'Vento sentido na face. Pequenas ondas sem cristas.',it:'Vento sentito sul viso. Piccole increspature.',zh:'脸部能感觉到风，小波浪无浪花。',ca:'Vent sentit a la cara. Petites ones sense crestes.',eu:'Aurpegian haizea sentitzen da. Olatu txikiak.',gl:'Vento sentido na cara. Pequenas ondas sen cristas.',ar:'يُحس الريح على الوجه. أمواج صغيرة.',ru:'Ветер ощущается на лице. Небольшая рябь.',ja:'顔に風を感じる。小さな波紋。',ko:'얼굴에 바람 느낌. 잔물결.',nl:'Wind voelbaar op het gezicht. Kleine rimpels.',pl:'Wiatr odczuwalny na twarzy. Małe zmarszczki.',hi:'चेहरे पर हवा महसूस होती है। छोटी तरंगें।',ro:'Vânt simțit pe față. Valuri mici fără creste.',hu:'Arcon érezhető a szél. Kis hullámok.'}},
+  { kmhMin:6,  kmhMax:11,  nombres:{es:'Brisa muy débil',en:'Light breeze',de:'Leichte Brise',fr:'Légère brise',pt:'Brisa leve',it:'Brezza leggera',zh:'轻风',ca:'Brisa molt feble',eu:'Haize arina',gl:'Brisa suave',ar:'نسيم خفيف',ru:'Лёгкий бриз',ja:'軽風',ko:'남실바람',nl:'Zwakke wind',pl:'Słaby wiatr',hi:'हल्की बयार',ro:'Briză ușoară',hu:'Gyenge szellő'},
+    desc:{es:'Hojas en movimiento. Veletas indican dirección. Pequeñas olas cortas.',en:'Leaves rustle. Wind felt on face. Small short waves.',de:'Blätter rascheln. Kleiner Wellengang.',fr:'Feuilles qui bougent. Petites vagues courtes.',pt:'Folhas a mover-se. Ondas pequenas e curtas.',it:'Foglie che si muovono. Piccole onde corte.',zh:'叶子轻动，可感风向，短小波浪。',ca:'Fulles en moviment. Ones petites i curtes.',eu:'Hostoak mugitzen dira. Uhin txiki laburrak.',gl:'Follas en movemento. Ondas pequenas e cortas.',ar:'تتحرك الأوراق. أمواج قصيرة صغيرة.',ru:'Листья шелестят. Небольшие короткие волны.',ja:'葉がそよぐ。短い小さな波。',ko:'나뭇잎이 살랑거림. 짧은 파도.',nl:'Bladeren ritselen. Kleine korte golven.',pl:'Liście szumią. Małe krótkie fale.',hi:'पत्तियाँ हिलती हैं। छोटी लहरें।',ro:'Frunzele se mișcă. Valuri mici și scurte.',hu:'Levelek suhognak. Kis, rövid hullámok.'}},
+  { kmhMin:12, kmhMax:19,  nombres:{es:'Brisa débil',en:'Gentle breeze',de:'Schwache Brise',fr:'Petite brise',pt:'Brisa fraca',it:'Brezza leggera',zh:'微风',ca:'Brisa feble',eu:'Haize leuna',gl:'Brisa débil',ar:'نسيم ضعيف',ru:'Слабый бриз',ja:'軟風',ko:'산들바람',nl:'Zwakke bries',pl:'Słaba bryza',hi:'मंद हवा',ro:'Briză slabă',hu:'Gyenge szellő'},
+    desc:{es:'Banderas extendidas. Hojas y ramitas en continuo movimiento.',en:'Flags extended. Leaves and small twigs in constant motion.',de:'Fahnen flattern. Blätter und Zweige in Bewegung.',fr:'Drapeaux déployés. Feuilles et petites branches en mouvement.',pt:'Bandeiras estendidas. Folhas e galhos em movimento.',it:'Bandiere distese. Foglie e rametti in costante movimento.',zh:'旗帜展开，树叶和小枝不断运动。',ca:'Banderes esteses. Fulles i branques en moviment.',eu:'Banderak hedatuta. Hostoak eta abarrak etengabeko mugimenduan.',gl:'Bandeiras estendidas. Follas e pólas en movemento.',ar:'الأعلام منتشرة. تتحرك الأوراق والأغصان باستمرار.',ru:'Флаги развеваются. Листья и ветки в постоянном движении.',ja:'旗がはためく。葉や小枝が絶えず動く。',ko:'깃발이 펼쳐짐. 나뭇잎과 잔가지 지속 움직임.',nl:'Vlaggen wapperen. Bladeren en takjes in constant beweging.',pl:'Flagi rozpostarte. Liście i gałązki w ciągłym ruchu.',hi:'झंडे फैले हुए हैं। पत्तियाँ और टहनियाँ निरंतर हिलती हैं।',ro:'Steaguri desfăcute. Frunze și crenguțe în mișcare.',hu:'Zászlók kiterülnek. Levelek és ágak folyamatos mozgásban.'}},
+  { kmhMin:20, kmhMax:28,  nombres:{es:'Brisa moderada',en:'Moderate breeze',de:'Mäßige Brise',fr:'Jolie brise',pt:'Brisa moderada',it:'Brezza moderata',zh:'和风',ca:'Brisa moderada',eu:'Haize moderatua',gl:'Brisa moderada',ar:'نسيم معتدل',ru:'Умеренный бриз',ja:'和風',ko:'건들바람',nl:'Matige bries',pl:'Umiarkowana bryza',hi:'मध्यम हवा',ro:'Briză moderată',hu:'Mérsékelt szellő'},
+    desc:{es:'Polvo y papeles se levantan. Ramas pequeñas en movimiento.',en:'Dust and loose paper raised. Small branches move.',de:'Staub und Papier wird aufgewirbelt. Kleine Äste bewegen sich.',fr:'Poussière et papiers s\'envolent. Petites branches bougent.',pt:'Poeira e papéis levantados. Galhos pequenos em movimento.',it:'Polvere e fogli sollevati. Piccoli rami in movimento.',zh:'灰尘和纸张飞扬，小树枝摇动。',ca:'Pols i papers s\'aixequen. Branques petites en moviment.',eu:'Hautsa eta paperak altxatzen dira. Adar txikiak mugitzen dira.',gl:'Po e papeis levántanse. Pólas pequenas en movemento.',ar:'الغبار والأوراق ترتفع. تتحرك الأغصان الصغيرة.',ru:'Пыль и бумага поднимаются. Небольшие ветки движутся.',ja:'砂埃や紙が舞い上がる。小枝が動く。',ko:'먼지와 종이 날림. 작은 가지 흔들림.',nl:'Stof en papier opgewaaid. Kleine takken bewegen.',pl:'Kurz i papiery unoszą się. Małe gałęzie poruszają się.',hi:'धूल और कागज उड़ते हैं। छोटी शाखाएँ हिलती हैं।',ro:'Praf și hârtii ridicate. Ramuri mici se mișcă.',hu:'Por és papír felkavarodik. Kis ágak mozognak.'}},
+  { kmhMin:29, kmhMax:38,  nombres:{es:'Brisa fresca',en:'Fresh breeze',de:'Frische Brise',fr:'Bonne brise',pt:'Brisa fresca',it:'Brezza tesa',zh:'清风',ca:'Brisa fresca',eu:'Haize freskoa',gl:'Brisa fresca',ar:'نسيم منعش',ru:'Свежий бриз',ja:'疾風',ko:'흔들바람',nl:'Frisse bries',pl:'Świeża bryza',hi:'ताज़ी हवा',ro:'Briză proaspătă',hu:'Friss szellő'},
+    desc:{es:'Árboles pequeños se balancean. Olas moderadas.',en:'Small trees sway. Moderate waves, some crests.',de:'Kleine Bäume schwanken. Mäßige Wellen.',fr:'Petits arbres balancent. Vagues modérées avec crêtes.',pt:'Árvores pequenas balançam. Ondas moderadas.',it:'Alberelli si muovono. Onde moderate.',zh:'小树摇摆，中等波浪，部分有浪花。',ca:'Arbres petits es balancegen. Ones moderades.',eu:'Zuhaitz txikiak kulunkatzen dira. Olatu moderatuak.',gl:'Árbores pequenas bálanse. Ondas moderadas.',ar:'الأشجار الصغيرة تتمايل. أمواج معتدلة.',ru:'Маленькие деревья качаются. Умеренные волны.',ja:'小さな木が揺れる。中程度の波。',ko:'작은 나무 흔들림. 중간 파도.',nl:'Kleine bomen zwaaien. Matige golven.',pl:'Małe drzewa kołyszą się. Umiarkowane fale.',hi:'छोटे पेड़ डोलते हैं। मध्यम लहरें।',ro:'Copaci mici se balansează. Valuri moderate.',hu:'Kis fák hintáznak. Mérsékelt hullámok.'}},
+  { kmhMin:39, kmhMax:49,  nombres:{es:'Brisa fuerte',en:'Strong breeze',de:'Starke Brise',fr:'Vent frais',pt:'Vento fresco',it:'Vento fresco',zh:'强风',ca:'Brisa forta',eu:'Haize bizia',gl:'Brisa forte',ar:'نسيم قوي',ru:'Сильный бриз',ja:'強風',ko:'된바람',nl:'Krachtige wind',pl:'Silna bryza',hi:'तेज़ हवा',ro:'Briză puternică',hu:'Erős szellő'},
+    desc:{es:'Ramas grandes en movimiento. Dificultad con paraguas.',en:'Large branches in motion. Umbrellas difficult to use.',de:'Große Äste in Bewegung. Regenschirme schwer zu öffnen.',fr:'Grosses branches en mouvement. Parapluies difficiles à utiliser.',pt:'Grandes galhos em movimento. Dificuldade com guarda-chuvas.',it:'Grossi rami in moto. Difficoltà con ombrelli.',zh:'大树枝摇动，使用雨伞困难。',ca:'Branques grans en moviment. Dificultats amb paraigua.',eu:'Adar handiak mugitzen dira. Aterkia erabiltzea zaila.',gl:'Pólas grandes en movemento. Dificultade con guarda-chovias.',ar:'أغصان كبيرة تتحرك. صعوبة استخدام المظلات.',ru:'Большие ветви в движении. Зонтики сложно использовать.',ja:'大きな枝が動く。傘の使用が困難。',ko:'큰 가지 흔들림. 우산 사용 곤란.',nl:'Grote takken in beweging. Paraplu\'s moeilijk.',pl:'Duże gałęzie się kołyszą. Trudność z parasolem.',hi:'बड़ी शाखाएँ हिलती हैं। छाता इस्तेमाल मुश्किल।',ro:'Crengi mari se mișcă. Dificultăți cu umbrela.',hu:'Nagy ágak mozognak. Esernyő nehezen kezelhető.'}},
+  { kmhMin:50, kmhMax:61,  nombres:{es:'Viento fuerte',en:'Near gale',de:'Steifer Wind',fr:'Grand frais',pt:'Vento forte',it:'Vento forte',zh:'疾风',ca:'Vent fort',eu:'Haize gogorra',gl:'Vento forte',ar:'ريح قوية',ru:'Крепкий ветер',ja:'疾風',ko:'센바람',nl:'Harde wind',pl:'Silny wiatr',hi:'तूफ़ानी हवा',ro:'Vânt puternic',hu:'Erős szél'},
+    desc:{es:'Árboles enteros en movimiento. Caminar a contraviento resulta difícil.',en:'Whole trees in motion. Difficult to walk against wind.',de:'Ganze Bäume in Bewegung. Gegen den Wind gehen schwierig.',fr:'Arbres entiers en mouvement. Difficile de marcher contre le vent.',pt:'Árvores inteiras em movimento. Difícil caminhar contra o vento.',it:'Interi alberi in moto. Difficile camminare contro il vento.',zh:'整棵树木摇动，逆风行走困难。',ca:'Arbres sencers en moviment. Caminar a contraviento és difícil.',eu:'Zuhaitz osoak mugitzen dira. Haizearen kontra ibiltzea zaila.',gl:'Árbores enteiras en movemento. Camiñar contra o vento é difícil.',ar:'أشجار كاملة في حركة. صعوبة المشي ضد الريح.',ru:'Целые деревья качаются. Ходить против ветра сложно.',ja:'木全体が揺れる。逆風を歩くのが困難。',ko:'나무 전체 흔들림. 바람 맞서 걷기 어려움.',nl:'Hele bomen in beweging. Moeilijk tegen de wind in lopen.',pl:'Całe drzewa się kołyszą. Trudność chodzenia pod wiatr.',hi:'पूरे पेड़ हिलते हैं। तेज़ हवा में चलना मुश्किल।',ro:'Copaci întregi se mișcă. Greu de mers împotriva vântului.',hu:'Egész fák mozognak. Szemben haladni nehéz.'}},
+  { kmhMin:62, kmhMax:74,  nombres:{es:'Temporal',en:'Gale',de:'Stürmischer Wind',fr:'Coup de vent',pt:'Tempestade',it:'Burrasca',zh:'大风',ca:'Temporal',eu:'Ekaitza',gl:'Temporal',ar:'عاصفة',ru:'Шторм',ja:'大強風',ko:'큰바람',nl:'Storm',pl:'Sztorm',hi:'आँधी',ro:'Furtună',hu:'Viharos szél'},
+    desc:{es:'Ramas rotas. Caminar muy difícil. Olas altas con crestas.',en:'Twigs broken off. Very difficult to walk. High waves.',de:'Zweige brechen. Gehen sehr schwierig. Hohe Wellen.',fr:'Branchettes cassées. Marche très difficile. Hautes vagues.',pt:'Galhos quebrados. Caminhada muito difícil. Ondas altas.',it:'Ramoscelli spezzati. Molto difficile camminare. Onde alte.',zh:'小枝折断，行走极其困难，巨浪汹涌。',ca:'Branques trencades. Caminar molt difícil. Ones altes.',eu:'Adar txikiak hausten dira. Oso zaila ibiltzea. Uhin altuak.',gl:'Pólas partidas. Camiñar moi difícil. Ondas altas.',ar:'تنكسر الأغصان. المشي صعب جداً. أمواج عالية.',ru:'Ветви ломаются. Идти очень сложно. Высокие волны.',ja:'小枝が折れる。歩行が非常に困難。高い波。',ko:'잔가지 부러짐. 걷기 매우 어려움. 높은 파도.',nl:'Takken breken. Lopen zeer moeilijk. Hoge golven.',pl:'Gałęzie łamią się. Chodzenie bardzo trudne. Wysokie fale.',hi:'शाखाएँ टूटती हैं। चलना बहुत मुश्किल। ऊँची लहरें।',ro:'Crengile se rup. Mers foarte dificil. Valuri înalte.',hu:'Ágak törnek. Járás nagyon nehéz. Magas hullámok.'}},
+  { kmhMin:75, kmhMax:88,  nombres:{es:'Temporal fuerte',en:'Strong gale',de:'Sturm',fr:'Fort coup de vent',pt:'Tempestade forte',it:'Burrasca forte',zh:'烈风',ca:'Temporal fort',eu:'Ekaitz handia',gl:'Temporal forte',ar:'عاصفة قوية',ru:'Сильный шторм',ja:'強大強風',ko:'큰센바람',nl:'Zware storm',pl:'Silny sztorm',hi:'भारी आँधी',ro:'Furtună puternică',hu:'Erős vihar'},
+    desc:{es:'Daños en estructuras. Tejas y chimeneas derribadas.',en:'Slight structural damage. Chimney pots blown off.',de:'Leichte Gebäudeschäden. Schornsteine beschädigt.',fr:'Légers dommages aux structures. Cheminées arrachées.',pt:'Pequenos danos estruturais. Chaminés derrubadas.',it:'Leggeri danni strutturali. Comignoli abbattuti.',zh:'轻微建筑损坏，烟囱受损。',ca:'Danys estructurals lleus. Xemeneies caigudes.',eu:'Egitura-kalte arinak. Tximiniak eraitsita.',gl:'Danos estruturais leves. Chemineas derrubadas.',ar:'أضرار هيكلية طفيفة. سقوط مداخن.',ru:'Небольшие повреждения зданий. Дымовые трубы сорваны.',ja:'軽微な構造的損傷。煙突が倒れる。',ko:'경미한 구조 피해. 굴뚝 무너짐.',nl:'Lichte structurele schade. Schoorstenen omgeblazen.',pl:'Drobne uszkodzenia budynków. Kominy zwalone.',hi:'हल्की संरचनात्मक क्षति। चिमनियाँ गिरती हैं।',ro:'Daune structurale ușoare. Hornuri căzute.',hu:'Enyhe szerkezeti károk. Kémények ledőlnek.'}},
+  { kmhMin:89, kmhMax:102, nombres:{es:'Temporal muy fuerte',en:'Storm',de:'Schwerer Sturm',fr:'Tempête',pt:'Tempestade violenta',it:'Tempesta',zh:'狂风',ca:'Temporal molt fort',eu:'Ekaitz bizia',gl:'Temporal moi forte',ar:'عاصفة شديدة',ru:'Жестокий шторм',ja:'全強風',ko:'노대바람',nl:'Hevige storm',pl:'Gwałtowna burza',hi:'प्रचंड आँधी',ro:'Furtună violentă',hu:'Heves vihar'},
+    desc:{es:'Pocas veces se produce. Grandes daños en construcciones.',en:'Seldom experienced inland. Trees uprooted, structural damage.',de:'Selten im Landesinneren. Bäume entwurzelt, Strukturschäden.',fr:'Rarement observé à l\'intérieur. Arbres déracinés.',pt:'Raramente observado no interior. Árvores desarraigadas.',it:'Raramente osservato nell\'interno. Alberi sradicati.',zh:'内陆罕见，树木连根拔起，建筑受损。',ca:'Rarament observat a l\'interior. Arbres arrencats.',eu:'Gutxitan gertatzen da. Zuhaitzak errotik aterata.',gl:'Raramente observado no interior. Árbores arrancadas.',ar:'نادر في الداخل. أشجار مقتلعة وأضرار هيكلية.',ru:'Редко бывает в глубине суши. Деревья вырваны с корнем.',ja:'内陸では稀。木が根こそぎ倒れ、構造的損傷。',ko:'내륙에서 드묾. 나무 뿌리째 뽑힘.',nl:'Zelden inland. Bomen ontwortelend, structurele schade.',pl:'Rzadko w głębi lądu. Drzewa powalone z korzeniami.',hi:'अंदरूनी इलाकों में दुर्लभ। पेड़ उखड़ते हैं।',ro:'Rar în interior. Copaci dezrădăcinați, daune structurale.',hu:'Ritkán fordulna elő. Fák gyökerestül kiszakadnak.'}},
+  { kmhMin:103,kmhMax:117, nombres:{es:'Tempestad',en:'Violent storm',de:'Orkanartige Böen',fr:'Violente tempête',pt:'Tempestade violentíssima',it:'Tempesta violenta',zh:'暴风',ca:'Tempesta',eu:'Ekaitz bortitza',gl:'Tempestade',ar:'عاصفة عنيفة',ru:'Ураганный ветер',ja:'暴風',ko:'왕바람',nl:'Gewelddadige storm',pl:'Gwałtowna burza',hi:'भयंकर तूफ़ान',ro:'Furtună violentă',hu:'Viharzó szélvihar'},
+    desc:{es:'Muy raramente. Enormes daños generalizados.',en:'Very rarely experienced. Widespread damage.',de:'Sehr selten. Weitverbreitete schwere Schäden.',fr:'Très rarement. Dommages considérables et étendus.',pt:'Muito raramente. Grandes danos generalizados.',it:'Molto raramente. Danni enormi generalizzati.',zh:'极少发生，造成广泛重大破坏。',ca:'Molt rarament. Enormes danys generalitzats.',eu:'Oso gutxitan. Kalte zabalduak eta handiak.',gl:'Moi raramente. Enormes danos xeneralizados.',ar:'نادر جداً. أضرار جسيمة واسعة النطاق.',ru:'Очень редко. Обширные серьёзные повреждения.',ja:'極めて稀。広範囲にわたる甚大な被害。',ko:'매우 드묾. 광범위한 심각한 피해.',nl:'Zeer zelden. Wijdverspreide schade.',pl:'Bardzo rzadko. Rozległe poważne zniszczenia.',hi:'बहुत दुर्लभ। व्यापक भारी नुकसान।',ro:'Foarte rar. Pagube extinse.',hu:'Nagyon ritka. Kiterjedt súlyos károk.'}},
+  { kmhMin:118,kmhMax:999, nombres:{es:'Huracán',en:'Hurricane',de:'Orkan',fr:'Ouragan',pt:'Furacão',it:'Uragano',zh:'飓风',ca:'Huracà',eu:'Urakana',gl:'Furacán',ar:'إعصار',ru:'Ураган',ja:'ハリケーン',ko:'허리케인',nl:'Orkaan',pl:'Huragan',hi:'तूफ़ान',ro:'Uragan',hu:'Orkán'},
+    desc:{es:'Devastación total. Solo en zonas tropicales y ciclones.',en:'Devastation. Air filled with foam and spray.',de:'Verwüstung. Luft mit Schaum und Gischt gefüllt.',fr:'Dévastation. Air rempli d\'écume et de projections.',pt:'Devastação. Ar cheio de espuma e respingos.',it:'Devastazione. Aria piena di schiuma e spruzzi.',zh:'毁灭性破坏，空气中充满泡沫和浪花。',ca:'Devastació total.',eu:'Suntsipena. Airea aparrez eta urez beteta.',gl:'Devastación. Aire cheo de escuma e salpicos.',ar:'دمار شامل. الهواء مليء بالرغوة والرش.',ru:'Опустошение. Воздух насыщен брызгами и пеной.',ja:'甚大な破壊。空気は泡と飛沫で満たされる。',ko:'전면 파괴. 공기 중 거품과 물보라.',nl:'Verwoesting. Lucht vol schuim en nevel.',pl:'Dewastacja. Powietrze pełne piany i mgły.',hi:'पूर्ण विनाश।',ro:'Devastare totală.',hu:'Teljes pusztítás.'}},
+];
+let _ultimoBeaufortKmh = 0;
+function abrirModalBeaufort() {
+  const bft = beaufort(_ultimoBeaufortKmh);
+  const data = BEAUFORT_DATA[bft];
+  const lang = idioma || 'en';
+  const titulo = {es:'Escala Beaufort',en:'Beaufort Scale',de:'Beaufort-Skala',fr:'Échelle de Beaufort',pt:'Escala de Beaufort',it:'Scala Beaufort',zh:'蒲福风力等级',ca:'Escala Beaufort',eu:'Beaufort eskala',gl:'Escala Beaufort',ar:'مقياس بوفور',ru:'Шкала Бофора',ja:'ビューフォートスケール',ko:'보퍼트 풍력 등급',nl:'Beaufortschaal',pl:'Skala Beauforta',hi:'ब्यूफोर्ट स्केल',ro:'Scala Beaufort',hu:'Beaufort-skála'}[lang] || 'Beaufort Scale';
+  document.getElementById('mbTitulo').textContent = titulo;
+  document.getElementById('mbNumero').textContent = bft;
+  document.getElementById('mbNombre').textContent = data.nombres[lang] || data.nombres.en;
+  const mn = Math.round(data.kmhMin), mx = data.kmhMax === 999 ? '≥'+Math.round(data.kmhMin) : Math.round(data.kmhMax);
+  const rangoKmh = data.kmhMax === 999 ? `≥${mn} km/h` : `${mn}–${mx} km/h`;
+  const rangoMph = data.kmhMax === 999 ? `≥${Math.round(mn*0.621)} mph` : `${Math.round(mn*0.621)}–${Math.round(data.kmhMax*0.621)} mph`;
+  document.getElementById('mbRango').textContent = (usaMph || usaFahrenheit) ? rangoMph : rangoKmh;
+  document.getElementById('mbDesc').textContent = data.desc[lang] || data.desc.en;
+  // Escala visual
+  const esc = document.getElementById('mbEscala');
+  esc.innerHTML = BEAUFORT_DATA.map((d, i) =>
+    `<div class="mb-escala-item${i === bft ? ' activo' : ''}">${i}</div>`
+  ).join('');
+  // Mostrar modal
+  const modal = document.getElementById('modalBeaufort');
+  modal.classList.add('abierto');
+  modal.style.display = '';
+  modal.onclick = e => { if (e.target === modal) cerrarModalBeaufort(); };
+}
+function cerrarModalBeaufort() {
+  const modal = document.getElementById('modalBeaufort');
+  modal.classList.remove('abierto');
+  modal.style.display = 'none';
 }
 function getCardLabel(key) {
   const L = {
@@ -3514,7 +3596,11 @@ function renderDatos(datos) {
   document.getElementById('mvRafagas').textContent = gustKmh !== null ? toViento(gustKmh) : '--';
   document.getElementById('mvLblDir').textContent = getCardLabel('dir');
   document.getElementById('mvDir').textContent = windDirStr ? dirVientoTexto(windDirStr, windDeg) : '--';
+  _ultimoBeaufortKmh = windSpeedKmh;
   document.getElementById('mvBeaufort').textContent = beaufort(windSpeedKmh);
+  const bftNombre = BEAUFORT_DATA[beaufort(windSpeedKmh)]?.nombres[idioma] || BEAUFORT_DATA[beaufort(windSpeedKmh)]?.nombres.en || '';
+  const bftNombreEl = document.getElementById('mvBeaufortNombre');
+  if (bftNombreEl) bftNombreEl.textContent = bftNombre;
   // Previsión horaria: WeatherAPI > AEMET > Open-Meteo
   if (wapiData?.forecast?.forecastday) renderHorasWAPI(wapiData);
   else if (aemetHoras && aemetHoras.length) renderHorasAEMET(aemetHoras);
