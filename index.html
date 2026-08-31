@@ -3517,7 +3517,6 @@ function renderDatos(datos) {
   document.getElementById('mvBeaufort').textContent = beaufort(windSpeedKmh);
   // Previsión horaria: WeatherAPI > AEMET > Open-Meteo
   if (wapiData?.forecast?.forecastday) renderHorasWAPI(wapiData);
-  else if (aemetHoras && aemetHoras.length) renderHorasAEMET(aemetHoras);
   else renderHoras(tiempo.hourly);
   renderSol(tiempo.daily);
   renderDias(tiempo.daily);
@@ -3540,31 +3539,7 @@ function renderDatos(datos) {
 async function cargarDatos(latitude, longitude, nombreFijo) {
   setEstado(T.consultando);
   try {
-    // APIs regionales en paralelo según ubicación
-    const enEspaña = esEspaña(latitude, longitude);
-    const enNWS = !enEspaña && esNWS(latitude, longitude);
-
-    const aemetPromise = enEspaña
-      ? obtenerMunicipioAEMET(latitude, longitude)
-          .then(cod => cod ? obtenerTiempoAEMET(cod) : null)
-          .catch(() => null)
-      : Promise.resolve(null);
-
-    const aemetObsPromise = enEspaña
-      ? obtenerObservacionAEMET(latitude, longitude).catch(() => null)
-      : Promise.resolve(null);
-
-    const enDWD = !enEspaña && !enNWS && esDWD(latitude, longitude);
-
-    const nwsPromise = enNWS
-      ? obtenerTiempoNWS(latitude, longitude).catch(() => null)
-      : Promise.resolve(null);
-
-    const dwdObsPromise = enDWD
-      ? obtenerObservacionDWD(latitude, longitude).catch(() => null)
-      : Promise.resolve(null);
-
-    const [tiempo, ciudad, mdata, elevacion, aireData, owmData, wapiData, aemetRaw, aemetObs, nwsActual, dwdObs] = await Promise.all([
+    const [tiempo, ciudad, mdata, elevacion, aireData, owmData, wapiData] = await Promise.all([
       obtenerTiempo(latitude, longitude),
       nombreFijo ? Promise.resolve({ principal: nombreFijo, sub: null }) : obtenerCiudad(latitude, longitude),
       obtenerMarea(latitude, longitude).catch(() => null),
@@ -3572,20 +3547,14 @@ async function cargarDatos(latitude, longitude, nombreFijo) {
       obtenerCalidadAire(latitude, longitude).catch(() => null),
       fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=ee01a14dca6430b5ddb8b0fed708d4ba`).then(r => r.json()).catch(() => null),
       fetch(`https://api.weatherapi.com/v1/forecast.json?key=df2620108c794b40a68181321262708&q=${latitude},${longitude}&days=2&aqi=no&alerts=no`).then(r => r.json()).catch(() => null),
-      aemetPromise,
-      aemetObsPromise,
-      nwsPromise,
-      dwdObsPromise
     ]);
-    const aemetActual = aemetRaw ? aemetDatosActuales(aemetRaw) : null;
-    const aemetHoras = aemetRaw ? aemetHorasProximas(aemetRaw) : null;
     elCiudad.firstChild.textContent = ciudad.principal;
     document.getElementById('ciudadSub').textContent = ciudad.sub || '';
     const nombreCiudad = ciudad.sub ? `${ciudad.principal}, ${ciudad.sub}` : ciudad.principal;
     currentCoords = { lat: latitude, lon: longitude, nombre: nombreCiudad };
     actualizarBtnFav();
     actualizarFavIdx();
-    ultimosDatos = { tiempo, ciudad, mdata, elevacion, aireData, owmData, wapiData, aemetActual, aemetHoras, aemetObs, nwsActual, dwdObs };
+    ultimosDatos = { tiempo, ciudad, mdata, elevacion, aireData, owmData, wapiData, aemetActual: null, aemetHoras: null, aemetObs: null, nwsActual: null, dwdObs: null };
     renderDatos(ultimosDatos);
     ultimaActualizacion = Date.now();
     setEstado(T.actualizado + ' ' + new Date(ultimaActualizacion).toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' }));
