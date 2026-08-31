@@ -3454,12 +3454,12 @@ function renderDatos(datos) {
     else weatherCode = 2; // código WAPI no mapeado → nublado por defecto
   }
 
-  // Temperatura y sensación: solo WeatherAPI
-  const tempActual = wapiData?.current?.temp_c ?? c.temperature_2m;
-  const sensacionActual = wapiData?.current?.feelslike_c ?? c.apparent_temperature;
+  // Temperatura y sensación: WeatherAPI, sin fallback
+  const tempActual = wapiData?.current?.temp_c ?? null;
+  const sensacionActual = wapiData?.current?.feelslike_c ?? null;
   _ultimaTempC = tempActual;
   _ultimaSensacion = sensacionActual;
-  elTemp.textContent = toTemp(tempActual);
+  elTemp.textContent = tempActual !== null ? toTemp(tempActual) : '--°';
   if (weatherCode !== null) {
     elDesc.textContent = T.codigos[weatherCode] || '';
     elIcono.innerHTML = iconoParaCodigo(weatherCode, isDay);
@@ -3482,12 +3482,12 @@ function renderDatos(datos) {
       probLluviaActual = idx >= 0 ? hourly.precipitation_probability[idx] : null;
     }
   }
-  // Viento: WeatherAPI como fuente principal, OM como fallback
-  const windSpeedKmh = wapiData?.current?.wind_kph ?? c.wind_speed_10m;
+  // Viento: WeatherAPI, sin fallback
+  const windSpeedKmh = wapiData?.current?.wind_kph ?? null;
   _ultimoVientoKmh = windSpeedKmh;
-  const windDeg = wapiData?.current?.wind_degree ?? c.wind_direction_10m ?? null;
-  const windDirStr = wapiData?.current?.wind_dir ?? (windDeg !== null ? dirViento(windDeg) : '');
-  const gustKmh = wapiData?.current?.gust_kph ?? c.wind_gusts_10m ?? null;
+  const windDeg = wapiData?.current?.wind_degree ?? null;
+  const windDirStr = wapiData?.current?.wind_dir ?? '';
+  const gustKmh = wapiData?.current?.gust_kph ?? null;
   // Actualizar labels de tarjetas según idioma
   const cabLblAltEl = document.getElementById('cabLblAlt');
   const cabLblBruEl = document.getElementById('cabLblBru');
@@ -3499,9 +3499,9 @@ function renderDatos(datos) {
   document.getElementById('cLblHumedad').textContent = getCardLabel('humedad');
   // Valores de tarjetas
   document.getElementById('lluvia').textContent = probLluviaActual !== null ? probLluviaActual + '%' : '--';
-  elSensacion.textContent = toTemp(sensacionActual);
-  elViento.textContent = toViento(windSpeedKmh);
-  elHumedad.textContent = c.relative_humidity_2m + '%';
+  elSensacion.textContent = sensacionActual !== null ? toTemp(sensacionActual) : '--°';
+  elViento.textContent = windSpeedKmh !== null ? toViento(windSpeedKmh) : '--';
+  elHumedad.textContent = wapiData?.current?.humidity !== undefined ? wapiData.current.humidity + '%' : '--';
   // Tarjeta viento: dirección en texto largo
   document.getElementById('vientoDir').textContent = dirVientoTexto(windDirStr, windDeg);
   // Modal viento: rellenar datos
