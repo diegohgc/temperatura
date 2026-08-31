@@ -1644,7 +1644,7 @@ function getCardLabel(key) {
     viento: {es:'Viento',en:'Wind',de:'Wind',fr:'Vent',pt:'Vento',it:'Vento',zh:'风',ca:'Vent',eu:'Haizea',gl:'Vento',ar:'الرياح',ru:'Ветер',ja:'風',ko:'바람',nl:'Wind',pl:'Wiatr',hi:'हवा',ro:'Vânt',hu:'Szél'},
     humedad: {es:'Humedad',en:'Humidity',de:'Feuchte',fr:'Humidité',pt:'Umidade',it:'Umidità',zh:'湿度',ca:'Humitat',eu:'Hezetasuna',gl:'Humidade',ar:'الرطوبة',ru:'Влажность',ja:'湿度',ko:'습도',nl:'Vochtigheid',pl:'Wilgotność',hi:'आर्द्रता',ro:'Umiditate',hu:'Páratartalom'},
     rafagas: {es:'Ráfagas',en:'Gusts',de:'Böen',fr:'Rafales',pt:'Rajadas',it:'Raffiche',zh:'阵风',ca:'Ratxes',eu:'Bolak',gl:'Vendavais',ar:'هبوب',ru:'Порывы',ja:'突風',ko:'돌풍',nl:'Windstoten',pl:'Porywy',hi:'झोंके',ro:'Rafale',hu:'Lökések'},
-    dir: {es:'Dirección',en:'Direction',de:'Richtung',fr:'Direction',pt:'Direção',it:'Direzione',zh:'方向',ca:'Direcció',eu:'Norabidea',gl:'Dirección',ar:'الاتجاه',ru:'Направление',ja:'方向',ko:'방향',nl:'Richting',pl:'Kierunek',hi:'दिशा',ro:'Direcție',hu:'Irány'},
+    dir: {es:'Procedencia',en:'Origin',de:'Herkunft',fr:'Provenance',pt:'Procedência',it:'Provenienza',zh:'来向',ca:'Procedència',eu:'Jatorria',gl:'Procedencia',ar:'مصدر الريح',ru:'Откуда',ja:'風向元',ko:'바람 출처',nl:'Herkomst',pl:'Skąd',hi:'उद्गम',ro:'Proveniență',hu:'Honnan'},
   };
   return (L[key]||{})[idioma] || (L[key]||{})['en'] || key;
 }
@@ -3513,7 +3513,7 @@ function renderDatos(datos) {
   document.getElementById('mvLblRafagas').textContent = getCardLabel('rafagas');
   document.getElementById('mvRafagas').textContent = gustKmh !== null ? toViento(gustKmh) : '--';
   document.getElementById('mvLblDir').textContent = getCardLabel('dir');
-  document.getElementById('mvDir').textContent = windDirStr || '--';
+  document.getElementById('mvDir').textContent = windDirStr ? dirVientoTexto(windDirStr, windDeg) : '--';
   document.getElementById('mvBeaufort').textContent = beaufort(windSpeedKmh);
   // Previsión horaria: WeatherAPI > AEMET > Open-Meteo
   if (wapiData?.forecast?.forecastday) renderHorasWAPI(wapiData);
