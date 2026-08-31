@@ -2642,24 +2642,51 @@ function abrirModalDia(i) {
   }
   const diaHoras = document.getElementById('diaHoras');
   diaHoras.innerHTML = '';
-  const hourly = ultimosDatos && ultimosDatos.tiempo && ultimosDatos.tiempo.hourly;
-  if (hourly && hourly.time) {
-    const fechaDia = daily.time[i];
-    hourly.time.forEach((t, hi) => {
-      if (!t.startsWith(fechaDia)) return;
-      const hora = new Date(t).getHours() + 'h';
-      const temp = hourly.temperature_2m[hi];
-      const probH = hourly.precipitation_probability ? hourly.precipitation_probability[hi] : null;
+  const fechaDia = daily.time[i];
+  const wapiData = ultimosDatos && ultimosDatos.wapiData;
+  const wapiHorasDia = wapiData?.forecast?.forecastday?.find(d => d.date === fechaDia)?.hour ?? null;
+  if (wapiHorasDia) {
+    wapiHorasDia.forEach(h => {
+      const hora = new Date(h.time).getHours() + 'h';
+      const probH = h.chance_of_rain ?? null;
+      const wapiCode = h.condition?.code ?? null;
+      let wmoCode = 2;
+      if (wapiCode === 1000) wmoCode = 0;
+      else if (wapiCode === 1003) wmoCode = 1;
+      else if (wapiCode === 1006) wmoCode = 2;
+      else if (wapiCode === 1009) wmoCode = 3;
+      else if ([1063,1150,1153,1180,1183,1186,1189,1192,1195,1240,1243].includes(wapiCode)) wmoCode = 61;
+      else if ([1066,1210,1213,1216,1219,1255].includes(wapiCode)) wmoCode = 71;
+      else if ([1087,1273,1276,1279,1282].includes(wapiCode)) wmoCode = 95;
       const div = document.createElement('div');
       div.className = 'hora';
       div.innerHTML = `
         <div class="h">${hora}</div>
-        <div class="icono-hora">${iconoConProb(hourly.weather_code[hi], probH, hourly.is_day ? hourly.is_day[hi] === 1 : true)}</div>
-        <div class="t">${toTemp(temp)}</div>
+        <div class="icono-hora">${iconoConProb(wmoCode, probH, h.is_day === 1)}</div>
+        <div class="t">${toTemp(h.temp_c)}</div>
         ${probH !== null ? `<div class="p">${probH}%</div>` : ''}
       `;
       diaHoras.appendChild(div);
     });
+  } else {
+    const hourly = ultimosDatos && ultimosDatos.tiempo && ultimosDatos.tiempo.hourly;
+    if (hourly && hourly.time) {
+      hourly.time.forEach((t, hi) => {
+        if (!t.startsWith(fechaDia)) return;
+        const hora = new Date(t).getHours() + 'h';
+        const temp = hourly.temperature_2m[hi];
+        const probH = hourly.precipitation_probability ? hourly.precipitation_probability[hi] : null;
+        const div = document.createElement('div');
+        div.className = 'hora';
+        div.innerHTML = `
+          <div class="h">${hora}</div>
+          <div class="icono-hora">${iconoConProb(hourly.weather_code[hi], probH, hourly.is_day ? hourly.is_day[hi] === 1 : true)}</div>
+          <div class="t">${toTemp(temp)}</div>
+          ${probH !== null ? `<div class="p">${probH}%</div>` : ''}
+        `;
+        diaHoras.appendChild(div);
+      });
+    }
   }
   document.getElementById('diaLblLluvia').textContent = '🌧 ' + (T.diaProbLluvia || 'Probabilidad de lluvia');
   document.getElementById('diaValLluvia').textContent = prob + '%';
@@ -2672,7 +2699,7 @@ function abrirModalDia(i) {
   document.getElementById('diaValSalida').textContent = fmtHora(daily.sunrise ? daily.sunrise[i] : null);
   document.getElementById('diaLblPuesta').textContent = T.anochecer || 'Atardecer';
   document.getElementById('diaValPuesta').textContent = fmtHora(daily.sunset ? daily.sunset[i] : null);
-  document.getElementById('diaLblUv').textContent = T.uvIndex || 'UV';
+  document.getElementById('diaLblUv').textContent = (T.uvIndex || 'UV') + ' max';
   document.getElementById('diaValUv').textContent = daily.uv_index_max ? (daily.uv_index_max[i] != null ? daily.uv_index_max[i].toFixed(0) : '—') : '—';
   document.getElementById('diaLblPrecip').textContent = '🌂 ' + (T.diaPrecip || 'Precipitaciones');
   document.getElementById('diaValPrecip').textContent = daily.precipitation_sum ? (daily.precipitation_sum[i] != null ? daily.precipitation_sum[i].toFixed(1) + ' mm' : '—') : '—';
