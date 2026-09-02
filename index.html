@@ -997,6 +997,47 @@ const TRADUCCIONES = {
     },
     locale: 'pt-PT'
   },
+  'pt-BR': {
+    buscarPlaceholder: 'Pesquisar cidade...',
+    usarGps: 'Usar minha localização',
+    actualizar: 'Atualizar',
+    consultando: 'Obtendo temperatura...',
+    localizando: 'Localizando...',
+    geoNoDisponible: 'Geolocalização não disponível neste navegador.',
+    permisoDenegado: 'Permissão de localização negada.',
+    errorUbicacion: 'Não foi possível obter sua localização.',
+    errorTemperatura: 'Não foi possível obter a temperatura.',
+    actualizado: 'Atualizado',
+    ajustes: 'Configurações', idioma: 'Idioma', radar: '🌧 Radar de chuva', probLluvia: 'Probabilidade de chuva próxima hora', ajustesTemp: 'Temperatura', ajustesVel: 'Velocidade do vento', diaViento: 'Velocidade do vento', diaPrecip: 'Precipitação', diaProbLluvia: 'Probabilidade de chuva', ciudadesGuardadas: 'Cidades salvas',
+    bienvenidaSub: 'Permitir acesso à sua localização', bienvenidaBody: 'Para oferecer o tempo e a temperatura exata no lugar onde você está.\n\n🔒 Sua localização só é usada em tempo real para consultar o clima. Nunca a armazenamos nem a compartilhamos com ninguém.', bienvenidaBtn: 'Permitir localização', bienvenidaLink: 'Prefiro pesquisar minha cidade →', denegadoTit: 'Sem localização', denegadoBody: 'Não conseguimos detectar sua posição automaticamente, mas você pode usar o app pesquisando sua cidade.', denegadoBtn: '🔍 Pesquisar cidade', denegadoAjustesBtn: 'Ir para Configurações', denegadoInstr: 'Configurações → Aplicativos → QuickTemp → Permissões → Localização → Ativar',
+    cambiarCiudad: 'Mudar cidade',
+    tuUbicacion: 'Sua localização',
+    sensacion: 'Sensação',
+    humedad: '% umid.',
+    mareaSubiendo: 'Maré subindo · maré alta às',
+    mareaBajando: 'Maré baixando · maré baixa às',
+    mareasDeHoy: 'Marés de hoje',
+    pleamar: 'Maré alta',
+    bajamar: 'Maré baixa',
+    olas: 'Ondas',
+    altitud: 'Altitude',
+    tuVelocidad: 'Sua velocidade', velMax: 'Máx.', velMedia: 'Média', distancia: 'Distância', resetDist: 'Reiniciar',
+    amanecer: 'Nascer do sol',
+    anochecer: 'Pôr do sol',
+    uvIndex: 'Índice UV', solRestante: 'Sol restante', paraAmanecer: 'Para o amanhecer', calidadAire: 'Qualidade do ar',
+    hoy: 'Hoje',
+    brujula: 'Bússola', sinSenal: 'sem sinal', cerrar: 'Fechar', calibrarBrujula: 'Lembre-se de calibrar a bússola', cardN:'N', cardS:'S', cardE:'L', cardO:'O',
+    codigos: {
+      0: 'Céu limpo', 1: 'Principalmente limpo', 2: 'Parcialmente nublado', 3: 'Nublado',
+      45: 'Neblina', 48: 'Neblina com geada',
+      51: 'Garoa fraca', 53: 'Garoa', 55: 'Garoa forte',
+      61: 'Chuva fraca', 63: 'Chuva', 65: 'Chuva forte',
+      71: 'Neve fraca', 73: 'Neve', 75: 'Neve forte',
+      80: 'Pancadas fracas', 81: 'Pancadas de chuva', 82: 'Pancadas fortes',
+      95: 'Tempestade', 96: 'Tempestade com granizo', 99: 'Tempestade forte com granizo'
+    },
+    locale: 'pt-BR'
+  },
   it: {
     buscarPlaceholder: 'Cerca città...',
     usarGps: 'Usa la mia posizione',
@@ -1578,6 +1619,7 @@ function detectarIdioma() {
   if (full.startsWith('ca')) return 'ca';
   if (full.startsWith('eu')) return 'eu';
   if (full.startsWith('gl')) return 'gl';
+  if (full.startsWith('pt-br')) return 'pt-BR';
   const lang = full.substring(0, 2);
   return TRADUCCIONES[lang] ? lang : 'en';
 }
@@ -1627,7 +1669,8 @@ function dirVientoTexto(dirStr, deg) {
     pl:['z Północy','z Północnego Wschodu','ze Wschodu','z Południowego Wschodu','z Południa','z Południowego Zachodu','z Zachodu','z Północnego Zachodu'],
     hi:['उत्तर से','उत्तर-पूर्व से','पूर्व से','दक्षिण-पूर्व से','दक्षिण से','दक्षिण-पश्चिम से','पश्चिम से','उत्तर-पश्चिम से'],
     ro:['din Nord','din Nord-Est','din Est','din Sud-Est','din Sud','din Sud-Vest','din Vest','din Nord-Vest'],
-    hu:['Északról','Északkeletről','Keletről','Délkeletről','Délről','Délnyugatról','Nyugatról','Északnyugatról'],
+    hu:['Északról','Északkeletről','Keletről','Délkeletről','Délről','Délnyugatról','Nyugatről','Északnyugatról'],
+    'pt-BR':['do Norte','do Nordeste','do Leste','do Sudeste','do Sul','do Sudoeste','do Oeste','do Noroeste'],
   };
   return (D[idioma] || D['en'])[i];
 }
@@ -1650,6 +1693,7 @@ function getCardLabel(key) {
 }
 const NOMBRES_IDIOMA = {
   es:'Español', en:'English', de:'Deutsch', fr:'Français', pt:'Português',
+  'pt-BR':'Português (Brasil)',
   it:'Italiano', zh:'中文', ca:'Català', eu:'Euskara', gl:'Galego',
   ar:'العربية', ru:'Русский', ja:'日本語', ko:'한국어', nl:'Nederlands',
   pl:'Polski', hi:'हिन्दी', ro:'Română', hu:'Magyar'
@@ -4944,6 +4988,22 @@ function abrirEnGoogleMaps() {
       ],
       footer: 'Volte aqui quando quiser tocando no botão ?'
     },
+    'pt-BR': {
+      titulo: '💡 Tudo é interativo',
+      sub: 'Toque em qualquer dado para ampliar a informação',
+      items: [
+        ['🌡️', 'Temperatura', 'Toque no número grande para ver máximas, mínimas e chuva de hoje'],
+        ['🧭', 'Bússola', 'Canto superior direito — toque para abrir em tela cheia'],
+        ['📍', 'Sua localização', 'Toque no nome do local para ver sua posição exata no mapa'],
+        ['☀️', 'Índice UV', 'Toque no valor UV para ver o nível de risco solar'],
+        ['💨', 'Qualidade do ar', 'Toque no valor do ar para ver os poluentes'],
+        ['🌊', 'Marés', 'Toque no painel de marés para ver o gráfico do dia'],
+        ['📅', 'Previsão diária', 'Toque em qualquer dia da semana para ver os detalhes'],
+        ['🌧', 'Radar de chuva', 'Toque no botão do radar para ver as últimas horas de chuva'],
+        ['⚙️', 'Configurações', 'Mude o idioma, °C/°F, km/h ou mph — canto superior esquerdo'],
+      ],
+      footer: 'Volte aqui quando quiser tocando no botão ?'
+    },
     it: {
       titulo: '💡 Tutto è interattivo',
       sub: 'Tocca qualsiasi dato per espandere le informazioni',
@@ -5171,7 +5231,8 @@ function abrirEnGoogleMaps() {
   };
 
   function renderAyuda() {
-    const lng = (typeof idioma !== 'undefined' ? idioma : 'en').substring(0,2);
+    const _idm = (typeof idioma !== 'undefined' ? idioma : 'en');
+    const lng = i18n[_idm] ? _idm : _idm.substring(0,2);
     const Tr = i18n[lng] || i18n.en;
     document.getElementById('ayudaTitulo').textContent = Tr.titulo;
     document.getElementById('ayudaSub').textContent = Tr.sub;
