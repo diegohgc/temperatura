@@ -2465,8 +2465,22 @@ function renderHorasWAPI(wapiData) {
   }
 }
 
-function renderSol(daily) {
+function renderSol(daily, astroData) {
   elSolInfo.innerHTML = '';
+  const astro = astroData?.astronomy?.astro;
+  if (astro && astro.sunrise && astro.sunset) {
+    // WeatherAPI Astronomy: hora local exacta de la ubicación, sin conversión de zona horaria
+    function _ampm24(str) {
+      const [time, ampm] = str.split(' ');
+      let [h, m] = time.split(':').map(Number);
+      if (ampm === 'PM' && h !== 12) h += 12;
+      if (ampm === 'AM' && h === 12) h = 0;
+      const d = new Date(); d.setHours(h, m, 0, 0);
+      return d.toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' });
+    }
+    elSolInfo.innerHTML = `${T.amanecer} ${_ampm24(astro.sunrise)}<br>${T.anochecer} ${_ampm24(astro.sunset)}`;
+    return;
+  }
   if (!daily || !daily.sunrise || !daily.sunrise[0]) return;
   const amanecer = new Date(daily.sunrise[0]).toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' });
   const anochecer = new Date(daily.sunset[0]).toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' });
@@ -3509,7 +3523,7 @@ async function obtenerCalidadAire(lat, lon) {
 }
 
 function renderDatos(datos) {
-  const { tiempo, ciudad, mdata, elevacion, aireData, owmData, wapiData, aemetActual, aemetHoras, aemetObs, nwsActual, dwdObs } = datos;
+  const { tiempo, ciudad, mdata, elevacion, aireData, owmData, wapiData, astroData, aemetActual, aemetHoras, aemetObs, nwsActual, dwdObs } = datos;
   _wapiDataGlobal = wapiData ?? null;
   const c = tiempo.current;
   const m15 = tiempo.minutely_15;
@@ -3601,10 +3615,34 @@ function renderDatos(datos) {
   // Previsión horaria: WeatherAPI > AEMET > Open-Meteo
   if (wapiData?.forecast?.forecastday) renderHorasWAPI(wapiData);
   else renderHoras(tiempo.hourly);
-  renderSol(tiempo.daily);
+  renderSol(tiempo.daily, astroData);
   renderDias(tiempo.daily);
   const tieneMarea = renderMarea(mdata);
   renderPanelInterior(c.uv_index, aireData, tiempo.daily && tiempo.daily.sunset ? tiempo.daily.sunset[0] : null, tieneMarea, tiempo.utc_offset_seconds, tiempo.daily && tiempo.daily.sunrise ? tiempo.daily.sunrise[0] : null, c.is_day === 1);
+  // Override sunrise/sunset con WeatherAPI Astronomy (hora local exacta de la ubicación)
+  const astro = astroData?.astronomy?.astro;
+  if (astro && astro.sunrise && astro.sunset) {
+    function _wapiAmPmToDate(str) {
+      const [time, ampm] = str.split(' ');
+      let [h, m] = time.split(':').map(Number);
+      if (ampm === 'PM' && h !== 12) h += 12;
+      if (ampm === 'AM' && h === 12) h = 0;
+      const d = new Date(); d.setHours(h, m, 0, 0); return d;
+    }
+    function _wapiAmPmTo24h(str) {
+      const [time, ampm] = str.split(' ');
+      let [h, m] = time.split(':').map(Number);
+      if (ampm === 'PM' && h !== 12) h += 12;
+      if (ampm === 'AM' && h === 12) h = 0;
+      return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+    }
+    const sunriseDate = _wapiAmPmToDate(astro.sunrise);
+    const sunsetDate  = _wapiAmPmToDate(astro.sunset);
+    _ultimoSunrise = sunriseDate.toISOString();
+    _ultimoSunset  = sunsetDate.toISOString();
+    _ultimoSunriseLocalHora = _wapiAmPmTo24h(astro.sunrise);
+    _ultimoSunsetLocalHora  = _wapiAmPmTo24h(astro.sunset);
+  }
   aplicarColorTemp(Math.round(tempActual));
   const max0 = tiempo.daily && tiempo.daily.temperature_2m_max ? tiempo.daily.temperature_2m_max[0] : null;
   const min0 = tiempo.daily && tiempo.daily.temperature_2m_min ? tiempo.daily.temperature_2m_min[0] : null;
@@ -3622,7 +3660,7 @@ function renderDatos(datos) {
 async function cargarDatos(latitude, longitude, nombreFijo) {
   setEstado(T.consultando);
   try {
-    const [tiempo, ciudad, mdata, elevacion, aireData, owmData, wapiData] = await Promise.all([
+    const [tiempo, ciudad, mdata, elevacion, aireData, owmData, wapiData, astroData] = await Promise.all([
       obtenerTiempo(latitude, longitude),
       nombreFijo ? Promise.resolve({ principal: nombreFijo, sub: null }) : obtenerCiudad(latitude, longitude),
       obtenerMarea(latitude, longitude).catch(() => null),
@@ -3630,10 +3668,12 @@ async function cargarDatos(latitude, longitude, nombreFijo) {
       obtenerCalidadAire(latitude, longitude).catch(() => null),
       fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=ee01a14dca6430b5ddb8b0fed708d4ba`).then(r => r.json()).catch(() => null),
       fetch(`https://api.weatherapi.com/v1/forecast.json?key=1273625cfc2746fcaa760211260309&q=${latitude},${longitude}&days=2&aqi=no&alerts=no`).then(r => r.json()).catch(() => null),
+      fetch(`https://api.weatherapi.com/v1/astronomy.json?key=1273625cfc2746fcaa760211260309&q=${latitude},${longitude}&dt=${new Date().toISOString().split('T')[0]}`).then(r => r.json()).catch(() => null),
     ]);
     // Si WeatherAPI devolvió un error JSON (plan caducado, key desactivada…) tratar como null
     const wapiDataClean = (wapiData && wapiData.error) ? null : wapiData;
-    const datosFinales = { tiempo, ciudad, mdata, elevacion, aireData, owmData, wapiData: wapiDataClean, aemetActual: null, aemetHoras: null, aemetObs: null, nwsActual: null, dwdObs: null };
+    const astroDataClean = (astroData && astroData.error) ? null : astroData;
+    const datosFinales = { tiempo, ciudad, mdata, elevacion, aireData, owmData, wapiData: wapiDataClean, astroData: astroDataClean, aemetActual: null, aemetHoras: null, aemetObs: null, nwsActual: null, dwdObs: null };
     elCiudad.firstChild.textContent = ciudad.principal;
     document.getElementById('ciudadSub').textContent = ciudad.sub || '';
     const nombreCiudad = ciudad.sub ? `${ciudad.principal}, ${ciudad.sub}` : ciudad.principal;
