@@ -3657,9 +3657,39 @@ function renderDatos(datos) {
   animarSwipeEntrada();
 }
 
-async function cargarDatos(latitude, longitude, nombreFijo) {
+// ── Caché WeatherAPI (forecast + astronomy) ──────────────────────────────────
+const _WAPI_CACHE_KEY = 'ql_wapi_cache';
+const _WAPI_CACHE_TTL = 30 * 60 * 1000; // 30 minutos
+
+function _getWapiCache(lat, lon) {
+  try {
+    const raw = localStorage.getItem(_WAPI_CACHE_KEY);
+    if (!raw) return null;
+    const c = JSON.parse(raw);
+    if (!c || !c.ts || !c.forecast) return null;
+    if (Date.now() - c.ts > _WAPI_CACHE_TTL) return null;
+    if (Math.round(lat * 100) !== Math.round(c.lat * 100)) return null;
+    if (Math.round(lon * 100) !== Math.round(c.lon * 100)) return null;
+    return c;
+  } catch(e) { return null; }
+}
+
+function _setWapiCache(lat, lon, forecast, astro) {
+  try {
+    localStorage.setItem(_WAPI_CACHE_KEY, JSON.stringify({
+      lat: Math.round(lat * 100) / 100,
+      lon: Math.round(lon * 100) / 100,
+      ts: Date.now(), forecast, astro
+    }));
+  } catch(e) {}
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
+async function cargarDatos(latitude, longitude, nombreFijo, forzar = false) {
   setEstado(T.consultando);
   try {
+    // Intentar caché de WeatherAPI (salvo recarga forzada)
+    const cached = forzar ? null : _getWapiCache(latitude, longitude);
     const [tiempo, ciudad, mdata, elevacion, aireData, owmData, wapiData, astroData] = await Promise.all([
       obtenerTiempo(latitude, longitude),
       nombreFijo ? Promise.resolve({ principal: nombreFijo, sub: null }) : obtenerCiudad(latitude, longitude),
@@ -3667,12 +3697,14 @@ async function cargarDatos(latitude, longitude, nombreFijo) {
       fetch(`https://api.open-meteo.com/v1/elevation?latitude=${latitude}&longitude=${longitude}`).then(r => r.json()).catch(() => null),
       obtenerCalidadAire(latitude, longitude).catch(() => null),
       fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=ee01a14dca6430b5ddb8b0fed708d4ba`).then(r => r.json()).catch(() => null),
-      fetch(`https://api.weatherapi.com/v1/forecast.json?key=1273625cfc2746fcaa760211260309&q=${latitude},${longitude}&days=2&aqi=no&alerts=no`).then(r => r.json()).catch(() => null),
-      fetch(`https://api.weatherapi.com/v1/astronomy.json?key=1273625cfc2746fcaa760211260309&q=${latitude},${longitude}&dt=${new Date().toISOString().split('T')[0]}`).then(r => r.json()).catch(() => null),
+      cached ? Promise.resolve(cached.forecast) : fetch(`https://api.weatherapi.com/v1/forecast.json?key=1273625cfc2746fcaa760211260309&q=${latitude},${longitude}&days=2&aqi=no&alerts=no`).then(r => r.json()).catch(() => null),
+      cached ? Promise.resolve(cached.astro)    : fetch(`https://api.weatherapi.com/v1/astronomy.json?key=1273625cfc2746fcaa760211260309&q=${latitude},${longitude}&dt=${new Date().toISOString().split('T')[0]}`).then(r => r.json()).catch(() => null),
     ]);
     // Si WeatherAPI devolvió un error JSON (plan caducado, key desactivada…) tratar como null
     const wapiDataClean = (wapiData && wapiData.error) ? null : wapiData;
     const astroDataClean = (astroData && astroData.error) ? null : astroData;
+    // Guardar en caché si se obtuvieron datos frescos de la API
+    if (!cached && wapiDataClean) _setWapiCache(latitude, longitude, wapiDataClean, astroDataClean);
     const datosFinales = { tiempo, ciudad, mdata, elevacion, aireData, owmData, wapiData: wapiDataClean, astroData: astroDataClean, aemetActual: null, aemetHoras: null, aemetObs: null, nwsActual: null, dwdObs: null };
     elCiudad.firstChild.textContent = ciudad.principal;
     document.getElementById('ciudadSub').textContent = ciudad.sub || '';
@@ -3692,13 +3724,13 @@ if (window.ayudaCerrarAlCargar) { window.ayudaCerrarAlCargar(); window.ayudaCerr
   }
 }
 
-async function actualizar() {
+async function actualizar(forzar = false) {
   if (_bienvenidaActiva) return;
   setEstado(T.localizando);
   elTemp.textContent = '--°';
   elDesc.textContent = '';
   if (ubicacionManual) {
-    cargarDatos(ubicacionManual.lat, ubicacionManual.lon, ubicacionManual.nombre);
+    cargarDatos(ubicacionManual.lat, ubicacionManual.lon, ubicacionManual.nombre, forzar);
     return;
   }
   if (!navigator.geolocation) {
@@ -3720,11 +3752,11 @@ async function actualizar() {
   navigator.geolocation.getCurrentPosition((pos) => {
     fase1Cargada = true;
     const lat1 = pos.coords.latitude, lon1 = pos.coords.longitude;
-    cargarDatos(lat1, lon1);
+    cargarDatos(lat1, lon1, null, forzar);
     // Fase 2: GPS preciso
     navigator.geolocation.getCurrentPosition((pos2) => {
       const lat2 = pos2.coords.latitude, lon2 = pos2.coords.longitude;
-      if (distanciaM(lat1, lon1, lat2, lon2) > 500) cargarDatos(lat2, lon2);
+      if (distanciaM(lat1, lon1, lat2, lon2) > 500) cargarDatos(lat2, lon2, null, forzar);
     }, () => {}, { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 });
   }, (err) => {
     if (fase1Cargada) return;
@@ -3826,7 +3858,7 @@ document.getElementById('btnMiUbicacion').addEventListener('click', () => {
   actualizar();
 });
 
-btn.addEventListener('click', actualizar);
+btn.addEventListener('click', () => actualizar(true));
 // El arranque lo gestiona el script de bienvenida al final del body:
 // si el usuario ya pasó la bienvenida, llama actualizar() desde allí.
 // Si es la primera vez, muestra la pantalla y espera que el usuario pulse.
