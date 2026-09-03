@@ -3630,7 +3630,7 @@ async function cargarDatos(latitude, longitude, nombreFijo) {
       fetch(`https://api.open-meteo.com/v1/elevation?latitude=${latitude}&longitude=${longitude}`).then(r => r.json()).catch(() => null),
       obtenerCalidadAire(latitude, longitude).catch(() => null),
       fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=ee01a14dca6430b5ddb8b0fed708d4ba`).then(r => r.json()).catch(() => null),
-      fetch(`https://api.weatherapi.com/v1/forecast.json?key=df2620108c794b40a68181321262708&q=${latitude},${longitude}&days=2&aqi=no&alerts=no`).then(r => r.json()).catch(() => null),
+      fetch(`https://api.weatherapi.com/v1/forecast.json?key=1273625cfc2746fcaa760211260309&q=${latitude},${longitude}&days=2&aqi=no&alerts=no`).then(r => r.json()).catch(() => null),
     ]);
     // Si WeatherAPI devolvió un error JSON (plan caducado, key desactivada…) tratar como null
     const wapiDataClean = (wapiData && wapiData.error) ? null : wapiData;
