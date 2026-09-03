@@ -3766,7 +3766,7 @@ async function actualizar(forzar = false) {
     } else {
       setEstado(T.errorUbicacion);
     }
-  }, { enableHighAccuracy: false, timeout: 5000, maximumAge: 120000 });
+  }, { enableHighAccuracy: false, timeout: 15000, maximumAge: 120000 });
 }
 
 let timeoutBusqueda = null;
