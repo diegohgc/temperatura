@@ -3537,9 +3537,9 @@ function renderDatos(datos) {
     else weatherCode = 2; // código WAPI no mapeado → nublado por defecto
   }
 
-  // Temperatura y sensación: WeatherAPI, sin fallback
-  const tempActual = wapiData?.current?.temp_c ?? null;
-  const sensacionActual = wapiData?.current?.feelslike_c ?? null;
+  // Temperatura y sensación: WeatherAPI → Open-Meteo
+  const tempActual = wapiData?.current?.temp_c ?? c.temperature_2m ?? null;
+  const sensacionActual = wapiData?.current?.feelslike_c ?? c.apparent_temperature ?? null;
   _ultimaTempC = tempActual;
   _ultimaSensacion = sensacionActual;
   elTemp.textContent = tempActual !== null ? toTemp(tempActual) : '--°';
@@ -3565,12 +3565,12 @@ function renderDatos(datos) {
       probLluviaActual = idx >= 0 ? hourly.precipitation_probability[idx] : null;
     }
   }
-  // Viento: WeatherAPI, sin fallback
-  const windSpeedKmh = wapiData?.current?.wind_kph ?? null;
+  // Viento: WeatherAPI → Open-Meteo
+  const windSpeedKmh = wapiData?.current?.wind_kph ?? c.wind_speed_10m ?? null;
   _ultimoVientoKmh = windSpeedKmh;
-  const windDeg = wapiData?.current?.wind_degree ?? null;
+  const windDeg = wapiData?.current?.wind_degree ?? c.wind_direction_10m ?? null;
   const windDirStr = wapiData?.current?.wind_dir ?? '';
-  const gustKmh = wapiData?.current?.gust_kph ?? null;
+  const gustKmh = wapiData?.current?.gust_kph ?? c.wind_gusts_10m ?? null;
   // Actualizar labels de tarjetas según idioma
   const cabLblAltEl = document.getElementById('cabLblAlt');
   const cabLblBruEl = document.getElementById('cabLblBru');
@@ -3584,7 +3584,8 @@ function renderDatos(datos) {
   document.getElementById('lluvia').textContent = probLluviaActual !== null ? probLluviaActual + '%' : '--';
   elSensacion.textContent = sensacionActual !== null ? toTemp(sensacionActual) : '--°';
   elViento.textContent = windSpeedKmh !== null ? toViento(windSpeedKmh) : '--';
-  elHumedad.textContent = wapiData?.current?.humidity !== undefined ? wapiData.current.humidity + '%' : '--';
+  const humedadActual = wapiData?.current?.humidity ?? c.relative_humidity_2m ?? null;
+  elHumedad.textContent = humedadActual !== null ? humedadActual + '%' : '--';
   // Tarjeta viento: dirección en texto largo
   document.getElementById('vientoDir').textContent = dirVientoTexto(windDirStr, windDeg);
   // Modal viento: rellenar datos
@@ -3631,13 +3632,16 @@ async function cargarDatos(latitude, longitude, nombreFijo) {
       fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=ee01a14dca6430b5ddb8b0fed708d4ba`).then(r => r.json()).catch(() => null),
       fetch(`https://api.weatherapi.com/v1/forecast.json?key=df2620108c794b40a68181321262708&q=${latitude},${longitude}&days=2&aqi=no&alerts=no`).then(r => r.json()).catch(() => null),
     ]);
+    // Si WeatherAPI devolvió un error JSON (plan caducado, key desactivada…) tratar como null
+    const wapiDataClean = (wapiData && wapiData.error) ? null : wapiData;
+    const datosFinales = { tiempo, ciudad, mdata, elevacion, aireData, owmData, wapiData: wapiDataClean, aemetActual: null, aemetHoras: null, aemetObs: null, nwsActual: null, dwdObs: null };
     elCiudad.firstChild.textContent = ciudad.principal;
     document.getElementById('ciudadSub').textContent = ciudad.sub || '';
     const nombreCiudad = ciudad.sub ? `${ciudad.principal}, ${ciudad.sub}` : ciudad.principal;
     currentCoords = { lat: latitude, lon: longitude, nombre: nombreCiudad };
     actualizarBtnFav();
     actualizarFavIdx();
-    ultimosDatos = { tiempo, ciudad, mdata, elevacion, aireData, owmData, wapiData, aemetActual: null, aemetHoras: null, aemetObs: null, nwsActual: null, dwdObs: null };
+    ultimosDatos = datosFinales;
     renderDatos(ultimosDatos);
     ultimaActualizacion = Date.now();
     setEstado(T.actualizado + ' ' + new Date(ultimaActualizacion).toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' }));
