@@ -5501,14 +5501,28 @@ function wbgDrawMoon(cx,cy,r){
   return true;
 }
 
-/* ── Nube con halo suave ── */
+/* ── Nube volumétrica sutil ── */
 function wbgCloud(x,y,sc,color,alpha){
   const bumps=[[0,0,30],[22,-10,22],[42,-4,26],[58,6,19],[-16,6,20],[20,10,32]];
   const c=wbgCtx;
+  // Halo base
   c.save(); c.filter='blur(9px)'; c.globalAlpha=alpha*.5; c.fillStyle=color; c.beginPath();
   bumps.forEach(([dx,dy,r])=>c.arc(x+dx*sc,y+dy*sc,r*sc*1.07,0,Math.PI*2)); c.fill(); c.restore();
+  // Cuerpo base
   c.save(); c.globalAlpha=alpha*.9; c.fillStyle=color; c.beginPath();
   bumps.forEach(([dx,dy,r])=>c.arc(x+dx*sc,y+dy*sc,r*sc*0.93,0,Math.PI*2)); c.fill(); c.restore();
+  // Gradiente volumétrico sutil por puff
+  bumps.forEach(([dx,dy,r])=>{
+    const cx2=x+dx*sc,cy2=y+dy*sc,rad=r*sc*0.93;
+    const g=c.createRadialGradient(cx2-rad*.15,cy2-rad*.2,0,cx2,cy2,rad);
+    g.addColorStop(0,`rgba(255,255,255,${alpha*.22})`);
+    g.addColorStop(0.55,'rgba(255,255,255,0)');
+    g.addColorStop(1,`rgba(180,200,225,${alpha*.18})`);
+    c.save(); c.fillStyle=g; c.beginPath(); c.arc(cx2,cy2,rad,0,Math.PI*2); c.fill(); c.restore();
+  });
+  // Sombra inferior mínima
+  c.save(); c.filter='blur(5px)'; c.globalAlpha=alpha*.09; c.fillStyle='#1e3a5f'; c.beginPath();
+  bumps.forEach(([dx,dy,r])=>c.arc(x+dx*sc,(y+dy*sc)+r*sc*.35,r*sc*.75,0,Math.PI*2)); c.fill(); c.restore();
 }
 
 /* ── Estado ── */
