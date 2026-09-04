@@ -3592,14 +3592,7 @@ function renderDatos(datos) {
     const horaActual = todasHoras.find(h => h.time_epoch >= ahoraEpoch);
     if (horaActual) probLluviaActual = horaActual.chance_of_rain ?? null;
   }
-  if (probLluviaActual === null) {
-    const hourly = tiempo.hourly;
-    if (hourly && hourly.time && hourly.precipitation_probability) {
-      const now = new Date();
-      const idx = hourly.time.findIndex(t => new Date(t) >= now);
-      probLluviaActual = idx >= 0 ? hourly.precipitation_probability[idx] : null;
-    }
-  }
+  // Probabilidad lluvia: solo WeatherAPI (sin fallback Open-Meteo)
   // Viento: WeatherAPI
   const windSpeedKmh = wapiData?.current?.wind_kph ?? null;
   _ultimoVientoKmh = windSpeedKmh;
@@ -3633,9 +3626,9 @@ function renderDatos(datos) {
   document.getElementById('mvLblDir').textContent = getCardLabel('dir');
   document.getElementById('mvDir').textContent = windDirStr ? dirVientoTexto(windDirStr, windDeg) : '--';
   document.getElementById('mvBeaufort').textContent = beaufort(windSpeedKmh);
-  // Previsión horaria: WeatherAPI > AEMET > Open-Meteo
+  // Previsión horaria: WeatherAPI únicamente
   if (wapiData?.forecast?.forecastday) renderHorasWAPI(wapiData);
-  else renderHoras(tiempo.hourly);
+  else elHoras.innerHTML = '';
   renderSol(tiempo.daily, astroData);
   renderDias(tiempo.daily);
   const tieneMarea = renderMarea(mdata);
