@@ -3730,7 +3730,7 @@ async function cargarDatos(latitude, longitude, nombreFijo, forzar = false) {
       obtenerMarea(latitude, longitude).catch(() => null),
       fetch(`https://api.open-meteo.com/v1/elevation?latitude=${latitude}&longitude=${longitude}`).then(r => r.json()).catch(() => null),
       obtenerCalidadAire(latitude, longitude).catch(() => null),
-      fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=ee01a14dca6430b5ddb8b0fed708d4ba`).then(r => r.json()).catch(() => null),
+      fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=97744bfca680d48cc88ced9ca0851a04`).then(r => r.json()).catch(() => null),
       cached ? Promise.resolve(cached.forecast) : fetch(`https://api.weatherapi.com/v1/forecast.json?key=1273625cfc2746fcaa760211260309&q=${latitude},${longitude}&days=2&aqi=no&alerts=no`).then(r => r.json()).catch(() => null),
       cached ? Promise.resolve(cached.astro)    : fetch(`https://api.weatherapi.com/v1/astronomy.json?key=1273625cfc2746fcaa760211260309&q=${latitude},${longitude}&dt=${new Date().toISOString().split('T')[0]}`).then(r => r.json()).catch(() => null),
     ]);
@@ -4002,7 +4002,7 @@ function inicializarRadar() {
   }
 }
 
-const OWM_KEY = 'ee01a14dca6430b5ddb8b0fed708d4ba';
+const OWM_KEY = '97744bfca680d48cc88ced9ca0851a04';
 let _radarFrames = [];
 let _radarLayer = null;
 let _radarIdx = 0;
