@@ -5390,34 +5390,94 @@ function wbgGrad(stops){
   stops.forEach(([s,c])=>g.addColorStop(s,c)); return g;
 }
 
-/* ── Fase lunar ── */
+/* ── Fase lunar realista ── */
+// Caché de textura lunar (se regenera solo si cambia el radio)
+let _wbgLunaTexCache=null, _wbgLunaTexR=0;
+
+function _wbgMkRng(seed){ let s=seed>>>0; return ()=>{ s=(s*1664525+1013904223)>>>0; return s/4294967296; }; }
+
+const _wbgMARIA=[
+  {cx:-0.33,cy:-0.05,rx:0.24,ry:0.42,op:0.24},{cx:-0.38,cy:0.18,rx:0.16,ry:0.20,op:0.20},
+  {cx:-0.20,cy:-0.15,rx:0.14,ry:0.16,op:0.16},{cx:-0.20,cy:-0.30,rx:0.22,ry:0.19,op:0.26},
+  {cx:0.14,cy:-0.25,rx:0.14,ry:0.13,op:0.24},{cx:0.22,cy:-0.06,rx:0.17,ry:0.15,op:0.23},
+  {cx:0.44,cy:-0.18,rx:0.09,ry:0.07,op:0.26},{cx:0.30,cy:0.15,rx:0.14,ry:0.12,op:0.21},
+  {cx:0.23,cy:0.30,rx:0.09,ry:0.08,op:0.22},{cx:-0.22,cy:0.31,rx:0.12,ry:0.10,op:0.22},
+  {cx:0.04,cy:0.26,rx:0.14,ry:0.12,op:0.20},{cx:-0.08,cy:-0.44,rx:0.26,ry:0.055,op:0.18},
+  {cx:0.04,cy:-0.13,rx:0.07,ry:0.06,op:0.18},
+];
+
+function _wbgBuildLunaTex(r){
+  const sz=Math.ceil(r*2)+6, ox=sz/2, oy=sz/2;
+  const tc=document.createElement('canvas'); tc.width=sz; tc.height=sz;
+  const tt=tc.getContext('2d');
+  tt.beginPath(); tt.arc(ox,oy,r,0,Math.PI*2); tt.clip();
+  // Base gris lunar
+  const bg=tt.createRadialGradient(ox-r*.15,oy-r*.15,0,ox,oy,r);
+  bg.addColorStop(0,'#E8E6E2'); bg.addColorStop(.50,'#D8D5D0');
+  bg.addColorStop(.82,'#BCBAB4'); bg.addColorStop(1,'#9A9894');
+  tt.fillStyle=bg; tt.fillRect(0,0,sz,sz);
+  // Textura de regolito
+  const rng=_wbgMkRng(137); const nd=Math.round(r*r*.85);
+  for(let i=0;i<nd;i++){
+    const ang=rng()*Math.PI*2, dist=Math.sqrt(rng())*r*.97;
+    tt.globalAlpha=0.022+rng()*.038;
+    tt.fillStyle=rng()>.48?'#FFF':'#555';
+    tt.beginPath(); tt.arc(ox+dist*Math.cos(ang),oy+dist*Math.sin(ang),rng()*1.7+.3,0,Math.PI*2); tt.fill();
+  }
+  tt.globalAlpha=1;
+  // Mares lunares
+  for(const m of _wbgMARIA){
+    const mx=ox+m.cx*r, my=oy+m.cy*r, rx=m.rx*r, ry=m.ry*r;
+    tt.save(); tt.translate(mx,my); tt.scale(1,ry/rx);
+    const g=tt.createRadialGradient(0,0,0,0,0,rx);
+    g.addColorStop(0,`rgba(0,0,0,${m.op})`); g.addColorStop(.50,`rgba(0,0,0,${m.op*.62})`);
+    g.addColorStop(.78,`rgba(0,0,0,${m.op*.22})`); g.addColorStop(1,'rgba(0,0,0,0)');
+    tt.fillStyle=g; tt.beginPath(); tt.arc(0,0,rx,0,Math.PI*2); tt.fill();
+    const g2=tt.createRadialGradient(0,0,0,0,0,rx*.55);
+    g2.addColorStop(0,`rgba(0,0,0,${m.op*.45})`); g2.addColorStop(1,'rgba(0,0,0,0)');
+    tt.fillStyle=g2; tt.beginPath(); tt.arc(0,0,rx*.55,0,Math.PI*2); tt.fill();
+    tt.restore();
+  }
+  tt.globalAlpha=1;
+  // Oscurecimiento de limbo
+  const ld=tt.createRadialGradient(ox,oy,r*.38,ox,oy,r);
+  ld.addColorStop(0,'rgba(0,0,0,0)'); ld.addColorStop(.70,'rgba(0,0,0,.07)'); ld.addColorStop(1,'rgba(0,0,0,.62)');
+  tt.fillStyle=ld; tt.fillRect(0,0,sz,sz);
+  return tc;
+}
+
 function wbgDrawMoon(cx,cy,r){
   const phase=wbgMoonPhase;
   const illum=(1-Math.cos(phase*Math.PI*2))/2;
   if(illum<0.015) return false;
-  const sz=Math.ceil(r*2)+6;
+  if(!_wbgLunaTexCache||Math.abs(_wbgLunaTexR-r)>0.5){ _wbgLunaTexCache=_wbgBuildLunaTex(r); _wbgLunaTexR=r; }
+  const sz=_wbgLunaTexCache.width, ox=sz/2;
   const oc=document.createElement('canvas'); oc.width=sz; oc.height=sz;
-  const ot=oc.getContext('2d'); const ox=sz/2, oy=sz/2;
-  ot.beginPath(); ot.arc(ox,oy,r,0,Math.PI*2); ot.clip();
-  const mg=ot.createRadialGradient(ox-r*.18,oy-r*.18,0,ox,oy,r);
-  mg.addColorStop(0,'rgba(255,253,232,1)'); mg.addColorStop(0.7,'rgba(242,238,205,0.92)'); mg.addColorStop(1,'rgba(212,207,172,0.82)');
-  ot.fillStyle=mg; ot.fillRect(0,0,sz,sz);
+  const ot=oc.getContext('2d'); ot.drawImage(_wbgLunaTexCache,0,0);
   if(illum<0.985){
-    const tx=r*Math.abs(Math.cos(illum*Math.PI)), wax=(wbgLat>=0?phase<0.5:phase>=0.5), gib=illum>0.5;
+    const tx=r*Math.abs(Math.cos(illum*Math.PI));
+    const south=wbgLat<0, wax=south?phase>=0.5:phase<0.5, gib=illum>0.5;
     const xOff=(wax?1:-1)*(gib?-tx:tx);
     ot.globalCompositeOperation='destination-out'; ot.fillStyle='rgba(0,0,0,1)';
-    const N=52; ot.beginPath();
+    const N=96; ot.beginPath();
     for(let i=0;i<=N/2;i++){
-      const t=i/(N/2), a=wax?(3*Math.PI/2-Math.PI*t):(-Math.PI/2+Math.PI*t);
-      const px=ox+r*Math.cos(a),py=oy+r*Math.sin(a); i===0?ot.moveTo(px,py):ot.lineTo(px,py);
+      const t=i/(N/2),a=wax?(3*Math.PI/2-Math.PI*t):(-Math.PI/2+Math.PI*t);
+      if(i===0) ot.moveTo(ox+r*Math.cos(a),ox+r*Math.sin(a));
+      else       ot.lineTo(ox+r*Math.cos(a),ox+r*Math.sin(a));
     }
     for(let i=0;i<=N/2;i++){
-      const t=i/(N/2), a=Math.PI/2-Math.PI*t;
-      ot.lineTo(ox+xOff*Math.cos(a),oy+r*Math.sin(a));
+      const t=i/(N/2),a=Math.PI/2-Math.PI*t;
+      ot.lineTo(ox+xOff*Math.cos(a),ox+r*Math.sin(a));
     }
     ot.closePath(); ot.fill();
   }
-  wbgCtx.drawImage(oc,cx-sz/2,cy-sz/2); return true;
+  wbgCtx.drawImage(oc,cx-ox,cy-ox);
+  // Halo
+  const c=wbgCtx;
+  const gw=c.createRadialGradient(cx,cy,r*.87,cx,cy,r*2.0);
+  gw.addColorStop(0,'rgba(210,208,198,.10)'); gw.addColorStop(.5,'rgba(210,208,198,.03)'); gw.addColorStop(1,'rgba(210,208,198,0)');
+  c.fillStyle=gw; c.beginPath(); c.arc(cx,cy,r*2,0,Math.PI*2); c.fill();
+  return true;
 }
 
 /* ── Nube con halo suave ── */
