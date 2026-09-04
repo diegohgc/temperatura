@@ -5844,6 +5844,17 @@ function wbgDraw(key,dt){
       c.fillStyle=hG2;c.fillRect(0,wbgH*.72,wbgW,wbgH*.28);
       break;
     }
+    case 'nightcloudy':{
+      c.fillStyle=wbgGrad([[0,'#070d18'],[.5,'#0c1628'],[1,'#101e35']]);c.fillRect(0,0,wbgW,wbgH);
+      wbgNightC.forEach(cl=>{
+        cl.x-=cl.speed*dt*60;if(cl.x<-240*cl.sc)cl.x=wbgW+80*cl.sc;
+        wbgCloud(cl.x,cl.y,cl.sc,cl.color,cl.alpha);
+      });
+      const hGnc=c.createLinearGradient(0,wbgH*.75,0,wbgH);
+      hGnc.addColorStop(0,'rgba(255,140,60,0)');hGnc.addColorStop(1,'rgba(255,120,40,0.08)');
+      c.fillStyle=hGnc;c.fillRect(0,wbgH*.75,wbgW,wbgH*.25);
+      break;
+    }
     case 'nightrain':{
       c.fillStyle=wbgGrad([[0,'#05090f'],[.5,'#0a1520'],[1,'#0e1c2c']]);c.fillRect(0,0,wbgW,wbgH);
       const hG3=c.createLinearGradient(0,wbgH*.65,0,wbgH);
