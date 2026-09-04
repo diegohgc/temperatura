@@ -3577,8 +3577,8 @@ function renderDatos(datos) {
     if (weatherCode <= 1 && !llueveDeVerdad) {
       const omCloud = c.cloud_cover ?? null;
       if (omCloud !== null) {
-        if (omCloud >= 70) weatherCode = 2;       // nublado
-        else if (omCloud >= 40) weatherCode = 1;  // parcialmente nublado
+        if (omCloud >= 60) weatherCode = 2;       // nublado
+        else if (omCloud >= 25) weatherCode = 1;  // parcialmente nublado
       }
     }
   }
