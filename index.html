@@ -3574,11 +3574,12 @@ function renderDatos(datos) {
     // ── Corrección anti-optimismo: si WAPI dice despejado pero OM ve nubes ──
     // Open-Meteo (ECMWF/ICON) es más preciso para nubosidad en Europa.
     // Solo corregimos hacia más nubes, nunca hacia más sol.
-    if (weatherCode <= 1 && !llueveDeVerdad) {
+    // WMO: 0=Despejado, 1=Mayormente despejado, 2=Parcialmente nublado, 3=Nublado
+    if (weatherCode <= 2 && !llueveDeVerdad) {
       const omCloud = c.cloud_cover ?? null;
       if (omCloud !== null) {
-        if (omCloud >= 60) weatherCode = 2;       // nublado
-        else if (omCloud >= 25) weatherCode = 1;  // parcialmente nublado
+        if      (omCloud >= 60) weatherCode = Math.max(weatherCode, 3); // nublado
+        else if (omCloud >= 25) weatherCode = Math.max(weatherCode, 2); // parcialmente nublado
       }
     }
   }
