@@ -3809,6 +3809,7 @@ async function actualizarPosicionYAltitud() {
   if (_bienvenidaActiva) return;
   if (ubicacionManual || !navigator.geolocation) return;
   navigator.geolocation.getCurrentPosition(async (pos) => {
+    if (ubicacionManual) return; // el usuario buscó una ciudad mientras el GPS resolvía
     const { latitude, longitude } = pos.coords;
     currentCoords = { ...currentCoords, lat: latitude, lon: longitude };
     try {
@@ -3828,6 +3829,7 @@ async function actualizarCiudad() {
   if (_bienvenidaActiva) return;
   if (ubicacionManual || !navigator.geolocation) return;
   navigator.geolocation.getCurrentPosition(async (pos) => {
+    if (ubicacionManual) return; // el usuario buscó una ciudad mientras el GPS resolvía
     const { latitude, longitude } = pos.coords;
     try {
       const ciudad = await obtenerCiudad(latitude, longitude);
