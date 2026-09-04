@@ -4384,7 +4384,7 @@ function abrirMapaAltitud() {
   if (!currentCoords) return;
   const { lat, lon } = currentCoords;
   const modal = document.getElementById('mapaModal');
-  document.getElementById('mapaModalTitulo').textContent = T.tuUbicacion || 'Ubicación';
+  document.getElementById('mapaModalTitulo').textContent = currentCoords.nombre || '';
   document.getElementById('mapaModalAltitud').textContent = document.getElementById('altitud').textContent;
   modal.style.display = 'flex';
   setTimeout(() => {
