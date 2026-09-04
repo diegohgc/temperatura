@@ -5637,14 +5637,14 @@ function wbgInit(key){
         {x:wbgW*.20,y:wbgH*.24,sc:0.8*sc,alpha:0.60,color:'rgba(20,33,50,1)',speed:0.17},
         {x:wbgW*.65,y:wbgH*.30,sc:0.7*sc,alpha:0.55,color:'rgba(24,38,58,1)',speed:0.20},
       ]; break;
-    case 'nightcloudy': // nublado total de noche: sin estrellas, nubes densas
+    case 'nightcloudy': // nublado total de noche: sin estrellas, nubes visibles
       wbgNightC=[
-        {x:wbgW*.00,y:wbgH*.06,sc:1.4*sc,alpha:0.92,color:'rgba(16,26,40,1)',speed:0.08},
-        {x:wbgW*.50,y:wbgH*.04,sc:1.2*sc,alpha:0.88,color:'rgba(20,32,48,1)',speed:0.11},
-        {x:wbgW*.15,y:wbgH*.22,sc:1.1*sc,alpha:0.82,color:'rgba(18,30,46,1)',speed:0.09},
-        {x:wbgW*.65,y:wbgH*.18,sc:1.0*sc,alpha:0.78,color:'rgba(22,36,54,1)',speed:0.12},
-        {x:wbgW*.35,y:wbgH*.34,sc:0.9*sc,alpha:0.72,color:'rgba(20,33,50,1)',speed:0.14},
-        {x:wbgW*.80,y:wbgH*.10,sc:0.85*sc,alpha:0.70,color:'rgba(24,38,58,1)',speed:0.10},
+        {x:wbgW*.00,y:wbgH*.06,sc:1.4*sc,alpha:0.88,color:'rgba(52,75,108,1)',speed:0.08},
+        {x:wbgW*.50,y:wbgH*.04,sc:1.2*sc,alpha:0.82,color:'rgba(48,70,102,1)',speed:0.11},
+        {x:wbgW*.15,y:wbgH*.22,sc:1.1*sc,alpha:0.76,color:'rgba(50,73,105,1)',speed:0.09},
+        {x:wbgW*.65,y:wbgH*.18,sc:1.0*sc,alpha:0.72,color:'rgba(46,68,100,1)',speed:0.12},
+        {x:wbgW*.35,y:wbgH*.34,sc:0.9*sc,alpha:0.68,color:'rgba(54,77,110,1)',speed:0.14},
+        {x:wbgW*.80,y:wbgH*.10,sc:0.85*sc,alpha:0.65,color:'rgba(50,72,104,1)',speed:0.10},
       ]; break;
     case 'nightrain':
       wbgNightR=Array.from({length:110},()=>({x:Math.random()*wbgW,y:Math.random()*wbgH,spd:5+Math.random()*7,len:14+Math.random()*20,op:0.06+Math.random()*.11}));
