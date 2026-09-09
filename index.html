@@ -6120,5 +6120,62 @@ window.aplicarFondoDinamico=function(weatherCode,isDay,astroData,lat){
 })();
 </script>
 
+<script>
+/* ── Botón "atrás" del sistema (Android): cierra el modal visible en vez de
+   salir de la app. La app es una SPA sin cambios de URL, así que el WebView
+   no tiene de forma nativa nada que "deshacer" al pulsar atrás — le damos
+   una entrada de historial nosotros mientras haya un modal abierto. ── */
+(function () {
+  const MODALES = [
+    { el: () => document.getElementById('modalDia'),       visible: el => el.classList.contains('abierto'), cerrar: () => window.cerrarModalDia && cerrarModalDia() },
+    { el: () => document.getElementById('modalInterior'),  visible: el => el.classList.contains('abierto'), cerrar: () => window.cerrarModalInterior && cerrarModalInterior() },
+    { el: () => document.getElementById('modalRadar'),     visible: el => el.classList.contains('abierto'), cerrar: () => window.cerrarModalRadar && cerrarModalRadar() },
+    { el: () => document.getElementById('modalMarea'),     visible: el => el.classList.contains('abierto'), cerrar: () => window.cerrarModalMarea && cerrarModalMarea() },
+    { el: () => document.getElementById('modalViento'),    visible: el => !el.hidden, cerrar: el => { el.hidden = true; } },
+    { el: () => document.getElementById('modalLluvia'),    visible: el => !el.hidden, cerrar: el => { el.hidden = true; } },
+    { el: () => document.getElementById('modalSensacion'), visible: el => !el.hidden, cerrar: el => { el.hidden = true; } },
+    { el: () => document.getElementById('modalHumedad'),   visible: el => !el.hidden, cerrar: el => { el.hidden = true; } },
+    { el: () => document.getElementById('mapaModal'),      visible: el => el.style.display === 'flex', cerrar: () => window.cerrarMapaAltitud && cerrarMapaAltitud() },
+    { el: () => document.getElementById('brujulaModal'),   visible: el => el.style.display === 'flex', cerrar: el => { el.style.display = 'none'; } },
+    { el: () => document.getElementById('ayudaModal'),     visible: el => el.classList.contains('open'), cerrar: el => { el.classList.remove('open'); } },
+    { el: () => document.getElementById('buscador'),       visible: el => !el.hidden, cerrar: () => window.cerrarBuscador ? cerrarBuscador() : (document.getElementById('buscador').hidden = true) },
+  ];
+
+  function algunModalVisible() {
+    return MODALES.some(m => { const el = m.el(); return el && m.visible(el); });
+  }
+  function cerrarModalVisible() {
+    for (const m of MODALES) {
+      const el = m.el();
+      if (el && m.visible(el)) { m.cerrar(el); return true; }
+    }
+    return false;
+  }
+
+  let historyPushed = false;
+
+  const observer = new MutationObserver(() => {
+    const visible = algunModalVisible();
+    if (visible && !historyPushed) {
+      historyPushed = true;
+      history.pushState({ quicktempModal: true }, '', location.href);
+    } else if (!visible && historyPushed) {
+      // Se cerró por otra vía (botón X, tocar fuera): consumir la entrada
+      // de historial que habíamos añadido para no dejarla "colgada".
+      historyPushed = false;
+      history.back();
+    }
+  });
+  observer.observe(document.body, { attributes: true, attributeFilter: ['class', 'hidden', 'style'], subtree: true });
+
+  window.addEventListener('popstate', () => {
+    if (historyPushed) {
+      historyPushed = false;
+      cerrarModalVisible();
+    }
+  });
+})();
+</script>
+
 </body>
 </html>
