@@ -42,7 +42,6 @@
   body.wbg-bright #pageCard,
   body.wbg-bright .panel.panel-interior  { background: transparent !important; }
   body.wbg-bright .interior-item,
-  body.wbg-bright .card-altbru,
   body.wbg-bright .card,
   body.wbg-bright .panel                 { background: rgba(0,50,100,0.28) !important; }
   body.wbg-bright #btnActualizar         { background: rgba(0,50,100,0.28) !important; border-color: rgba(100,180,255,0.4) !important; }
@@ -69,6 +68,29 @@
     padding-top: 8px;
     position: relative;
   }
+  .carga-inicial[hidden] { display: none; }
+  .carga-inicial {
+    position: absolute; inset: 0; z-index: 50;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(10,20,35,0.45); backdrop-filter: blur(2px);
+    border-radius: inherit;
+  }
+  .carga-inicial .spinner {
+    width: 34px; height: 34px; border-radius: 50%;
+    border: 3px solid rgba(255,255,255,0.25); border-top-color: #fff;
+    animation: qtSpin 0.8s linear infinite;
+  }
+  @keyframes qtSpin { to { transform: rotate(360deg); } }
+  .tip-pill {
+    position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom, 16px) + 18px);
+    transform: translateX(-50%); z-index: 60;
+    background: rgba(20,30,45,0.92); color: #fff; font-size: 0.82rem;
+    padding: 10px 18px; border-radius: 30px; white-space: nowrap;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    opacity: 0; transition: opacity 0.4s ease;
+    pointer-events: none;
+  }
+  .tip-pill.visible { opacity: 1; }
   .btn-buscar {
     background: none;
     border: none;
@@ -88,12 +110,11 @@
   }
   .buscador { max-width: 260px; margin: 0 auto 10px; }
   .buscar-fila { display: flex; flex-direction: column; align-items: center; gap: 2px; margin-bottom: 4px; }
-  .btn-fav { background: none; border: none; cursor: pointer; font-size: 1rem; color: inherit; opacity: 0.75; padding: 0; line-height: 1; transition: opacity 0.2s; display: flex; align-items: center; gap: 4px; }
+  .ciudad-nombre-fila { display: flex; align-items: center; gap: 6px; }
+  .btn-fav { background: none; border: none; cursor: pointer; font-size: 1.1rem; color: inherit; opacity: 0.75; padding: 0; line-height: 1; transition: opacity 0.2s; }
   .btn-fav:hover { opacity: 1; }
   .btn-ajustes { position: absolute; top: 10px; left: 1px; background: rgba(0,0,0,0.35); border: none; border-radius: 6px; color: inherit; font-size: 0.8rem; padding: 2px 6px; cursor: pointer; opacity: 0.8; transition: opacity 0.2s; line-height: 1; }
   .btn-ajustes:hover { opacity: 1; }
-  .btn-ayuda { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.35); border: none; border-radius: 50%; color: inherit; font-size: 0.85rem; font-weight: 700; width: 26px; height: 26px; cursor: pointer; opacity: 0.7; transition: opacity 0.2s; line-height: 1; display: flex; align-items: center; justify-content: center; }
-  .btn-ayuda:hover { opacity: 1; }
   #ayudaModal { display: none; position: fixed; inset: 0; z-index: 9998; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); align-items: center; justify-content: center; }
   #ayudaModal.open { display: flex; }
   .ayuda-box { background: var(--card-bg,#1e2330); border-radius: 20px; padding: 24px 20px 20px; width: 88vw; max-width: 360px; max-height: 85vh; overflow-y: auto; position: relative; box-shadow: 0 8px 40px rgba(0,0,0,0.5); }
@@ -110,6 +131,8 @@
   .ajustes-panel { position: absolute; top: 38px; left: 12px; background: rgba(30,30,40,0.92); backdrop-filter: blur(8px); border-radius: 10px; padding: 10px 14px; z-index: 100; min-width: 180px; box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
   .ajustes-fila { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 5px 0; font-size: 0.82rem; opacity: 0.9; }
   .ajustes-fila:not(:last-child) { border-bottom: 1px solid rgba(255,255,255,0.1); }
+  .ajustes-fila-btn { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .ajustes-fila-btn:active { opacity: 0.6; }
   .ajustes-label { color: #ffffff; }
   .ajustes-toggle { display: flex; background: rgba(255,255,255,0.12); border-radius: 6px; overflow: hidden; }
   .ajustes-toggle button { background: none; border: none; color: #ffffff; font-size: 0.78rem; font-weight: 600; padding: 4px 9px; cursor: pointer; opacity: 0.55; transition: opacity 0.15s, background 0.15s; }
@@ -121,7 +144,6 @@
   .ajustes-fav-nombre { font-size: 0.82rem; color: #ffffff; }
   .ajustes-fav-remove { background: none; border: none; color: #ffffff; opacity: 0.4; cursor: pointer; font-size: 0.85rem; padding: 0 0 0 8px; line-height: 1; }
   .ajustes-fav-remove:hover { opacity: 0.9; }
-  .btn-fav-texto { font-size: 0.95rem; }
   .fav-titulo { font-size: 0.7rem; opacity: 0.65; text-transform: uppercase; letter-spacing: 0.06em; margin: 10px 0 5px; }
   .fav-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; border-radius: 10px; background: rgba(255,255,255,0.1); margin-bottom: 5px; cursor: pointer; }
   .fav-item:hover { background: rgba(255,255,255,0.18); }
@@ -150,10 +172,13 @@
   }
   .ciudad { font-size: 1.8rem; font-weight: 700; line-height: 1.1; display: flex; flex-direction: column; }
   #ciudadSub { font-size: 0.85rem; font-weight: 400; opacity: 0.65; margin-top: 1px; }
+  .ciudad #altitud { font-size: 0.7rem; font-weight: 400; opacity: 0.45; margin-top: 2px; cursor: pointer; touch-action: manipulation; }
   .top-info {
     text-align: right; font-size: 0.8rem; opacity: 0.85;
-    line-height: 1.8; white-space: nowrap; padding-top: 4px;
+    line-height: 1.8; white-space: nowrap;
   }
+  #altitudRow { display: flex; justify-content: flex-end; }
+  #altitudRow svg#brujula { background: rgba(0,0,0,0.35); border-radius: 50%; padding: 4px; box-sizing: content-box; }
   .principal {
     display: flex; align-items: center; justify-content: center;
     gap: 14px; margin: 4px 0 8px;
@@ -178,6 +203,7 @@
   }
   .temp-minmax .tmx { font-weight: 600; }
   .temp-minmax .tmn { opacity: 0.75; }
+  .temp-minmax .mm-lbl { font-size: 0.6rem; opacity: 0.65; text-transform: uppercase; letter-spacing: 0.03em; margin-right: 3px; }
   .desc { font-size: 1rem; opacity: 0.9; margin-bottom: 2px; }
   .lluvia { font-size: 0.78rem; opacity: 0.8; margin-bottom: 4px; min-height: 1em; }
   .aire { font-size: 0.82rem; opacity: 0.85; margin-bottom: 2px; min-height: 1em; }
@@ -196,13 +222,6 @@
   .interior-valor { font-size: 1.6rem; font-weight: 700; line-height: 1; white-space: nowrap; }
   .interior-label { font-size: 0.56rem; opacity: 0.5; text-transform: uppercase; letter-spacing: 0.1em; text-align: center; line-height: 1.3; }
   /* ── Cards grid 2×2 ── */
-  .card-altbru { background: rgba(255,255,255,0.24); border-radius: 13px; display: flex; align-items: center; margin-bottom: 10px; overflow: hidden; }
-  .cab-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 9px 8px 8px; }
-  .cab-label { font-size: 0.52rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.45; }
-  .cab-value { font-size: 1rem; font-weight: 700; line-height: 1.1; }
-  .cab-divider { width: 1px; height: 34px; background: rgba(255,255,255,0.12); flex-shrink: 0; }
-  .cab-item-btn { cursor: pointer; -webkit-tap-highlight-color: transparent; }
-  .cab-item-btn:active { opacity: 0.7; }
   .cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 10px; }
   .card { background: rgba(255,255,255,0.24); border-radius: 13px; padding: 9px 11px 8px; display: flex; flex-direction: column; gap: 3px; }
   .card-label { font-size: 0.56rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -235,17 +254,9 @@
     font-size: 0.72rem; opacity: 0.65;
     text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px;
   }
-  .marea-extremos { display: flex; justify-content: space-around; margin-bottom: 8px; }
-  .marea-extremo { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-  .marea-extremo .me-icono svg {
-    width: 26px; height: 26px; stroke: #fff; fill: none;
-    stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
-  }
-  .marea-extremo .me-label { font-size: 0.68rem; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.04em; }
-  .marea-agua { font-size: 0.85rem; opacity: 0.8; text-align: center; margin-top: 6px; }
-  .marea-extremo .me-hora { font-size: 0.95rem; font-weight: 600; }
-  .marea-extremo .me-altura { font-size: 0.78rem; opacity: 0.8; }
-  .marea-estado { font-size: 0.85rem; opacity: 0.9; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 6px; }
+  .marea-agua { font-size: 0.85rem; opacity: 0.8; text-align: center; margin-top: 9px; }
+  .marea-estado { font-size: 1.05rem; font-weight: 600; text-align: center; margin-bottom: 4px; }
+  .marea-mini-chart { display: block; width: 100%; height: 54px; }
   #panelMarea { cursor: pointer; }
   #panelMarea:hover { opacity: 0.85; }
   /* Modal mareas */
@@ -423,10 +434,7 @@
     .icono { width: 38px; height: 38px; }
     .temp { font-size: 2.2rem; }
     .panel-titulo { margin-bottom: 4px; }
-    .marea-extremos { margin-bottom: 4px; }
     .bottom-row button { padding: 6px 14px; font-size: 0.8rem; }
-    .marea-extremo .me-label { font-size: 0.6rem; }
-    .marea-extremo .me-icono svg { width: 20px; height: 20px; }
   }
 </style>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
@@ -476,8 +484,8 @@
   <div id="bg"><canvas id="wbg"></canvas></div>
   <div id="swipeClip" style="width:100%;max-width:420px;overflow:hidden">
   <div class="card" id="pageCard">
+    <div id="cargaInicial" class="carga-inicial" hidden><div class="spinner"></div></div>
     <button class="btn-ajustes" id="btnAjustes"></button>
-    <button class="btn-ayuda" id="btnAyuda">?</button>
     <div id="ajustesPanel" hidden>
       <div class="ajustes-panel">
         <div class="ajustes-fila">
@@ -498,6 +506,10 @@
           <span class="ajustes-label" id="ajustesIdiomaLabel"></span>
           <select id="selectIdioma" class="ajustes-select"></select>
         </div>
+        <div class="ajustes-fila ajustes-fila-btn" id="btnAyuda">
+          <span class="ajustes-label" id="ajustesAyudaLabel"></span>
+          <span>?</span>
+        </div>
         <div id="ajustesFavsSeccion" hidden>
           <div class="ajustes-favs-titulo" id="ajustesFavsTitulo"></div>
           <div id="ajustesFavsLista"></div>
@@ -509,18 +521,20 @@
         <svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M19.5 19.5l-4.3-4.3"/></svg>
         <span class="btn-buscar-texto" id="textoCambiarCiudad"></span>
       </button>
-      <button class="btn-fav" id="btnFavorito" aria-label="Guardar favorito" hidden>☆</button>
       <button id="btnMiUbicacion" style="display:none;background:none;border:none;color:inherit;opacity:0.7;font-size:0.78rem;cursor:pointer;padding:0;align-items:center;gap:3px;white-space:nowrap">📍 <span id="btnMiUbicacionTxt">Mi ubicación</span></button>
     </div>
     <div class="top-row">
-      <div class="ciudad" id="ciudad" style="cursor:pointer;touch-action:manipulation" onclick="abrirMapaAltitud()">—<span id="ciudadSub"></span></div>
+      <div class="ciudad" id="ciudad" style="cursor:pointer;touch-action:manipulation" onclick="abrirMapaAltitud()">
+        <div class="ciudad-nombre-fila"><span id="ciudadNombre">—</span><button class="btn-fav" id="btnFavorito" aria-label="Guardar favorito" hidden>☆</button></div>
+        <span id="ciudadSub"></span>
+        <div id="altitud" onclick="event.stopPropagation();abrirMapaAltitud()"></div>
+      </div>
       <div class="top-info">
         <div id="velocidadRow" style="display:none!important;align-items:center;gap:4px;justify-content:flex-end;cursor:pointer;touch-action:manipulation" onclick="abrirVelocimetro()">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="opacity:0.8"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 12 L18 6"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/></svg>
           <span id="velocidadTxt" style="font-size:0.85rem;font-weight:600;opacity:0.9"></span>
         </div>
-        <div id="altitudRow" style="display:none">
-          <div id="altitud" style="font-size:0.95rem;font-weight:600;cursor:pointer;touch-action:manipulation" onclick="abrirMapaAltitud()"></div>
+        <div id="altitudRow">
           <svg id="brujula" width="28" height="28" viewBox="0 0 22 22" style="opacity:0.9;flex-shrink:0;cursor:pointer;touch-action:manipulation" aria-label="Abrir brújula">
             <circle cx="11" cy="11" r="10" fill="none" stroke="currentColor" stroke-width="1"/>
             <line x1="11" y1="2" x2="11" y2="20" stroke="currentColor" stroke-width="0.8" stroke-dasharray="1.5,2.2" opacity="0.35"/>
@@ -531,7 +545,6 @@
               <circle cx="11" cy="11" r="1.8" fill="currentColor"/>
             </g>
           </svg>
-
         </div>
         <div id="solInfo"></div>
       </div>
@@ -554,26 +567,6 @@
       </div>
     </div>
     <div class="desc" id="desc"></div>
-    <div class="card-altbru" id="cardAltBru">
-      <div class="cab-item" onclick="abrirMapaAltitud()" style="cursor:pointer;-webkit-tap-highlight-color:transparent">
-        <div class="cab-label" id="cabLblAlt">Altitud</div>
-        <div class="cab-value" id="cabAlt">--</div>
-      </div>
-      <div class="cab-divider"></div>
-      <div class="cab-item cab-item-btn" id="cabBrujulaBtn">
-        <div class="cab-label" id="cabLblBru">Brújula</div>
-        <svg width="26" height="26" viewBox="0 0 22 22" fill="none" style="opacity:0.9">
-          <circle cx="11" cy="11" r="10" stroke="currentColor" stroke-width="1"/>
-          <line x1="11" y1="2" x2="11" y2="20" stroke="currentColor" stroke-width="0.8" stroke-dasharray="1.5,2.2" opacity="0.35"/>
-          <line x1="2" y1="11" x2="20" y2="11" stroke="currentColor" stroke-width="0.8" stroke-dasharray="1.5,2.2" opacity="0.35"/>
-          <g id="cabBrujulaAguja" style="transform-origin:11px 11px">
-            <path d="M11 3.5 L12.8 10 L11 8.8 L9.2 10 Z" fill="currentColor"/>
-            <path d="M11 18.5 L12.8 12 L11 13.2 L9.2 12 Z" fill="currentColor" opacity="0.25"/>
-            <circle cx="11" cy="11" r="1.8" fill="currentColor"/>
-          </g>
-        </svg>
-      </div>
-    </div>
     <div class="cards-grid">
       <div class="card card-viento" id="cardLluviaBtn" role="button" tabindex="0">
         <div class="card-label" id="cLblLluvia">🌧 Lluvia</div>
@@ -618,8 +611,8 @@
     </div>
     <div class="panel" id="panelMarea" hidden>
       <div class="panel-titulo" id="titMarea"></div>
-      <div class="marea-extremos" id="mareaExtremos"></div>
       <div class="marea-estado" id="marea"></div>
+      <svg id="mareaMiniChart" class="marea-mini-chart" viewBox="0 0 300 56" preserveAspectRatio="none"></svg>
       <div class="marea-agua" id="mareaAgua"></div>
     </div>
     <!-- Modal ayuda -->
@@ -1746,12 +1739,17 @@ document.getElementById('selectIdioma').addEventListener('change', (e) => {
   renderFavoritosLista();
 });
 
+const AYUDA_LABEL = { es:'Ayuda', en:'Help', de:'Hilfe', fr:'Aide', pt:'Ajuda', it:'Aiuto', zh:'帮助', ca:'Ajuda', eu:'Laguntza', gl:'Axuda', ar:'مساعدة', ru:'Помощь', ja:'ヘルプ', ko:'도움말', nl:'Help', pl:'Pomoc', hi:'सहायता', ro:'Ajutor', hu:'Súgó' };
+const MAX_LABEL = { es:'Máx', en:'Max', de:'Max', fr:'Max', pt:'Máx', it:'Max', zh:'最高', ca:'Màx', eu:'Geh.', gl:'Máx', ar:'أعلى', ru:'Макс', ja:'最高', ko:'최고', nl:'Max', pl:'Maks', hi:'अधि.', ro:'Max', hu:'Max' };
+const MIN_LABEL = { es:'Mín', en:'Min', de:'Min', fr:'Min', pt:'Mín', it:'Min', zh:'最低', ca:'Mín', eu:'Gutx.', gl:'Mín', ar:'أدنى', ru:'Мин', ja:'最低', ko:'최저', nl:'Min', pl:'Min', hi:'न्यून.', ro:'Min', hu:'Min' };
+const TIP_TARJETAS = { es:'Toca cualquier tarjeta para ver más', en:'Tap any card to see more', de:'Tippe auf eine Kachel für mehr Details', fr:'Touchez une carte pour en savoir plus', pt:'Toque num cartão para ver mais', it:'Tocca una scheda per saperne di più', zh:'点击任意卡片查看更多', ca:'Toca qualsevol targeta per veure més', eu:'Sakatu edozein txartel gehiago ikusteko', gl:'Toca calquera tarxeta para ver máis', ar:'اضغط على أي بطاقة لمزيد من التفاصيل', ru:'Нажмите на карточку, чтобы узнать больше', ja:'カードをタップすると詳細が見られます', ko:'카드를 탭하면 자세히 볼 수 있어요', nl:'Tik op een kaart voor meer info', pl:'Dotknij kartę, aby zobaczyć więcej', hi:'अधिक देखने के लिए किसी भी कार्ड पर टैप करें', ro:'Atinge orice card pentru mai multe detalii', hu:'Koppints egy kártyára a részletekért' };
 function actualizarTextosFijos() {
   document.getElementById('btnActualizar').textContent = T.actualizar;
   document.getElementById('btnAjustes').textContent = T.ajustes;
   document.getElementById('textoCambiarCiudad').textContent = T.cambiarCiudad;
   document.getElementById('ajustesTempLabel').textContent = T.ajustesTemp;
   document.getElementById('ajustesVelLabel').textContent = T.ajustesVel;
+  document.getElementById('ajustesAyudaLabel').textContent = AYUDA_LABEL[idioma] || 'Help';
   document.getElementById('btnRadar').textContent = T.radar;
   const favsTit = document.getElementById('ajustesFavsTitulo');
   if (favsTit) favsTit.textContent = T.ciudadesGuardadas;
@@ -1853,13 +1851,12 @@ actualizarAjustes();
 
 const elTemp = document.getElementById('temp');
 const elDesc = document.getElementById('desc');
-const elCiudad = document.getElementById('ciudad');
+const elCiudadNombre = document.getElementById('ciudadNombre');
 const elSensacion = document.getElementById('sensacion');
 const elViento = document.getElementById('viento');
 const elHumedad = document.getElementById('humedad');
 const elEstado = document.getElementById('estado');
 const elAltitud = document.getElementById('altitud');
-const elCabAlt = document.getElementById('cabAlt');
 const elIcono = document.getElementById('icono');
 const elHoras = document.getElementById('horas');
 const elDias = document.getElementById('dias');
@@ -1878,6 +1875,7 @@ document.getElementById('textoCambiarCiudad').textContent = T.cambiarCiudad;
 document.getElementById('btnAjustes').textContent = '⚙ ' + (T.ajustes || 'Settings');
 document.getElementById('ajustesTempLabel').textContent = T.ajustesTemp || 'Temperature';
 document.getElementById('ajustesVelLabel').textContent = T.ajustesVel || 'Wind speed';
+document.getElementById('ajustesAyudaLabel').textContent = AYUDA_LABEL[idioma] || 'Help';
 document.getElementById('ajustesFavsTitulo').textContent = T.ciudadesGuardadas || 'Saved cities';
 
 let ubicacionManual = null;
@@ -1903,7 +1901,8 @@ function actualizarBtnFav() {
   if (!currentCoords) { btn.hidden = true; if (btnUbi) btnUbi.hidden = true; return; }
   btn.hidden = false;
   const esFav = esFavorito(currentCoords.lat, currentCoords.lon);
-  btn.innerHTML = `${esFav ? '★' : '☆'} <span class="btn-fav-texto">${(esFav ? FAV_REMOVE : FAV_ADD)[idioma] || (esFav ? 'Remove favorite' : 'Add to favorites')}</span>`;
+  btn.textContent = esFav ? '★' : '☆';
+  btn.setAttribute('aria-label', (esFav ? FAV_REMOVE : FAV_ADD)[idioma] || (esFav ? 'Remove favorite' : 'Add to favorites'));
   if (btnUbi) {
     btnUbi.style.display = ubicacionManual ? 'flex' : 'none';
     const txt = document.getElementById('btnMiUbicacionTxt');
@@ -1945,7 +1944,8 @@ function renderFavoritosLista() {
   });
 }
 
-document.getElementById('btnFavorito').addEventListener('click', () => {
+document.getElementById('btnFavorito').addEventListener('click', (e) => {
+  e.stopPropagation();
   if (!currentCoords) return;
   const favs = loadFavoritos();
   const idx = favs.findIndex(f => Math.abs(f.lat - currentCoords.lat) < 0.01 && Math.abs(f.lon - currentCoords.lon) < 0.01);
@@ -1969,8 +1969,6 @@ const ICONOS = {
   lunaNube: '<svg viewBox="0 0 24 24"><path d="M8.8 9.3a3.3 3.3 0 0 1 2.1-5.5 2.4 2.4 0 0 0 2.4 3.3 4.7 4.7 0 0 1-1.6 4.9" fill="url(#ql-moon)" stroke="none"/><path d="M7 19.5h10.5a3.5 3.5 0 0 0 .5-6.96A5 5 0 0 0 8.6 11.2 4 4 0 0 0 7 19.5z" fill="url(#ql-cloud-fair)" stroke="none"/></svg>',
 };
 
-const ICONO_PLEAMAR = '<svg viewBox="0 0 24 24"><path d="M3 17c1.5-2 3-3 4.5-3s3 2 4.5 2 3-2 4.5-2 3 1 4.5 3"/><line x1="12" y1="14" x2="12" y2="6"/><polyline points="9,9 12,6 15,9"/></svg>';
-const ICONO_BAJAMAR = '<svg viewBox="0 0 24 24"><path d="M3 7c1.5 2 3 3 4.5 3s3-2 4.5-2 3 2 4.5 2 3-1 4.5-3"/><line x1="12" y1="10" x2="12" y2="18"/><polyline points="9,15 12,18 15,15"/></svg>';
 
 function iconoParaCodigo(codigo, esDia = true) {
   if (codigo === 0) return esDia ? ICONOS.sol : ICONOS.luna;
@@ -3355,6 +3353,84 @@ async function obtenerMarea(lat, lon) {
   return { extremos, subiendo, horaNext, tempAgua, waveHeight, tiempos, alturas };
 }
 
+function _mareaInterp(slice, t) {
+  if (t <= slice[0].t) return slice[0].h;
+  if (t >= slice[slice.length - 1].t) return slice[slice.length - 1].h;
+  for (let i = 1; i < slice.length; i++) {
+    if (t <= slice[i].t) {
+      const r = (t - slice[i-1].t) / (slice[i].t - slice[i-1].t);
+      return slice[i-1].h + r * (slice[i].h - slice[i-1].h);
+    }
+  }
+  return slice[slice.length - 1].h;
+}
+
+// Curva compacta de marea (hoy hasta las 6h de mañana): mismo alcance que antes,
+// solo que como una forma continua en vez de columnas repetidas.
+function renderMareaMiniChart(datos) {
+  const svgEl = document.getElementById('mareaMiniChart');
+  const { tiempos, alturas, extremos } = datos;
+  if (!svgEl || !tiempos || !alturas) { if (svgEl) svgEl.innerHTML = ''; return; }
+
+  const ahora = Date.now();
+  const W = 300, H = 56, PADX = 4, TOP = 11, BOTTOM = H - 11;
+
+  const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
+  const manana6 = new Date(hoy); manana6.setDate(manana6.getDate() + 1); manana6.setHours(6, 0, 0, 0);
+  const startIdx = Math.max(0, tiempos.findIndex(t => new Date(t).getTime() >= hoy.getTime()));
+  let endIdx = tiempos.findIndex(t => new Date(t).getTime() >= manana6.getTime());
+  if (endIdx < 0) endIdx = tiempos.length - 1;
+  // Sin recortar a 0: se usa la altura real (puede bajar de 0 en referencia MSL)
+  // para que la curva conserve su forma natural en la bajamar, sin tramos planos.
+  const slice = alturas.slice(startIdx, endIdx + 1).map((h, i) => ({
+    t: new Date(tiempos[startIdx + i]).getTime(), h: h ?? 0
+  }));
+  if (slice.length < 2) { svgEl.innerHTML = ''; return; }
+
+  const minH = Math.min(...slice.map(p => p.h));
+  const maxH = Math.max(...slice.map(p => p.h));
+  const rangeH = maxH - minH || 1;
+  const minT = slice[0].t, maxT = slice[slice.length - 1].t;
+  const rangeT = maxT - minT || 1;
+
+  const px = t => PADX + ((t - minT) / rangeT) * (W - 2 * PADX);
+  const py = h => BOTTOM - ((h - minH) / rangeH) * (BOTTOM - TOP);
+
+  let d = `M ${px(slice[0].t)} ${py(slice[0].h)}`;
+  for (let i = 1; i < slice.length; i++) {
+    const x0 = px(slice[i-1].t), y0 = py(slice[i-1].h);
+    const x1 = px(slice[i].t),   y1 = py(slice[i].h);
+    const cpx = (x0 + x1) / 2;
+    d += ` C ${cpx} ${y0}, ${cpx} ${y1}, ${x1} ${y1}`;
+  }
+  const fillD = `${d} L ${px(slice[slice.length-1].t)} ${H} L ${px(slice[0].t)} ${H} Z`;
+
+  const nowInRange = ahora >= minT && ahora <= maxT;
+  const nowX = px(Math.min(maxT, Math.max(minT, ahora)));
+  const nowY = py(_mareaInterp(slice, ahora));
+
+  const puntos = (extremos || []).filter(e => e.hora >= minT && e.hora <= maxT);
+
+  svgEl.innerHTML = `
+    <defs>
+      <linearGradient id="mgrdMini" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="rgba(150,210,255,0.40)"/>
+        <stop offset="100%" stop-color="rgba(150,210,255,0.02)"/>
+      </linearGradient>
+    </defs>
+    <path d="${fillD}" fill="url(#mgrdMini)"/>
+    <path d="${d}" fill="none" stroke="rgba(150,210,255,0.9)" stroke-width="1.6" stroke-linecap="round"/>
+    ${puntos.map(e => {
+      const ex = px(e.hora), ey = py(_mareaInterp(slice, e.hora));
+      const hora = new Date(e.hora).toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' });
+      const textY = e.tipo === 'pleamar' ? Math.max(9, ey - 6) : Math.min(H - 2, ey + 13);
+      return `<circle cx="${ex}" cy="${ey}" r="2.6" fill="rgba(225,242,255,0.95)"/>
+              <text x="${ex}" y="${textY}" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.78)">${hora}</text>`;
+    }).join('')}
+    ${nowInRange ? `<circle cx="${nowX}" cy="${nowY}" r="3.4" fill="#fff" stroke="rgba(150,210,255,0.9)" stroke-width="1.5"/>` : ''}
+  `;
+}
+
 function renderMarea(datos) {
   const panel = document.getElementById('panelMarea');
   const estadoTexto = datos && datos.horaNext != null
@@ -3367,20 +3443,8 @@ function renderMarea(datos) {
   panel.hidden = false;
   document.getElementById('titMarea').textContent = T.mareasDeHoy;
 
-  const elExtremos = document.getElementById('mareaExtremos');
-  elExtremos.innerHTML = datos.extremos.map(e => {
-    const hora = new Date(e.hora).toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' });
-    const label = e.tipo === 'pleamar' ? T.pleamar : T.bajamar;
-    const icono = e.tipo === 'pleamar' ? ICONO_PLEAMAR : ICONO_BAJAMAR;
-    return `<div class="marea-extremo">
-      <div class="me-icono">${icono}</div>
-      <div class="me-label">${label}</div>
-      <div class="me-hora">${hora}</div>
-      <div class="me-altura">${toAlt(e.altura)}</div>
-    </div>`;
-  }).join('');
-
   document.getElementById('marea').textContent = estadoTexto || '';
+  renderMareaMiniChart(datos);
   const elAgua = document.getElementById('mareaAgua');
   const partes = [];
   if (datos.tempAgua !== null && datos.tempAgua !== undefined) partes.push(`🌊 ${toTemp(datos.tempAgua)}`);
@@ -3626,10 +3690,6 @@ function renderDatos(datos) {
   const windDirStr = wapiData?.current?.wind_dir ?? '';
   const gustKmh = wapiData?.current?.gust_kph ?? null;
   // Actualizar labels de tarjetas según idioma
-  const cabLblAltEl = document.getElementById('cabLblAlt');
-  const cabLblBruEl = document.getElementById('cabLblBru');
-  if (cabLblAltEl) cabLblAltEl.textContent = T.altitud || 'Altitud';
-  if (cabLblBruEl) cabLblBruEl.textContent = T.brujula || 'Brújula';
   document.getElementById('cLblLluvia').textContent = getCardLabel('lluvia');
   document.getElementById('cLblSensacion').textContent = T.sensacion || 'Sensación';
   document.getElementById('cLblViento').textContent = getCardLabel('viento');
@@ -3689,12 +3749,11 @@ function renderDatos(datos) {
   const min0 = tiempo.daily && tiempo.daily.temperature_2m_min ? tiempo.daily.temperature_2m_min[0] : null;
   const elMinMax = document.getElementById('tempMinMax');
   if (max0 !== null && min0 !== null) {
-    elMinMax.innerHTML = `<span class="tmx">${toTemp(max0)}</span><span class="tmn">${toTemp(min0)}</span>`;
+    elMinMax.innerHTML = `<span class="tmx"><span class="mm-lbl">${MAX_LABEL[idioma] || 'Max'}</span>${toTemp(max0)}</span><span class="tmn"><span class="mm-lbl">${MIN_LABEL[idioma] || 'Min'}</span>${toTemp(min0)}</span>`;
   }
   const alt = elevacion && elevacion.elevation && elevacion.elevation[0];
   const altTxt = alt !== null && alt !== undefined ? (usaMph ? `${Math.round(alt * 3.28084)} ft` : `${Math.round(alt)} m`) : '';
-  elAltitud.textContent = altTxt ? `${T.altitud} ${altTxt}` : '';
-  if (elCabAlt) elCabAlt.textContent = altTxt || '--';
+  elAltitud.textContent = altTxt;
   animarSwipeEntrada();
 }
 
@@ -3747,7 +3806,7 @@ async function cargarDatos(latitude, longitude, nombreFijo, forzar = false) {
     // Guardar en caché si se obtuvieron datos frescos de la API
     if (!cached && wapiDataClean) _setWapiCache(latitude, longitude, wapiDataClean, astroDataClean);
     const datosFinales = { tiempo, ciudad, mdata, elevacion, aireData, owmData, wapiData: wapiDataClean, astroData: astroDataClean, aemetActual: null, aemetHoras: null, aemetObs: null, nwsActual: null, dwdObs: null };
-    elCiudad.firstChild.textContent = ciudad.principal;
+    elCiudadNombre.textContent = ciudad.principal;
     document.getElementById('ciudadSub').textContent = ciudad.sub || '';
     const nombreCiudad = ciudad.sub ? `${ciudad.principal}, ${ciudad.sub}` : ciudad.principal;
     currentCoords = { lat: latitude, lon: longitude, nombre: nombreCiudad };
@@ -3758,10 +3817,11 @@ async function cargarDatos(latitude, longitude, nombreFijo, forzar = false) {
     ultimaActualizacion = Date.now();
     setEstado(T.actualizado + ' ' + new Date(ultimaActualizacion).toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' }));
     localStorage.setItem('ql_ultima_act', Date.now().toString());
-if (window.ayudaCerrarAlCargar) { window.ayudaCerrarAlCargar(); window.ayudaCerrarAlCargar = null; }
+    if (window.ocultarCargaInicial) { window.ocultarCargaInicial(); window.ocultarCargaInicial = null; }
     if (window.ocultarPermisoDenegado) window.ocultarPermisoDenegado();
   } catch (e) {
     setEstado(T.errorTemperatura);
+    if (window.ocultarCargaInicial) { window.ocultarCargaInicial(); window.ocultarCargaInicial = null; }
   }
 }
 
@@ -3825,8 +3885,7 @@ async function actualizarPosicionYAltitud() {
       const alt = data.elevation && data.elevation.length ? data.elevation[0] : null;
       if (alt !== null) {
         const altTxt2 = usaMph ? `${Math.round(alt * 3.28084)} ft` : `${Math.round(alt)} m`;
-        elAltitud.textContent = `${T.altitud} ${altTxt2}`;
-        if (elCabAlt) elCabAlt.textContent = altTxt2;
+        elAltitud.textContent = altTxt2;
       }
     } catch (e) {}
   }, null, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
@@ -3840,7 +3899,7 @@ async function actualizarCiudad() {
     const { latitude, longitude } = pos.coords;
     try {
       const ciudad = await obtenerCiudad(latitude, longitude);
-      elCiudad.firstChild.textContent = ciudad.principal;
+      elCiudadNombre.textContent = ciudad.principal;
       document.getElementById('ciudadSub').textContent = ciudad.sub || '';
       const nombreCiudad = ciudad.sub ? `${ciudad.principal}, ${ciudad.sub}` : ciudad.principal;
       currentCoords = { ...currentCoords, lat: latitude, lon: longitude, nombre: nombreCiudad };
@@ -4658,12 +4717,8 @@ function abrirEnGoogleMaps() {
     }
   }
 
-  // Abrir modal al pulsar la brújula (header oculto o tarjeta nueva)
+  // Abrir modal al pulsar el icono de brújula de la cabecera
   document.getElementById('brujula').addEventListener('click', function() {
-    abrirModal(); iniciarSensor();
-  });
-  const cabBtn = document.getElementById('cabBrujulaBtn');
-  if (cabBtn) cabBtn.addEventListener('click', function() {
     abrirModal(); iniciarSensor();
   });
 
@@ -5369,26 +5424,16 @@ function abrirEnGoogleMaps() {
 
   const modal = document.getElementById('ayudaModal');
 
-  document.getElementById('btnAyuda').addEventListener('click', () => { renderAyuda(); modal.classList.add('open'); });
+  document.getElementById('btnAyuda').addEventListener('click', (e) => {
+    e.stopPropagation();
+    document.getElementById('ajustesPanel').hidden = true;
+    renderAyuda(); modal.classList.add('open');
+  });
 
   function cerrarAyuda() { modal.classList.remove('open'); }
   document.getElementById('ayudaClose').addEventListener('click', cerrarAyuda);
   modal.addEventListener('click', e => { if (e.target === modal) cerrarAyuda(); });
 
-  // Primera vez: marcar como vista
-  if (!localStorage.getItem('ql_ayuda_vista')) {
-    localStorage.setItem('ql_ayuda_vista', '1');
-  }
-
-  // Siempre (si ya pasó la bienvenida): abrir para tapar pantalla vacía mientras cargan los datos
-  // Se cierra automáticamente cuando llegan los datos (ayudaCerrarAlCargar)
-  if (localStorage.getItem('ql_bienvenida_vista')) {
-    renderAyuda();
-    modal.classList.add('open');
-  }
-
-  // Cerrar automáticamente cuando los datos terminen de cargar
-  window.ayudaCerrarAlCargar = cerrarAyuda;
 })();
 
 /* ═══════════════════════════════════════════════════════════
@@ -6046,6 +6091,9 @@ window.aplicarFondoDinamico=function(weatherCode,isDay,astroData,lat){
   <button id="btnBienvenidaCiudad" style="background:none;border:none;color:rgba(255,255,255,0.7);font-size:0.9rem;cursor:pointer;text-decoration:underline;padding:8px"></button>
 </div>
 
+<!-- ── Aviso de una sola vez: toca cualquier tarjeta para ampliar ── -->
+<div id="tipTarjetas" class="tip-pill" hidden>💡 <span id="tipTarjetasTxt"></span></div>
+
 <!-- ── Pantalla de permiso denegado ──────────────────────── -->
 <div id="modalPermisoDenegado" style="display:none;position:fixed;inset:0;z-index:10000;background:linear-gradient(160deg,#1e3a5f,#3a6ea5);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 28px;color:#fff">
   <div style="font-size:3rem;margin-bottom:12px">📍</div>
@@ -6077,12 +6125,41 @@ window.aplicarFondoDinamico=function(weatherCode,isDay,astroData,lat){
   }
   aplicarTraducciones();
 
+  // Spinner discreto mientras cargan los datos por primera vez (sustituye al
+  // modal de ayuda que antes se usaba como tapadera de la pantalla vacía).
+  const elCargaInicial = document.getElementById('cargaInicial');
+  window.ocultarCargaInicial = () => {
+    if (elCargaInicial) elCargaInicial.hidden = true;
+    mostrarTipTarjetasSiProcede();
+  };
+
+  // Aviso de una sola vez: "toca cualquier tarjeta para ver más".
+  // Se marca como visto en cuanto se muestra, nunca vuelve a aparecer.
+  function mostrarTipTarjetasSiProcede() {
+    if (localStorage.getItem('ql_tip_tarjetas_vista')) return;
+    localStorage.setItem('ql_tip_tarjetas_vista', '1');
+    const el = document.getElementById('tipTarjetas');
+    if (!el) return;
+    document.getElementById('tipTarjetasTxt').textContent =
+      TIP_TARJETAS[idioma] || TIP_TARJETAS.en;
+    el.hidden = false;
+    requestAnimationFrame(() => el.classList.add('visible'));
+    const ocultar = () => {
+      el.classList.remove('visible');
+      setTimeout(() => { el.hidden = true; }, 400);
+    };
+    const timer = setTimeout(ocultar, 4000);
+    document.querySelectorAll('.card-viento, #panelInterior, #panelMarea').forEach(c => {
+      c.addEventListener('click', () => { clearTimeout(timer); ocultar(); }, { once: true });
+    });
+  }
+
   if (!localStorage.getItem(KEY)) {
     // Primera vez: mostrar bienvenida, NO llamar actualizar()
     elBienvenida.style.display = 'flex';
-    localStorage.setItem('ql_ayuda_vista', '1');
   } else {
-    // Ya vio la bienvenida: mostrar ayuda mientras carga y arrancar
+    // Ya vio la bienvenida: mostrar spinner mientras carga y arrancar
+    if (elCargaInicial) elCargaInicial.hidden = false;
     actualizar();
   }
 
@@ -6090,6 +6167,7 @@ window.aplicarFondoDinamico=function(weatherCode,isDay,astroData,lat){
     localStorage.setItem(KEY, '1');
     _bienvenidaActiva = false;
     elBienvenida.style.display = 'none';
+    if (elCargaInicial) elCargaInicial.hidden = false;
     if (window._iniciarWatchVelocimetro) window._iniciarWatchVelocimetro();
     actualizar();
   });
