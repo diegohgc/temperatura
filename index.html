@@ -765,7 +765,9 @@
     <div id="intModalValor" style="font-size:2.5rem;font-weight:800;text-align:center;margin-bottom:6px"></div>
     <div id="intModalDetalle" style="font-size:0.88rem;text-align:center;line-height:1.6;padding:0 4px;margin-bottom:14px"></div>
     <div id="intModalSolArco"></div>
+    <div id="intModalAireArco"></div>
     <div id="intModalNivel" style="font-size:0.9rem;text-align:center;opacity:0.7;margin-bottom:18px"></div>
+    <div id="intModalAireExtra" style="display:none;gap:10px;margin:-8px 0 16px"></div>
   </div>
 </div>
 <!-- Modal día -->
@@ -2509,6 +2511,48 @@ function renderSol(daily, astroData) {
   elSolInfo.innerHTML = `${T.amanecer} ${amanecer}<br>${T.anochecer} ${anochecer}`;
 }
 
+function generarArcoAire(aqi, tipo) {
+  if (aqi === null || aqi === undefined) return '';
+  const gaugeMax = tipo === 'eu' ? 100 : 300;
+  const pct = Math.max(0, Math.min(1, aqi / gaugeMax));
+  const W = 180, H = 92, BOTTOM = 81, R = 70;
+  const marcas = tipo === 'eu' ? [0, 25, 50, 75, 100] : [0, 75, 150, 225, 300];
+
+  const angDe = pct2 => Math.PI - pct2 * Math.PI; // 180°→0°
+  const punto = pct2 => {
+    const ang = angDe(pct2);
+    return [90 + R * Math.cos(ang), BOTTOM - R * Math.sin(ang)];
+  };
+  const [mx, my] = punto(pct);
+  const col = colorParaAQI(aqi, tipo);
+
+  const ticks = marcas.map(v => {
+    const p = v / gaugeMax;
+    const [tx, ty] = (() => {
+      const ang = angDe(p), r2 = R + 10;
+      return [90 + r2 * Math.cos(ang), BOTTOM - r2 * Math.sin(ang)];
+    })();
+    const anchor = p === 0 ? 'start' : p === 1 ? 'end' : 'middle';
+    return `<text x="${tx.toFixed(1)}" y="${ty.toFixed(1)}" text-anchor="${anchor}" font-size="8" fill="rgba(255,255,255,0.4)">${v}</text>`;
+  }).join('');
+
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:220px;display:block;margin:2px auto 0;overflow:visible">
+    <defs>
+      <linearGradient id="aireGrad" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="#4CAF50"/>
+        <stop offset="45%" stop-color="#FFC107"/>
+        <stop offset="75%" stop-color="#FF9800"/>
+        <stop offset="100%" stop-color="#E53935"/>
+      </linearGradient>
+    </defs>
+    <path d="M20 ${BOTTOM} A${R} ${R} 0 0 1 160 ${BOTTOM}" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="9" stroke-linecap="round"/>
+    <path d="M20 ${BOTTOM} A${R} ${R} 0 0 1 160 ${BOTTOM}" fill="none" stroke="url(#aireGrad)" stroke-width="9" stroke-linecap="round"
+          stroke-dasharray="220" stroke-dashoffset="${(220 - pct * 220).toFixed(1)}"/>
+    ${ticks}
+    <circle cx="${mx.toFixed(1)}" cy="${my.toFixed(1)}" r="6" fill="${col}" stroke="#fff" stroke-width="1.5"/>
+  </svg>`;
+}
+
 function generarArcoSolar() {
   if (!_ultimoSunrise || !_ultimoSunset) return '';
   const amanecerDate = new Date(_ultimoSunrise);
@@ -2931,6 +2975,34 @@ function abrirModalInterior(tipo) {
       const cn = consejos.find(x => _ultimoAireData.aqi <= x.max) || consejos[consejos.length-1];
       detalle = (cn.c[lang] || cn.c.es) + `\n\n${aqiLabel}: ${_ultimoAireData.aqi}`;
     } else { valor = '--'; nivel = ''; detalle = ''; }
+  }
+
+  const _elArcoAire = document.getElementById('intModalAireArco');
+  const _elExtraAire = document.getElementById('intModalAireExtra');
+  if (tipo === 'aire' && _ultimoAireData) {
+    _elArcoAire.innerHTML = generarArcoAire(_ultimoAireData.aqi, _ultimoAireData.tipo);
+    const filas = [];
+    if (_ultimoAireData.pm25 !== null && _ultimoAireData.pm25 !== undefined) {
+      filas.push(['PM2.5', `${Math.round(_ultimoAireData.pm25)} µg/m³`]);
+    }
+    if (_ultimoAireData.ozono !== null && _ultimoAireData.ozono !== undefined) {
+      filas.push(['O₃', `${Math.round(_ultimoAireData.ozono)} µg/m³`]);
+    }
+    if (filas.length) {
+      _elExtraAire.style.display = 'flex';
+      _elExtraAire.innerHTML = filas.map(([label, val]) => `
+        <div style="flex:1;background:rgba(255,255,255,0.05);border-radius:12px;padding:8px 10px;text-align:center">
+          <div style="font-size:0.6rem;opacity:0.5;text-transform:uppercase;letter-spacing:0.06em">${label}</div>
+          <div style="font-size:0.95rem;font-weight:600;margin-top:2px">${val}</div>
+        </div>`).join('');
+    } else {
+      _elExtraAire.style.display = 'none';
+      _elExtraAire.innerHTML = '';
+    }
+  } else {
+    _elArcoAire.innerHTML = '';
+    _elExtraAire.style.display = 'none';
+    _elExtraAire.innerHTML = '';
   }
 
   document.getElementById('intModalTitulo').textContent = titulo;
@@ -3577,11 +3649,13 @@ async function obtenerElevacionTerreno(lat, lon) {
 async function obtenerCalidadAire(lat, lon) {
   // Europa: lat 34-72, lon -25 a 50
   const esEuropa = lat >= 34 && lat <= 72 && lon >= -25 && lon <= 50;
-  const r = await fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=european_aqi,us_aqi`);
+  const r = await fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=european_aqi,us_aqi,pm2_5,ozone`);
   if (!r.ok) throw new Error();
   const data = await r.json();
   const aqiEU = data.current?.european_aqi;
   const aqiUS = data.current?.us_aqi;
+  const pm25 = data.current?.pm2_5 ?? null;
+  const ozono = data.current?.ozone ?? null;
   const tipo = esEuropa ? 'eu' : 'us';
   const aqi = tipo === 'eu' ? (aqiEU ?? aqiUS) : (aqiUS ?? aqiEU);
   if (aqi === null || aqi === undefined) return null;
@@ -3607,7 +3681,15 @@ async function obtenerCalidadAire(lat, lon) {
   const nivel = niveles.find(n => aqi <= n.max) || niveles[niveles.length - 1];
   const _idiomaBase = idioma.split('-')[0];
   const textoCorto = nivel.textoCorto ? (nivel.textoCorto[idioma] || nivel.textoCorto[_idiomaBase] || nivel.textoCorto['en']) : null;
-  return { texto: nivel.texto[idioma] || nivel.texto[_idiomaBase] || nivel.texto['en'], textoCorto, aqi, nivelTexto: nivel.texto, tipo };
+  return { texto: nivel.texto[idioma] || nivel.texto[_idiomaBase] || nivel.texto['en'], textoCorto, aqi, nivelTexto: nivel.texto, tipo, pm25, ozono };
+}
+
+// Color del nivel de AQI (misma escala EU/US ya usada para los textos de nivel)
+function colorParaAQI(aqi, tipo) {
+  const escala = tipo === 'eu'
+    ? [[20,'#4CAF50'],[40,'#8BC34A'],[60,'#FFC107'],[80,'#FF9800'],[999,'#E53935']]
+    : [[50,'#4CAF50'],[100,'#FBC02D'],[150,'#FF9800'],[200,'#E53935'],[300,'#8E24AA'],[999,'#6D1B1B']];
+  return (escala.find(([max]) => aqi <= max) || escala[escala.length-1])[1];
 }
 
 function renderDatos(datos) {
