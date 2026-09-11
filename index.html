@@ -530,10 +530,6 @@
         <div id="altitud" onclick="event.stopPropagation();abrirMapaAltitud()"></div>
       </div>
       <div class="top-info">
-        <div id="velocidadRow" style="display:none!important;align-items:center;gap:4px;justify-content:flex-end;cursor:pointer;touch-action:manipulation" onclick="abrirVelocimetro()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="opacity:0.8"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 12 L18 6"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/></svg>
-          <span id="velocidadTxt" style="font-size:0.85rem;font-weight:600;opacity:0.9"></span>
-        </div>
         <div id="altitudRow">
           <svg id="brujula" width="28" height="28" viewBox="0 0 22 22" style="opacity:0.9;flex-shrink:0;cursor:pointer;touch-action:manipulation" aria-label="Abrir brújula">
             <circle cx="11" cy="11" r="10" fill="none" stroke="currentColor" stroke-width="1"/>
@@ -3660,6 +3656,19 @@ function renderDatos(datos) {
         else if (omCloud >= 50) weatherCode = Math.max(weatherCode, 2); // parcialmente nublado
       }
     }
+
+    // ── Corrección anti-pesimismo: si WAPI dice Nublado (1009) pero OM ve
+    // cielo despejado. Mismo razonamiento que la de arriba, en sentido
+    // contrario — solo para el código "Overcast" puro, no para lluvia/niebla
+    // (esos ya tienen su propia validación con precipitación/visibilidad).
+    if (wapiCode === 1009 && !llueveDeVerdad) {
+      const omCloud2 = c.cloud_cover ?? null;
+      if (omCloud2 !== null) {
+        if      (omCloud2 < 20) weatherCode = 0;                    // despejado
+        else if (omCloud2 < 50) weatherCode = 1;                    // mayormente despejado
+        else if (omCloud2 < 80) weatherCode = Math.min(weatherCode, 2); // parcialmente nublado
+      }
+    }
   }
 
   // Temperatura y sensación: WeatherAPI
@@ -4482,7 +4491,8 @@ function abrirEnGoogleMaps() {
 // ── Velocímetro ──────────────────────────────────────────────────────────────
 (function() {
   const UMBRAL_MS = 0.6; // ~2 km/h, por debajo se considera parado
-  const MAX_VEL = 180;   // km/h para escala del arco (o 110 mph)
+  const MAX_VEL = 220;   // km/h para escala del arco
+  const MAX_VEL_MPH = Math.round(MAX_VEL * 0.621371); // equivalente en mph, redondeado
   let velActual = 0, velMax = 0, velSuma = 0, velCount = 0;
   let watchId = null;
   let distMetros = 0, lastLat = null, lastLon = null;
@@ -4503,20 +4513,57 @@ function abrirEnGoogleMaps() {
     return m < 1000 ? [Math.round(m) + '', 'm'] : [(m / 1000).toFixed(2), 'km'];
   }
 
+  function msToDisplay(ms) {
+    const usaMph = window.usaMph || false;
+    return usaMph ? (ms * 2.23694) : (ms * 3.6);
+  }
+
+  function unidad() {
+    return (window.usaMph || false) ? 'mph' : 'km/h';
+  }
+
+  // Marcas numéricas del arco (0, 1/4, 1/2, 3/4, máximo)
+  function dibujarTicks(maxDisplay) {
+    const ticksG = document.getElementById('brjVelTicks');
+    if (!ticksG) return;
+    const cx = 90, cy = 100, r = 80;
+    ticksG.innerHTML = [180, 135, 90, 45, 0].map(deg => {
+      const rad = deg * Math.PI / 180;
+      const x = cx + r * Math.cos(rad);
+      const y = cy - r * Math.sin(rad);
+      const val = Math.round(maxDisplay * (180 - deg) / 180);
+      const anchor = deg === 180 ? 'start' : deg === 0 ? 'end' : 'middle';
+      return `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="${anchor}">${val}</text>`;
+    }).join('');
+  }
+
   function actualizarPanelBrujula() {
     const T = window.T || {};
+    const usaMph = window.usaMph || false;
+    const maxDisplay = usaMph ? MAX_VEL_MPH : MAX_VEL;
+
     const velLabel = document.getElementById('brjVelLabel');
-    const velNum   = document.getElementById('brjVelNum');
+    const numero   = document.getElementById('brjVelNumero');
     const velUnit  = document.getElementById('brjVelUnit');
+    const arco     = document.getElementById('brjVelArco');
     const distLabel = document.getElementById('brjDistLabel');
     const distNum  = document.getElementById('brjDistNum');
     const distUnit = document.getElementById('brjDistUnit');
     const resetBtn = document.getElementById('brjDistReset');
+
     if (velLabel) velLabel.textContent = T.tuVelocidad || 'Velocidad';
     if (distLabel) distLabel.textContent = T.distancia || 'Distancia';
     if (resetBtn) resetBtn.textContent = T.resetDist || 'Reset';
-    if (velNum) velNum.textContent = Math.round(msToDisplay(velActual));
+
+    const v = Math.round(msToDisplay(velActual));
+    if (numero) numero.textContent = v;
     if (velUnit) velUnit.textContent = unidad();
+    if (arco) {
+      const pct = Math.min(v / maxDisplay, 1);
+      arco.style.strokeDashoffset = 220 - pct * 220;
+    }
+    dibujarTicks(maxDisplay);
+
     const [dVal, dUnit] = formatDist(distMetros);
     if (distNum) distNum.textContent = dVal;
     if (distUnit) distUnit.textContent = dUnit;
@@ -4527,68 +4574,6 @@ function abrirEnGoogleMaps() {
     actualizarPanelBrujula();
   };
   window.actualizarPanelBrujula = actualizarPanelBrujula;
-
-  function msToDisplay(ms) {
-    const usaMph = window.usaMph || false;
-    return usaMph ? (ms * 2.23694) : (ms * 3.6);
-  }
-
-  function unidad() {
-    return (window.usaMph || false) ? 'mph' : 'km/h';
-  }
-
-  function actualizarFila(ms) {
-    const row = document.getElementById('velocidadRow');
-    const txt = document.getElementById('velocidadTxt');
-    if (!row || !txt) return;
-    if (ms < UMBRAL_MS) {
-      row.style.display = 'none';
-      return;
-    }
-    const v = Math.round(msToDisplay(ms));
-    txt.textContent = v + ' ' + unidad();
-    // row.style.display = 'flex'; // velocímetro oculto de pantalla principal
-  }
-
-  function actualizarModal() {
-    const v = Math.round(msToDisplay(velActual));
-    const vMax = velMax > 0 ? Math.round(msToDisplay(velMax)) : null;
-    const vMedia = velCount > 0 ? Math.round(msToDisplay(velSuma / velCount)) : null;
-    const maxDisplay = (window.usaMph || false) ? 110 : MAX_VEL;
-
-    const numero = document.getElementById('velNumero');
-    const arco = document.getElementById('velArco');
-    const aguja = document.getElementById('velAguja');
-    const maxN = document.getElementById('velMaxNumero');
-    const mediaN = document.getElementById('velMediaNumero');
-    const unidadEl = document.getElementById('velUnidad');
-    const tituloEl = document.getElementById('velTitulo');
-    const maxLabel = document.getElementById('velMaxLabel');
-    const mediaLabel = document.getElementById('velMediaLabel');
-    const T = window.T || {};
-
-    if (tituloEl) tituloEl.textContent = T.tuVelocidad || 'Tu velocidad';
-    if (unidadEl) unidadEl.textContent = unidad();
-    if (maxLabel) maxLabel.textContent = T.velMax || 'Máx.';
-    if (mediaLabel) mediaLabel.textContent = T.velMedia || 'Media';
-
-    if (numero) numero.textContent = v;
-    if (maxN) maxN.textContent = vMax !== null ? vMax : '—';
-    if (mediaN) mediaN.textContent = vMedia !== null ? vMedia : '—';
-
-    // arco: 220px total, proporcional al % de maxDisplay
-    if (arco) {
-      const pct = Math.min(v / maxDisplay, 1);
-      const offset = 220 - pct * 220;
-      arco.style.strokeDashoffset = offset;
-    }
-    // aguja: de -90° (izq) a +90° (der)
-    if (aguja) {
-      const pct = Math.min(v / maxDisplay, 1);
-      const deg = -90 + pct * 180;
-      aguja.style.transform = `rotate(${deg}deg)`;
-    }
-  }
 
   function onPos(pos) {
     const ms = pos.coords.speed !== null ? pos.coords.speed : 0;
@@ -4605,10 +4590,6 @@ function abrirEnGoogleMaps() {
     }
     lastLat = lat; lastLon = lon;
 
-    actualizarFila(ms);
-    const modal = document.getElementById('velModal');
-    if (modal && modal.style.display !== 'none') actualizarModal();
-    // Actualizar panel en modal brújula siempre
     actualizarPanelBrujula();
   }
 
@@ -4619,18 +4600,6 @@ function abrirEnGoogleMaps() {
   }
   // Arrancar el velocímetro cuando el usuario pase la bienvenida
   window._iniciarWatchVelocimetro = iniciarWatch;
-
-  window.abrirVelocimetro = function() {
-    const modal = document.getElementById('velModal');
-    if (!modal) return;
-    actualizarModal();
-    modal.style.display = 'flex';
-  };
-
-  window.cerrarVelocimetro = function() {
-    const modal = document.getElementById('velModal');
-    if (modal) modal.style.display = 'none';
-  };
 
   // Arrancar en cuanto el DOM esté listo
   if (document.readyState === 'loading') {
@@ -5997,35 +5966,6 @@ window.aplicarFondoDinamico=function(weatherCode,isDay,astroData,lat){
   </div>
 </div>
 
-<!-- Modal velocímetro -->
-<div id="velModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.65);backdrop-filter:blur(4px);align-items:center;justify-content:center" onclick="if(event.target===this)cerrarVelocimetro()">
-  <div style="background:var(--card-bg,#1e2330);border-radius:24px;padding:32px 36px;text-align:center;min-width:260px;box-shadow:0 8px 40px rgba(0,0,0,0.5);position:relative">
-    <button onclick="cerrarVelocimetro()" style="position:absolute;top:14px;right:14px;border:none;background:rgba(255,255,255,0.1);color:inherit;border-radius:50%;width:32px;height:32px;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
-    <div id="velTitulo" style="font-size:1rem;font-weight:600;opacity:0.7;margin-bottom:18px"></div>
-    <!-- arco SVG -->
-    <svg width="180" height="110" viewBox="0 0 180 110" style="display:block;margin:0 auto 8px">
-      <!-- arco fondo -->
-      <path d="M20 100 A70 70 0 0 1 160 100" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="10" stroke-linecap="round"/>
-      <!-- arco velocidad -->
-      <path id="velArco" d="M20 100 A70 70 0 0 1 160 100" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="10" stroke-linecap="round" stroke-dasharray="220" stroke-dashoffset="220" style="transition:stroke-dashoffset 0.5s ease"/>
-      <!-- aguja -->
-      <line id="velAguja" x1="90" y1="100" x2="90" y2="38" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="transform-origin:90px 100px;transform:rotate(-90deg);transition:transform 0.5s ease"/>
-      <circle cx="90" cy="100" r="5" fill="currentColor"/>
-    </svg>
-    <div id="velNumero" style="font-size:3.2rem;font-weight:700;line-height:1;letter-spacing:-1px">0</div>
-    <div id="velUnidad" style="font-size:1rem;opacity:0.6;margin-top:4px"></div>
-    <div style="display:flex;justify-content:space-between;margin-top:20px;gap:16px">
-      <div style="flex:1;background:rgba(255,255,255,0.07);border-radius:12px;padding:10px 0">
-        <div id="velMaxLabel" style="font-size:0.7rem;opacity:0.5;margin-bottom:2px"></div>
-        <div id="velMaxNumero" style="font-size:1.3rem;font-weight:600">—</div>
-      </div>
-      <div style="flex:1;background:rgba(255,255,255,0.07);border-radius:12px;padding:10px 0">
-        <div id="velMediaLabel" style="font-size:0.7rem;opacity:0.5;margin-bottom:2px"></div>
-        <div id="velMediaNumero" style="font-size:1.3rem;font-weight:600">—</div>
-      </div>
-    </div>
-  </div>
-</div>
 
 <!-- Modal brújula grande — fuera del topbar para evitar stacking context -->
 <div id="brujulaModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.65);backdrop-filter:blur(4px);align-items:center;justify-content:center">
@@ -6048,28 +5988,23 @@ window.aplicarFondoDinamico=function(weatherCode,isDay,astroData,lat){
     </svg>
     <div id="brujulaGradosTexto" style="font-size:2rem;font-weight:700;margin-top:12px;letter-spacing:2px">—</div>
     <div id="brujulaDireccionTexto" style="font-size:0.9rem;opacity:0.6;margin-top:2px">sin señal</div>
-    <!-- Panel velocidad + distancia -->
-    <div style="display:flex;gap:10px;margin-top:18px">
-      <div style="flex:1;background:rgba(255,255,255,0.05);border-radius:14px;overflow:hidden">
-        <div style="height:3px;background:#4A9EFF"></div>
-        <div style="padding:10px 10px 12px;text-align:center">
-          <div id="brjVelLabel" style="font-size:0.6rem;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.38);margin-bottom:6px">Velocidad</div>
-          <div id="brjVelNum" style="font-family:'DM Mono',monospace;font-size:2rem;font-weight:500;line-height:1;color:#4A9EFF;font-variant-numeric:tabular-nums">0</div>
-          <div id="brjVelUnit" style="font-size:0.65rem;font-weight:500;letter-spacing:0.06em;margin-top:3px;color:#4A9EFF;opacity:0.55">km/h</div>
-        </div>
-      </div>
-      <div style="flex:1;background:rgba(255,255,255,0.05);border-radius:14px;overflow:hidden">
-        <div style="height:3px;background:#34C98A"></div>
-        <div style="padding:10px 10px 12px;text-align:center">
-          <div id="brjDistLabel" style="font-size:0.6rem;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.38);margin-bottom:6px">Distancia</div>
-          <div id="brjDistNum" style="font-family:'DM Mono',monospace;font-size:2rem;font-weight:500;line-height:1;color:#34C98A;font-variant-numeric:tabular-nums">0</div>
-          <div id="brjDistUnit" style="font-size:0.65rem;font-weight:500;letter-spacing:0.06em;margin-top:3px;color:#34C98A;opacity:0.55">m</div>
-          <button id="brjDistReset" onclick="window.resetDistancia && window.resetDistancia()" style="margin-top:7px;background:none;border:none;color:rgba(255,255,255,0.3);font-size:0.6rem;cursor:pointer;text-decoration:underline;padding:0">Reset</button>
-        </div>
-      </div>
+    <!-- Velocímetro: arco con marcas -->
+    <div style="margin-top:16px">
+      <div id="brjVelLabel" style="font-size:0.6rem;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.38);margin-bottom:2px">Velocidad</div>
+      <svg width="180" height="118" viewBox="0 0 180 118" style="display:block;margin:0 auto">
+        <path d="M20 100 A70 70 0 0 1 160 100" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="9" stroke-linecap="round"/>
+        <path id="brjVelArco" d="M20 100 A70 70 0 0 1 160 100" fill="none" stroke="#4A9EFF" stroke-width="9" stroke-linecap="round" stroke-dasharray="220" stroke-dashoffset="220" style="transition:stroke-dashoffset 0.5s ease"/>
+        <g id="brjVelTicks" font-size="8" fill="rgba(255,255,255,0.4)" font-family="sans-serif"></g>
+        <text id="brjVelNumero" x="90" y="98" text-anchor="middle" font-size="26" font-weight="600" fill="#fff">0</text>
+        <text id="brjVelUnit" x="90" y="114" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.55)">km/h</text>
+      </svg>
     </div>
-    <button id="brujulaCerrarBtn" onclick="document.getElementById('brujulaModal').style.display='none'" style="margin-top:16px;padding:10px 32px;border:none;border-radius:30px;background:rgba(255,255,255,0.12);color:inherit;font-size:0.95rem;cursor:pointer">Cerrar</button>
-    <div style="margin-top:14px">
+    <!-- Distancia: discreta, sin tarjeta -->
+    <div style="margin-top:6px;font-size:0.78rem;opacity:0.55">
+      <span id="brjDistLabel">Distancia</span> <span id="brjDistNum" style="font-variant-numeric:tabular-nums">0</span> <span id="brjDistUnit">m</span>
+    </div>
+    <button id="brjDistReset" onclick="window.resetDistancia && window.resetDistancia()" style="margin-top:3px;background:none;border:none;color:inherit;opacity:0.4;font-size:0.7rem;cursor:pointer;text-decoration:underline;padding:0">Reset</button>
+    <div style="margin-top:16px">
       <button id="brujulaCalibrarBtn" onclick="document.getElementById('brujulaCalibrarInfo').style.display=document.getElementById('brujulaCalibrarInfo').style.display==='none'?'block':'none'" style="background:none;border:none;color:inherit;opacity:0.5;font-size:0.78rem;cursor:pointer;text-decoration:underline">Recuerda tener la brújula calibrada</button>
       <div id="brujulaCalibrarInfo" style="display:none;margin-top:10px;background:rgba(255,255,255,0.07);border-radius:12px;padding:12px 14px;font-size:0.78rem;line-height:1.6;opacity:0.85;text-align:left">
         <strong id="brujulaCalibrarTit">Cómo calibrar:</strong><br>
@@ -6077,6 +6012,8 @@ window.aplicarFondoDinamico=function(weatherCode,isDay,astroData,lat){
         <strong id="brujulaCalibrarTit2">En algunos dispositivos:</strong><br>
         <span id="brujulaCalibrarTxt2">Ajustes → Sensores → Brújula → Calibrar</span>
       </div>
+    </div>
+    <button id="brujulaCerrarBtn" onclick="document.getElementById('brujulaModal').style.display='none'" style="margin-top:14px;padding:7px 20px;border:none;border-radius:30px;background:rgba(255,255,255,0.12);color:inherit;opacity:0.8;font-size:0.8rem;cursor:pointer">Cerrar</button>
     </div>
   </div>
 </div>
