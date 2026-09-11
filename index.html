@@ -110,8 +110,9 @@
   }
   .buscador { max-width: 260px; margin: 0 auto 10px; }
   .buscar-fila { display: flex; flex-direction: column; align-items: center; gap: 2px; margin-bottom: 4px; }
-  .ciudad-nombre-fila { display: flex; align-items: center; gap: 6px; }
-  .btn-fav { background: none; border: none; cursor: pointer; font-size: 1.1rem; color: inherit; opacity: 0.75; padding: 0; line-height: 1; transition: opacity 0.2s; }
+  .ciudad-nombre-fila { display: flex; align-items: flex-start; gap: 6px; }
+  .ciudad-nombre-fila .btn-fav { margin-top: 3px; }
+  .btn-fav { background: none; border: none; cursor: pointer; font-size: 0.85rem; color: inherit; opacity: 0.75; padding: 0; line-height: 1; transition: opacity 0.2s; }
   .btn-fav:hover { opacity: 1; }
   .btn-ajustes { position: absolute; top: 10px; left: 1px; background: rgba(0,0,0,0.35); border: none; border-radius: 6px; color: inherit; font-size: 0.8rem; padding: 2px 6px; cursor: pointer; opacity: 0.8; transition: opacity 0.2s; line-height: 1; }
   .btn-ajustes:hover { opacity: 1; }
@@ -170,9 +171,9 @@
     margin-bottom: 10px;
     text-align: left;
   }
-  .ciudad { font-size: 1.8rem; font-weight: 700; line-height: 1.1; display: flex; flex-direction: column; }
-  #ciudadSub { font-size: 0.85rem; font-weight: 400; opacity: 0.65; margin-top: 1px; }
-  .ciudad #altitud { font-size: 0.7rem; font-weight: 400; opacity: 0.45; margin-top: 2px; cursor: pointer; touch-action: manipulation; }
+  .ciudad { font-size: 1.65rem; font-weight: 700; line-height: 1.15; display: flex; flex-direction: column; }
+  #ciudadSub { font-size: 0.95rem; font-weight: 400; opacity: 0.7; margin-top: 1px; }
+  .ciudad #altitud { font-size: 0.8rem; font-weight: 400; opacity: 0.7; margin-top: 2px; cursor: pointer; touch-action: manipulation; }
   .top-info {
     text-align: right; font-size: 0.8rem; opacity: 0.85;
     line-height: 1.8; white-space: nowrap;
@@ -1851,6 +1852,16 @@ actualizarAjustes();
 const elTemp = document.getElementById('temp');
 const elDesc = document.getElementById('desc');
 const elCiudadNombre = document.getElementById('ciudadNombre');
+
+// Cuando se busca una ciudad, "principal" llega con "Ciudad, Provincia" ya
+// unido (sin sub). Lo separamos solo para mostrarlo: el nombre real y las
+// favoritas guardadas no se tocan, solo el texto en pantalla.
+function _splitNombreCiudad(ciudad) {
+  if (ciudad.sub) return { principal: ciudad.principal, sub: ciudad.sub };
+  const idx = (ciudad.principal || '').indexOf(',');
+  if (idx === -1) return { principal: ciudad.principal, sub: '' };
+  return { principal: ciudad.principal.slice(0, idx), sub: ciudad.principal.slice(idx + 1).trim() };
+}
 const elSensacion = document.getElementById('sensacion');
 const elViento = document.getElementById('viento');
 const elHumedad = document.getElementById('humedad');
@@ -3898,8 +3909,9 @@ async function cargarDatos(latitude, longitude, nombreFijo, forzar = false) {
     // Guardar en caché si se obtuvieron datos frescos de la API
     if (!cached && wapiDataClean) _setWapiCache(latitude, longitude, wapiDataClean, astroDataClean);
     const datosFinales = { tiempo, ciudad, mdata, elevacion, aireData, owmData, wapiData: wapiDataClean, astroData: astroDataClean, aemetActual: null, aemetHoras: null, aemetObs: null, nwsActual: null, dwdObs: null };
-    elCiudadNombre.textContent = ciudad.principal;
-    document.getElementById('ciudadSub').textContent = ciudad.sub || '';
+    const _sp1 = _splitNombreCiudad(ciudad);
+    elCiudadNombre.textContent = _sp1.principal;
+    document.getElementById('ciudadSub').textContent = _sp1.sub;
     const nombreCiudad = ciudad.sub ? `${ciudad.principal}, ${ciudad.sub}` : ciudad.principal;
     currentCoords = { lat: latitude, lon: longitude, nombre: nombreCiudad };
     actualizarBtnFav();
