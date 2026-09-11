@@ -804,6 +804,7 @@
       <button class="modal-close" onclick="cerrarModalMarea()">✕</button>
     </div>
     <div class="modal-titulo" id="modalMareaTit"></div>
+    <div id="modalMareaAgua" style="display:flex;gap:8px;justify-content:center;margin-bottom:10px"></div>
     <svg id="mareaChart" viewBox="0 0 360 130" preserveAspectRatio="none"></svg>
     <div class="modal-extremos" id="modalExtremost"></div>
   </div>
@@ -4264,6 +4265,21 @@ function abrirModalMarea() {
   document.getElementById('modalMareaTit').textContent = T.mareasDeHoy || 'Mareas';
   const mdata = ultimosDatos && ultimosDatos.mdata;
   if (!mdata || !mdata.tiempos || !mdata.alturas) return;
+  const elAguaModal = document.getElementById('modalMareaAgua');
+  const chipsModal = [];
+  if (mdata.tempAgua !== null && mdata.tempAgua !== undefined) {
+    chipsModal.push(`<div style="flex:0 0 auto;background:rgba(255,255,255,0.06);border-radius:12px;padding:6px 14px;text-align:center">
+      <div style="font-size:0.8rem">🌡️</div>
+      <div style="font-size:0.88rem;font-weight:600;margin-top:1px">${toTemp(mdata.tempAgua)}</div>
+    </div>`);
+  }
+  if (mdata.waveHeight !== null && mdata.waveHeight !== undefined) {
+    chipsModal.push(`<div style="flex:0 0 auto;background:rgba(255,255,255,0.06);border-radius:12px;padding:6px 14px;text-align:center">
+      <div style="font-size:0.55rem;opacity:0.5;text-transform:uppercase;letter-spacing:0.06em">🌊 ${T.olas}</div>
+      <div style="font-size:0.88rem;font-weight:600;margin-top:1px">${toAlt(mdata.waveHeight)}</div>
+    </div>`);
+  }
+  if (elAguaModal) elAguaModal.innerHTML = chipsModal.join('');
   try {
     renderModalMareaChart(mdata);
     renderModalMareaExtremost(mdata);
