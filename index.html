@@ -5536,6 +5536,13 @@ let wbgCondKey=null, wbgMoonPhase=0.35, wbgMoonUp=true, wbgLat=0;
 
 function wbgResize(){
   wbgW=window.innerWidth; wbgH=window.innerHeight;
+  // Poner primero a 0 fuerza a que el navegador suelte de verdad la
+  // textura interna del canvas antes de recrearla — si se asigna
+  // directamente el mismo ancho que ya tenía, algunos motores se saltan
+  // la reasignación real y la textura vieja (con contenido de un resize
+  // anterior, p.ej. el de abrir/cerrar el teclado) se queda corrupta,
+  // pintando solo el centro y dejando los lados con lo que hubiera antes.
+  wbgCanvas.width=0; wbgCanvas.height=0;
   wbgCanvas.width=wbgW; wbgCanvas.height=wbgH;
   if(wbgCondKey) wbgInit(wbgCondKey);
 }
