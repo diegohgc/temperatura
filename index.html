@@ -6145,6 +6145,20 @@ window.aplicarFondoDinamico=function(weatherCode,isDay,astroData,lat){
   if(_bgEl) _bgEl.classList.toggle('wbg-day', _bright);
 };
 
+// TEMPORAL — overlay de diagnostico visible en pantalla, quitar despues.
+(function(){
+  const d=document.createElement('div');
+  d.style.cssText='position:fixed;top:0;left:0;right:0;z-index:99999;background:#f0f;color:#000;font:11px monospace;padding:4px;white-space:pre-wrap;pointer-events:none';
+  document.body.appendChild(d);
+  setInterval(()=>{
+    d.textContent='innerW='+window.innerWidth+' innerH='+window.innerHeight+
+      ' docClientW='+document.documentElement.clientWidth+
+      ' bodyClientW='+document.body.clientWidth+
+      ' canvasW='+wbgCanvas.width+' dpr='+window.devicePixelRatio+
+      ' screenW='+window.screen.width+' visualVW='+(window.visualViewport?window.visualViewport.width:'n/a');
+  },300);
+})();
+
 })();
 </script>
 
