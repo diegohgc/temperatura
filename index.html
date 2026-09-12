@@ -5637,18 +5637,22 @@ function wbgDrawMoon(cx,cy,r){
 // Se tiñe una sola vez por color (caché) preservando su sombreado interno
 // mediante 'source-atop' con alpha parcial, en vez de sustituir el color
 // entero (lo que aplanaría la textura).
-const _wbgNubeImg=new Image();
-let _wbgNubeImgLoaded=false;
-_wbgNubeImg.onload=()=>{_wbgNubeImgLoaded=true;};
-_wbgNubeImg.src='./nube-textura.png';
+const _wbgNubeSrcs=['./nube-textura.png','./nube2-textura.png'];
+const _wbgNubeImgs=_wbgNubeSrcs.map(src=>{
+  const img=new Image(); img._loaded=false;
+  img.onload=()=>{img._loaded=true;};
+  img.src=src;
+  return img;
+});
 const _wbgNubeTintCache={};
-function _wbgNubeTinted(tintColor,tintAlpha){
-  const key=(tintColor||'')+'|'+(tintAlpha||'');
+function _wbgNubeTinted(texIdx,tintColor,tintAlpha){
+  const srcImg=_wbgNubeImgs[texIdx]||_wbgNubeImgs[0];
+  const key=texIdx+'|'+(tintColor||'')+'|'+(tintAlpha||'');
   if(_wbgNubeTintCache[key]) return _wbgNubeTintCache[key];
-  const w=_wbgNubeImg.naturalWidth,h=_wbgNubeImg.naturalHeight;
+  const w=srcImg.naturalWidth,h=srcImg.naturalHeight;
   const oc=document.createElement('canvas'); oc.width=w; oc.height=h;
   const octx=oc.getContext('2d');
-  octx.drawImage(_wbgNubeImg,0,0);
+  octx.drawImage(srcImg,0,0);
   if(tintColor){
     octx.globalCompositeOperation='source-atop';
     octx.globalAlpha=tintAlpha??0.55;
@@ -5658,9 +5662,10 @@ function _wbgNubeTinted(tintColor,tintAlpha){
   _wbgNubeTintCache[key]=oc;
   return oc;
 }
-function wbgCloud(x,y,sc,alpha,flip,tintColor,tintAlpha){
-  if(!_wbgNubeImgLoaded) return;
-  const img=_wbgNubeTinted(tintColor,tintAlpha);
+function wbgCloud(x,y,sc,alpha,flip,tintColor,tintAlpha,texIdx){
+  texIdx=texIdx||0;
+  if(!_wbgNubeImgs[texIdx]||!_wbgNubeImgs[texIdx]._loaded) return;
+  const img=_wbgNubeTinted(texIdx,tintColor,tintAlpha);
   const w=img.width*sc,h=img.height*sc;
   const c=wbgCtx;
   c.save();
@@ -5734,19 +5739,19 @@ function wbgInit(key){
       break;
     case 'partial':
       wbgClouds=[
-        {x:wbgW*.10,y:wbgH*.12,sc:0.50*sc,alpha:0.88,speed:0.14,flip:false},
-        {x:wbgW*.55,y:wbgH*.08,sc:0.40*sc,alpha:0.75,speed:0.18,flip:true},
-        {x:wbgW*.25,y:wbgH*.25,sc:0.32*sc,alpha:0.60,speed:0.22,flip:false},
+        {x:wbgW*.10,y:wbgH*.12,sc:0.50*sc,alpha:0.88,speed:0.14,flip:false,tex:0},
+        {x:wbgW*.55,y:wbgH*.08,sc:0.48*sc,alpha:0.75,speed:0.18,flip:true,tex:1},
+        {x:wbgW*.25,y:wbgH*.25,sc:0.32*sc,alpha:0.60,speed:0.22,flip:false,tex:0},
       ]; break;
     case 'cloudy':
       wbgClouds=[
-        {x:wbgW*.00,y:wbgH*.06,sc:0.60*sc,alpha:0.90,speed:0.08,flip:false},
-        {x:wbgW*.45,y:wbgH*.04,sc:0.52*sc,alpha:0.85,speed:0.11,flip:true},
-        {x:wbgW*.15,y:wbgH*.18,sc:0.46*sc,alpha:0.80,speed:0.13,flip:false},
-        {x:wbgW*.62,y:wbgH*.20,sc:0.40*sc,alpha:0.75,speed:0.15,flip:true},
-        {x:wbgW*.30,y:wbgH*.32,sc:0.36*sc,alpha:0.68,speed:0.17,flip:false},
-        {x:wbgW*.82,y:wbgH*.34,sc:0.32*sc,alpha:0.62,speed:0.19,flip:true},
-        {x:wbgW*.05,y:wbgH*.42,sc:0.27*sc,alpha:0.55,speed:0.21,flip:false},
+        {x:wbgW*.00,y:wbgH*.06,sc:0.60*sc,alpha:0.90,speed:0.08,flip:false,tex:0},
+        {x:wbgW*.45,y:wbgH*.04,sc:0.58*sc,alpha:0.85,speed:0.11,flip:true,tex:1},
+        {x:wbgW*.15,y:wbgH*.18,sc:0.46*sc,alpha:0.80,speed:0.13,flip:false,tex:0},
+        {x:wbgW*.62,y:wbgH*.20,sc:0.46*sc,alpha:0.75,speed:0.15,flip:true,tex:1},
+        {x:wbgW*.30,y:wbgH*.32,sc:0.36*sc,alpha:0.68,speed:0.17,flip:false,tex:0},
+        {x:wbgW*.82,y:wbgH*.34,sc:0.36*sc,alpha:0.62,speed:0.19,flip:true,tex:1},
+        {x:wbgW*.05,y:wbgH*.42,sc:0.27*sc,alpha:0.55,speed:0.21,flip:false,tex:0},
       ]; break;
     case 'rain':
     case 'storm':
@@ -5773,19 +5778,19 @@ function wbgInit(key){
         x:Math.random()*wbgW,y:Math.random()*wbgH*.7,r:0.3+Math.random()*1.2,phase:Math.random()*Math.PI*2,spd:0.4+Math.random()*1.1
       }));
       wbgNightC=[
-        {x:wbgW*.05,y:wbgH*.10,sc:0.53*sc,alpha:0.82,tint:'rgba(18,30,46,1)',speed:0.10,flip:false},
-        {x:wbgW*.55,y:wbgH*.06,sc:0.42*sc,alpha:0.70,tint:'rgba(22,36,54,1)',speed:0.13,flip:true},
-        {x:wbgW*.20,y:wbgH*.24,sc:0.35*sc,alpha:0.60,tint:'rgba(20,33,50,1)',speed:0.17,flip:false},
-        {x:wbgW*.65,y:wbgH*.30,sc:0.31*sc,alpha:0.55,tint:'rgba(24,38,58,1)',speed:0.20,flip:true},
+        {x:wbgW*.05,y:wbgH*.10,sc:0.53*sc,alpha:0.82,tint:'rgba(18,30,46,1)',speed:0.10,flip:false,tex:0},
+        {x:wbgW*.55,y:wbgH*.06,sc:0.48*sc,alpha:0.70,tint:'rgba(22,36,54,1)',speed:0.13,flip:true,tex:1},
+        {x:wbgW*.20,y:wbgH*.24,sc:0.35*sc,alpha:0.60,tint:'rgba(20,33,50,1)',speed:0.17,flip:false,tex:0},
+        {x:wbgW*.65,y:wbgH*.30,sc:0.35*sc,alpha:0.55,tint:'rgba(24,38,58,1)',speed:0.20,flip:true,tex:1},
       ]; break;
     case 'nightcloudy': // nublado total de noche: sin estrellas, nubes sutiles
       wbgNightC=[
-        {x:wbgW*.00,y:wbgH*.06,sc:0.62*sc,alpha:0.18,tint:'rgba(38,58,88,1)',speed:0.08,flip:false},
-        {x:wbgW*.50,y:wbgH*.04,sc:0.53*sc,alpha:0.15,tint:'rgba(35,54,82,1)',speed:0.11,flip:true},
-        {x:wbgW*.15,y:wbgH*.22,sc:0.48*sc,alpha:0.13,tint:'rgba(36,56,85,1)',speed:0.09,flip:false},
-        {x:wbgW*.65,y:wbgH*.18,sc:0.44*sc,alpha:0.12,tint:'rgba(34,52,80,1)',speed:0.12,flip:true},
-        {x:wbgW*.35,y:wbgH*.34,sc:0.40*sc,alpha:0.11,tint:'rgba(40,60,90,1)',speed:0.14,flip:false},
-        {x:wbgW*.80,y:wbgH*.10,sc:0.37*sc,alpha:0.10,tint:'rgba(36,56,84,1)',speed:0.10,flip:true},
+        {x:wbgW*.00,y:wbgH*.06,sc:0.62*sc,alpha:0.18,tint:'rgba(38,58,88,1)',speed:0.08,flip:false,tex:0},
+        {x:wbgW*.50,y:wbgH*.04,sc:0.60*sc,alpha:0.15,tint:'rgba(35,54,82,1)',speed:0.11,flip:true,tex:1},
+        {x:wbgW*.15,y:wbgH*.22,sc:0.48*sc,alpha:0.13,tint:'rgba(36,56,85,1)',speed:0.09,flip:false,tex:0},
+        {x:wbgW*.65,y:wbgH*.18,sc:0.48*sc,alpha:0.12,tint:'rgba(34,52,80,1)',speed:0.12,flip:true,tex:1},
+        {x:wbgW*.35,y:wbgH*.34,sc:0.40*sc,alpha:0.11,tint:'rgba(40,60,90,1)',speed:0.14,flip:false,tex:0},
+        {x:wbgW*.80,y:wbgH*.10,sc:0.40*sc,alpha:0.10,tint:'rgba(36,56,84,1)',speed:0.10,flip:true,tex:1},
       ]; break;
     case 'nightrain':
       wbgNightR=Array.from({length:110},()=>({x:Math.random()*wbgW,y:Math.random()*wbgH,spd:5+Math.random()*7,len:14+Math.random()*20,op:0.06+Math.random()*.11}));
@@ -5860,12 +5865,12 @@ function wbgDraw(key,dt){
       gw.addColorStop(0,'rgba(255,255,200,.5)');gw.addColorStop(1,'rgba(255,240,150,0)');
       c.beginPath();c.arc(sx,sy,60*sc,0,Math.PI*2);c.fillStyle=gw;c.fill();
       c.beginPath();c.arc(sx,sy,18*sc,0,Math.PI*2);c.fillStyle='rgba(255,255,220,.8)';c.fill();
-      wbgClouds.forEach(cl=>{cl.x-=cl.speed*dt*60;if(cl.x<-200*cl.sc)cl.x=wbgW+60*cl.sc;wbgCloud(cl.x,cl.y,cl.sc,cl.alpha,cl.flip);});
+      wbgClouds.forEach(cl=>{cl.x-=cl.speed*dt*60;if(cl.x<-200*cl.sc)cl.x=wbgW+60*cl.sc;wbgCloud(cl.x,cl.y,cl.sc,cl.alpha,cl.flip,null,null,cl.tex);});
       break;
     }
     case 'cloudy':{
       c.fillStyle=wbgGrad([[0,'#5c6878'],[.5,'#6d7a8c'],[1,'#7d8ba0']]);c.fillRect(0,0,wbgW,wbgH);
-      wbgClouds.forEach(cl=>{cl.x-=cl.speed*dt*60;if(cl.x<-200*cl.sc)cl.x=wbgW+60*cl.sc;wbgCloud(cl.x,cl.y,cl.sc,cl.alpha,cl.flip);});
+      wbgClouds.forEach(cl=>{cl.x-=cl.speed*dt*60;if(cl.x<-200*cl.sc)cl.x=wbgW+60*cl.sc;wbgCloud(cl.x,cl.y,cl.sc,cl.alpha,cl.flip,null,null,cl.tex);});
       break;
     }
     case 'rain':{
@@ -5978,7 +5983,7 @@ function wbgDraw(key,dt){
       });
       wbgNightC.forEach(cl=>{
         cl.x-=cl.speed*dt*60;if(cl.x<-220*cl.sc)cl.x=wbgW+70*cl.sc;
-        wbgCloud(cl.x,cl.y,cl.sc,cl.alpha,cl.flip,cl.tint,0.6);
+        wbgCloud(cl.x,cl.y,cl.sc,cl.alpha,cl.flip,cl.tint,0.6,cl.tex);
       });
       const hG2=c.createLinearGradient(0,wbgH*.72,0,wbgH);
       hG2.addColorStop(0,'rgba(255,140,60,0)');hG2.addColorStop(1,'rgba(255,120,40,0.1)');
@@ -5989,7 +5994,7 @@ function wbgDraw(key,dt){
       c.fillStyle=wbgGrad([[0,'#070d18'],[.5,'#0c1628'],[1,'#101e35']]);c.fillRect(0,0,wbgW,wbgH);
       wbgNightC.forEach(cl=>{
         cl.x-=cl.speed*dt*60;if(cl.x<-240*cl.sc)cl.x=wbgW+80*cl.sc;
-        wbgCloud(cl.x,cl.y,cl.sc,cl.alpha,cl.flip,cl.tint,0.6);
+        wbgCloud(cl.x,cl.y,cl.sc,cl.alpha,cl.flip,cl.tint,0.6,cl.tex);
       });
       const hGnc=c.createLinearGradient(0,wbgH*.75,0,wbgH);
       hGnc.addColorStop(0,'rgba(255,140,60,0)');hGnc.addColorStop(1,'rgba(255,120,40,0.08)');
