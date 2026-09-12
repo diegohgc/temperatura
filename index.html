@@ -5955,21 +5955,31 @@ function wbgDraw(key,dt){
     }
     case 'mayormente':{
       c.fillStyle=wbgGrad([[0,'#3f9fd8'],[.7,'#6cc0ec'],[1,'#a0defc']]);c.fillRect(0,0,wbgW,wbgH);
-      const sxm=wbgW*.78,sym=wbgH*.09;
-      const gwm=c.createRadialGradient(sxm,sym,0,sxm,sym,66*sc);
-      gwm.addColorStop(0,'rgba(255,255,210,.55)');gwm.addColorStop(1,'rgba(255,240,150,0)');
-      c.beginPath();c.arc(sxm,sym,66*sc,0,Math.PI*2);c.fillStyle=gwm;c.fill();
-      c.beginPath();c.arc(sxm,sym,20*sc,0,Math.PI*2);c.fillStyle='rgba(255,255,225,.85)';c.fill();
+      const sxm=wbgW*.78,sym=wbgH*.09,discRm=20*sc;
+      if(_wbgSolImg._loaded){
+        const solWm=discRm*5.5,solHm=solWm*(_wbgSolImg.naturalHeight/_wbgSolImg.naturalWidth);
+        c.save();c.globalAlpha=0.62;c.drawImage(_wbgSolImg,sxm-solWm/2,sym-solHm/2,solWm,solHm);c.restore();
+      } else {
+        const gwm=c.createRadialGradient(sxm,sym,0,sxm,sym,66*sc);
+        gwm.addColorStop(0,'rgba(255,255,210,.55)');gwm.addColorStop(1,'rgba(255,240,150,0)');
+        c.beginPath();c.arc(sxm,sym,66*sc,0,Math.PI*2);c.fillStyle=gwm;c.fill();
+        c.beginPath();c.arc(sxm,sym,discRm,0,Math.PI*2);c.fillStyle='rgba(255,255,225,.85)';c.fill();
+      }
       wbgClouds.forEach(cl=>{_wbgAvanzarNube(cl,dt);wbgCloud(cl.x,cl.y,cl.sc,cl.alpha,cl.flip,null,null,cl.tex);});
       break;
     }
     case 'partial':{
       c.fillStyle=wbgGrad([[0,'#4aa8d8'],[.7,'#70c0e8'],[1,'#98d8f5']]);c.fillRect(0,0,wbgW,wbgH);
-      const sx=wbgW*.82,sy=wbgH*.06;
-      const gw=c.createRadialGradient(sx,sy,0,sx,sy,60*sc);
-      gw.addColorStop(0,'rgba(255,255,200,.5)');gw.addColorStop(1,'rgba(255,240,150,0)');
-      c.beginPath();c.arc(sx,sy,60*sc,0,Math.PI*2);c.fillStyle=gw;c.fill();
-      c.beginPath();c.arc(sx,sy,18*sc,0,Math.PI*2);c.fillStyle='rgba(255,255,220,.8)';c.fill();
+      const sx=wbgW*.82,sy=wbgH*.06,discR2=18*sc;
+      if(_wbgSolImg._loaded){
+        const solW2=discR2*5.5,solH2=solW2*(_wbgSolImg.naturalHeight/_wbgSolImg.naturalWidth);
+        c.save();c.globalAlpha=0.62;c.drawImage(_wbgSolImg,sx-solW2/2,sy-solH2/2,solW2,solH2);c.restore();
+      } else {
+        const gw=c.createRadialGradient(sx,sy,0,sx,sy,60*sc);
+        gw.addColorStop(0,'rgba(255,255,200,.5)');gw.addColorStop(1,'rgba(255,240,150,0)');
+        c.beginPath();c.arc(sx,sy,60*sc,0,Math.PI*2);c.fillStyle=gw;c.fill();
+        c.beginPath();c.arc(sx,sy,discR2,0,Math.PI*2);c.fillStyle='rgba(255,255,220,.8)';c.fill();
+      }
       wbgClouds.forEach(cl=>{_wbgAvanzarNube(cl,dt);wbgCloud(cl.x,cl.y,cl.sc,cl.alpha,cl.flip,null,null,cl.tex);});
       break;
     }
