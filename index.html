@@ -5725,6 +5725,20 @@ class WbgDrop{
   }
 }
 
+// Cielo practicamente lleno de nube.png (nublado / lluvia): mismo patron
+// reutilizado en varias condiciones para no repetir el array 4 veces.
+function _wbgNubesDensas(sc,tint,tintAlpha){
+  return [
+    {x:0.00,y:0.06,sc:0.60*sc,alpha:0.90,speed:0.08,flip:false,tex:0,tint,tintAlpha},
+    {x:0.45,y:0.04,sc:0.58*sc,alpha:0.85,speed:0.11,flip:true, tex:0,tint,tintAlpha},
+    {x:0.15,y:0.18,sc:0.46*sc,alpha:0.80,speed:0.13,flip:false,tex:0,tint,tintAlpha},
+    {x:0.62,y:0.20,sc:0.46*sc,alpha:0.75,speed:0.15,flip:true, tex:0,tint,tintAlpha},
+    {x:0.30,y:0.32,sc:0.36*sc,alpha:0.68,speed:0.17,flip:false,tex:1,tint,tintAlpha},
+    {x:0.82,y:0.34,sc:0.36*sc,alpha:0.62,speed:0.19,flip:true, tex:0,tint,tintAlpha},
+    {x:0.05,y:0.42,sc:0.27*sc,alpha:0.55,speed:0.21,flip:false,tex:0,tint,tintAlpha},
+  ].map(cl=>({...cl,x:wbgW*cl.x,y:wbgH*cl.y}));
+}
+
 /* ── Init por condición ── */
 function wbgInit(key){
   wbgDrizzle=[];wbgFlakes=[];wbgStars=[];wbgNightC=[];wbgNightR=[];wbgFogB=[];wbgDust=[];
@@ -5737,24 +5751,30 @@ function wbgInit(key){
         r:1+Math.random()*2, vy:-(0.2+Math.random()*.5), vx:-0.15+Math.random()*.3, op:0.1+Math.random()*.25
       }));
       break;
-    case 'partial':
+    case 'mayormente': // Mayormente despejado: solo alguna nube suelta y ligera (nube2)
+      wbgClouds=[
+        {x:wbgW*.15,y:wbgH*.10,sc:0.40*sc,alpha:0.55,speed:0.12,flip:false,tex:1},
+        {x:wbgW*.65,y:wbgH*.16,sc:0.30*sc,alpha:0.42,speed:0.16,flip:true,tex:1},
+      ]; break;
+    case 'partial': // Parcialmente nublado: mezcla de las dos texturas
       wbgClouds=[
         {x:wbgW*.10,y:wbgH*.12,sc:0.50*sc,alpha:0.88,speed:0.14,flip:false,tex:0},
         {x:wbgW*.55,y:wbgH*.08,sc:0.48*sc,alpha:0.75,speed:0.18,flip:true,tex:1},
         {x:wbgW*.25,y:wbgH*.25,sc:0.32*sc,alpha:0.60,speed:0.22,flip:false,tex:0},
       ]; break;
-    case 'cloudy':
+    case 'cloudy': // Nublado: cielo practicamente lleno, sobre todo nube.png (mas densa)
       wbgClouds=[
         {x:wbgW*.00,y:wbgH*.06,sc:0.60*sc,alpha:0.90,speed:0.08,flip:false,tex:0},
-        {x:wbgW*.45,y:wbgH*.04,sc:0.58*sc,alpha:0.85,speed:0.11,flip:true,tex:1},
+        {x:wbgW*.45,y:wbgH*.04,sc:0.58*sc,alpha:0.85,speed:0.11,flip:true,tex:0},
         {x:wbgW*.15,y:wbgH*.18,sc:0.46*sc,alpha:0.80,speed:0.13,flip:false,tex:0},
-        {x:wbgW*.62,y:wbgH*.20,sc:0.46*sc,alpha:0.75,speed:0.15,flip:true,tex:1},
-        {x:wbgW*.30,y:wbgH*.32,sc:0.36*sc,alpha:0.68,speed:0.17,flip:false,tex:0},
-        {x:wbgW*.82,y:wbgH*.34,sc:0.36*sc,alpha:0.62,speed:0.19,flip:true,tex:1},
+        {x:wbgW*.62,y:wbgH*.20,sc:0.46*sc,alpha:0.75,speed:0.15,flip:true,tex:0},
+        {x:wbgW*.30,y:wbgH*.32,sc:0.36*sc,alpha:0.68,speed:0.17,flip:false,tex:1},
+        {x:wbgW*.82,y:wbgH*.34,sc:0.36*sc,alpha:0.62,speed:0.19,flip:true,tex:0},
         {x:wbgW*.05,y:wbgH*.42,sc:0.27*sc,alpha:0.55,speed:0.21,flip:false,tex:0},
       ]; break;
     case 'rain':
     case 'storm':
+      wbgClouds=_wbgNubesDensas(sc,'rgba(35,40,50,1)',0.35);
       wbgStreaks=Array.from({length:150},()=>({x:Math.random()*wbgW,y:Math.random()*wbgH,spd:5+Math.random()*7,len:14+Math.random()*20,op:0.10+Math.random()*.18}));
       if(key==='storm'){
         wbgHeavyS=Array.from({length:160},()=>({x:Math.random()*wbgW,y:Math.random()*wbgH,spd:8+Math.random()*10,len:20+Math.random()*30,op:0.10+Math.random()*.20}));
@@ -5762,6 +5782,7 @@ function wbgInit(key){
       }
       break;
     case 'drizzle':
+      wbgClouds=_wbgNubesDensas(sc,'rgba(45,52,62,1)',0.3);
       wbgDrizzle=Array.from({length:100},()=>({x:Math.random()*wbgW,y:Math.random()*wbgH,spd:2.2+Math.random()*2.8,len:7+Math.random()*11,op:0.09+Math.random()*.14}));
       break;
     case 'snow':
@@ -5858,6 +5879,16 @@ function wbgDraw(key,dt){
       });
       break;
     }
+    case 'mayormente':{
+      c.fillStyle=wbgGrad([[0,'#3f9fd8'],[.7,'#6cc0ec'],[1,'#a0defc']]);c.fillRect(0,0,wbgW,wbgH);
+      const sxm=wbgW*.78,sym=wbgH*.09;
+      const gwm=c.createRadialGradient(sxm,sym,0,sxm,sym,66*sc);
+      gwm.addColorStop(0,'rgba(255,255,210,.55)');gwm.addColorStop(1,'rgba(255,240,150,0)');
+      c.beginPath();c.arc(sxm,sym,66*sc,0,Math.PI*2);c.fillStyle=gwm;c.fill();
+      c.beginPath();c.arc(sxm,sym,20*sc,0,Math.PI*2);c.fillStyle='rgba(255,255,225,.85)';c.fill();
+      wbgClouds.forEach(cl=>{cl.x-=cl.speed*dt*60;if(cl.x<-200*cl.sc)cl.x=wbgW+60*cl.sc;wbgCloud(cl.x,cl.y,cl.sc,cl.alpha,cl.flip,null,null,cl.tex);});
+      break;
+    }
     case 'partial':{
       c.fillStyle=wbgGrad([[0,'#4aa8d8'],[.7,'#70c0e8'],[1,'#98d8f5']]);c.fillRect(0,0,wbgW,wbgH);
       const sx=wbgW*.82,sy=wbgH*.06;
@@ -5875,6 +5906,7 @@ function wbgDraw(key,dt){
     }
     case 'rain':{
       c.fillStyle=wbgGrad([[0,'#0e1d2c'],[1,'#192a3d']]);c.fillRect(0,0,wbgW,wbgH);
+      wbgClouds.forEach(cl=>{cl.x-=cl.speed*dt*60;if(cl.x<-200*cl.sc)cl.x=wbgW+60*cl.sc;wbgCloud(cl.x,cl.y,cl.sc,cl.alpha,cl.flip,cl.tint,cl.tintAlpha,cl.tex);});
       c.save();c.lineWidth=0.5;
       wbgStreaks.forEach(s=>{
         s.y+=s.spd*dt*60;if(s.y>wbgH+30){s.y=-30;s.x=Math.random()*wbgW;}
@@ -5887,6 +5919,7 @@ function wbgDraw(key,dt){
     }
     case 'drizzle':{
       c.fillStyle=wbgGrad([[0,'#2a3a4c'],[.6,'#364c60'],[1,'#405870']]);c.fillRect(0,0,wbgW,wbgH);
+      wbgClouds.forEach(cl=>{cl.x-=cl.speed*dt*60;if(cl.x<-200*cl.sc)cl.x=wbgW+60*cl.sc;wbgCloud(cl.x,cl.y,cl.sc,cl.alpha,cl.flip,cl.tint,cl.tintAlpha,cl.tex);});
       c.save();c.lineWidth=0.4;
       wbgDrizzle.forEach(s=>{
         s.y+=s.spd*dt*60;if(s.y>wbgH+20){s.y=-20;s.x=Math.random()*wbgW;}
@@ -5898,6 +5931,7 @@ function wbgDraw(key,dt){
     }
     case 'storm':{
       c.fillStyle=wbgGrad([[0,'#06101a'],[1,'#0d1b2a']]);c.fillRect(0,0,wbgW,wbgH);
+      wbgClouds.forEach(cl=>{cl.x-=cl.speed*dt*60;if(cl.x<-200*cl.sc)cl.x=wbgW+60*cl.sc;wbgCloud(cl.x,cl.y,cl.sc,cl.alpha,cl.flip,cl.tint,cl.tintAlpha,cl.tex);});
       c.save();c.lineWidth=0.6;
       wbgHeavyS.forEach(s=>{
         s.y+=s.spd*dt*60;if(s.y>wbgH+40){s.y=-40;s.x=Math.random()*wbgW;}
@@ -6017,8 +6051,8 @@ function wbgDraw(key,dt){
     }
   }
   /* Capa de legibilidad: oscurece la zona de texto en fondos claros */
-  if(key==='sun'||key==='partial'||key==='cloudy'||key==='snow'){
-    const oa={sun:0.35,partial:0.22,cloudy:0.16,snow:0.20}[key];
+  if(key==='sun'||key==='mayormente'||key==='partial'||key==='cloudy'||key==='snow'){
+    const oa={sun:0.35,mayormente:0.28,partial:0.22,cloudy:0.16,snow:0.20}[key];
     const rd=c.createLinearGradient(0,0,0,wbgH*.60);
     rd.addColorStop(0,`rgba(0,0,0,${oa})`);
     rd.addColorStop(0.55,'rgba(0,0,0,0)');
@@ -6062,7 +6096,8 @@ window.aplicarFondoDinamico=function(weatherCode,isDay,astroData,lat){
   const wc=weatherCode;
   let key;
   if(wc===0)                                       key=isDay?'sun':'night';
-  else if(wc===1||wc===2)                           key=isDay?'partial':'nightcloud';
+  else if(wc===1)                                   key=isDay?'mayormente':'nightcloud';
+  else if(wc===2)                                   key=isDay?'partial':'nightcloud';
   else if(wc===3)                                   key=isDay?'cloudy':'nightcloudy';
   else if(wc===45||wc===47||wc===48)                key='fog';
   else if(wc>=51&&wc<=57)                           key=isDay?'drizzle':'nightrain';
@@ -6071,7 +6106,7 @@ window.aplicarFondoDinamico=function(weatherCode,isDay,astroData,lat){
   else if(wc>=95)                                   key='storm';
   else                                              key=isDay?'partial':'nightcloud';
   if(key!==wbgCondKey){wbgCondKey=key;wbgInit(key);}
-  const _bright = key==='sun'||key==='partial'||key==='cloudy'||key==='snow';
+  const _bright = key==='sun'||key==='mayormente'||key==='partial'||key==='cloudy'||key==='snow';
   document.body.classList.toggle('wbg-bright', _bright);
   const _bgEl = document.getElementById('bg');
   if(_bgEl) _bgEl.classList.toggle('wbg-day', _bright);
