@@ -20,22 +20,6 @@
     position: absolute; inset: 0; width: 100%; height: 100%;
     display: block;
   }
-  #bg::after {
-    content: '';
-    position: absolute; inset: 0; z-index: 1;
-    /* circle, no ellipse: con la forma elíptica (por defecto ajustada al
-       alto/ancho del recuadro) en una pantalla de móvil, mucho más alta
-       que ancha, el oscurecido llegaba antes a los lados que arriba/abajo
-       y se veían dos franjas verticales oscuras — con círculo, la misma
-       distancia real en cualquier dirección da el mismo oscurecido. */
-    background: radial-gradient(circle at center, transparent 40%, rgba(0,0,0,0.45) 100%);
-    pointer-events: none;
-    transition: opacity 1.5s ease;
-  }
-  /* En fondos claros el vignette crea un halo en el centro → lo quitamos */
-  #bg.wbg-day::after {
-    opacity: 0;
-  }
   /* Scrim: capa oscura uniforme para garantizar contraste siempre */
   #bg::before {
     content: '';
@@ -6148,23 +6132,7 @@ window.aplicarFondoDinamico=function(weatherCode,isDay,astroData,lat){
   if(key!==wbgCondKey){wbgCondKey=key;wbgInit(key);}
   const _bright = key==='sun'||key==='mayormente'||key==='partial'||key==='cloudy'||key==='snow';
   document.body.classList.toggle('wbg-bright', _bright);
-  const _bgEl = document.getElementById('bg');
-  if(_bgEl) _bgEl.classList.toggle('wbg-day', _bright);
 };
-
-// TEMPORAL — overlay de diagnostico visible en pantalla, quitar despues.
-(function(){
-  const d=document.createElement('div');
-  d.style.cssText='position:fixed;bottom:70px;left:0;right:0;z-index:99999;background:#f0f;color:#000;font:11px monospace;padding:4px;white-space:pre-wrap;pointer-events:none';
-  document.body.appendChild(d);
-  setInterval(()=>{
-    d.textContent='innerW='+window.innerWidth+' innerH='+window.innerHeight+
-      ' docClientW='+document.documentElement.clientWidth+
-      ' bodyClientW='+document.body.clientWidth+
-      ' canvasW='+wbgCanvas.width+' dpr='+window.devicePixelRatio+
-      ' screenW='+window.screen.width+' visualVW='+(window.visualViewport?window.visualViewport.width:'n/a');
-  },300);
-})();
 
 })();
 </script>
