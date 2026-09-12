@@ -5645,6 +5645,13 @@ const _wbgNubeImgs=_wbgNubeSrcs.map(src=>{
   return img;
 });
 const _wbgNubeTintCache={};
+
+// Foto real del sol (con lens flare) para el fondo "despejado", en vez del
+// disco/halo dibujado por canvas — igual que las nubes, aporta el detalle
+// de rayos y brillo que un degradado radial no consigue.
+const _wbgSolImg=new Image(); _wbgSolImg._loaded=false;
+_wbgSolImg.onload=()=>{_wbgSolImg._loaded=true;};
+_wbgSolImg.src='./sol-textura.png';
 function _wbgNubeTinted(texIdx,tintColor,tintAlpha){
   const srcImg=_wbgNubeImgs[texIdx]||_wbgNubeImgs[0];
   const key=texIdx+'|'+(tintColor||'')+'|'+(tintAlpha||'');
@@ -5878,10 +5885,15 @@ function wbgDraw(key,dt){
         c.closePath();c.fillStyle=g;c.fill();
       }
       c.restore();
-      const halo=c.createRadialGradient(sx,sy,discR*.5,sx,sy,discR*4.5);
-      halo.addColorStop(0,'rgba(255,240,120,0.45)');halo.addColorStop(0.4,'rgba(255,220,80,0.18)');halo.addColorStop(1,'rgba(255,200,60,0)');
-      c.beginPath();c.arc(sx,sy,discR*4.5,0,Math.PI*2);c.fillStyle=halo;c.fill();
-      c.beginPath();c.arc(sx,sy,discR,0,Math.PI*2);c.fillStyle='rgba(255,225,80,.85)';c.fill();
+      if(_wbgSolImg._loaded){
+        const solW=discR*5.5,solH=solW*(_wbgSolImg.naturalHeight/_wbgSolImg.naturalWidth);
+        c.save();c.globalAlpha=0.95;c.drawImage(_wbgSolImg,sx-solW/2,sy-solH/2,solW,solH);c.restore();
+      } else {
+        const halo=c.createRadialGradient(sx,sy,discR*.5,sx,sy,discR*4.5);
+        halo.addColorStop(0,'rgba(255,240,120,0.45)');halo.addColorStop(0.4,'rgba(255,220,80,0.18)');halo.addColorStop(1,'rgba(255,200,60,0)');
+        c.beginPath();c.arc(sx,sy,discR*4.5,0,Math.PI*2);c.fillStyle=halo;c.fill();
+        c.beginPath();c.arc(sx,sy,discR,0,Math.PI*2);c.fillStyle='rgba(255,225,80,.85)';c.fill();
+      }
       wbgDust.forEach(p=>{
         p.x+=p.vx*dt*60;p.y+=p.vy*dt*60;if(p.y<-10){p.y=wbgH+10;p.x=Math.random()*wbgW;}
         c.save();c.globalAlpha=p.op;c.fillStyle='rgba(255,240,200,1)';c.beginPath();c.arc(p.x,p.y,p.r,0,Math.PI*2);c.fill();c.restore();

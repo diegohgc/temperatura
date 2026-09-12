@@ -1,5 +1,5 @@
-const CACHE = 'temperatura-v108';
-const ASSETS = ['./manifest.json', './icon-192.png', './icon-512.png', './nube-textura.png', './nube2-textura.png'];
+const CACHE = 'temperatura-v109';
+const ASSETS = ['./manifest.json', './icon-192.png', './icon-512.png', './nube-textura.png', './nube2-textura.png', './sol-textura.png'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)));
