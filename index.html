@@ -5906,10 +5906,12 @@ function wbgFlake(x,y,r,alpha,rot){
 }
 
 /* ── Manchas difusas de fondo (sensación de "nublado") ── */
-function _wbgNubesDifusas(color,alpha,sc){
+const _WBG_MANCHAS_BASE=[[.26,.20,80],[.67,.15,60],[.89,.31,70],[.15,.37,55]];
+const _WBG_MANCHAS_EXTRA=[[.26,.20,80],[.67,.15,60],[.89,.31,70],[.15,.37,55],[.45,.10,50],[.05,.14,45],[.78,.42,58]];
+function _wbgNubesDifusas(color,alpha,sc,manchas){
   const c=wbgCtx;
   c.save();c.filter='blur(20px)';c.globalAlpha=alpha;c.fillStyle=color;
-  [[.26,.20,80],[.67,.15,60],[.89,.31,70],[.15,.37,55]].forEach(([xf,yf,base])=>{
+  (manchas||_WBG_MANCHAS_BASE).forEach(([xf,yf,base])=>{
     const r=base*sc,cx2=xf*wbgW,cy2=yf*wbgH;
     c.beginPath();c.arc(cx2,cy2,r,0,Math.PI*2);c.arc(cx2+r*.6,cy2-r*.25,r*.7,0,Math.PI*2);c.arc(cx2-r*.5,cy2-r*.1,r*.55,0,Math.PI*2);c.fill();
   });
@@ -5955,6 +5957,7 @@ function wbgDraw(key,dt){
     }
     case 'mayormente':{
       c.fillStyle=wbgGrad([[0,'#3f9fd8'],[.7,'#6cc0ec'],[1,'#a0defc']]);c.fillRect(0,0,wbgW,wbgH);
+      _wbgNubesDifusas('rgba(255,255,255,0.9)',0.16,sc,_WBG_MANCHAS_EXTRA);
       const sxm=wbgW*.78,sym=wbgH*.09,discRm=20*sc;
       if(_wbgSolImg._loaded){
         const solWm=discRm*5.5,solHm=solWm*(_wbgSolImg.naturalHeight/_wbgSolImg.naturalWidth);
@@ -5970,6 +5973,7 @@ function wbgDraw(key,dt){
     }
     case 'partial':{
       c.fillStyle=wbgGrad([[0,'#4aa8d8'],[.7,'#70c0e8'],[1,'#98d8f5']]);c.fillRect(0,0,wbgW,wbgH);
+      _wbgNubesDifusas('rgba(255,255,255,0.9)',0.18,sc,_WBG_MANCHAS_EXTRA);
       const sx=wbgW*.82,sy=wbgH*.06,discR2=18*sc;
       if(_wbgSolImg._loaded){
         const solW2=discR2*5.5,solH2=solW2*(_wbgSolImg.naturalHeight/_wbgSolImg.naturalWidth);
@@ -6087,6 +6091,7 @@ function wbgDraw(key,dt){
     }
     case 'nightcloud':{
       c.fillStyle=wbgGrad([[0,'#060912'],[.6,'#0b1428'],[1,'#0f1e3a']]);c.fillRect(0,0,wbgW,wbgH);
+      _wbgNubesDifusas('rgba(50,65,85,0.9)',0.20,sc,_WBG_MANCHAS_EXTRA);
       if(wbgMoonUp){
         const mx=wbgW*.72,my=wbgH*.12,mr=26*sc;
         if(wbgDrawMoon(mx,my,mr)){
