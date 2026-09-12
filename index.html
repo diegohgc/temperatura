@@ -5870,6 +5870,17 @@ function wbgFlake(x,y,r,alpha,rot){
   c.fillStyle='rgba(255,255,255,0.85)';c.beginPath();c.arc(0,0,r*.16,0,Math.PI*2);c.fill();c.restore();
 }
 
+/* ── Manchas difusas de fondo (sensación de "nublado") ── */
+function _wbgNubesDifusas(color,alpha,sc){
+  const c=wbgCtx;
+  c.save();c.filter='blur(20px)';c.globalAlpha=alpha;c.fillStyle=color;
+  [[.26,.20,80],[.67,.15,60],[.89,.31,70],[.15,.37,55]].forEach(([xf,yf,base])=>{
+    const r=base*sc,cx2=xf*wbgW,cy2=yf*wbgH;
+    c.beginPath();c.arc(cx2,cy2,r,0,Math.PI*2);c.arc(cx2+r*.6,cy2-r*.25,r*.7,0,Math.PI*2);c.arc(cx2-r*.5,cy2-r*.1,r*.55,0,Math.PI*2);c.fill();
+  });
+  c.restore();
+}
+
 /* ── Dibuja según condición ── */
 function wbgDraw(key,dt){
   const c=wbgCtx, t=wbgLastTs*.001, sc=Math.min(wbgW,420)/270;
@@ -5929,11 +5940,13 @@ function wbgDraw(key,dt){
     }
     case 'cloudy':{
       c.fillStyle=wbgGrad([[0,'#5c6878'],[.5,'#6d7a8c'],[1,'#7d8ba0']]);c.fillRect(0,0,wbgW,wbgH);
+      _wbgNubesDifusas('rgba(150,158,165,0.9)',0.24,sc);
       wbgClouds.forEach(cl=>{_wbgAvanzarNube(cl,dt);wbgCloud(cl.x,cl.y,cl.sc,cl.alpha,cl.flip,null,null,cl.tex);});
       break;
     }
     case 'rain':{
       c.fillStyle=wbgGrad([[0,'#282b2e'],[1,'#383c40']]);c.fillRect(0,0,wbgW,wbgH);
+      _wbgNubesDifusas('rgba(150,158,165,0.9)',0.24,sc);
       wbgClouds.forEach(cl=>{_wbgAvanzarNube(cl,dt);wbgCloud(cl.x,cl.y,cl.sc,cl.alpha,cl.flip,cl.tint,cl.tintAlpha,cl.tex);});
       c.save();c.lineWidth=0.5;
       wbgStreaks.forEach(s=>{
@@ -5947,6 +5960,7 @@ function wbgDraw(key,dt){
     }
     case 'drizzle':{
       c.fillStyle=wbgGrad([[0,'#3c3f42'],[.6,'#484c50'],[1,'#54585c']]);c.fillRect(0,0,wbgW,wbgH);
+      _wbgNubesDifusas('rgba(150,158,165,0.9)',0.24,sc);
       wbgClouds.forEach(cl=>{_wbgAvanzarNube(cl,dt);wbgCloud(cl.x,cl.y,cl.sc,cl.alpha,cl.flip,cl.tint,cl.tintAlpha,cl.tex);});
       c.save();c.lineWidth=0.4;
       wbgDrizzle.forEach(s=>{
@@ -5960,6 +5974,7 @@ function wbgDraw(key,dt){
     case 'storm':
     case 'nightstorm':{
       c.fillStyle=key==='storm'?wbgGrad([[0,'#3a3e42'],[1,'#4a4f54']]):wbgGrad([[0,'#04101c'],[1,'#0a1c2e']]);c.fillRect(0,0,wbgW,wbgH);
+      _wbgNubesDifusas(key==='storm'?'rgba(150,158,165,0.9)':'rgba(50,65,85,0.9)', key==='storm'?0.24:0.26, sc);
       wbgClouds.forEach(cl=>{_wbgAvanzarNube(cl,dt);wbgCloud(cl.x,cl.y,cl.sc,cl.alpha,cl.flip,cl.tint,cl.tintAlpha,cl.tex);});
       c.save();c.lineWidth=0.6;
       wbgHeavyS.forEach(s=>{
@@ -5975,12 +5990,7 @@ function wbgDraw(key,dt){
     }
     case 'snow':{
       c.fillStyle=wbgGrad([[0,'#c3d8ea'],[.5,'#9bbbd4'],[1,'#7aa8c6']]);c.fillRect(0,0,wbgW,wbgH);
-      c.save();c.filter='blur(20px)';c.globalAlpha=0.28;c.fillStyle='rgba(255,255,255,0.9)';
-      [[.26,.20,80],[.67,.15,60],[.89,.31,70],[.15,.37,55]].forEach(([xf,yf,base])=>{
-        const r=base*sc,cx2=xf*wbgW,cy2=yf*wbgH;
-        c.beginPath();c.arc(cx2,cy2,r,0,Math.PI*2);c.arc(cx2+r*.6,cy2-r*.25,r*.7,0,Math.PI*2);c.arc(cx2-r*.5,cy2-r*.1,r*.55,0,Math.PI*2);c.fill();
-      });
-      c.restore();
+      _wbgNubesDifusas('rgba(255,255,255,0.9)',0.28,sc);
       wbgClouds.forEach(cl=>{_wbgAvanzarNube(cl,dt);wbgCloud(cl.x,cl.y,cl.sc,cl.alpha,cl.flip,cl.tint,cl.tintAlpha,cl.tex);});
       wbgFlakes.forEach(f=>{
         f.y+=f.spd*dt*60;f.x+=Math.sin(t*f.drift+f.phase)*.4*dt*60;
@@ -6056,6 +6066,7 @@ function wbgDraw(key,dt){
     }
     case 'nightcloudy':{
       c.fillStyle=wbgGrad([[0,'#070d18'],[.5,'#0c1628'],[1,'#101e35']]);c.fillRect(0,0,wbgW,wbgH);
+      _wbgNubesDifusas('rgba(50,65,85,0.9)',0.26,sc);
       wbgNightC.forEach(cl=>{
         _wbgAvanzarNube(cl,dt);
         wbgCloud(cl.x,cl.y,cl.sc,cl.alpha,cl.flip,cl.tint,0.6,cl.tex);
@@ -6067,6 +6078,7 @@ function wbgDraw(key,dt){
     }
     case 'nightrain':{
       c.fillStyle=wbgGrad([[0,'#081521'],[.5,'#0e1d2c'],[1,'#132638']]);c.fillRect(0,0,wbgW,wbgH);
+      _wbgNubesDifusas('rgba(50,65,85,0.9)',0.26,sc);
       const hG3=c.createLinearGradient(0,wbgH*.65,0,wbgH);
       hG3.addColorStop(0,'rgba(255,150,60,0)');hG3.addColorStop(1,'rgba(255,120,40,0.07)');
       c.fillStyle=hG3;c.fillRect(0,wbgH*.65,wbgW,wbgH*.35);
