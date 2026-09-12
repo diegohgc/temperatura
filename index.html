@@ -6123,17 +6123,6 @@ window.aplicarFondoDinamico=function(weatherCode,isDay,astroData,lat){
 
 
 })();
-
-// TEMPORAL — solo para previsualizar el fondo nublado sin depender del
-// tiempo real. Quitar antes de publicar. Uso: añadir ?debugNube=1 a la URL.
-if (new URLSearchParams(location.search).has('debugNube')) {
-  const _forzarNube = setInterval(() => {
-    if (ultimosDatos && currentCoords) {
-      clearInterval(_forzarNube);
-      aplicarFondoDinamico(3, true, ultimosDatos.astroData, currentCoords.lat);
-    }
-  }, 300);
-}
 </script>
 
 <!-- Modal mapa altitud -->
