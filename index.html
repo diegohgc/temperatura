@@ -23,7 +23,12 @@
   #bg::after {
     content: '';
     position: absolute; inset: 0; z-index: 1;
-    background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.45) 100%);
+    /* circle, no ellipse: con la forma elíptica (por defecto ajustada al
+       alto/ancho del recuadro) en una pantalla de móvil, mucho más alta
+       que ancha, el oscurecido llegaba antes a los lados que arriba/abajo
+       y se veían dos franjas verticales oscuras — con círculo, la misma
+       distancia real en cualquier dirección da el mismo oscurecido. */
+    background: radial-gradient(circle at center, transparent 40%, rgba(0,0,0,0.45) 100%);
     pointer-events: none;
     transition: opacity 1.5s ease;
   }
