@@ -5733,7 +5733,8 @@ class WbgDrop{
 
 // Cielo practicamente lleno de nube.png (nublado / lluvia): mismo patron
 // reutilizado en varias condiciones para no repetir el array 4 veces.
-function _wbgNubesDensas(sc,tint,tintAlpha){
+function _wbgNubesDensas(sc,tint,tintAlpha,alphaMul){
+  alphaMul=alphaMul??1;
   return [
     {x:0.00,y:0.06,sc:0.60*sc,alpha:0.90,speed:0.08,flip:false,tex:0,tint,tintAlpha},
     {x:0.45,y:0.04,sc:0.58*sc,alpha:0.85,speed:0.11,flip:true, tex:0,tint,tintAlpha},
@@ -5746,7 +5747,7 @@ function _wbgNubesDensas(sc,tint,tintAlpha){
     {x:0.92,y:0.08,sc:0.32*sc,alpha:0.66,speed:0.16,flip:true, tex:1,tint,tintAlpha},
     {x:0.22,y:0.50,sc:0.30*sc,alpha:0.58,speed:0.14,flip:true, tex:1,tint,tintAlpha},
     {x:0.68,y:0.48,sc:0.25*sc,alpha:0.52,speed:0.23,flip:false,tex:0,tint,tintAlpha},
-  ].map(cl=>({...cl,x:wbgW*cl.x,y:wbgH*cl.y}));
+  ].map(cl=>({...cl,alpha:cl.alpha*alphaMul,x:wbgW*cl.x,y:wbgH*cl.y}));
 }
 
 /* ── Init por condición ── */
@@ -5787,26 +5788,27 @@ function wbgInit(key){
         {x:wbgW*.68,y:wbgH*.48,sc:0.25*sc,alpha:0.52,speed:0.23,flip:false,tex:0},
       ]; break;
     case 'rain':
-      wbgClouds=_wbgNubesDensas(sc,'rgba(35,40,50,1)',0.35);
+      wbgClouds=_wbgNubesDensas(sc,'rgba(35,40,50,1)',0.35,0.85);
       wbgStreaks=Array.from({length:150},()=>({x:Math.random()*wbgW,y:Math.random()*wbgH,spd:5+Math.random()*7,len:14+Math.random()*20,op:0.10+Math.random()*.18}));
       break;
     case 'storm':
+    case 'nightstorm':
       // Tormenta: todavia mas nubes que en lluvia, cielo completamente cubierto
-      wbgClouds=_wbgNubesDensas(sc,'rgba(35,40,50,1)',0.35).concat([
-        {x:wbgW*.38,y:wbgH*.02,sc:0.42*sc,alpha:0.80,speed:0.09,flip:true, tex:0,tint:'rgba(35,40,50,1)',tintAlpha:0.35},
-        {x:wbgW*.78,y:wbgH*.14,sc:0.30*sc,alpha:0.60,speed:0.18,flip:false,tex:1,tint:'rgba(35,40,50,1)',tintAlpha:0.35},
-        {x:wbgW*.02,y:wbgH*.28,sc:0.24*sc,alpha:0.50,speed:0.24,flip:true, tex:0,tint:'rgba(35,40,50,1)',tintAlpha:0.35},
+      wbgClouds=_wbgNubesDensas(sc,'rgba(35,40,50,1)',0.35,0.85).concat([
+        {x:wbgW*.38,y:wbgH*.02,sc:0.42*sc,alpha:0.68,speed:0.09,flip:true, tex:0,tint:'rgba(35,40,50,1)',tintAlpha:0.35},
+        {x:wbgW*.78,y:wbgH*.14,sc:0.30*sc,alpha:0.51,speed:0.18,flip:false,tex:1,tint:'rgba(35,40,50,1)',tintAlpha:0.35},
+        {x:wbgW*.02,y:wbgH*.28,sc:0.24*sc,alpha:0.43,speed:0.24,flip:true, tex:0,tint:'rgba(35,40,50,1)',tintAlpha:0.35},
       ]);
       wbgStreaks=Array.from({length:150},()=>({x:Math.random()*wbgW,y:Math.random()*wbgH,spd:5+Math.random()*7,len:14+Math.random()*20,op:0.10+Math.random()*.18}));
       wbgHeavyS=Array.from({length:160},()=>({x:Math.random()*wbgW,y:Math.random()*wbgH,spd:8+Math.random()*10,len:20+Math.random()*30,op:0.10+Math.random()*.20}));
       wbgLightT=2+Math.random()*4; wbgLightA=0;
       break;
     case 'drizzle':
-      wbgClouds=_wbgNubesDensas(sc,'rgba(45,52,62,1)',0.3);
+      wbgClouds=_wbgNubesDensas(sc,'rgba(45,52,62,1)',0.3,0.85);
       wbgDrizzle=Array.from({length:100},()=>({x:Math.random()*wbgW,y:Math.random()*wbgH,spd:2.2+Math.random()*2.8,len:7+Math.random()*11,op:0.09+Math.random()*.14}));
       break;
     case 'snow':
-      wbgClouds=_wbgNubesDensas(sc,'rgba(210,225,240,1)',0.2);
+      wbgClouds=_wbgNubesDensas(sc,'rgba(210,225,240,1)',0.2,0.7);
       wbgFlakes=Array.from({length:60},()=>({
         x:Math.random()*wbgW,y:Math.random()*wbgH,r:(1.5+Math.random()*4)*sc,
         spd:0.4+Math.random()*1.2,drift:0.3+Math.random()*.5,phase:Math.random()*Math.PI*2,op:0.4+Math.random()*.55
@@ -5955,8 +5957,9 @@ function wbgDraw(key,dt){
       c.restore();
       break;
     }
-    case 'storm':{
-      c.fillStyle=wbgGrad([[0,'#06101a'],[1,'#0d1b2a']]);c.fillRect(0,0,wbgW,wbgH);
+    case 'storm':
+    case 'nightstorm':{
+      c.fillStyle=key==='storm'?wbgGrad([[0,'#3a3e42'],[1,'#4a4f54']]):wbgGrad([[0,'#04101c'],[1,'#0a1c2e']]);c.fillRect(0,0,wbgW,wbgH);
       wbgClouds.forEach(cl=>{_wbgAvanzarNube(cl,dt);wbgCloud(cl.x,cl.y,cl.sc,cl.alpha,cl.flip,cl.tint,cl.tintAlpha,cl.tex);});
       c.save();c.lineWidth=0.6;
       wbgHeavyS.forEach(s=>{
@@ -6137,7 +6140,7 @@ window.aplicarFondoDinamico=function(weatherCode,isDay,astroData,lat){
   else if(wc>=51&&wc<=57)                           key=isDay?'drizzle':'nightrain';
   else if(wc===71||wc===73||wc===75||wc===77||wc===85||wc===86) key='snow';
   else if((wc>=61&&wc<=69)||(wc>=80&&wc<=82))      key=isDay?'rain':'nightrain';
-  else if(wc>=95)                                   key='storm';
+  else if(wc>=95)                                   key=isDay?'storm':'nightstorm';
   else                                              key=isDay?'partial':'nightcloud';
   if(key!==wbgCondKey){wbgCondKey=key;wbgInit(key);}
   const _bright = key==='sun'||key==='mayormente'||key==='partial'||key==='cloudy'||key==='snow';
