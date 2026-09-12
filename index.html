@@ -6090,6 +6090,13 @@ function wbgDraw(key,dt){
 function wbgLoop(ts){
   const dt=Math.min((ts-wbgLastTs)/1000,0.05);
   wbgLastTs=ts;
+  // Autocorrección: si por lo que sea (p.ej. el resize de ventana que
+  // dispara el teclado del buscador de ciudad en el WebView de Android
+  // al abrirse/cerrarse) el canvas se quedó con un tamaño que ya no
+  // coincide con el viewport real, se corrige aquí mismo antes de pintar
+  // — así nunca queda un margen sin cubrir a los lados por mucho que el
+  // evento 'resize' llegue tarde, incompleto o con un valor intermedio.
+  if(wbgW!==window.innerWidth||wbgH!==window.innerHeight) wbgResize();
   if(wbgCondKey){ wbgCtx.clearRect(0,0,wbgW,wbgH); wbgDraw(wbgCondKey,dt); }
   wbgRafId=requestAnimationFrame(wbgLoop);
 }
@@ -6137,7 +6144,6 @@ window.aplicarFondoDinamico=function(weatherCode,isDay,astroData,lat){
   const _bgEl = document.getElementById('bg');
   if(_bgEl) _bgEl.classList.toggle('wbg-day', _bright);
 };
-
 
 })();
 </script>
