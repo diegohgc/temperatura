@@ -5552,8 +5552,16 @@ function _wbgBuildLunaTex(r){
   const sz=Math.ceil(r*2)+6, ox=sz/2, oy=sz/2;
   const tc=document.createElement('canvas'); tc.width=sz; tc.height=sz;
   const tt=tc.getContext('2d');
+  if(_wbgLunaImg._loaded){
+    tt.beginPath(); tt.arc(ox,oy,r,0,Math.PI*2); tt.clip();
+    tt.drawImage(_wbgLunaImg,ox-r,oy-r,r*2,r*2);
+    const ld2=tt.createRadialGradient(ox,oy,r*.55,ox,oy,r);
+    ld2.addColorStop(0,'rgba(0,0,0,0)'); ld2.addColorStop(.75,'rgba(0,0,0,.06)'); ld2.addColorStop(1,'rgba(0,0,0,.35)');
+    tt.fillStyle=ld2; tt.fillRect(0,0,sz,sz);
+    return tc;
+  }
   tt.beginPath(); tt.arc(ox,oy,r,0,Math.PI*2); tt.clip();
-  // Base gris lunar
+  // Base gris lunar (procedural, mientras carga la foto real)
   const bg=tt.createRadialGradient(ox-r*.15,oy-r*.15,0,ox,oy,r);
   bg.addColorStop(0,'#E8E6E2'); bg.addColorStop(.50,'#D8D5D0');
   bg.addColorStop(.82,'#BCBAB4'); bg.addColorStop(1,'#9A9894');
@@ -5642,6 +5650,13 @@ const _wbgNubeTintCache={};
 const _wbgSolImg=new Image(); _wbgSolImg._loaded=false;
 _wbgSolImg.onload=()=>{_wbgSolImg._loaded=true;};
 _wbgSolImg.src='./sol-textura.png';
+
+// Foto real de la luna llena, recortada en circulo con fondo transparente.
+// El recorte de fase (creciente/menguante) se sigue haciendo con
+// destination-out sobre esta textura, igual que antes con la procedural.
+const _wbgLunaImg=new Image(); _wbgLunaImg._loaded=false;
+_wbgLunaImg.onload=()=>{_wbgLunaImg._loaded=true;_wbgLunaTexCache=null;};
+_wbgLunaImg.src='./luna-textura.png';
 function _wbgNubeTinted(texIdx,tintColor,tintAlpha){
   const srcImg=_wbgNubeImgs[texIdx]||_wbgNubeImgs[0];
   const key=texIdx+'|'+(tintColor||'')+'|'+(tintAlpha||'');
