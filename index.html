@@ -5747,6 +5747,11 @@ function _wbgNubesDensas(sc,tint,tintAlpha,alphaMul){
     {x:0.92,y:0.08,sc:0.32*sc,alpha:0.66,speed:0.16,flip:true, tex:1,tint,tintAlpha},
     {x:0.22,y:0.50,sc:0.30*sc,alpha:0.58,speed:0.14,flip:true, tex:1,tint,tintAlpha},
     {x:0.68,y:0.48,sc:0.25*sc,alpha:0.52,speed:0.23,flip:false,tex:0,tint,tintAlpha},
+    {x:0.38,y:0.14,sc:0.40*sc,alpha:0.70,speed:0.12,flip:true, tex:1,tint,tintAlpha},
+    {x:0.75,y:0.06,sc:0.38*sc,alpha:0.64,speed:0.20,flip:false,tex:0,tint,tintAlpha},
+    {x:0.10,y:0.30,sc:0.28*sc,alpha:0.56,speed:0.24,flip:true, tex:0,tint,tintAlpha},
+    {x:0.48,y:0.44,sc:0.22*sc,alpha:0.48,speed:0.26,flip:false,tex:1,tint,tintAlpha},
+    {x:0.88,y:0.46,sc:0.20*sc,alpha:0.44,speed:0.18,flip:true, tex:0,tint,tintAlpha},
   ].map(cl=>({...cl,alpha:cl.alpha*alphaMul,x:wbgW*cl.x,y:wbgH*cl.y}));
 }
 
@@ -5786,6 +5791,11 @@ function wbgInit(key){
         {x:wbgW*.92,y:wbgH*.08,sc:0.32*sc,alpha:0.66,speed:0.16,flip:true,tex:1},
         {x:wbgW*.22,y:wbgH*.50,sc:0.30*sc,alpha:0.58,speed:0.14,flip:true,tex:1},
         {x:wbgW*.68,y:wbgH*.48,sc:0.25*sc,alpha:0.52,speed:0.23,flip:false,tex:0},
+        {x:wbgW*.38,y:wbgH*.14,sc:0.40*sc,alpha:0.70,speed:0.12,flip:true, tex:1},
+        {x:wbgW*.75,y:wbgH*.06,sc:0.38*sc,alpha:0.64,speed:0.20,flip:false,tex:0},
+        {x:wbgW*.10,y:wbgH*.30,sc:0.28*sc,alpha:0.56,speed:0.24,flip:true, tex:0},
+        {x:wbgW*.48,y:wbgH*.44,sc:0.22*sc,alpha:0.48,speed:0.26,flip:false,tex:1},
+        {x:wbgW*.88,y:wbgH*.46,sc:0.20*sc,alpha:0.44,speed:0.18,flip:true, tex:0},
       ]; break;
     case 'rain':
       wbgClouds=_wbgNubesDensas(sc,'rgba(35,40,50,1)',0.35,0.85);
