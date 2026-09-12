@@ -5782,16 +5782,23 @@ function wbgInit(key){
         r:1+Math.random()*2, vy:-(0.2+Math.random()*.5), vx:-0.15+Math.random()*.3, op:0.1+Math.random()*.25
       }));
       break;
-    case 'mayormente': // Mayormente despejado: solo alguna nube suelta y ligera (nube2)
+    case 'mayormente': // Mayormente despejado: nubes sueltas y ligeras (nube2)
       wbgClouds=[
-        {x:wbgW*.15,y:wbgH*.10,sc:0.40*sc,alpha:0.55,speed:0.12,flip:false,tex:1},
-        {x:wbgW*.65,y:wbgH*.16,sc:0.30*sc,alpha:0.42,speed:0.16,flip:true,tex:1},
+        {x:wbgW*.15,y:wbgH*.09,sc:0.40*sc,alpha:0.55,speed:0.12,flip:false,tex:1},
+        {x:wbgW*.65,y:wbgH*.16,sc:0.30*sc,alpha:0.42,speed:0.16,flip:true, tex:1},
+        {x:wbgW*.40,y:wbgH*.22,sc:0.26*sc,alpha:0.38,speed:0.20,flip:false,tex:1},
+        {x:wbgW*.88,y:wbgH*.10,sc:0.32*sc,alpha:0.46,speed:0.14,flip:true, tex:1},
+        {x:wbgW*.02,y:wbgH*.30,sc:0.24*sc,alpha:0.36,speed:0.24,flip:false,tex:1},
       ]; break;
     case 'partial': // Parcialmente nublado: mezcla de las dos texturas
       wbgClouds=[
         {x:wbgW*.10,y:wbgH*.12,sc:0.50*sc,alpha:0.88,speed:0.14,flip:false,tex:0},
-        {x:wbgW*.55,y:wbgH*.08,sc:0.48*sc,alpha:0.75,speed:0.18,flip:true,tex:1},
+        {x:wbgW*.55,y:wbgH*.06,sc:0.48*sc,alpha:0.75,speed:0.18,flip:true, tex:1},
         {x:wbgW*.25,y:wbgH*.25,sc:0.32*sc,alpha:0.60,speed:0.22,flip:false,tex:0},
+        {x:wbgW*.75,y:wbgH*.20,sc:0.34*sc,alpha:0.62,speed:0.16,flip:true, tex:1},
+        {x:wbgW*.42,y:wbgH*.30,sc:0.26*sc,alpha:0.50,speed:0.26,flip:false,tex:0},
+        {x:wbgW*.92,y:wbgH*.08,sc:0.30*sc,alpha:0.55,speed:0.19,flip:true, tex:0},
+        {x:wbgW*.05,y:wbgH*.22,sc:0.22*sc,alpha:0.45,speed:0.28,flip:false,tex:1},
       ]; break;
     case 'cloudy': // Nublado: cielo practicamente lleno, sobre todo nube.png (mas densa)
       wbgClouds=[
@@ -5847,10 +5854,13 @@ function wbgInit(key){
         x:Math.random()*wbgW,y:Math.random()*wbgH*.7,r:0.3+Math.random()*1.2,phase:Math.random()*Math.PI*2,spd:0.4+Math.random()*1.1
       }));
       wbgNightC=[
-        {x:wbgW*.05,y:wbgH*.10,sc:0.53*sc,alpha:0.82,tint:'rgba(18,30,46,1)',speed:0.10,flip:false,tex:0},
-        {x:wbgW*.55,y:wbgH*.06,sc:0.48*sc,alpha:0.70,tint:'rgba(22,36,54,1)',speed:0.13,flip:true,tex:1},
+        {x:wbgW*.05,y:wbgH*.12,sc:0.53*sc,alpha:0.82,tint:'rgba(18,30,46,1)',speed:0.10,flip:false,tex:0},
+        {x:wbgW*.55,y:wbgH*.06,sc:0.48*sc,alpha:0.70,tint:'rgba(22,36,54,1)',speed:0.13,flip:true, tex:1},
         {x:wbgW*.20,y:wbgH*.24,sc:0.35*sc,alpha:0.60,tint:'rgba(20,33,50,1)',speed:0.17,flip:false,tex:0},
-        {x:wbgW*.65,y:wbgH*.30,sc:0.35*sc,alpha:0.55,tint:'rgba(24,38,58,1)',speed:0.20,flip:true,tex:1},
+        {x:wbgW*.65,y:wbgH*.30,sc:0.35*sc,alpha:0.55,tint:'rgba(24,38,58,1)',speed:0.20,flip:true, tex:1},
+        {x:wbgW*.85,y:wbgH*.12,sc:0.30*sc,alpha:0.50,tint:'rgba(20,33,50,1)',speed:0.15,flip:false,tex:1},
+        {x:wbgW*.38,y:wbgH*.16,sc:0.28*sc,alpha:0.46,tint:'rgba(22,36,54,1)',speed:0.22,flip:true, tex:0},
+        {x:wbgW*.10,y:wbgH*.36,sc:0.24*sc,alpha:0.40,tint:'rgba(18,30,46,1)',speed:0.26,flip:false,tex:1},
       ]; break;
     case 'nightcloudy': // nublado total de noche: sin estrellas, nubes sutiles
       wbgNightC=[
