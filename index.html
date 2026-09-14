@@ -752,10 +752,14 @@
     </div>
     <div id="intModalTitulo" style="font-size:1.1rem;font-weight:700;text-align:center;margin-bottom:12px"></div>
     <div id="intModalValor" style="font-size:2.5rem;font-weight:800;text-align:center;margin-bottom:6px"></div>
-    <div id="intModalDetalle" style="font-size:0.88rem;text-align:center;line-height:1.6;padding:0 4px;margin-bottom:14px"></div>
+    <div id="intModalDetalle" style="font-size:0.88rem;text-align:center;line-height:1.6;padding:0 4px;margin-bottom:18px"></div>
+    <div id="intModalLuna" style="display:none;flex-direction:column;align-items:center;margin-bottom:18px">
+      <canvas id="intModalLunaCanvas" width="260" height="260" style="width:148px;height:148px"></canvas>
+      <div id="intModalLunaHoras" style="font-size:0.78rem;opacity:0.6;letter-spacing:0.02em;margin-top:8px"></div>
+    </div>
     <div id="intModalSolArco"></div>
     <div id="intModalAireArco"></div>
-    <div id="intModalNivel" style="font-size:0.9rem;text-align:center;opacity:0.7;margin-bottom:18px"></div>
+    <div id="intModalNivel" style="font-size:0.9rem;text-align:center;opacity:0.7;margin-top:10px;margin-bottom:18px"></div>
     <div id="intModalAireExtra" style="display:none;gap:10px;margin:-8px 0 16px"></div>
   </div>
 </div>
@@ -2936,6 +2940,7 @@ document.getElementById('modalDia').addEventListener('click', (e) => {
 });
 
 let _ultimoUV = null, _ultimoAireData = null, _ultimoSunset = null, _ultimoSunrise = null, _ultimoSunsetLocalHora = null, _ultimoSunriseLocalHora = null, _ultimoIsDay = true;
+let _ultimoMoonriseLocalHora = null, _ultimoMoonsetLocalHora = null;
 let _ultimaTempC = null;
 let _wapiDataGlobal = null;
 
@@ -3073,6 +3078,20 @@ function abrirModalInterior(tipo) {
   document.getElementById('intModalDetalle').style.whiteSpace = 'pre-line';
   document.getElementById('intModalDetalle').textContent = detalle;
   document.getElementById('intModalSolArco').innerHTML = tipo === 'sol' ? generarArcoSolar() : '';
+
+  // Foto real de la luna (misma textura y fase que el fondo animado),
+  // con la hora de salida/puesta en una linea minimalista debajo.
+  const _elLuna = document.getElementById('intModalLuna');
+  if (tipo === 'sol' && window.wbgRenderMoonTo) {
+    _elLuna.style.display = 'flex';
+    window.wbgRenderMoonTo(document.getElementById('intModalLunaCanvas'));
+    const _subeStr = _ultimoMoonriseLocalHora, _bajaStr = _ultimoMoonsetLocalHora;
+    document.getElementById('intModalLunaHoras').textContent =
+      (_subeStr || _bajaStr) ? `↑ ${_subeStr || '--'}   |   ↓ ${_bajaStr || '--'}` : '';
+  } else {
+    _elLuna.style.display = 'none';
+  }
+
   document.getElementById('modalInterior').classList.add('abierto');
   document.body.style.overflow = 'hidden';
 }
@@ -3907,6 +3926,8 @@ function renderDatos(datos) {
     _ultimoSunset  = sunsetDate.toISOString();
     _ultimoSunriseLocalHora = _wapiAmPmTo24h(astro.sunrise);
     _ultimoSunsetLocalHora  = _wapiAmPmTo24h(astro.sunset);
+    _ultimoMoonriseLocalHora = astro.moonrise && !/no/i.test(astro.moonrise) ? _wapiAmPmTo24h(astro.moonrise) : null;
+    _ultimoMoonsetLocalHora  = astro.moonset  && !/no/i.test(astro.moonset)  ? _wapiAmPmTo24h(astro.moonset)  : null;
   }
   aplicarColorTemp(Math.round(tempActual));
   if (window.aplicarFondoDinamico) aplicarFondoDinamico(weatherCode, isDay, astroData, currentCoords?.lat ?? 0, tiempo.utc_offset_seconds || 0);
@@ -5686,14 +5707,19 @@ function _wbgBuildLunaTex(r){
   return tc;
 }
 
-function wbgDrawMoon(cx,cy,r){
+// Pinta la luna (foto real + recorte de fase + halo) en CUALQUIER
+// contexto de canvas, no solo el del fondo animado -- cada llamador
+// pasa su propio "cacheHolder" ({tex,r}) para no invalidar la cache
+// de textura de otro (p.ej. el fondo redibuja cada frame a un radio
+// distinto al que usa el modal, y no queremos que se pisen).
+function _wbgPaintMoon(ctx,cx,cy,r,cacheHolder){
   const phase=wbgMoonPhase;
   const illum=(1-Math.cos(phase*Math.PI*2))/2;
   if(illum<0.015) return false;
-  if(!_wbgLunaTexCache||Math.abs(_wbgLunaTexR-r)>0.5){ _wbgLunaTexCache=_wbgBuildLunaTex(r); _wbgLunaTexR=r; }
-  const sz=_wbgLunaTexCache.width, ox=sz/2;
+  if(!cacheHolder.tex||Math.abs(cacheHolder.r-r)>0.5){ cacheHolder.tex=_wbgBuildLunaTex(r); cacheHolder.r=r; }
+  const sz=cacheHolder.tex.width, ox=sz/2;
   const oc=document.createElement('canvas'); oc.width=sz; oc.height=sz;
-  const ot=oc.getContext('2d'); ot.drawImage(_wbgLunaTexCache,0,0);
+  const ot=oc.getContext('2d'); ot.drawImage(cacheHolder.tex,0,0);
   if(illum<0.985){
     const tx=r*Math.abs(Math.cos(illum*Math.PI));
     const south=wbgLat<0, wax=south?phase>=0.5:phase<0.5, gib=illum>0.5;
@@ -5711,14 +5737,29 @@ function wbgDrawMoon(cx,cy,r){
     }
     ot.closePath(); ot.fill();
   }
-  wbgCtx.drawImage(oc,cx-ox,cy-ox);
+  ctx.drawImage(oc,cx-ox,cy-ox);
   // Halo
-  const c=wbgCtx;
-  const gw=c.createRadialGradient(cx,cy,r*.87,cx,cy,r*2.0);
+  const gw=ctx.createRadialGradient(cx,cy,r*.87,cx,cy,r*2.0);
   gw.addColorStop(0,'rgba(210,208,198,.10)'); gw.addColorStop(.5,'rgba(210,208,198,.03)'); gw.addColorStop(1,'rgba(210,208,198,0)');
-  c.fillStyle=gw; c.beginPath(); c.arc(cx,cy,r*2,0,Math.PI*2); c.fill();
+  ctx.fillStyle=gw; ctx.beginPath(); ctx.arc(cx,cy,r*2,0,Math.PI*2); ctx.fill();
   return true;
 }
+
+const _wbgMainMoonCache={tex:null,r:0};
+function wbgDrawMoon(cx,cy,r){ return _wbgPaintMoon(wbgCtx,cx,cy,r,_wbgMainMoonCache); }
+
+// Reutilizado por el modal de sol/noche para pintar la misma foto real
+// de la luna (con su fase actual) en su propio canvas, mucho mas grande.
+const _wbgModalMoonCache={tex:null,r:0};
+window.wbgRenderMoonTo=function(canvasEl){
+  if(!canvasEl) return false;
+  const w=canvasEl.width, h=canvasEl.height;
+  const ctx=canvasEl.getContext('2d');
+  ctx.clearRect(0,0,w,h);
+  const r=Math.min(w,h)*0.42;
+  return _wbgPaintMoon(ctx,w/2,h/2,r,_wbgModalMoonCache);
+};
+window.wbgMoonImageReady=function(){ return _wbgLunaImg._loaded; };
 
 /* ── Nube volumétrica sutil ── */
 // Nube real (foto con transparencia recortada) en vez de círculos dibujados.
