@@ -3830,17 +3830,22 @@ function renderDatos(datos) {
   if (astro && astro.sunrise && astro.sunset) {
     function _wapiAmPmToDate(str) {
       // OJO: la hora que da WeatherAPI es la hora LOCAL de la ciudad
-      // consultada, no la del dispositivo. Si no se corrige por el
-      // desfase horario, d.setHours() la fija en la zona horaria del
-      // movil, dando una hora (y por tanto una condicion dia/noche)
-      // completamente distinta cuando la ciudad esta lejos de casa.
+      // consultada (solo "hh:mm AM/PM", sin fecha). Usar `new Date()`
+      // y ponerle solo la hora tomaba el DIA DEL DISPOSITIVO como si
+      // fuera el dia de la ciudad -- cuando el dispositivo y la ciudad
+      // no estan en el mismo dia civil (habitual con varias horas de
+      // diferencia horaria), el resultado quedaba desplazado casi 24h
+      // y la cuenta atras / condicion dia-noche salian completamente
+      // mal. Por eso el dia se calcula a partir del propio offset de
+      // la ciudad, no del dispositivo.
       const [time, ampm] = str.split(' ');
       let [h, m] = time.split(':').map(Number);
       if (ampm === 'PM' && h !== 12) h += 12;
       if (ampm === 'AM' && h === 12) h = 0;
-      const d = new Date(); d.setHours(h, m, 0, 0);
-      const deviceOffsetSec = -new Date().getTimezoneOffset() * 60;
-      return new Date(d.getTime() + (deviceOffsetSec - (tiempo.utc_offset_seconds || 0)) * 1000);
+      const cityOffsetSec = tiempo.utc_offset_seconds || 0;
+      const cityNow = new Date(Date.now() + cityOffsetSec * 1000);
+      const utcMs = Date.UTC(cityNow.getUTCFullYear(), cityNow.getUTCMonth(), cityNow.getUTCDate(), h, m, 0, 0) - cityOffsetSec * 1000;
+      return new Date(utcMs);
     }
     function _wapiAmPmTo24h(str) {
       const [time, ampm] = str.split(' ');
