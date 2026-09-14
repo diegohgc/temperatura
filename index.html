@@ -2935,7 +2935,7 @@ function abrirModalInterior(tipo) {
   // Normalizar variantes regionales a la base para lookups de objetos inline
   const lang = langFull.includes('-') ? langFull.split('-')[0] : langFull;
 
-  let titulo = '', valor = '', nivel = '', detalle = '';
+  let titulo = '', valor = '', nivel = '', detalle = '', tituloIconoLuna = false;
 
   if (tipo === 'uv') {
     const uv = _ultimoUV !== null ? Math.round(_ultimoUV) : null;
@@ -2948,7 +2948,11 @@ function abrirModalInterior(tipo) {
     const sunset = _ultimoSunset ? new Date(_ultimoSunset) : null;
     const now = new Date();
     const NOCHE = { es:'Noche', en:'Night', de:'Nacht', fr:'Nuit', pt:'Noite', it:'Notte', zh:'夜间', ca:'Nit', eu:'Gaua', gl:'Noite', ar:'ليل', ru:'Ночь', ja:'夜', ko:'밤', nl:'Nacht', pl:'Noc', hi:'रात', ro:'Noapte', hu:'Éjszaka' };
-    titulo = !_ultimoIsDay ? ('🌙 ' + (NOCHE[lang] || 'Noche')) : ('🌅 ' + (T.solRestante || 'Sol restante'));
+    // Luna en blanco/casi blanco: el emoji 🌙 se renderiza siempre en
+    // amarillo (glifo a color del sistema, no se puede recolorear con
+    // CSS), asi que de noche se usa un SVG en vez del emoji.
+    tituloIconoLuna = !_ultimoIsDay;
+    titulo = !_ultimoIsDay ? (NOCHE[lang] || 'Noche') : ('🌅 ' + (T.solRestante || 'Sol restante'));
     if (sunset) {
       const hPuesta = _ultimoSunsetLocalHora || sunset.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
       const HL = { es:'hora local', en:'local time', de:'Ortszeit', fr:'heure locale', pt:'hora local', it:'ora locale', zh:'当地时间', ca:'hora local', eu:'tokiko ordua', gl:'hora local', ar:'التوقيت المحلي', ru:'местное время', ja:'現地時間', ko:'현지 시간', nl:'lokale tijd', pl:'czas lokalny', hi:'स्थानीय समय', ro:'ora locală', hu:'helyi idő' }[lang] || 'hora local';
@@ -3037,7 +3041,12 @@ function abrirModalInterior(tipo) {
     _elExtraAire.innerHTML = '';
   }
 
-  document.getElementById('intModalTitulo').textContent = titulo;
+  const elModalTitulo = document.getElementById('intModalTitulo');
+  if (tituloIconoLuna) {
+    elModalTitulo.innerHTML = `<svg width="17" height="17" viewBox="0 0 24 24" style="vertical-align:-3px;margin-right:4px"><path d="M20.5 14.5a8.5 8.5 0 1 1-9-13.4 9.5 9.5 0 0 0 9 13.4z" fill="#F5F7FA"/></svg>${titulo}`;
+  } else {
+    elModalTitulo.textContent = titulo;
+  }
   document.getElementById('intModalValor').textContent = valor;
   document.getElementById('intModalNivel').textContent = nivel;
   document.getElementById('intModalDetalle').style.whiteSpace = 'pre-line';
