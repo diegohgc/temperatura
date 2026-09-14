@@ -755,7 +755,8 @@
     <div id="intModalDetalle" style="font-size:0.88rem;text-align:center;line-height:1.6;padding:0 4px;margin-bottom:18px"></div>
     <div id="intModalLuna" style="display:none;flex-direction:column;align-items:center;margin-bottom:18px">
       <canvas id="intModalLunaCanvas" width="260" height="260" style="width:148px;height:148px"></canvas>
-      <div id="intModalLunaHoras" style="font-size:0.78rem;opacity:0.6;letter-spacing:0.02em;margin-top:8px"></div>
+      <div id="intModalLunaFase" style="font-size:0.76rem;color:rgba(255,255,255,0.7);letter-spacing:0.02em;margin-top:9px"></div>
+      <div id="intModalLunaHoras" style="font-size:0.78rem;opacity:0.6;letter-spacing:0.02em;margin-top:5px"></div>
     </div>
     <div id="intModalSolArco"></div>
     <div id="intModalAireArco"></div>
@@ -1752,6 +1753,18 @@ document.getElementById('selectIdioma').addEventListener('change', (e) => {
 });
 
 const AYUDA_LABEL = { es:'Ayuda', en:'Help', de:'Hilfe', fr:'Aide', pt:'Ajuda', it:'Aiuto', zh:'帮助', ca:'Ajuda', eu:'Laguntza', gl:'Axuda', ar:'مساعدة', ru:'Помощь', ja:'ヘルプ', ko:'도움말', nl:'Help', pl:'Pomoc', hi:'सहायता', ro:'Ajutor', hu:'Súgó' };
+// Nombres de fase lunar (claves tal como las da WeatherAPI Astronomy)
+// para el texto sutil del modal de sol/noche, ej. "Luna menguante (8%)".
+const FASE_LUNAR = {
+  'New Moon':        { es:'Luna nueva', en:'New moon', de:'Neumond', fr:'Nouvelle lune', pt:'Lua nova', it:'Luna nuova', zh:'新月', ca:'Lluna nova', eu:'Ilberria', gl:'Lúa nova', ar:'محاق', ru:'Новолуние', ja:'新月', ko:'신월', nl:'Nieuwe maan', pl:'Nów', hi:'अमावस्या', ro:'Lună nouă', hu:'Újhold' },
+  'Waxing Crescent':  { es:'Luna creciente', en:'Waxing crescent', de:'Zunehmende Sichel', fr:'Premier croissant', pt:'Lua crescente', it:'Luna crescente', zh:'娥眉月', ca:'Lluna creixent', eu:'Ilargi gorakorra', gl:'Lúa crecente', ar:'هلال متزايد', ru:'Растущий серп', ja:'三日月', ko:'초승달', nl:'Wassende maansikkel', pl:'Przybywający sierp', hi:'बढ़ता अर्धचंद्र', ro:'Semilună crescătoare', hu:'Növekvő sarló' },
+  'First Quarter':    { es:'Cuarto creciente', en:'First quarter', de:'Erstes Viertel', fr:'Premier quartier', pt:'Quarto crescente', it:'Primo quarto', zh:'上弦月', ca:'Quart creixent', eu:'Lehen laurdena', gl:'Cuarto crecente', ar:'التربيع الأول', ru:'Первая четверть', ja:'上弦の月', ko:'상현달', nl:'Eerste kwartier', pl:'Pierwsza kwadra', hi:'प्रथम चतुर्थांश', ro:'Primul pătrar', hu:'Első negyed' },
+  'Waxing Gibbous':   { es:'Luna gibosa creciente', en:'Waxing gibbous', de:'Zunehmender Mond', fr:'Gibbeuse croissante', pt:'Lua gibosa crescente', it:'Gibbosa crescente', zh:'盈凸月', ca:'Lluna gibosa creixent', eu:'Gibosa gorakorra', gl:'Lúa xibosa crecente', ar:'أحدب متزايد', ru:'Растущая горбатая луна', ja:'満ちゆく月', ko:'차오르는 달', nl:'Wassende maan', pl:'Garbaty przybywający', hi:'बढ़ता उत्तल चाँद', ro:'Lună gibboasă crescătoare', hu:'Növekvő dundorodó hold' },
+  'Full Moon':        { es:'Luna llena', en:'Full moon', de:'Vollmond', fr:'Pleine lune', pt:'Lua cheia', it:'Luna piena', zh:'满月', ca:'Lluna plena', eu:'Ilbete', gl:'Lúa chea', ar:'بدر', ru:'Полнолуние', ja:'満月', ko:'보름달', nl:'Volle maan', pl:'Pełnia', hi:'पूर्णिमा', ro:'Lună plină', hu:'Telihold' },
+  'Waning Gibbous':   { es:'Luna gibosa menguante', en:'Waning gibbous', de:'Abnehmender Mond', fr:'Gibbeuse décroissante', pt:'Lua gibosa minguante', it:'Gibbosa calante', zh:'亏凸月', ca:'Lluna gibosa minvant', eu:'Gibosa beherakorra', gl:'Lúa xibosa minguante', ar:'أحدب متناقص', ru:'Убывающая горбатая луна', ja:'欠けていく月', ko:'이지러지는 달', nl:'Afnemende maan', pl:'Garbaty ubywający', hi:'घटता उत्तल चाँद', ro:'Lună gibboasă descrescătoare', hu:'Fogyó dundorodó hold' },
+  'Last Quarter':     { es:'Cuarto menguante', en:'Last quarter', de:'Letztes Viertel', fr:'Dernier quartier', pt:'Quarto minguante', it:'Ultimo quarto', zh:'下弦月', ca:'Quart minvant', eu:'Azken laurdena', gl:'Cuarto minguante', ar:'التربيع الأخير', ru:'Последняя четверть', ja:'下弦の月', ko:'하현달', nl:'Laatste kwartier', pl:'Ostatnia kwadra', hi:'अंतिम चतुर्थांश', ro:'Ultimul pătrar', hu:'Utolsó negyed' },
+  'Waning Crescent':  { es:'Luna menguante', en:'Waning crescent', de:'Abnehmende Sichel', fr:'Dernier croissant', pt:'Lua minguante', it:'Luna calante', zh:'残月', ca:'Lluna minvant', eu:'Ilargi beherakorra', gl:'Lúa minguante', ar:'هلال متناقص', ru:'Убывающий серп', ja:'細くなる月', ko:'그믐달', nl:'Afnemende maansikkel', pl:'Ubywający sierp', hi:'घटता अर्धचंद्र', ro:'Semilună descrescătoare', hu:'Fogyó sarló' },
+};
 const VALORAR_LABEL = { es:'Valorar QuickTemp', en:'Rate QuickTemp', de:'QuickTemp bewerten', fr:'Noter QuickTemp', pt:'Avaliar QuickTemp', it:'Valuta QuickTemp', zh:'评价 QuickTemp', ca:'Valorar QuickTemp', eu:'Baloratu QuickTemp', gl:'Valorar QuickTemp', ar:'قيّم QuickTemp', ru:'Оценить QuickTemp', ja:'QuickTempを評価', ko:'QuickTemp 평가하기', nl:'QuickTemp beoordelen', pl:'Oceń QuickTemp', hi:'QuickTemp को रेट करें', ro:'Evaluează QuickTemp', hu:'QuickTemp értékelése' };
 // El boton "Valorar" solo se activa cuando la web se carga DESDE la app
 // Android (con ?apk=1 en la URL, lo pone MainActivity.kt), nunca para
@@ -2941,6 +2954,7 @@ document.getElementById('modalDia').addEventListener('click', (e) => {
 
 let _ultimoUV = null, _ultimoAireData = null, _ultimoSunset = null, _ultimoSunrise = null, _ultimoSunsetLocalHora = null, _ultimoSunriseLocalHora = null, _ultimoIsDay = true;
 let _ultimoMoonriseLocalHora = null, _ultimoMoonsetLocalHora = null;
+let _ultimoMoonPhaseKey = null, _ultimoMoonIlumPct = null;
 let _ultimaTempC = null;
 let _wapiDataGlobal = null;
 
@@ -3080,11 +3094,17 @@ function abrirModalInterior(tipo) {
   document.getElementById('intModalSolArco').innerHTML = tipo === 'sol' ? generarArcoSolar() : '';
 
   // Foto real de la luna (misma textura y fase que el fondo animado),
-  // con la hora de salida/puesta en una linea minimalista debajo.
+  // con el nombre de la fase + % de iluminacion y la hora de salida/
+  // puesta debajo, en lineas minimalistas. Solo de noche -- de dia no
+  // hay luna que mostrar en el cielo, asi que el bloque entero se oculta.
   const _elLuna = document.getElementById('intModalLuna');
-  if (tipo === 'sol' && window.wbgRenderMoonTo) {
+  if (tipo === 'sol' && !_ultimoIsDay && window.wbgRenderMoonTo) {
     _elLuna.style.display = 'flex';
     window.wbgRenderMoonTo(document.getElementById('intModalLunaCanvas'));
+    const _faseInfo = _ultimoMoonPhaseKey ? FASE_LUNAR[_ultimoMoonPhaseKey] : null;
+    const _faseNombre = _faseInfo ? (_faseInfo[lang] || _faseInfo.es) : '';
+    document.getElementById('intModalLunaFase').textContent =
+      _faseNombre ? `${_faseNombre}${_ultimoMoonIlumPct !== null ? ` (${_ultimoMoonIlumPct}%)` : ''}` : '';
     const _subeStr = _ultimoMoonriseLocalHora, _bajaStr = _ultimoMoonsetLocalHora;
     document.getElementById('intModalLunaHoras').textContent =
       (_subeStr || _bajaStr) ? `↑ ${_subeStr || '--'}   |   ↓ ${_bajaStr || '--'}` : '';
@@ -3928,6 +3948,9 @@ function renderDatos(datos) {
     _ultimoSunsetLocalHora  = _wapiAmPmTo24h(astro.sunset);
     _ultimoMoonriseLocalHora = astro.moonrise && !/no/i.test(astro.moonrise) ? _wapiAmPmTo24h(astro.moonrise) : null;
     _ultimoMoonsetLocalHora  = astro.moonset  && !/no/i.test(astro.moonset)  ? _wapiAmPmTo24h(astro.moonset)  : null;
+    _ultimoMoonPhaseKey = astro.moon_phase || null;
+    _ultimoMoonIlumPct  = astro.moon_illumination !== undefined && astro.moon_illumination !== null && astro.moon_illumination !== ''
+      ? Math.round(Number(astro.moon_illumination)) : null;
   }
   aplicarColorTemp(Math.round(tempActual));
   if (window.aplicarFondoDinamico) aplicarFondoDinamico(weatherCode, isDay, astroData, currentCoords?.lat ?? 0, tiempo.utc_offset_seconds || 0);
