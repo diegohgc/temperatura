@@ -5712,7 +5712,15 @@ function _wbgBuildLunaTex(r){
 // pasa su propio "cacheHolder" ({tex,r}) para no invalidar la cache
 // de textura de otro (p.ej. el fondo redibuja cada frame a un radio
 // distinto al que usa el modal, y no queremos que se pisen).
-function _wbgPaintMoon(ctx,cx,cy,r,cacheHolder){
+// "haloOuter" es el radio maximo al que se le deja llegar al halo --
+// en el fondo animado (canvas de pantalla completa) da igual que sea
+// muy grande porque se difumina en el cielo sin que se note ningun
+// borde, pero en un canvas pequeño (como el del modal) si ese radio
+// supera el propio canvas, el degradado nunca llega a alpha 0 antes
+// del borde y se ve como un recuadro cuadrado tintado. Por defecto
+// (fondo animado) se mantiene r*2 como hasta ahora; el modal pasa un
+// valor mas ajustado a su propio tamaño.
+function _wbgPaintMoon(ctx,cx,cy,r,cacheHolder,haloOuter){
   const phase=wbgMoonPhase;
   const illum=(1-Math.cos(phase*Math.PI*2))/2;
   if(illum<0.015) return false;
@@ -5738,10 +5746,12 @@ function _wbgPaintMoon(ctx,cx,cy,r,cacheHolder){
     ot.closePath(); ot.fill();
   }
   ctx.drawImage(oc,cx-ox,cy-ox);
-  // Halo
-  const gw=ctx.createRadialGradient(cx,cy,r*.87,cx,cy,r*2.0);
+  // Halo -- se apaga del todo (alpha 0) al llegar a haloOuter, nunca
+  // mas alla del canvas que lo contiene.
+  const hOut = haloOuter ?? r*2.0;
+  const gw=ctx.createRadialGradient(cx,cy,r*.87,cx,cy,hOut);
   gw.addColorStop(0,'rgba(210,208,198,.10)'); gw.addColorStop(.5,'rgba(210,208,198,.03)'); gw.addColorStop(1,'rgba(210,208,198,0)');
-  ctx.fillStyle=gw; ctx.beginPath(); ctx.arc(cx,cy,r*2,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle=gw; ctx.beginPath(); ctx.arc(cx,cy,hOut,0,Math.PI*2); ctx.fill();
   return true;
 }
 
@@ -5757,7 +5767,10 @@ window.wbgRenderMoonTo=function(canvasEl){
   const ctx=canvasEl.getContext('2d');
   ctx.clearRect(0,0,w,h);
   const r=Math.min(w,h)*0.42;
-  return _wbgPaintMoon(ctx,w/2,h/2,r,_wbgModalMoonCache);
+  // El halo tiene que apagarse antes de tocar el borde del canvas
+  // (con un pequeño margen), o se ve como un recuadro cuadrado.
+  const haloOuter=Math.min(r*2.0, Math.min(w,h)/2*0.96);
+  return _wbgPaintMoon(ctx,w/2,h/2,r,_wbgModalMoonCache,haloOuter);
 };
 window.wbgMoonImageReady=function(){ return _wbgLunaImg._loaded; };
 
