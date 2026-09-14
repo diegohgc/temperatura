@@ -3909,7 +3909,7 @@ function renderDatos(datos) {
     _ultimoSunsetLocalHora  = _wapiAmPmTo24h(astro.sunset);
   }
   aplicarColorTemp(Math.round(tempActual));
-  if (window.aplicarFondoDinamico) aplicarFondoDinamico(weatherCode, isDay, astroData, currentCoords?.lat ?? 0);
+  if (window.aplicarFondoDinamico) aplicarFondoDinamico(weatherCode, isDay, astroData, currentCoords?.lat ?? 0, tiempo.utc_offset_seconds || 0);
   const max0 = tiempo.daily && tiempo.daily.temperature_2m_max ? tiempo.daily.temperature_2m_max[0] : null;
   const min0 = tiempo.daily && tiempo.daily.temperature_2m_min ? tiempo.daily.temperature_2m_min[0] : null;
   const elMinMax = document.getElementById('tempMinMax');
@@ -6259,7 +6259,7 @@ function wbgLoop(ts){
 wbgRafId=requestAnimationFrame(ts=>{wbgLastTs=ts;wbgLoop(ts);});
 
 /* ── Fase lunar desde WeatherAPI Astronomy ── */
-function wbgSetMoon(astro){
+function wbgSetMoon(astro,utcOffsetSec){
   if(!astro){wbgMoonPhase=0.35;wbgMoonUp=true;return;}
   const nm={
     'New Moon':0,'Waxing Crescent':0.125,'First Quarter':0.25,'Waxing Gibbous':0.375,
@@ -6272,14 +6272,21 @@ function wbgSetMoon(astro){
     const [tm,ap]=s.split(' ');let[h,m]=tm.split(':').map(Number);
     if(ap==='PM'&&h!==12)h+=12;if(ap==='AM'&&h===12)h=0;return h*60+m;
   };
-  const rise=pt(rStr),set=pt(sStr),now=new Date().getHours()*60+new Date().getMinutes();
+  // "now" tiene que ser la hora LOCAL DE LA CIUDAD (misma zona que
+  // moonrise/moonset), no la del dispositivo -- si no, al ver una ciudad
+  // en otra zona horaria la luna aparece/desaparece en el momento
+  // equivocado. Se calcula desplazando el instante actual por el offset
+  // de la ciudad y leyendo los getters UTC (ver tambien _wapiAmPmToDate).
+  const rise=pt(rStr),set=pt(sStr);
+  const cityNow=new Date(Date.now()+(utcOffsetSec||0)*1000);
+  const now=cityNow.getUTCHours()*60+cityNow.getUTCMinutes();
   wbgMoonUp=rise<set?(now>=rise&&now<=set):(now>=rise||now<=set);
 }
 
 /* ── Punto de entrada: llamado desde renderDatos ── */
-window.aplicarFondoDinamico=function(weatherCode,isDay,astroData,lat){
+window.aplicarFondoDinamico=function(weatherCode,isDay,astroData,lat,utcOffsetSec){
   wbgLat=lat??0;
-  wbgSetMoon(astroData?.astronomy?.astro);
+  wbgSetMoon(astroData?.astronomy?.astro,utcOffsetSec);
   const _rainKeys=['drizzle','rain','storm','nightrain'];
   if(weatherCode===null){wbgCondKey=null;wbgCtx.clearRect(0,0,wbgW,wbgH);return;}
   const wc=weatherCode;
