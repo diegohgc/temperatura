@@ -2648,7 +2648,12 @@ function generarArcoSolar() {
   const nightTotal = nextSunrise - anochecerDate;
   let tn = 0;
   if (ahora > anochecerDate) tn = (ahora - anochecerDate) / nightTotal;
-  else if (ahora < amanecerDate) tn = (ahora + (nextSunrise - anochecerDate)) / nightTotal;
+  // Madrugada (antes del amanecer de hoy): esta noche empezo con el
+  // anochecer de AYER, 24h antes del de hoy. Sumar Date + numero aqui
+  // concatenaba texto en vez de sumar ms (daba NaN) -- por eso el sol
+  // no caia sobre la curva real. Se resta en milisegundos, con 24h de
+  // margen para volver a referenciar el anochecer de ayer.
+  else if (ahora < amanecerDate) tn = (ahora.getTime() - anochecerDate.getTime() + 24 * 3600000) / nightTotal;
   tn = Math.max(0, Math.min(1, tn));
   const altNocheActual = Math.min(0, altReal(ahora));
   const nightSunX = x1 + (x0 - x1) * tn;
