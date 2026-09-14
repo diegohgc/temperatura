@@ -494,6 +494,10 @@
           <span class="ajustes-label" id="ajustesAyudaLabel"></span>
           <span>?</span>
         </div>
+        <div class="ajustes-fila ajustes-fila-btn" id="btnValorar">
+          <span class="ajustes-label" id="ajustesValorarLabel"></span>
+          <span>⭐</span>
+        </div>
         <div id="ajustesFavsSeccion" hidden>
           <div class="ajustes-favs-titulo" id="ajustesFavsTitulo"></div>
           <div id="ajustesFavsLista"></div>
@@ -1743,6 +1747,7 @@ document.getElementById('selectIdioma').addEventListener('change', (e) => {
 });
 
 const AYUDA_LABEL = { es:'Ayuda', en:'Help', de:'Hilfe', fr:'Aide', pt:'Ajuda', it:'Aiuto', zh:'帮助', ca:'Ajuda', eu:'Laguntza', gl:'Axuda', ar:'مساعدة', ru:'Помощь', ja:'ヘルプ', ko:'도움말', nl:'Help', pl:'Pomoc', hi:'सहायता', ro:'Ajutor', hu:'Súgó' };
+const VALORAR_LABEL = { es:'Valorar QuickTemp', en:'Rate QuickTemp', de:'QuickTemp bewerten', fr:'Noter QuickTemp', pt:'Avaliar QuickTemp', it:'Valuta QuickTemp', zh:'评价 QuickTemp', ca:'Valorar QuickTemp', eu:'Baloratu QuickTemp', gl:'Valorar QuickTemp', ar:'قيّم QuickTemp', ru:'Оценить QuickTemp', ja:'QuickTempを評価', ko:'QuickTemp 평가하기', nl:'QuickTemp beoordelen', pl:'Oceń QuickTemp', hi:'QuickTemp को रेट करें', ro:'Evaluează QuickTemp', hu:'QuickTemp értékelése' };
 const MAX_LABEL = { es:'Máx', en:'Max', de:'Max', fr:'Max', pt:'Máx', it:'Max', zh:'最高', ca:'Màx', eu:'Geh.', gl:'Máx', ar:'أعلى', ru:'Макс', ja:'最高', ko:'최고', nl:'Max', pl:'Maks', hi:'अधि.', ro:'Max', hu:'Max' };
 const MIN_LABEL = { es:'Mín', en:'Min', de:'Min', fr:'Min', pt:'Mín', it:'Min', zh:'最低', ca:'Mín', eu:'Gutx.', gl:'Mín', ar:'أدنى', ru:'Мин', ja:'最低', ko:'최저', nl:'Min', pl:'Min', hi:'न्यून.', ro:'Min', hu:'Min' };
 const TIP_TARJETAS = { es:'Toca cualquier tarjeta para ver más', en:'Tap any card to see more', de:'Tippe auf eine Kachel für mehr Details', fr:'Touchez une carte pour en savoir plus', pt:'Toque num cartão para ver mais', it:'Tocca una scheda per saperne di più', zh:'点击任意卡片查看更多', ca:'Toca qualsevol targeta per veure més', eu:'Sakatu edozein txartel gehiago ikusteko', gl:'Toca calquera tarxeta para ver máis', ar:'اضغط على أي بطاقة لمزيد من التفاصيل', ru:'Нажмите на карточку, чтобы узнать больше', ja:'カードをタップすると詳細が見られます', ko:'카드를 탭하면 자세히 볼 수 있어요', nl:'Tik op een kaart voor meer info', pl:'Dotknij kartę, aby zobaczyć więcej', hi:'अधिक देखने के लिए किसी भी कार्ड पर टैप करें', ro:'Atinge orice card pentru mai multe detalii', hu:'Koppints egy kártyára a részletekért' };
@@ -1753,6 +1758,7 @@ function actualizarTextosFijos() {
   document.getElementById('ajustesTempLabel').textContent = T.ajustesTemp;
   document.getElementById('ajustesVelLabel').textContent = T.ajustesVel;
   document.getElementById('ajustesAyudaLabel').textContent = AYUDA_LABEL[idioma] || 'Help';
+  document.getElementById('ajustesValorarLabel').textContent = VALORAR_LABEL[idioma] || 'Rate QuickTemp';
   document.getElementById('btnRadar').textContent = T.radar;
   const favsTit = document.getElementById('ajustesFavsTitulo');
   if (favsTit) favsTit.textContent = T.ciudadesGuardadas;
@@ -1889,6 +1895,7 @@ document.getElementById('btnAjustes').textContent = '⚙ ' + (T.ajustes || 'Sett
 document.getElementById('ajustesTempLabel').textContent = T.ajustesTemp || 'Temperature';
 document.getElementById('ajustesVelLabel').textContent = T.ajustesVel || 'Wind speed';
 document.getElementById('ajustesAyudaLabel').textContent = AYUDA_LABEL[idioma] || 'Help';
+document.getElementById('ajustesValorarLabel').textContent = VALORAR_LABEL[idioma] || 'Rate QuickTemp';
 document.getElementById('ajustesFavsTitulo').textContent = T.ciudadesGuardadas || 'Saved cities';
 
 let ubicacionManual = null;
@@ -5548,6 +5555,15 @@ function abrirEnGoogleMaps() {
     e.stopPropagation();
     document.getElementById('ajustesPanel').hidden = true;
     renderAyuda(); modal.classList.add('open');
+  });
+
+  // Botón pasivo "Valorar QuickTemp": solo abre la ficha de Play Store.
+  // No hay ningún filtro ni pregunta previa -- el usuario decide por su
+  // cuenta si quiere entrar, sin que la app le empuje en ningún sentido.
+  document.getElementById('btnValorar').addEventListener('click', (e) => {
+    e.stopPropagation();
+    document.getElementById('ajustesPanel').hidden = true;
+    window.location.href = 'https://play.google.com/store/apps/details?id=com.diegohg.quicktemp';
   });
 
   function cerrarAyuda() { modal.classList.remove('open'); }
