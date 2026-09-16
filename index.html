@@ -4060,7 +4060,12 @@ function renderDatos(datos) {
       else weatherCode = 48;
     }
     else if ([1063,1150,1153,1180,1183].includes(wapiCode)) weatherCode = llueveDeVerdad ? 51 : 2;
-    else if ([1186,1189,1192,1195,1240,1243].includes(wapiCode)) weatherCode = llueveDeVerdad ? 61 : 2;
+    // Lluvia moderada/fuerte: antes se agrupaban todos estos codigos de
+    // WeatherAPI en "Lluvia ligera" (61) sin mirar la intensidad real,
+    // por lo que un aguacero fuerte se mostraba igual que una llovizna.
+    else if (wapiCode === 1240) weatherCode = llueveDeVerdad ? 61 : 2; // light rain shower
+    else if ([1186,1189].includes(wapiCode)) weatherCode = llueveDeVerdad ? 63 : 2; // moderate rain
+    else if ([1192,1195,1243,1246].includes(wapiCode)) weatherCode = llueveDeVerdad ? 65 : 2; // heavy/torrential rain
     else if ([1066,1210,1213,1216,1219,1255].includes(wapiCode)) weatherCode = 71;
     else if ([1087,1273,1276,1279,1282].includes(wapiCode)) weatherCode = 95;
     else weatherCode = 2; // código WAPI no mapeado → nublado por defecto
