@@ -5954,6 +5954,10 @@ if (!wbgCanvas) return;
 const wbgCtx = wbgCanvas.getContext('2d');
 let wbgW=0, wbgH=0, wbgLastTs=0, wbgRafId=null;
 let wbgCondKey=null, wbgMoonPhase=0.35, wbgMoonUp=true, wbgLat=0;
+// Intensidad de lluvia/llovizna para el fondo animado: 1=ligera, 2=moderada,
+// 3=fuerte. Antes el fondo usaba siempre el mismo numero de gotas para
+// cualquier intensidad (solo escalaba en tormenta electrica de verdad).
+let wbgIntensidad=2, wbgIntensidadPrev=null;
 
 function wbgResize(){
   wbgW=window.innerWidth; wbgH=window.innerHeight;
@@ -6295,10 +6299,12 @@ function wbgInit(key){
         {x:wbgW*.48,y:wbgH*.44,sc:0.22*sc,alpha:0.48,speed:0.26,flip:false,tex:1},
         {x:wbgW*.88,y:wbgH*.46,sc:0.20*sc,alpha:0.44,speed:0.18,flip:true, tex:0},
       ]; break;
-    case 'rain':
+    case 'rain':{
       wbgClouds=_wbgNubesDensas(sc,'rgba(35,40,50,1)',0.35,0.85);
-      wbgStreaks=Array.from({length:150},()=>({x:Math.random()*wbgW,y:Math.random()*wbgH,spd:5+Math.random()*7,len:14+Math.random()*20,op:0.10+Math.random()*.18}));
+      const _rCount=[0,90,150,220][wbgIntensidad]||150, _rSpd=[0,4,5,6.5][wbgIntensidad]||5, _rSpdVar=[0,4,7,10][wbgIntensidad]||7;
+      wbgStreaks=Array.from({length:_rCount},()=>({x:Math.random()*wbgW,y:Math.random()*wbgH,spd:_rSpd+Math.random()*_rSpdVar,len:14+Math.random()*20,op:0.10+Math.random()*.18}));
       break;
+    }
     case 'storm':
     case 'nightstorm':
       // Tormenta: todavia mas nubes que en lluvia, cielo completamente cubierto
@@ -6311,10 +6317,12 @@ function wbgInit(key){
       wbgHeavyS=Array.from({length:160},()=>({x:Math.random()*wbgW,y:Math.random()*wbgH,spd:8+Math.random()*10,len:20+Math.random()*30,op:0.10+Math.random()*.20}));
       wbgLightT=2+Math.random()*4; wbgLightA=0;
       break;
-    case 'drizzle':
+    case 'drizzle':{
       wbgClouds=_wbgNubesDensas(sc,'rgba(45,52,62,1)',0.3,0.85);
-      wbgDrizzle=Array.from({length:100},()=>({x:Math.random()*wbgW,y:Math.random()*wbgH,spd:2.2+Math.random()*2.8,len:7+Math.random()*11,op:0.09+Math.random()*.14}));
+      const _dCount=[0,60,100,140][wbgIntensidad]||100;
+      wbgDrizzle=Array.from({length:_dCount},()=>({x:Math.random()*wbgW,y:Math.random()*wbgH,spd:2.2+Math.random()*2.8,len:7+Math.random()*11,op:0.09+Math.random()*.14}));
       break;
+    }
     case 'snow':
       wbgClouds=_wbgNubesDensas(sc,'rgba(210,225,240,1)',0.2,0.7);
       wbgFlakes=Array.from({length:60},()=>({
@@ -6347,9 +6355,11 @@ function wbgInit(key){
         {x:wbgW*.35,y:wbgH*.34,sc:0.40*sc,alpha:0.11,tint:'rgba(40,60,90,1)',speed:0.14,flip:false,tex:0},
         {x:wbgW*.80,y:wbgH*.10,sc:0.40*sc,alpha:0.10,tint:'rgba(36,56,84,1)',speed:0.10,flip:true,tex:1},
       ]; break;
-    case 'nightrain':
-      wbgNightR=Array.from({length:110},()=>({x:Math.random()*wbgW,y:Math.random()*wbgH,spd:5+Math.random()*7,len:14+Math.random()*20,op:0.06+Math.random()*.11}));
+    case 'nightrain':{
+      const _nrCount=[0,65,110,165][wbgIntensidad]||110, _nrSpd=[0,4,5,6.5][wbgIntensidad]||5, _nrSpdVar=[0,4,7,10][wbgIntensidad]||7;
+      wbgNightR=Array.from({length:_nrCount},()=>({x:Math.random()*wbgW,y:Math.random()*wbgH,spd:_nrSpd+Math.random()*_nrSpdVar,len:14+Math.random()*20,op:0.06+Math.random()*.11}));
       break;
+    }
     case 'fog':
       wbgFogB=Array.from({length:7},()=>({
         x:Math.random()*wbgW*1.4-wbgW*.2,y:Math.random()*wbgH,
@@ -6464,7 +6474,7 @@ function wbgDraw(key,dt){
       break;
     }
     case 'cloudy':{
-      c.fillStyle=wbgGrad([[0,'#5c6878'],[.5,'#6d7a8c'],[1,'#7d8ba0']]);c.fillRect(0,0,wbgW,wbgH);
+      c.fillStyle=wbgGrad([[0,'#8994a3'],[.5,'#9aa5b4'],[1,'#b3bdc9']]);c.fillRect(0,0,wbgW,wbgH);
       _wbgNubesDifusas('rgba(150,158,165,0.9)',0.24,sc);
       wbgClouds.forEach(cl=>{_wbgAvanzarNube(cl,dt);wbgCloud(cl.x,cl.y,cl.sc,cl.alpha,cl.flip,null,null,cl.tex);});
       break;
@@ -6687,7 +6697,10 @@ window.aplicarFondoDinamico=function(weatherCode,isDay,astroData,lat,utcOffsetSe
   else if((wc>=61&&wc<=69)||(wc>=80&&wc<=82))      key=isDay?'rain':'nightrain';
   else if(wc>=95)                                   key=isDay?'storm':'nightstorm';
   else                                              key=isDay?'partial':'nightcloud';
-  if(key!==wbgCondKey){wbgCondKey=key;wbgInit(key);}
+  // Intensidad de lluvia/llovizna para escalar el fondo (ver wbgIntensidad):
+  // codigos WMO ...1/80 = ligera, ...5/82 = fuerte, el resto = moderada.
+  wbgIntensidad = ([51,61,80].includes(wc)) ? 1 : ([55,65,82].includes(wc)) ? 3 : 2;
+  if(key!==wbgCondKey || wbgIntensidad!==wbgIntensidadPrev){wbgCondKey=key;wbgIntensidadPrev=wbgIntensidad;wbgInit(key);}
   const _bright = key==='sun'||key==='mayormente'||key==='partial'||key==='cloudy'||key==='snow';
   document.body.classList.toggle('wbg-bright', _bright);
 };
