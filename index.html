@@ -6713,11 +6713,19 @@ wbgRafId=requestAnimationFrame(ts=>{wbgLastTs=ts;wbgLoop(ts);});
 /* ── Fase lunar desde WeatherAPI Astronomy ── */
 function wbgSetMoon(astro,utcOffsetSec){
   if(!astro){wbgMoonPhase=0.35;wbgMoonUp=true;return;}
-  const nm={
-    'New Moon':0,'Waxing Crescent':0.125,'First Quarter':0.25,'Waxing Gibbous':0.375,
-    'Full Moon':0.5,'Waning Gibbous':0.625,'Last Quarter':0.75,'Waning Crescent':0.875
-  };
-  wbgMoonPhase=nm[astro.moon_phase]??0.35;
+  // Fase continua a partir del % de iluminacion real (astro.moon_illumination),
+  // no de la categoria fija (New/Waxing Crescent/...) -- esa categoria solo
+  // tiene 8 valores posibles y hacia que un 8% y un 45% de luna creciente se
+  // dibujaran identicos. illum=(1-cos(phase*2pi))/2 -> phase=acos(1-2*illum)/2pi
+  // en el tramo creciente (0..0.5); en menguante se refleja (1-eso).
+  const cat=astro.moon_phase||'';
+  const pctRaw=Number(astro.moon_illumination);
+  const pct=isFinite(pctRaw)?Math.max(0,Math.min(100,pctRaw))/100:0.5;
+  const waning=/waning|last quarter/i.test(cat);
+  const half=Math.acos(Math.max(-1,Math.min(1,1-2*pct)))/(2*Math.PI);
+  wbgMoonPhase = /new moon/i.test(cat) ? 0
+    : /full moon/i.test(cat) ? 0.5
+    : waning ? (1-half) : half;
   const rStr=astro.moonrise,sStr=astro.moonset;
   if(!rStr||/no/i.test(rStr)||!sStr||/no/i.test(sStr)){wbgMoonUp=true;return;}
   const pt=s=>{
