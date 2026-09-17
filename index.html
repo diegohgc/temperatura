@@ -2148,19 +2148,33 @@ const inputCiudad = document.getElementById('inputCiudad');
 const elResultadosCiudad = document.getElementById('resultadosCiudad');
 const btnUsarGps = document.getElementById('btnUsarGps');
 
-inputCiudad.placeholder = T.buscarPlaceholder;
-btnUsarGps.textContent = T.usarGps;
-btn.textContent = T.actualizar;
-document.getElementById('textoCambiarCiudad').textContent = T.cambiarCiudad;
-document.getElementById('btnAjustes').textContent = '⚙ ' + (T.ajustes || 'Settings');
-document.getElementById('ajustesTempLabel').textContent = T.ajustesTemp || 'Temperature';
-document.getElementById('ajustesVelLabel').textContent = T.ajustesVel || 'Wind speed';
-document.getElementById('ajustesAyudaLabel').textContent = AYUDA_LABEL[idioma] || 'Help';
-if (_mostrarBtnValorar) {
-  document.getElementById('ajustesValorarLabel').textContent = VALORAR_LABEL[idioma] || 'Rate QuickTemp';
-  document.getElementById('btnValorar').hidden = false;
+// Igual que con actualizarAjustes() mas abajo: estas asignaciones
+// corren nada mas definirse las constantes de arriba, antes de que
+// el resto del HTML (mas abajo en el documento) exista siempre de
+// forma garantizada en el DOM segun el dispositivo/velocidad de
+// parseo -- se envuelve en DOMContentLoaded por seguridad para que
+// el placeholder del buscador y demas textos no se queden en
+// español en idiomas distintos de es.
+function inicializarTextosDeArranque() {
+  inputCiudad.placeholder = T.buscarPlaceholder;
+  btnUsarGps.textContent = T.usarGps;
+  btn.textContent = T.actualizar;
+  document.getElementById('textoCambiarCiudad').textContent = T.cambiarCiudad;
+  document.getElementById('btnAjustes').textContent = '⚙ ' + (T.ajustes || 'Settings');
+  document.getElementById('ajustesTempLabel').textContent = T.ajustesTemp || 'Temperature';
+  document.getElementById('ajustesVelLabel').textContent = T.ajustesVel || 'Wind speed';
+  document.getElementById('ajustesAyudaLabel').textContent = AYUDA_LABEL[idioma] || 'Help';
+  if (_mostrarBtnValorar) {
+    document.getElementById('ajustesValorarLabel').textContent = VALORAR_LABEL[idioma] || 'Rate QuickTemp';
+    document.getElementById('btnValorar').hidden = false;
+  }
+  document.getElementById('ajustesFavsTitulo').textContent = T.ciudadesGuardadas || 'Saved cities';
 }
-document.getElementById('ajustesFavsTitulo').textContent = T.ciudadesGuardadas || 'Saved cities';
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', inicializarTextosDeArranque);
+} else {
+  inicializarTextosDeArranque();
+}
 
 let ubicacionManual = null;
 let currentCoords = null;
