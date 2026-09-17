@@ -154,6 +154,8 @@
   .ciudad { font-size: 1.65rem; font-weight: 700; line-height: 1.15; display: flex; flex-direction: column; }
   #ciudadSub { font-size: 0.95rem; font-weight: 400; opacity: 0.7; margin-top: 1px; }
   .ciudad #altitud { font-size: 0.8rem; font-weight: 400; opacity: 0.7; margin-top: 2px; cursor: pointer; touch-action: manipulation; }
+  #horaLocal { font-size: 0.8rem; font-weight: 400; opacity: 0.7; margin-top: 2px; }
+  #horaLocal:empty { display: none; }
   .top-info {
     text-align: right; font-size: 0.8rem; opacity: 0.85;
     line-height: 1.8; white-space: nowrap;
@@ -516,6 +518,7 @@
       <div class="ciudad" id="ciudad" style="cursor:pointer;touch-action:manipulation" onclick="abrirMapaAltitud()">
         <div class="ciudad-nombre-fila"><span id="ciudadNombre">—</span><button class="btn-fav" id="btnFavorito" aria-label="Guardar favorito" hidden>☆</button></div>
         <span id="ciudadSub"></span>
+        <div id="horaLocal"></div>
         <div id="altitud" onclick="event.stopPropagation();abrirMapaAltitud()"></div>
       </div>
       <div class="top-info">
@@ -2137,6 +2140,22 @@ const elViento = document.getElementById('viento');
 const elHumedad = document.getElementById('humedad');
 const elEstado = document.getElementById('estado');
 const elAltitud = document.getElementById('altitud');
+const elHoraLocal = document.getElementById('horaLocal');
+let _ultimoUtcOffsetSec = null;
+// Hora local de la ciudad consultada, solo cuando difiere de la hora del
+// propio dispositivo (misma referencia horaria que usa el usuario via
+// GPS/reloj del sistema) -- si coincide con su zona no aporta nada y no
+// se muestra.
+function pintarHoraLocal() {
+  if (_ultimoUtcOffsetSec === null) { elHoraLocal.textContent = ''; return; }
+  const deviceOffsetSec = -new Date().getTimezoneOffset() * 60;
+  if (Math.abs(_ultimoUtcOffsetSec - deviceOffsetSec) < 60) { elHoraLocal.textContent = ''; return; }
+  const cityNow = new Date(Date.now() + (_ultimoUtcOffsetSec - deviceOffsetSec) * 1000);
+  const hh = String(cityNow.getHours()).padStart(2, '0');
+  const mm = String(cityNow.getMinutes()).padStart(2, '0');
+  elHoraLocal.textContent = `🕒 ${hh}:${mm}`;
+}
+setInterval(pintarHoraLocal, 30000);
 const elIcono = document.getElementById('icono');
 const elHoras = document.getElementById('horas');
 const elDias = document.getElementById('dias');
@@ -4261,6 +4280,8 @@ function renderDatos(datos) {
   const alt = elevacion && elevacion.elevation && elevacion.elevation[0];
   const altTxt = alt !== null && alt !== undefined ? (usaMph ? `${Math.round(alt * 3.28084)} ft` : `${Math.round(alt)} m`) : '';
   elAltitud.textContent = altTxt;
+  _ultimoUtcOffsetSec = tiempo.utc_offset_seconds ?? null;
+  pintarHoraLocal();
   animarSwipeEntrada();
 }
 
