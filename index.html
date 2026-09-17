@@ -3005,9 +3005,41 @@ function iconoConProb(code, prob, esDia = true) {
 }
 
 let _ultimoDaily = null;
+let _ultimoHourly = null;
 
-function renderDias(daily) {
+// El "codigo del dia" que da Open-Meteo (daily.weather_code) es el
+// fenomeno mas significativo de las 24h segun su propia escala, y la
+// niebla tiene prioridad alta ahi aunque solo dure de madrugada -- por
+// eso un dia con niebla a las 6-7h y sol el resto aparecia como
+// "Niebla" todo el dia. Para el icono/descripcion del dia se usa en su
+// lugar el codigo mas severo dentro de la franja horaria "activa"
+// (10h-19h), que es la que de verdad importa para planificar el dia.
+function codigoDiurnoDia(daily, hourly, i) {
+  const fallback = daily.weather_code[i];
+  if (!hourly || !hourly.time || !hourly.weather_code) return fallback;
+  const fecha = daily.time[i];
+  const rango = (c) => {
+    if (c >= 95) return 5;
+    if ((c >= 61 && c <= 82) || (c >= 85 && c <= 86)) return 4;
+    if (c >= 51 && c <= 57) return 3;
+    if (c === 45 || c === 48) return 2;
+    return 1;
+  };
+  let mejor = null, mejorRango = -1;
+  hourly.time.forEach((t, hi) => {
+    if (!t.startsWith(fecha)) return;
+    const hora = parseInt(t.slice(11, 13), 10);
+    if (hora < 10 || hora > 19) return;
+    const c = hourly.weather_code[hi];
+    const r = rango(c);
+    if (r > mejorRango) { mejorRango = r; mejor = c; }
+  });
+  return mejor !== null ? mejor : fallback;
+}
+
+function renderDias(daily, hourly) {
   _ultimoDaily = daily;
+  _ultimoHourly = hourly || null;
   elDias.innerHTML = '';
   if (!daily || !daily.time) return;
   const hoy = new Date().toDateString();
@@ -3017,12 +3049,13 @@ function renderDias(daily) {
     const nombreDia = esHoy ? T.hoy : d.toLocaleDateString(T.locale, { weekday: 'short' }).replace('.', '');
     const max = daily.temperature_2m_max[i];
     const min = daily.temperature_2m_min[i];
+    const codigoDia = codigoDiurnoDia(daily, hourly, i);
     const div = document.createElement('div');
     div.className = 'dia';
     div.dataset.index = i;
     div.innerHTML = `
       <div class="d">${nombreDia}</div>
-      <div class="icono-dia">${iconoConProb(daily.weather_code[i], daily.precipitation_probability_max ? (daily.precipitation_probability_max[i] ?? 0) : 0, true)}</div>
+      <div class="icono-dia">${iconoConProb(codigoDia, daily.precipitation_probability_max ? (daily.precipitation_probability_max[i] ?? 0) : 0, true)}</div>
       <div class="max">${toTemp(max)}</div>
       <div class="min">${toTemp(min)}</div>
       <div class="dia-lluvia">${daily.precipitation_probability_max ? (daily.precipitation_probability_max[i] ?? 0) : 0}%</div>
@@ -3043,7 +3076,7 @@ function abrirModalDia(i) {
   const nombreDia = esHoy ? T.hoy : d.toLocaleDateString(T.locale, { weekday: 'long' });
   const fechaStr = d.toLocaleDateString(T.locale, { day: 'numeric', month: 'long' });
   document.getElementById('diaNombreFecha').textContent = `${nombreDia} · ${fechaStr}`;
-  let code = daily.weather_code[i];
+  let code = codigoDiurnoDia(daily, _ultimoHourly, i);
   const prob = daily.precipitation_probability_max ? (daily.precipitation_probability_max[i] ?? 0) : 0;
   // Para hoy usar el código ya validado (con observaciones reales) de la pantalla principal
   if (esHoy && ultimosDatos && ultimosDatos.weatherCodeValidado != null) {
@@ -4159,7 +4192,7 @@ function renderDatos(datos) {
   if (wapiData?.forecast?.forecastday) renderHorasWAPI(wapiData);
   else elHoras.innerHTML = '';
   renderSol(tiempo.daily, astroData);
-  renderDias(tiempo.daily);
+  renderDias(tiempo.daily, tiempo.hourly);
   const tieneMarea = renderMarea(mdata);
   renderPanelInterior(c.uv_index, aireData, tiempo.daily && tiempo.daily.sunset ? tiempo.daily.sunset[0] : null, tieneMarea, tiempo.utc_offset_seconds, tiempo.daily && tiempo.daily.sunrise ? tiempo.daily.sunrise[0] : null, c.is_day === 1);
   // Override sunrise/sunset con WeatherAPI Astronomy (hora local exacta de la ubicación)
