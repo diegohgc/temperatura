@@ -99,6 +99,15 @@
   #ayudaModal.open { display: flex; }
   .ayuda-box { background: var(--card-bg,#1e2330); border-radius: 20px; padding: 24px 20px 20px; width: 88vw; max-width: 360px; max-height: 85vh; overflow-y: auto; position: relative; box-shadow: 0 8px 40px rgba(0,0,0,0.5); }
   #ayudaModal { align-items: flex-start; padding-top: max(5vh, 20px); }
+  #feedbackModal { display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); align-items: flex-start; justify-content: center; padding-top: max(5vh, 20px); }
+  #feedbackModal.open { display: flex; }
+  .feedback-input { display: block; width: 100%; box-sizing: border-box; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; padding: 10px 12px; color: inherit; font-size: 0.9rem; font-family: inherit; margin-bottom: 10px; }
+  .feedback-input::placeholder { color: inherit; opacity: 0.5; }
+  .feedback-textarea { resize: vertical; min-height: 90px; }
+  .feedback-error { font-size: 0.78rem; color: #ff8a8a; margin: -2px 0 10px; }
+  .feedback-enviar { width: 100%; border: none; border-radius: 12px; padding: 12px; font-size: 0.95rem; font-weight: 700; background: #ffffff; color: #1e2330; cursor: pointer; }
+  .feedback-enviar:disabled { opacity: 0.6; cursor: default; }
+  .feedback-gracias { text-align: center; font-size: 1rem; font-weight: 700; padding: 30px 10px; }
   .ayuda-close { position: absolute; top: 12px; right: 14px; background: rgba(255,255,255,0.1); border: none; color: inherit; border-radius: 50%; width: 28px; height: 28px; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
   .ayuda-titulo { font-size: 1.1rem; font-weight: 800; margin-bottom: 4px; }
   .ayuda-sub { font-size: 0.8rem; opacity: 0.6; margin-bottom: 16px; }
@@ -119,12 +128,7 @@
   .ajustes-toggle button { background: none; border: none; color: #ffffff; font-size: 0.78rem; font-weight: 600; padding: 4px 9px; cursor: pointer; opacity: 0.55; transition: opacity 0.15s, background 0.15s; }
   .ajustes-toggle button.activo { background: rgba(255,255,255,0.25); opacity: 1; }
   .ajustes-select { background: rgba(255,255,255,0.12); border: none; border-radius: 6px; color: #ffffff; font-size: 0.78rem; font-weight: 600; padding: 4px 8px; cursor: pointer; outline: none; }
-  .ajustes-favs-titulo { font-size: 0.7rem; opacity: 0.55; text-transform: uppercase; letter-spacing: 0.06em; color: #ffffff; margin: 8px 0 4px; }
-  .ajustes-fav-item { display: flex; align-items: center; justify-content: space-between; padding: 5px 8px; border-radius: 7px; background: rgba(255,255,255,0.08); margin-bottom: 4px; cursor: pointer; transition: background 0.15s; }
-  .ajustes-fav-item:hover { background: rgba(255,255,255,0.18); }
-  .ajustes-fav-nombre { font-size: 0.82rem; color: #ffffff; }
-  .ajustes-fav-remove { background: none; border: none; color: #ffffff; opacity: 0.4; cursor: pointer; font-size: 0.85rem; padding: 0 0 0 8px; line-height: 1; }
-  .ajustes-fav-remove:hover { opacity: 0.9; }
+  .ajustes-separador { height: 1px; background: rgba(255,255,255,0.12); margin: 6px 0; }
   .fav-titulo { font-size: 0.7rem; opacity: 0.65; text-transform: uppercase; letter-spacing: 0.06em; margin: 10px 0 5px; }
   .fav-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; border-radius: 10px; background: rgba(255,255,255,0.1); margin-bottom: 5px; cursor: pointer; }
   .fav-item:hover { background: rgba(255,255,255,0.18); }
@@ -493,17 +497,18 @@
           <span class="ajustes-label" id="ajustesIdiomaLabel"></span>
           <select id="selectIdioma" class="ajustes-select"></select>
         </div>
+        <div class="ajustes-separador"></div>
         <div class="ajustes-fila ajustes-fila-btn" id="btnAyuda">
           <span class="ajustes-label" id="ajustesAyudaLabel"></span>
-          <span>?</span>
+          <span>📖</span>
         </div>
-        <div class="ajustes-fila ajustes-fila-btn" id="btnValorar" hidden>
+        <div class="ajustes-fila ajustes-fila-btn" id="btnEscribenos">
+          <span class="ajustes-label" id="ayudanosEscribenosLabel"></span>
+          <span>✉️</span>
+        </div>
+        <div class="ajustes-fila ajustes-fila-btn" id="btnValorar">
           <span class="ajustes-label" id="ajustesValorarLabel"></span>
           <span>⭐</span>
-        </div>
-        <div id="ajustesFavsSeccion" hidden>
-          <div class="ajustes-favs-titulo" id="ajustesFavsTitulo"></div>
-          <div id="ajustesFavsLista"></div>
         </div>
       </div>
     </div>
@@ -611,6 +616,21 @@
         <div class="ayuda-sub" id="ayudaSub"></div>
         <div class="ayuda-lista" id="ayudaLista"></div>
         <div class="ayuda-footer" id="ayudaFooter"></div>
+      </div>
+    </div>
+    <!-- Modal feedback ("Escríbenos") -->
+    <div id="feedbackModal">
+      <div class="ayuda-box">
+        <button class="ayuda-close" id="feedbackClose">✕</button>
+        <div class="ayuda-titulo" id="feedbackTitulo"></div>
+        <form id="feedbackForm">
+          <input type="text" id="feedbackNombre" class="feedback-input" required>
+          <input type="email" id="feedbackEmail" class="feedback-input">
+          <textarea id="feedbackMensaje" class="feedback-input feedback-textarea" required></textarea>
+          <div class="feedback-error" id="feedbackErrorMsg" hidden></div>
+          <button type="submit" class="feedback-enviar" id="feedbackEnviar"></button>
+        </form>
+        <div class="feedback-gracias" id="feedbackGracias" hidden></div>
       </div>
     </div>
     <div class="bottom-row">
@@ -820,7 +840,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'No se pudo obtener tu ubicación.',
     errorTemperatura: 'No se pudo obtener la temperatura.',
     actualizado: 'Actualizado',
-    ajustes: 'Ajustes', idioma: 'Idioma', radar: '🌧 Radar de lluvia', probLluvia: 'Probabilidad de lluvia próxima hora', ajustesTemp: 'Temperatura', ajustesVel: 'Velocidad', diaViento: 'Velocidad del viento', diaPrecip: 'Precipitaciones', diaProbLluvia: 'Probabilidad de lluvia', ciudadesGuardadas: 'Ciudades guardadas', mediaHistorica: 'media histórica', prediccion: 'predicción', horaLocal: 'Hora local', altitudTxt: '{v} de altura',
+    ajustes: 'Ajustes', idioma: 'Idioma', radar: '🌧 Radar de lluvia', probLluvia: 'Probabilidad de lluvia próxima hora', ajustesTemp: 'Temperatura', ajustesVel: 'Velocidad', diaViento: 'Velocidad del viento', diaPrecip: 'Precipitaciones', diaProbLluvia: 'Probabilidad de lluvia', ciudadesGuardadas: 'Ciudades guardadas', mediaHistorica: 'media histórica', prediccion: 'predicción', horaLocal: 'Hora local', altitudTxt: '{v} de altura', ayudanosTitulo: 'Ayúdanos', ayudanosTexto: '¿Crees que podemos mejorar? {escribenos} Si te gusta la app, {valoracion}', ayudanosEscribenos: 'Contacto y sugerencias', ayudanosValoracion: 'danos una valoración en Google Play.', feedbackTitulo: 'Escríbenos', feedbackNombre: 'Tu nombre', feedbackEmail: 'Tu email (opcional)', feedbackMensaje: 'Cuéntanos qué podemos mejorar...', feedbackEnviar: 'Enviar', feedbackEnviando: 'Enviando...', feedbackGracias: '¡Gracias por tu ayuda! :)', feedbackError: 'No se pudo enviar. Inténtalo de nuevo.',
     bienvenidaSub: 'Permite el acceso a tu ubicación', bienvenidaBody: 'Para ofrecerte el tiempo y la temperatura exacta en el lugar donde te encuentras.\n\n🔒 Tu ubicación solo se usa en tiempo real para consultar el clima. Nunca la guardamos ni la compartimos con nadie.', bienvenidaBtn: 'Permitir ubicación', bienvenidaLink: 'Prefiero buscar mi ciudad →', denegadoTit: 'Sin ubicación', denegadoBody: 'No podemos detectar tu posición automáticamente, pero puedes usar la app igualmente buscando tu ciudad.', denegadoBtn: '🔍 Buscar mi ciudad', denegadoAjustesBtn: 'Ir a Ajustes del sistema', denegadoInstr: 'Ajustes → Aplicaciones → QuickTemp → Permisos → Ubicación → Activar',
     cambiarCiudad: 'Cambiar ciudad',
     tuUbicacion: 'Tu ubicación',
@@ -862,7 +882,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'No se pudo obtener tu ubicación.',
     errorTemperatura: 'No se pudo obtener la temperatura.',
     actualizado: 'Actualizado',
-    ajustes: 'Configuración', idioma: 'Idioma', radar: '🌧 Radar de lluvia', probLluvia: 'Probabilidad de lluvia próxima hora', ajustesTemp: 'Temperatura', ajustesVel: 'Velocidad', diaViento: 'Velocidad del viento', diaPrecip: 'Precipitaciones', diaProbLluvia: 'Probabilidad de lluvia', ciudadesGuardadas: 'Ciudades guardadas', mediaHistorica: 'media histórica', prediccion: 'predicción', horaLocal: 'Hora local', altitudTxt: '{v} de altura',
+    ajustes: 'Configuración', idioma: 'Idioma', radar: '🌧 Radar de lluvia', probLluvia: 'Probabilidad de lluvia próxima hora', ajustesTemp: 'Temperatura', ajustesVel: 'Velocidad', diaViento: 'Velocidad del viento', diaPrecip: 'Precipitaciones', diaProbLluvia: 'Probabilidad de lluvia', ciudadesGuardadas: 'Ciudades guardadas', mediaHistorica: 'media histórica', prediccion: 'predicción', horaLocal: 'Hora local', altitudTxt: '{v} de altura', ayudanosTitulo: 'Ayúdanos', ayudanosTexto: '¿Crees que podemos mejorar? {escribenos} Si te gusta la app, {valoracion}', ayudanosEscribenos: 'Contacto y sugerencias', ayudanosValoracion: 'danos una valoración en Google Play.', feedbackTitulo: 'Escríbenos', feedbackNombre: 'Tu nombre', feedbackEmail: 'Tu email (opcional)', feedbackMensaje: 'Cuéntanos qué podemos mejorar...', feedbackEnviar: 'Enviar', feedbackEnviando: 'Enviando...', feedbackGracias: '¡Gracias por tu ayuda! :)', feedbackError: 'No se pudo enviar. Inténtalo de nuevo.',
     bienvenidaSub: 'Permite el acceso a tu ubicación', bienvenidaBody: 'Para ofrecerte el tiempo y la temperatura exacta en el lugar donde te encuentras.\n\n🔒 Tu ubicación solo se usa en tiempo real para consultar el clima. Nunca la guardamos ni la compartimos con nadie.', bienvenidaBtn: 'Permitir ubicación', bienvenidaLink: 'Prefiero buscar mi ciudad →', denegadoTit: 'Sin ubicación', denegadoBody: 'No podemos detectar tu posición automáticamente, pero puedes usar la app igualmente buscando tu ciudad.', denegadoBtn: '🔍 Buscar mi ciudad', denegadoAjustesBtn: 'Ir a Configuración del sistema', denegadoInstr: 'Configuración → Aplicaciones → QuickTemp → Permisos → Ubicación → Activar',
     cambiarCiudad: 'Cambiar ciudad',
     tuUbicacion: 'Tu ubicación',
@@ -904,7 +924,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Could not get your location.',
     errorTemperatura: 'Could not get the temperature.',
     actualizado: 'Updated',
-    ajustes: 'Settings', idioma: 'Language', radar: '🌧 Rain radar', probLluvia: 'Rain probability next hour', ajustesTemp: 'Temperature', ajustesVel: 'Wind speed', diaViento: 'Wind speed', diaPrecip: 'Precipitation', diaProbLluvia: 'Rain probability', ciudadesGuardadas: 'Saved cities', mediaHistorica: 'historical avg', prediccion: 'forecast', horaLocal: 'Local time', altitudTxt: '{v} elevation',
+    ajustes: 'Settings', idioma: 'Language', radar: '🌧 Rain radar', probLluvia: 'Rain probability next hour', ajustesTemp: 'Temperature', ajustesVel: 'Wind speed', diaViento: 'Wind speed', diaPrecip: 'Precipitation', diaProbLluvia: 'Rain probability', ciudadesGuardadas: 'Saved cities', mediaHistorica: 'historical avg', prediccion: 'forecast', horaLocal: 'Local time', altitudTxt: '{v} elevation', ayudanosTitulo: 'Help us', ayudanosTexto: 'Think we can improve? {escribenos} If you like the app, {valoracion}', ayudanosEscribenos: 'Contact & suggestions', ayudanosValoracion: 'rate us on Google Play.', feedbackTitulo: 'Write to us', feedbackNombre: 'Your name', feedbackEmail: 'Your email (optional)', feedbackMensaje: 'Tell us what we can improve...', feedbackEnviar: 'Send', feedbackEnviando: 'Sending...', feedbackGracias: 'Thanks for your help! :)', feedbackError: 'Couldn\'t send it. Please try again.',
     bienvenidaSub: 'Allow access to your location', bienvenidaBody: 'To give you the exact weather and temperature at your current location.\n\n🔒 Your location is only used in real time to check the weather. We never store or share it with anyone.', bienvenidaBtn: 'Allow location', bienvenidaLink: 'I prefer to search for my city →', denegadoTit: 'No location', denegadoBody: 'We cannot detect your position automatically, but you can still use the app by searching for your city.', denegadoBtn: '🔍 Search my city', denegadoAjustesBtn: 'Go to System Settings', denegadoInstr: 'Settings → Apps → QuickTemp → Permissions → Location → Enable',
     cambiarCiudad: 'Change city',
     tuUbicacion: 'Your location',
@@ -946,7 +966,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Standort konnte nicht ermittelt werden.',
     errorTemperatura: 'Temperatur konnte nicht abgerufen werden.',
     actualizado: 'Aktualisiert',
-    ajustes: 'Einstellungen', idioma: 'Sprache', radar: '🌧 Regenradar', probLluvia: 'Regenwahrscheinlichkeit nächste Stunde', ajustesTemp: 'Temperatur', ajustesVel: 'Windgeschwindigkeit', diaViento: 'Windgeschwindigkeit', diaPrecip: 'Niederschlag', diaProbLluvia: 'Regenwahrscheinlichkeit', ciudadesGuardadas: 'Gespeicherte Städte', mediaHistorica: 'hist. Durchschnitt', prediccion: 'Prognose', horaLocal: 'Ortszeit', altitudTxt: '{v} Höhe',
+    ajustes: 'Einstellungen', idioma: 'Sprache', radar: '🌧 Regenradar', probLluvia: 'Regenwahrscheinlichkeit nächste Stunde', ajustesTemp: 'Temperatur', ajustesVel: 'Windgeschwindigkeit', diaViento: 'Windgeschwindigkeit', diaPrecip: 'Niederschlag', diaProbLluvia: 'Regenwahrscheinlichkeit', ciudadesGuardadas: 'Gespeicherte Städte', mediaHistorica: 'hist. Durchschnitt', prediccion: 'Prognose', horaLocal: 'Ortszeit', altitudTxt: '{v} Höhe', ayudanosTitulo: 'Hilf uns', ayudanosTexto: 'Meinst du, wir können uns verbessern? {escribenos} Wenn dir die App gefällt, {valoracion}', ayudanosEscribenos: 'Kontakt & Vorschläge', ayudanosValoracion: 'bewerte uns bei Google Play.', feedbackTitulo: 'Schreib uns', feedbackNombre: 'Dein Name', feedbackEmail: 'Deine E-Mail (optional)', feedbackMensaje: 'Sag uns, was wir verbessern können...', feedbackEnviar: 'Senden', feedbackEnviando: 'Wird gesendet...', feedbackGracias: 'Danke für deine Hilfe! :)', feedbackError: 'Senden fehlgeschlagen. Bitte versuch es erneut.',
     bienvenidaSub: 'Standortzugriff erlauben', bienvenidaBody: 'Um dir das genaue Wetter und die Temperatur an deinem Standort zu zeigen.\n\n🔒 Dein Standort wird nur in Echtzeit zur Wetterabfrage genutzt. Wir speichern oder teilen ihn niemals.', bienvenidaBtn: 'Standort erlauben', bienvenidaLink: 'Ich möchte meine Stadt suchen →', denegadoTit: 'Kein Standort', denegadoBody: 'Wir können deinen Standort nicht automatisch erkennen, aber du kannst die App trotzdem nutzen, indem du deine Stadt suchst.', denegadoBtn: '🔍 Stadt suchen', denegadoAjustesBtn: 'Zu Systemeinstellungen', denegadoInstr: 'Einstellungen → Apps → QuickTemp → Berechtigungen → Standort → Aktivieren',
     cambiarCiudad: 'Stadt ändern',
     tuUbicacion: 'Dein Standort',
@@ -988,7 +1008,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Impossible d\'obtenir votre position.',
     errorTemperatura: 'Impossible d\'obtenir la température.',
     actualizado: 'Mis à jour',
-    ajustes: 'Paramètres', idioma: 'Langue', radar: '🌧 Radar de pluie', probLluvia: 'Probabilité de pluie heure suivante', ajustesTemp: 'Température', ajustesVel: 'Vitesse du vent', diaViento: 'Vitesse du vent', diaPrecip: 'Précipitations', diaProbLluvia: 'Probabilité de pluie', ciudadesGuardadas: 'Villes enregistrées', mediaHistorica: 'moyenne historique', prediccion: 'prévision', horaLocal: 'Heure locale', altitudTxt: '{v} d’altitude',
+    ajustes: 'Paramètres', idioma: 'Langue', radar: '🌧 Radar de pluie', probLluvia: 'Probabilité de pluie heure suivante', ajustesTemp: 'Température', ajustesVel: 'Vitesse du vent', diaViento: 'Vitesse du vent', diaPrecip: 'Précipitations', diaProbLluvia: 'Probabilité de pluie', ciudadesGuardadas: 'Villes enregistrées', mediaHistorica: 'moyenne historique', prediccion: 'prévision', horaLocal: 'Heure locale', altitudTxt: '{v} d’altitude', ayudanosTitulo: 'Aidez-nous', ayudanosTexto: 'Vous pensez qu’on peut s’améliorer ? {escribenos} Si vous aimez l’application, {valoracion}', ayudanosEscribenos: 'Contact et suggestions', ayudanosValoracion: 'notez-nous sur Google Play.', feedbackTitulo: 'Écrivez-nous', feedbackNombre: 'Votre nom', feedbackEmail: 'Votre email (facultatif)', feedbackMensaje: 'Dites-nous ce qu’on peut améliorer...', feedbackEnviar: 'Envoyer', feedbackEnviando: 'Envoi...', feedbackGracias: 'Merci pour votre aide ! :)', feedbackError: 'Échec de l’envoi. Réessayez.',
     bienvenidaSub: 'Autoriser l\'accès à votre position', bienvenidaBody: "Pour vous offrir la météo et la température exactes à l'endroit où vous vous trouvez.\n\n🔒 Votre position n'est utilisée qu'en temps réel pour consulter la météo. Nous ne la stockons ni ne la partageons jamais.", bienvenidaBtn: 'Autoriser la localisation', bienvenidaLink: 'Je préfère rechercher ma ville →', denegadoTit: 'Sans localisation', denegadoBody: "Nous ne pouvons pas détecter votre position automatiquement, mais vous pouvez utiliser l'app en cherchant votre ville.", denegadoBtn: '🔍 Rechercher ma ville', denegadoAjustesBtn: 'Aller aux Paramètres', denegadoInstr: 'Paramètres → Applications → QuickTemp → Autorisations → Localisation → Activer',
     cambiarCiudad: 'Changer de ville',
     tuUbicacion: 'Votre position',
@@ -1030,7 +1050,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Não foi possível obter sua localização.',
     errorTemperatura: 'Não foi possível obter a temperatura.',
     actualizado: 'Atualizado',
-    ajustes: 'Configurações', idioma: 'Idioma', radar: '🌧 Radar de chuva', probLluvia: 'Probabilidade de chuva próxima hora', ajustesTemp: 'Temperatura', ajustesVel: 'Velocidade do vento', diaViento: 'Velocidade do vento', diaPrecip: 'Precipitação', diaProbLluvia: 'Probabilidade de chuva', ciudadesGuardadas: 'Cidades guardadas', mediaHistorica: 'média histórica', prediccion: 'previsão', horaLocal: 'Hora local', altitudTxt: '{v} de altitude',
+    ajustes: 'Configurações', idioma: 'Idioma', radar: '🌧 Radar de chuva', probLluvia: 'Probabilidade de chuva próxima hora', ajustesTemp: 'Temperatura', ajustesVel: 'Velocidade do vento', diaViento: 'Velocidade do vento', diaPrecip: 'Precipitação', diaProbLluvia: 'Probabilidade de chuva', ciudadesGuardadas: 'Cidades guardadas', mediaHistorica: 'média histórica', prediccion: 'previsão', horaLocal: 'Hora local', altitudTxt: '{v} de altitude', ayudanosTitulo: 'Ajude-nos', ayudanosTexto: 'Acha que podemos melhorar? {escribenos} Se gosta da aplicação, {valoracion}', ayudanosEscribenos: 'Contacto e sugestões', ayudanosValoracion: 'avalie-nos no Google Play.', feedbackTitulo: 'Escreva-nos', feedbackNombre: 'O seu nome', feedbackEmail: 'O seu email (opcional)', feedbackMensaje: 'Diga-nos o que podemos melhorar...', feedbackEnviar: 'Enviar', feedbackEnviando: 'A enviar...', feedbackGracias: 'Obrigado pela sua ajuda! :)', feedbackError: 'Não foi possível enviar. Tente novamente.',
     bienvenidaSub: 'Permitir acesso à sua localização', bienvenidaBody: 'Para oferecer o tempo e a temperatura exata no lugar onde você está.\n\n🔒 Sua localização só é usada em tempo real para consultar o clima. Nunca a armazenamos nem a compartilhamos com ninguém.', bienvenidaBtn: 'Permitir localização', bienvenidaLink: 'Prefiro pesquisar a minha cidade →', denegadoTit: 'Sem localização', denegadoBody: 'Não conseguimos detetar a sua posição automaticamente, mas pode usar a app pesquisando a sua cidade.', denegadoBtn: '🔍 Pesquisar cidade', denegadoAjustesBtn: 'Ir às Definições', denegadoInstr: 'Definições → Aplicações → QuickTemp → Permissões → Localização → Ativar',
     cambiarCiudad: 'Mudar cidade',
     tuUbicacion: 'Sua localização',
@@ -1072,7 +1092,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Não foi possível obter sua localização.',
     errorTemperatura: 'Não foi possível obter a temperatura.',
     actualizado: 'Atualizado',
-    ajustes: 'Configurações', idioma: 'Idioma', radar: '🌧 Radar de chuva', probLluvia: 'Probabilidade de chuva próxima hora', ajustesTemp: 'Temperatura', ajustesVel: 'Velocidade do vento', diaViento: 'Velocidade do vento', diaPrecip: 'Precipitação', diaProbLluvia: 'Probabilidade de chuva', ciudadesGuardadas: 'Cidades salvas', mediaHistorica: 'média histórica', prediccion: 'previsão', horaLocal: 'Hora local', altitudTxt: '{v} de altitude',
+    ajustes: 'Configurações', idioma: 'Idioma', radar: '🌧 Radar de chuva', probLluvia: 'Probabilidade de chuva próxima hora', ajustesTemp: 'Temperatura', ajustesVel: 'Velocidade do vento', diaViento: 'Velocidade do vento', diaPrecip: 'Precipitação', diaProbLluvia: 'Probabilidade de chuva', ciudadesGuardadas: 'Cidades salvas', mediaHistorica: 'média histórica', prediccion: 'previsão', horaLocal: 'Hora local', altitudTxt: '{v} de altitude', ayudanosTitulo: 'Ajude-nos', ayudanosTexto: 'Acha que podemos melhorar? {escribenos} Se você gosta do app, {valoracion}', ayudanosEscribenos: 'Contato e sugestões', ayudanosValoracion: 'avalie-nos no Google Play.', feedbackTitulo: 'Escreva para nós', feedbackNombre: 'Seu nome', feedbackEmail: 'Seu email (opcional)', feedbackMensaje: 'Conte o que podemos melhorar...', feedbackEnviar: 'Enviar', feedbackEnviando: 'Enviando...', feedbackGracias: 'Obrigado pela sua ajuda! :)', feedbackError: 'Não foi possível enviar. Tente novamente.',
     bienvenidaSub: 'Permitir acesso à sua localização', bienvenidaBody: 'Para oferecer o tempo e a temperatura exata no lugar onde você está.\n\n🔒 Sua localização só é usada em tempo real para consultar o clima. Nunca a armazenamos nem a compartilhamos com ninguém.', bienvenidaBtn: 'Permitir localização', bienvenidaLink: 'Prefiro pesquisar minha cidade →', denegadoTit: 'Sem localização', denegadoBody: 'Não conseguimos detectar sua posição automaticamente, mas você pode usar o app pesquisando sua cidade.', denegadoBtn: '🔍 Pesquisar cidade', denegadoAjustesBtn: 'Ir para Configurações', denegadoInstr: 'Configurações → Aplicativos → QuickTemp → Permissões → Localização → Ativar',
     cambiarCiudad: 'Mudar cidade',
     tuUbicacion: 'Sua localização',
@@ -1114,7 +1134,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Impossibile ottenere la posizione.',
     errorTemperatura: 'Impossibile ottenere la temperatura.',
     actualizado: 'Aggiornato',
-    ajustes: 'Impostazioni', idioma: 'Lingua', radar: '🌧 Radar pioggia', probLluvia: 'Probabilità pioggia prossima ora', ajustesTemp: 'Temperatura', ajustesVel: 'Velocità del vento', diaViento: 'Velocità del vento', diaPrecip: 'Precipitazioni', diaProbLluvia: 'Probabilità di pioggia', ciudadesGuardadas: 'Città salvate', mediaHistorica: 'media storica', prediccion: 'previsione', horaLocal: 'Ora locale', altitudTxt: '{v} di altitudine',
+    ajustes: 'Impostazioni', idioma: 'Lingua', radar: '🌧 Radar pioggia', probLluvia: 'Probabilità pioggia prossima ora', ajustesTemp: 'Temperatura', ajustesVel: 'Velocità del vento', diaViento: 'Velocità del vento', diaPrecip: 'Precipitazioni', diaProbLluvia: 'Probabilità di pioggia', ciudadesGuardadas: 'Città salvate', mediaHistorica: 'media storica', prediccion: 'previsione', horaLocal: 'Ora locale', altitudTxt: '{v} di altitudine', ayudanosTitulo: 'Aiutaci', ayudanosTexto: 'Pensi che possiamo migliorare? {escribenos} Se ti piace l’app, {valoracion}', ayudanosEscribenos: 'Contatti e suggerimenti', ayudanosValoracion: 'valutaci su Google Play.', feedbackTitulo: 'Scrivici', feedbackNombre: 'Il tuo nome', feedbackEmail: 'La tua email (facoltativa)', feedbackMensaje: 'Dicci cosa possiamo migliorare...', feedbackEnviar: 'Invia', feedbackEnviando: 'Invio...', feedbackGracias: 'Grazie per il tuo aiuto! :)', feedbackError: 'Invio non riuscito. Riprova.',
     bienvenidaSub: 'Consenti accesso alla tua posizione', bienvenidaBody: "Per offrirti il meteo e la temperatura esatta nel posto in cui ti trovi.\n\n🔒 La tua posizione viene usata solo in tempo reale per consultare il meteo. Non la salviamo né la condividiamo mai.", bienvenidaBtn: 'Consenti posizione', bienvenidaLink: 'Preferisco cercare la mia città →', denegadoTit: 'Senza posizione', denegadoBody: "Non riusciamo a rilevare la tua posizione automaticamente, ma puoi usare l'app cercando la tua città.", denegadoBtn: '🔍 Cerca la mia città', denegadoAjustesBtn: 'Vai alle Impostazioni', denegadoInstr: 'Impostazioni → App → QuickTemp → Autorizzazioni → Posizione → Attiva',
     cambiarCiudad: 'Cambia città',
     tuUbicacion: 'La tua posizione',
@@ -1156,7 +1176,7 @@ const TRADUCCIONES = {
     errorUbicacion: '无法获取您的位置。',
     errorTemperatura: '无法获取温度。',
     actualizado: '已更新',
-    ajustes: '设置', idioma: '语言', radar: '🌧 雨量雷达', probLluvia: '下一小时降雨概率', ajustesTemp: '温度', ajustesVel: '风速', diaViento: '风速', diaPrecip: '降水量', diaProbLluvia: '降雨概率', ciudadesGuardadas: '已保存城市', mediaHistorica: '历史平均值', prediccion: '预测', horaLocal: '当地时间', altitudTxt: '海拔 {v}',
+    ajustes: '设置', idioma: '语言', radar: '🌧 雨量雷达', probLluvia: '下一小时降雨概率', ajustesTemp: '温度', ajustesVel: '风速', diaViento: '风速', diaPrecip: '降水量', diaProbLluvia: '降雨概率', ciudadesGuardadas: '已保存城市', mediaHistorica: '历史平均值', prediccion: '预测', horaLocal: '当地时间', altitudTxt: '海拔 {v}', ayudanosTitulo: '帮助我们', ayudanosTexto: '觉得我们可以做得更好？{escribenos} 如果你喜欢这个应用，{valoracion}', ayudanosEscribenos: '联系与建议', ayudanosValoracion: '请在 Google Play 上给我们评分。', feedbackTitulo: '写信给我们', feedbackNombre: '你的名字', feedbackEmail: '你的邮箱（可选）', feedbackMensaje: '告诉我们可以改进的地方…', feedbackEnviar: '发送', feedbackEnviando: '发送中…', feedbackGracias: '感谢你的帮助！:)', feedbackError: '发送失败，请重试。',
     bienvenidaSub: '允许访问您的位置', bienvenidaBody: '为您提供当前所在位置的精确天气和温度。\n\n🔒 您的位置仅用于实时查询天气，我们从不存储或与任何人共享。', bienvenidaBtn: '允许使用位置', bienvenidaLink: '我更愿意搜索我的城市 →', denegadoTit: '无位置信息', denegadoBody: '我们无法自动检测您的位置，但您仍然可以通过搜索城市来使用此应用。', denegadoBtn: '🔍 搜索城市', denegadoAjustesBtn: '前往系统设置', denegadoInstr: '设置 → 应用 → QuickTemp → 权限 → 位置 → 启用',
     cambiarCiudad: '切换城市',
     tuUbicacion: '您的位置',
@@ -1198,7 +1218,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'No s\'ha pogut obtenir la teva ubicació.',
     errorTemperatura: 'No s\'ha pogut obtenir la temperatura.',
     actualizado: 'Actualitzat',
-    ajustes: 'Configuració', idioma: 'Idioma', radar: '🌧 Radar de pluja', probLluvia: 'Probabilitat de pluja propera hora', ajustesTemp: 'Temperatura', ajustesVel: 'Velocitat del vent', diaViento: 'Velocitat del vent', diaPrecip: 'Precipitacions', diaProbLluvia: 'Probabilitat de pluja', ciudadesGuardadas: 'Ciutats guardades', mediaHistorica: 'mitjana històrica', prediccion: 'previsió', horaLocal: 'Hora local', altitudTxt: '{v} d’altitud',
+    ajustes: 'Configuració', idioma: 'Idioma', radar: '🌧 Radar de pluja', probLluvia: 'Probabilitat de pluja propera hora', ajustesTemp: 'Temperatura', ajustesVel: 'Velocitat del vent', diaViento: 'Velocitat del vent', diaPrecip: 'Precipitacions', diaProbLluvia: 'Probabilitat de pluja', ciudadesGuardadas: 'Ciutats guardades', mediaHistorica: 'mitjana històrica', prediccion: 'previsió', horaLocal: 'Hora local', altitudTxt: '{v} d’altitud', ayudanosTitulo: 'Ajuda’ns', ayudanosTexto: 'Creus que podem millorar? {escribenos} Si t’agrada l’app, {valoracion}', ayudanosEscribenos: 'Contacte i suggeriments', ayudanosValoracion: 'dona’ns una valoració a Google Play.', feedbackTitulo: 'Escriu-nos', feedbackNombre: 'El teu nom', feedbackEmail: 'El teu email (opcional)', feedbackMensaje: 'Digues-nos què podem millorar...', feedbackEnviar: 'Envia', feedbackEnviando: 'Enviant...', feedbackGracias: 'Gràcies per la teva ajuda! :)', feedbackError: 'No s’ha pogut enviar. Torna-ho a provar.',
     bienvenidaSub: 'Permet l\'accés a la teva ubicació', bienvenidaBody: "Per oferir-te el temps i la temperatura exacta al lloc on et trobes.\n\n🔒 La teva ubicació només s'utilitza en temps real per consultar el clima. Mai la guardem ni la compartim amb ningú.", bienvenidaBtn: 'Permetre ubicació', bienvenidaLink: 'Prefereixo cercar la meva ciutat →', denegadoTit: 'Sense ubicació', denegadoBody: "No podem detectar la teva posició automàticament, però pots usar l'app cercant la teva ciutat.", denegadoBtn: '🔍 Cercar la meva ciutat', denegadoAjustesBtn: 'Anar a Configuració', denegadoInstr: 'Configuració → Aplicacions → QuickTemp → Permisos → Ubicació → Activar',
     cambiarCiudad: 'Canviar ciutat',
     tuUbicacion: 'La teva ubicació',
@@ -1240,7 +1260,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Ezin izan da zure kokapena lortu.',
     errorTemperatura: 'Ezin izan da tenperatura lortu.',
     actualizado: 'Eguneratuta',
-    ajustes: 'Ezarpenak', idioma: 'Hizkuntza', radar: '🌧 Euri radarra', probLluvia: 'Euri probabilitatea hurrengo orduan', ajustesTemp: 'Tenperatura', ajustesVel: 'Haize abiadura', diaViento: 'Haize abiadura', diaPrecip: 'Prezipitazioak', diaProbLluvia: 'Euri probabilitatea', ciudadesGuardadas: 'Gordetako hiriak', mediaHistorica: 'batez besteko historikoa', prediccion: 'iragarpena', horaLocal: 'Ordu lokala', altitudTxt: '{v} altuera',
+    ajustes: 'Ezarpenak', idioma: 'Hizkuntza', radar: '🌧 Euri radarra', probLluvia: 'Euri probabilitatea hurrengo orduan', ajustesTemp: 'Tenperatura', ajustesVel: 'Haize abiadura', diaViento: 'Haize abiadura', diaPrecip: 'Prezipitazioak', diaProbLluvia: 'Euri probabilitatea', ciudadesGuardadas: 'Gordetako hiriak', mediaHistorica: 'batez besteko historikoa', prediccion: 'iragarpena', horaLocal: 'Ordu lokala', altitudTxt: '{v} altuera', ayudanosTitulo: 'Lagundu gaitzazu', ayudanosTexto: 'Uste duzu hobetu dezakegula? {escribenos} Aplikazioa gustuko baduzu, {valoracion}', ayudanosEscribenos: 'Kontaktua eta iradokizunak', ayudanosValoracion: 'eman iezaguzu balorazio bat Google Play-n.', feedbackTitulo: 'Idatzi iezaguzu', feedbackNombre: 'Zure izena', feedbackEmail: 'Zure emaila (aukerakoa)', feedbackMensaje: 'Esaguzu zer hobe dezakegun...', feedbackEnviar: 'Bidali', feedbackEnviando: 'Bidaltzen...', feedbackGracias: 'Eskerrik asko laguntzagatik! :)', feedbackError: 'Ezin izan da bidali. Saiatu berriro.',
     bienvenidaSub: 'Kokapenera sarbidea baimendu', bienvenidaBody: 'Zaudeneko lekuko eguraldi eta tenperatura zehatza eskaintzeko.\n\n🔒 Zure kokapena eguraldia kontsultatzeko soilik erabiltzen da denbora errealean. Ez dugu inoiz gordetzen edo inorekin partekatzen.', bienvenidaBtn: 'Kokapena baimendu', bienvenidaLink: 'Nahiago dut nire hiria bilatu →', denegadoTit: 'Kokapenik gabe', denegadoBody: 'Ezin dugu zure posizioa automatikoki detektatu, baina app-a erabil dezakezu zure hiria bilatuz.', denegadoBtn: '🔍 Nire hiria bilatu', denegadoAjustesBtn: 'Joan Ezarpenetan', denegadoInstr: 'Ezarpenak → Aplikazioak → QuickTemp → Baimenak → Kokapena → Aktibatu',
     cambiarCiudad: 'Hiria aldatu',
     tuUbicacion: 'Zure kokapena',
@@ -1282,7 +1302,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Non se puido obter a túa localización.',
     errorTemperatura: 'Non se puido obter a temperatura.',
     actualizado: 'Actualizado',
-    ajustes: 'Configuración', idioma: 'Idioma', radar: '🌧 Radar de choiva', probLluvia: 'Probabilidade de choiva próxima hora', ajustesTemp: 'Temperatura', ajustesVel: 'Velocidade do vento', diaViento: 'Velocidade do vento', diaPrecip: 'Precipitacións', diaProbLluvia: 'Probabilidade de choiva', ciudadesGuardadas: 'Cidades gardadas', mediaHistorica: 'media histórica', prediccion: 'predición', horaLocal: 'Hora local', altitudTxt: '{v} de altitude',
+    ajustes: 'Configuración', idioma: 'Idioma', radar: '🌧 Radar de choiva', probLluvia: 'Probabilidade de choiva próxima hora', ajustesTemp: 'Temperatura', ajustesVel: 'Velocidade do vento', diaViento: 'Velocidade do vento', diaPrecip: 'Precipitacións', diaProbLluvia: 'Probabilidade de choiva', ciudadesGuardadas: 'Cidades gardadas', mediaHistorica: 'media histórica', prediccion: 'predición', horaLocal: 'Hora local', altitudTxt: '{v} de altitude', ayudanosTitulo: 'Axúdanos', ayudanosTexto: 'Cres que podemos mellorar? {escribenos} Se che gusta a app, {valoracion}', ayudanosEscribenos: 'Contacto e suxestións', ayudanosValoracion: 'dános unha valoración en Google Play.', feedbackTitulo: 'Escríbenos', feedbackNombre: 'O teu nome', feedbackEmail: 'O teu email (opcional)', feedbackMensaje: 'Cóntanos que podemos mellorar...', feedbackEnviar: 'Enviar', feedbackEnviando: 'Enviando...', feedbackGracias: 'Grazas pola túa axuda! :)', feedbackError: 'Non se puido enviar. Téntao de novo.',
     bienvenidaSub: 'Permitir acceso á túa localización', bienvenidaBody: 'Para ofrecerche o tempo e a temperatura exacta no lugar onde estás.\n\n🔒 A túa localización só se usa en tempo real para consultar o clima. Nunca a gardamos nin a compartimos con ninguén.', bienvenidaBtn: 'Permitir localización', bienvenidaLink: 'Prefiro buscar a miña cidade →', denegadoTit: 'Sen localización', denegadoBody: 'Non podemos detectar a túa posición automaticamente, pero podes usar a app buscando a túa cidade.', denegadoBtn: '🔍 Buscar a miña cidade', denegadoAjustesBtn: 'Ir a Axustes', denegadoInstr: 'Axustes → Aplicacións → QuickTemp → Permisos → Localización → Activar',
     cambiarCiudad: 'Cambiar cidade',
     tuUbicacion: 'A túa localización',
@@ -1324,7 +1344,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'تعذّر الحصول على موقعك.',
     errorTemperatura: 'تعذّر الحصول على درجة الحرارة.',
     actualizado: 'تم التحديث',
-    ajustes: 'الإعدادات', idioma: 'اللغة', radar: '🌧 رادار المطر', probLluvia: 'احتمال المطر الساعة القادمة', ajustesTemp: 'درجة الحرارة', ajustesVel: 'سرعة الرياح', diaViento: 'سرعة الرياح', diaPrecip: 'هطول الأمطار', diaProbLluvia: 'احتمال المطر', ciudadesGuardadas: 'المدن المحفوظة', mediaHistorica: 'المتوسط التاريخي', prediccion: 'توقع', horaLocal: 'التوقيت المحلي', altitudTxt: 'ارتفاع {v}',
+    ajustes: 'الإعدادات', idioma: 'اللغة', radar: '🌧 رادار المطر', probLluvia: 'احتمال المطر الساعة القادمة', ajustesTemp: 'درجة الحرارة', ajustesVel: 'سرعة الرياح', diaViento: 'سرعة الرياح', diaPrecip: 'هطول الأمطار', diaProbLluvia: 'احتمال المطر', ciudadesGuardadas: 'المدن المحفوظة', mediaHistorica: 'المتوسط التاريخي', prediccion: 'توقع', horaLocal: 'التوقيت المحلي', altitudTxt: 'ارتفاع {v}', ayudanosTitulo: 'ساعدنا', ayudanosTexto: 'هل تعتقد أنه يمكننا التحسين؟ {escribenos} إذا أعجبك التطبيق، {valoracion}', ayudanosEscribenos: 'التواصل والاقتراحات', ayudanosValoracion: 'قيّمنا على Google Play.', feedbackTitulo: 'راسلنا', feedbackNombre: 'اسمك', feedbackEmail: 'بريدك الإلكتروني (اختياري)', feedbackMensaje: 'أخبرنا بما يمكننا تحسينه...', feedbackEnviar: 'إرسال', feedbackEnviando: 'جارٍ الإرسال...', feedbackGracias: 'شكرًا على مساعدتك! :)', feedbackError: 'تعذر الإرسال. حاول مرة أخرى.',
     bienvenidaSub: 'السماح بالوصول إلى موقعك', bienvenidaBody: 'لنقدم لك الطقس ودرجة الحرارة الدقيقة في المكان الذي تتواجد فيه.\n\n🔒 موقعك يُستخدم فقط في الوقت الفعلي للاستعلام عن الطقس. لا نخزّنه أبدًا ولا نشاركه مع أي أحد.', bienvenidaBtn: 'السماح بالموقع', bienvenidaLink: 'أفضل البحث عن مدينتي ←', denegadoTit: 'بدون موقع', denegadoBody: 'لا يمكننا الكشف عن موقعك تلقائيًا، لكن يمكنك استخدام التطبيق بالبحث عن مدينتك.', denegadoBtn: '🔍 البحث عن مدينتي', denegadoAjustesBtn: 'الذهاب إلى الإعدادات', denegadoInstr: 'الإعدادات ← التطبيقات ← QuickTemp ← الأذونات ← الموقع ← تفعيل',
     cambiarCiudad: 'تغيير المدينة',
     tuUbicacion: 'موقعك',
@@ -1366,7 +1386,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Не удалось получить ваше местоположение.',
     errorTemperatura: 'Не удалось получить температуру.',
     actualizado: 'Обновлено',
-    ajustes: 'Настройки', idioma: 'Язык', radar: '🌧 Радар осадков', probLluvia: 'Вероятность дождя следующий час', ajustesTemp: 'Температура', ajustesVel: 'Скорость ветра', diaViento: 'Скорость ветра', diaPrecip: 'Осадки', diaProbLluvia: 'Вероятность дождя', ciudadesGuardadas: 'Сохранённые города', mediaHistorica: 'историческое среднее', prediccion: 'прогноз', horaLocal: 'Местное время', altitudTxt: 'высота {v}',
+    ajustes: 'Настройки', idioma: 'Язык', radar: '🌧 Радар осадков', probLluvia: 'Вероятность дождя следующий час', ajustesTemp: 'Температура', ajustesVel: 'Скорость ветра', diaViento: 'Скорость ветра', diaPrecip: 'Осадки', diaProbLluvia: 'Вероятность дождя', ciudadesGuardadas: 'Сохранённые города', mediaHistorica: 'историческое среднее', prediccion: 'прогноз', horaLocal: 'Местное время', altitudTxt: 'высота {v}', ayudanosTitulo: 'Помогите нам', ayudanosTexto: 'Думаете, мы можем стать лучше? {escribenos} Если вам нравится приложение, {valoracion}', ayudanosEscribenos: 'Контакты и предложения', ayudanosValoracion: 'оцените нас в Google Play.', feedbackTitulo: 'Напишите нам', feedbackNombre: 'Ваше имя', feedbackEmail: 'Ваш email (необязательно)', feedbackMensaje: 'Расскажите, что мы можем улучшить...', feedbackEnviar: 'Отправить', feedbackEnviando: 'Отправка...', feedbackGracias: 'Спасибо за вашу помощь! :)', feedbackError: 'Не удалось отправить. Попробуйте ещё раз.',
     bienvenidaSub: 'Разрешить доступ к геолокации', bienvenidaBody: 'Чтобы показывать вам точную погоду и температуру там, где вы находитесь.\n\n🔒 Геолокация используется только в реальном времени для запроса погоды. Мы никогда не сохраняем и не передаём её никому.', bienvenidaBtn: 'Разрешить геолокацию', bienvenidaLink: 'Предпочитаю найти мой город →', denegadoTit: 'Без геолокации', denegadoBody: 'Мы не можем определить ваше местоположение автоматически, но вы можете найти свой город вручную.', denegadoBtn: '🔍 Найти мой город', denegadoAjustesBtn: 'Перейти в Настройки', denegadoInstr: 'Настройки → Приложения → QuickTemp → Разрешения → Местоположение → Включить',
     cambiarCiudad: 'Изменить город',
     tuUbicacion: 'Ваше местоположение',
@@ -1408,7 +1428,7 @@ const TRADUCCIONES = {
     errorUbicacion: '位置情報を取得できませんでした。',
     errorTemperatura: '気温を取得できませんでした。',
     actualizado: '更新しました',
-    ajustes: '設定', idioma: '言語', radar: '🌧 雨雲レーダー', probLluvia: '次の1時間の降水確率', ajustesTemp: '気温', ajustesVel: '風速', diaViento: '風速', diaPrecip: '降水量', diaProbLluvia: '降水確率', ciudadesGuardadas: '保存された都市', mediaHistorica: '過去平均', prediccion: '予測', horaLocal: '現地時間', altitudTxt: '標高 {v}',
+    ajustes: '設定', idioma: '言語', radar: '🌧 雨雲レーダー', probLluvia: '次の1時間の降水確率', ajustesTemp: '気温', ajustesVel: '風速', diaViento: '風速', diaPrecip: '降水量', diaProbLluvia: '降水確率', ciudadesGuardadas: '保存された都市', mediaHistorica: '過去平均', prediccion: '予測', horaLocal: '現地時間', altitudTxt: '標高 {v}', ayudanosTitulo: 'ご協力をお願いします', ayudanosTexto: '改善できる点があれば教えてください。{escribenos} アプリを気に入ったら、{valoracion}', ayudanosEscribenos: 'お問い合わせ・ご意見', ayudanosValoracion: 'Google Playで評価をお願いします。', feedbackTitulo: 'お問い合わせ', feedbackNombre: 'お名前', feedbackEmail: 'メールアドレス（任意）', feedbackMensaje: '改善できる点を教えてください…', feedbackEnviar: '送信', feedbackEnviando: '送信中…', feedbackGracias: 'ご協力ありがとうございます！:)', feedbackError: '送信できませんでした。もう一度お試しください。',
     bienvenidaSub: '位置情報へのアクセスを許可', bienvenidaBody: 'あなたがいる場所の正確な天気と気温をお届けするために。\n\n🔒 位置情報は天気の取得にのみリアルタイムで使用します。保存・共有は一切しません。', bienvenidaBtn: '位置情報を許可', bienvenidaLink: '都市を検索する →', denegadoTit: '位置情報なし', denegadoBody: '自動で位置を検出できませんが、都市を検索してアプリをご利用いただけます。', denegadoBtn: '🔍 都市を検索', denegadoAjustesBtn: 'システム設定へ', denegadoInstr: '設定 → アプリ → QuickTemp → 権限 → 位置情報 → 有効にする',
     cambiarCiudad: '都市を変更',
     tuUbicacion: '現在地',
@@ -1450,7 +1470,7 @@ const TRADUCCIONES = {
     errorUbicacion: '위치를 가져올 수 없습니다.',
     errorTemperatura: '기온을 가져올 수 없습니다.',
     actualizado: '업데이트됨',
-    ajustes: '설정', idioma: '언어', radar: '🌧 강수 레이더', probLluvia: '다음 한 시간 강수 확률', ajustesTemp: '기온', ajustesVel: '풍속', diaViento: '풍속', diaPrecip: '강수량', diaProbLluvia: '강수 확률', ciudadesGuardadas: '저장된 도시', mediaHistorica: '과거 평균', prediccion: '예측', horaLocal: '현지 시간', altitudTxt: '고도 {v}',
+    ajustes: '설정', idioma: '언어', radar: '🌧 강수 레이더', probLluvia: '다음 한 시간 강수 확률', ajustesTemp: '기온', ajustesVel: '풍속', diaViento: '풍속', diaPrecip: '강수량', diaProbLluvia: '강수 확률', ciudadesGuardadas: '저장된 도시', mediaHistorica: '과거 평균', prediccion: '예측', horaLocal: '현지 시간', altitudTxt: '고도 {v}', ayudanosTitulo: '도와주세요', ayudanosTexto: '개선할 점이 있다고 생각하시나요? {escribenos} 앱이 마음에 드신다면, {valoracion}', ayudanosEscribenos: '문의 및 제안', ayudanosValoracion: 'Google Play에서 평가해 주세요.', feedbackTitulo: '문의하기', feedbackNombre: '이름', feedbackEmail: '이메일 (선택 사항)', feedbackMensaje: '개선할 점을 알려주세요...', feedbackEnviar: '보내기', feedbackEnviando: '보내는 중...', feedbackGracias: '도와주셔서 감사합니다! :)', feedbackError: '전송하지 못했습니다. 다시 시도해 주세요.',
     bienvenidaSub: '위치 접근 허용', bienvenidaBody: '현재 계신 위치의 정확한 날씨와 온도를 제공하기 위해.\n\n🔒 위치 정보는 날씨 조회를 위해 실시간으로만 사용됩니다. 저장하거나 누구와도 공유하지 않습니다.', bienvenidaBtn: '위치 허용', bienvenidaLink: '도시를 검색하겠습니다 →', denegadoTit: '위치 없음', denegadoBody: '위치를 자동으로 감지할 수 없지만 도시를 검색하여 앱을 사용할 수 있습니다.', denegadoBtn: '🔍 도시 검색', denegadoAjustesBtn: '시스템 설정으로', denegadoInstr: '설정 → 앱 → QuickTemp → 권한 → 위치 → 활성화',
     cambiarCiudad: '도시 변경',
     tuUbicacion: '내 위치',
@@ -1492,7 +1512,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Kon uw locatie niet ophalen.',
     errorTemperatura: 'Kon de temperatuur niet ophalen.',
     actualizado: 'Bijgewerkt',
-    ajustes: 'Instellingen', idioma: 'Taal', radar: '🌧 Neerslagramdar', probLluvia: 'Neerslagkans volgend uur', ajustesTemp: 'Temperatuur', ajustesVel: 'Windsnelheid', diaViento: 'Windsnelheid', diaPrecip: 'Neerslag', diaProbLluvia: 'Neerslagkans', ciudadesGuardadas: 'Opgeslagen steden', mediaHistorica: 'historisch gemiddelde', prediccion: 'voorspelling', horaLocal: 'Lokale tijd', altitudTxt: '{v} hoogte',
+    ajustes: 'Instellingen', idioma: 'Taal', radar: '🌧 Neerslagramdar', probLluvia: 'Neerslagkans volgend uur', ajustesTemp: 'Temperatuur', ajustesVel: 'Windsnelheid', diaViento: 'Windsnelheid', diaPrecip: 'Neerslag', diaProbLluvia: 'Neerslagkans', ciudadesGuardadas: 'Opgeslagen steden', mediaHistorica: 'historisch gemiddelde', prediccion: 'voorspelling', horaLocal: 'Lokale tijd', altitudTxt: '{v} hoogte', ayudanosTitulo: 'Help ons', ayudanosTexto: 'Denk je dat we iets kunnen verbeteren? {escribenos} Als je de app leuk vindt, {valoracion}', ayudanosEscribenos: 'Contact en suggesties', ayudanosValoracion: 'beoordeel ons op Google Play.', feedbackTitulo: 'Schrijf ons', feedbackNombre: 'Je naam', feedbackEmail: 'Je email (optioneel)', feedbackMensaje: 'Vertel ons wat we kunnen verbeteren...', feedbackEnviar: 'Versturen', feedbackEnviando: 'Versturen...', feedbackGracias: 'Bedankt voor je hulp! :)', feedbackError: 'Kon niet worden verzonden. Probeer het opnieuw.',
     bienvenidaSub: 'Toegang tot locatie toestaan', bienvenidaBody: 'Om je het exacte weer en de temperatuur op jouw huidige locatie te geven.\n\n🔒 Je locatie wordt alleen in realtime gebruikt om het weer op te halen. We slaan het nooit op en delen het met niemand.', bienvenidaBtn: 'Locatie toestaan', bienvenidaLink: 'Ik zoek liever mijn stad →', denegadoTit: 'Geen locatie', denegadoBody: 'We kunnen je positie niet automatisch detecteren, maar je kunt de app gebruiken door je stad te zoeken.', denegadoBtn: '🔍 Mijn stad zoeken', denegadoAjustesBtn: 'Naar Systeeminstellingen', denegadoInstr: 'Instellingen → Apps → QuickTemp → Machtigingen → Locatie → Inschakelen',
     cambiarCiudad: 'Stad wijzigen',
     tuUbicacion: 'Uw locatie',
@@ -1534,7 +1554,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Nie można pobrać lokalizacji.',
     errorTemperatura: 'Nie można pobrać temperatury.',
     actualizado: 'Zaktualizowano',
-    ajustes: 'Ustawienia', idioma: 'Język', radar: '🌧 Radar opadów', probLluvia: 'Prawdopodobieństwo deszczu następna godzina', ajustesTemp: 'Temperatura', ajustesVel: 'Prędkość wiatru', diaViento: 'Prędkość wiatru', diaPrecip: 'Opady', diaProbLluvia: 'Prawdopodobieństwo deszczu', ciudadesGuardadas: 'Zapisane miasta', mediaHistorica: 'średnia historyczna', prediccion: 'prognoza', horaLocal: 'Czas lokalny', altitudTxt: '{v} wysokości',
+    ajustes: 'Ustawienia', idioma: 'Język', radar: '🌧 Radar opadów', probLluvia: 'Prawdopodobieństwo deszczu następna godzina', ajustesTemp: 'Temperatura', ajustesVel: 'Prędkość wiatru', diaViento: 'Prędkość wiatru', diaPrecip: 'Opady', diaProbLluvia: 'Prawdopodobieństwo deszczu', ciudadesGuardadas: 'Zapisane miasta', mediaHistorica: 'średnia historyczna', prediccion: 'prognoza', horaLocal: 'Czas lokalny', altitudTxt: '{v} wysokości', ayudanosTitulo: 'Pomóż nam', ayudanosTexto: 'Myślisz, że możemy coś poprawić? {escribenos} Jeśli podoba Ci się aplikacja, {valoracion}', ayudanosEscribenos: 'Kontakt i sugestie', ayudanosValoracion: 'oceń nas w Google Play.', feedbackTitulo: 'Napisz do nas', feedbackNombre: 'Twoje imię', feedbackEmail: 'Twój email (opcjonalnie)', feedbackMensaje: 'Napisz, co możemy poprawić...', feedbackEnviar: 'Wyślij', feedbackEnviando: 'Wysyłanie...', feedbackGracias: 'Dziękujemy za pomoc! :)', feedbackError: 'Nie udało się wysłać. Spróbuj ponownie.',
     bienvenidaSub: 'Zezwól na dostęp do lokalizacji', bienvenidaBody: 'Aby zapewnić Ci dokładną pogodę i temperaturę w miejscu, w którym się znajdujesz.\n\n🔒 Twoja lokalizacja jest używana wyłącznie w czasie rzeczywistym do pobierania pogody. Nigdy jej nie przechowujemy ani nie udostępniamy.', bienvenidaBtn: 'Zezwól na lokalizację', bienvenidaLink: 'Wolę wyszukać swoje miasto →', denegadoTit: 'Brak lokalizacji', denegadoBody: 'Nie możemy automatycznie wykryć Twojej pozycji, ale możesz korzystać z aplikacji wyszukując swoje miasto.', denegadoBtn: '🔍 Szukaj miasta', denegadoAjustesBtn: 'Przejdź do Ustawień', denegadoInstr: 'Ustawienia → Aplikacje → QuickTemp → Uprawnienia → Lokalizacja → Włącz',
     cambiarCiudad: 'Zmień miasto',
     tuUbicacion: 'Twoja lokalizacja',
@@ -1576,7 +1596,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'आपका स्थान प्राप्त नहीं हो सका।',
     errorTemperatura: 'तापमान प्राप्त नहीं हो सका।',
     actualizado: 'अपडेट किया गया',
-    ajustes: 'सेटिंग्स', idioma: 'भाषा', radar: '🌧 वर्षा रडार', probLluvia: 'अगले घंटे बारिश की संभावना', ajustesTemp: 'तापमान', ajustesVel: 'हवा की गति', diaViento: 'हवा की गति', diaPrecip: 'वर्षा', diaProbLluvia: 'वर्षा की संभावना', ciudadesGuardadas: 'सहेजे गए शहर', mediaHistorica: 'ऐतिहासिक औसत', prediccion: 'पूर्वानुमान', horaLocal: 'स्थानीय समय', altitudTxt: 'ऊंचाई {v}',
+    ajustes: 'सेटिंग्स', idioma: 'भाषा', radar: '🌧 वर्षा रडार', probLluvia: 'अगले घंटे बारिश की संभावना', ajustesTemp: 'तापमान', ajustesVel: 'हवा की गति', diaViento: 'हवा की गति', diaPrecip: 'वर्षा', diaProbLluvia: 'वर्षा की संभावना', ciudadesGuardadas: 'सहेजे गए शहर', mediaHistorica: 'ऐतिहासिक औसत', prediccion: 'पूर्वानुमान', horaLocal: 'स्थानीय समय', altitudTxt: 'ऊंचाई {v}', ayudanosTitulo: 'हमारी मदद करें', ayudanosTexto: 'क्या आपको लगता है हम बेहतर कर सकते हैं? {escribenos} अगर आपको ऐप पसंद है, तो {valoracion}', ayudanosEscribenos: 'संपर्क और सुझाव', ayudanosValoracion: 'Google Play पर हमें रेट करें।', feedbackTitulo: 'हमें लिखें', feedbackNombre: 'आपका नाम', feedbackEmail: 'आपका ईमेल (वैकल्पिक)', feedbackMensaje: 'हमें बताएं हम क्या बेहतर कर सकते हैं...', feedbackEnviar: 'भेजें', feedbackEnviando: 'भेजा जा रहा है...', feedbackGracias: 'आपकी मदद के लिए धन्यवाद! :)', feedbackError: 'भेजा नहीं जा सका। फिर से कोशिश करें।',
     bienvenidaSub: 'अपनी लोकेशन का एक्सेस दें', bienvenidaBody: 'आप जहाँ हैं वहाँ का सटीक मौसम और तापमान देने के लिए।\n\n🔒 आपकी लोकेशन केवल मौसम जानने के लिए रियल-टाइम में उपयोग होती है। हम इसे कभी स्टोर या किसी से शेयर नहीं करते।', bienvenidaBtn: 'स्थान अनुमति दें', bienvenidaLink: 'मैं अपना शहर खोजना चाहता हूँ →', denegadoTit: 'स्थान नहीं', denegadoBody: 'हम आपकी स्थिति स्वचालित रूप से नहीं जान सकते, लेकिन आप शहर खोजकर ऐप का उपयोग कर सकते हैं।', denegadoBtn: '🔍 शहर खोजें', denegadoAjustesBtn: 'सिस्टम सेटिंग्स पर जाएं', denegadoInstr: 'सेटिंग्स → ऐप्स → QuickTemp → अनुमतियाँ → स्थान → सक्षम करें',
     cambiarCiudad: 'शहर बदलें',
     tuUbicacion: 'आपका स्थान',
@@ -1618,7 +1638,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Nu s-a putut obține locația.',
     errorTemperatura: 'Nu s-a putut obține temperatura.',
     actualizado: 'Actualizat',
-    ajustes: 'Setări', idioma: 'Limbă', radar: '🌧 Radar precipitații', probLluvia: 'Probabilitate ploaie ora următoare', ajustesTemp: 'Temperatură', ajustesVel: 'Viteza vântului', diaViento: 'Viteza vântului', diaPrecip: 'Precipitații', diaProbLluvia: 'Probabilitate de ploaie', ciudadesGuardadas: 'Orașe salvate', mediaHistorica: 'medie istorică', prediccion: 'prognoză', horaLocal: 'Ora locală', altitudTxt: '{v} altitudine',
+    ajustes: 'Setări', idioma: 'Limbă', radar: '🌧 Radar precipitații', probLluvia: 'Probabilitate ploaie ora următoare', ajustesTemp: 'Temperatură', ajustesVel: 'Viteza vântului', diaViento: 'Viteza vântului', diaPrecip: 'Precipitații', diaProbLluvia: 'Probabilitate de ploaie', ciudadesGuardadas: 'Orașe salvate', mediaHistorica: 'medie istorică', prediccion: 'prognoză', horaLocal: 'Ora locală', altitudTxt: '{v} altitudine', ayudanosTitulo: 'Ajută-ne', ayudanosTexto: 'Crezi că putem îmbunătăți ceva? {escribenos} Dacă îti place aplicația, {valoracion}', ayudanosEscribenos: 'Contact și sugestii', ayudanosValoracion: 'evaluează-ne pe Google Play.', feedbackTitulo: 'Scrie-ne', feedbackNombre: 'Numele tău', feedbackEmail: 'Emailul tău (opțional)', feedbackMensaje: 'Spune-ne ce putem îmbunătăți...', feedbackEnviar: 'Trimite', feedbackEnviando: 'Se trimite...', feedbackGracias: 'Mulțumim pentru ajutor! :)', feedbackError: 'Nu s-a putut trimite. Încearcă din nou.',
     bienvenidaSub: 'Permite accesul la locația ta', bienvenidaBody: 'Pentru a-ți oferi vremea și temperatura exactă în locul în care te afli.\n\n🔒 Locația ta este folosită doar în timp real pentru a consulta vremea. Nu o stocăm și nu o împărtășim niciodată cu nimeni.', bienvenidaBtn: 'Permite localizarea', bienvenidaLink: 'Prefer să caut orașul meu →', denegadoTit: 'Fără localizare', denegadoBody: 'Nu putem detecta automat poziția ta, dar poți folosi aplicația căutând orașul tău.', denegadoBtn: '🔍 Caută orașul meu', denegadoAjustesBtn: 'Mergi la Setări', denegadoInstr: 'Setări → Aplicații → QuickTemp → Permisiuni → Locație → Activează',
     cambiarCiudad: 'Schimbă orașul',
     tuUbicacion: 'Locația ta',
@@ -1660,7 +1680,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Nem sikerült lekérni a helyzetet.',
     errorTemperatura: 'Nem sikerült lekérni a hőmérsékletet.',
     actualizado: 'Frissítve',
-    ajustes: 'Beállítások', idioma: 'Nyelv', radar: '🌧 Csapadékradar', probLluvia: 'Esővalószínűség következő óra', ajustesTemp: 'Hőmérséklet', ajustesVel: 'Szélsebesség', diaViento: 'Szélsebesség', diaPrecip: 'Csapadék', diaProbLluvia: 'Esővalószínűség', ciudadesGuardadas: 'Mentett városok', mediaHistorica: 'történelmi átlag', prediccion: 'előrejelzés', horaLocal: 'Helyi idő', altitudTxt: '{v} magasság',
+    ajustes: 'Beállítások', idioma: 'Nyelv', radar: '🌧 Csapadékradar', probLluvia: 'Esővalószínűség következő óra', ajustesTemp: 'Hőmérséklet', ajustesVel: 'Szélsebesség', diaViento: 'Szélsebesség', diaPrecip: 'Csapadék', diaProbLluvia: 'Esővalószínűség', ciudadesGuardadas: 'Mentett városok', mediaHistorica: 'történelmi átlag', prediccion: 'előrejelzés', horaLocal: 'Helyi idő', altitudTxt: '{v} magasság', ayudanosTitulo: 'Segíts nekünk', ayudanosTexto: 'Szerinted javíthatunk valamin? {escribenos} Ha tetszik az alkalmazás, {valoracion}', ayudanosEscribenos: 'Kapcsolat és javaslatok', ayudanosValoracion: 'értékelj minket a Google Play-en.', feedbackTitulo: 'Írj nekünk', feedbackNombre: 'A neved', feedbackEmail: 'Az emailed (opcionális)', feedbackMensaje: 'Mondd el, min javíthatnánk...', feedbackEnviar: 'Küldés', feedbackEnviando: 'Küldés...', feedbackGracias: 'Köszönjük a segítséged! :)', feedbackError: 'Nem sikerült elküldeni. Próbáld újra.',
     bienvenidaSub: 'Helymeghatározás engedélyezése', bienvenidaBody: 'Hogy pontos időjárást és hőmérsékletet adjunk a tartózkodási helyeden.\n\n🔒 A helyzeted csak valós időben, az időjárás lekérdezéséhez használjuk. Soha nem tároljuk és senkivel sem osztjuk meg.', bienvenidaBtn: 'Helymeghatározás engedélyezése', bienvenidaLink: 'Inkább megkeresem a városomat →', denegadoTit: 'Nincs helymeghatározás', denegadoBody: 'Nem tudjuk automatikusan meghatározni a pozíciódat, de használhatod az alkalmazást a városod keresésével.', denegadoBtn: '🔍 Város keresése', denegadoAjustesBtn: 'Rendszerbeállításokhoz', denegadoInstr: 'Beállítások → Alkalmazások → QuickTemp → Engedélyek → Helymeghatározás → Bekapcsolás',
     cambiarCiudad: 'Város megváltoztatása',
     tuUbicacion: 'Az Ön helyzete',
@@ -1702,7 +1722,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Не вдалося визначити ваше місцезнаходження.',
     errorTemperatura: 'Не вдалося отримати температуру.',
     actualizado: 'Оновлено',
-    ajustes: 'Налаштування', idioma: 'Мова', radar: '🌧 Радар опадів', probLluvia: 'Ймовірність дощу протягом години', ajustesTemp: 'Температура', ajustesVel: 'Швидкість вітру', diaViento: 'Швидкість вітру', diaPrecip: 'Опади', diaProbLluvia: 'Ймовірність дощу', ciudadesGuardadas: 'Збережені міста', mediaHistorica: 'історичне середнє', prediccion: 'прогноз', horaLocal: 'Місцевий час', altitudTxt: 'висота {v}',
+    ajustes: 'Налаштування', idioma: 'Мова', radar: '🌧 Радар опадів', probLluvia: 'Ймовірність дощу протягом години', ajustesTemp: 'Температура', ajustesVel: 'Швидкість вітру', diaViento: 'Швидкість вітру', diaPrecip: 'Опади', diaProbLluvia: 'Ймовірність дощу', ciudadesGuardadas: 'Збережені міста', mediaHistorica: 'історичне середнє', prediccion: 'прогноз', horaLocal: 'Місцевий час', altitudTxt: 'висота {v}', ayudanosTitulo: 'Допоможіть нам', ayudanosTexto: 'Думаєте, ми можемо стати кращими? {escribenos} Якщо вам подобається застосунок, {valoracion}', ayudanosEscribenos: 'Контакти та пропозиції', ayudanosValoracion: 'оцініть нас у Google Play.', feedbackTitulo: 'Напишіть нам', feedbackNombre: 'Ваше ім’я', feedbackEmail: 'Ваш email (необов’язково)', feedbackMensaje: 'Розкажіть, що ми можемо покращити...', feedbackEnviar: 'Надіслати', feedbackEnviando: 'Надсилання...', feedbackGracias: 'Дякуємо за вашу допомогу! :)', feedbackError: 'Не вдалося надіслати. Спробуйте ще раз.',
     bienvenidaSub: 'Надайте доступ до вашого місцезнаходження', bienvenidaBody: 'Щоб показати точну погоду й температуру у вашому місці перебування.\n\n🔒 Ваше місцезнаходження використовується лише в реальному часі для отримання погоди. Ми ніколи його не зберігаємо і ні з ким не ділимося.', bienvenidaBtn: 'Дозволити доступ', bienvenidaLink: 'Я краще пошукаю своє місто →', denegadoTit: 'Немає доступу до місцезнаходження', denegadoBody: 'Ми не можемо автоматично визначити вашу позицію, але ви можете користуватися застосунком, знайшовши своє місто вручну.', denegadoBtn: '🔍 Знайти моє місто', denegadoAjustesBtn: 'Перейти до налаштувань системи', denegadoInstr: 'Налаштування → Застосунки → QuickTemp → Дозволи → Місцезнаходження → Увімкнути',
     cambiarCiudad: 'Змінити місто',
     tuUbicacion: 'Ваше місцезнаходження',
@@ -1744,7 +1764,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Kunne ikke finde din placering.',
     errorTemperatura: 'Kunne ikke hente temperaturen.',
     actualizado: 'Opdateret',
-    ajustes: 'Indstillinger', idioma: 'Sprog', radar: '🌧 Regnradar', probLluvia: 'Sandsynlighed for regn næste time', ajustesTemp: 'Temperatur', ajustesVel: 'Vindhastighed', diaViento: 'Vindhastighed', diaPrecip: 'Nedbør', diaProbLluvia: 'Sandsynlighed for regn', ciudadesGuardadas: 'Gemte byer', mediaHistorica: 'historisk gennemsnit', prediccion: 'prognose', horaLocal: 'Lokal tid', altitudTxt: '{v} højde',
+    ajustes: 'Indstillinger', idioma: 'Sprog', radar: '🌧 Regnradar', probLluvia: 'Sandsynlighed for regn næste time', ajustesTemp: 'Temperatur', ajustesVel: 'Vindhastighed', diaViento: 'Vindhastighed', diaPrecip: 'Nedbør', diaProbLluvia: 'Sandsynlighed for regn', ciudadesGuardadas: 'Gemte byer', mediaHistorica: 'historisk gennemsnit', prediccion: 'prognose', horaLocal: 'Lokal tid', altitudTxt: '{v} højde', ayudanosTitulo: 'Hjælp os', ayudanosTexto: 'Tror du, vi kan gøre det bedre? {escribenos} Hvis du kan lide appen, {valoracion}', ayudanosEscribenos: 'Kontakt og forslag', ayudanosValoracion: 'bedøm os på Google Play.', feedbackTitulo: 'Skriv til os', feedbackNombre: 'Dit navn', feedbackEmail: 'Din email (valgfri)', feedbackMensaje: 'Fortæl os, hvad vi kan forbedre...', feedbackEnviar: 'Send', feedbackEnviando: 'Sender...', feedbackGracias: 'Tak for din hjælp! :)', feedbackError: 'Kunne ikke sendes. Prøv igen.',
     bienvenidaSub: 'Tillad adgang til din placering', bienvenidaBody: 'For at give dig det nøjagtige vejr og temperatur, hvor du befinder dig.\n\n🔒 Din placering bruges kun i realtid til at hente vejret. Vi gemmer den aldrig og deler den ikke med nogen.', bienvenidaBtn: 'Tillad placering', bienvenidaLink: 'Jeg vil hellere søge efter min by →', denegadoTit: 'Ingen placering', denegadoBody: 'Vi kan ikke registrere din position automatisk, men du kan stadig bruge appen ved at søge efter din by.', denegadoBtn: '🔍 Søg efter min by', denegadoAjustesBtn: 'Gå til systemindstillinger', denegadoInstr: 'Indstillinger → Apps → QuickTemp → Tilladelser → Placering → Aktivér',
     cambiarCiudad: 'Skift by',
     tuUbicacion: 'Din placering',
@@ -1786,7 +1806,7 @@ const TRADUCCIONES = {
     errorUbicacion: 'Nepodařilo se zjistit vaši polohu.',
     errorTemperatura: 'Nepodařilo se načíst teplotu.',
     actualizado: 'Aktualizováno',
-    ajustes: 'Nastavení', idioma: 'Jazyk', radar: '🌧 Radar srážek', probLluvia: 'Pravděpodobnost deště příští hodinu', ajustesTemp: 'Teplota', ajustesVel: 'Rychlost větru', diaViento: 'Rychlost větru', diaPrecip: 'Srážky', diaProbLluvia: 'Pravděpodobnost deště', ciudadesGuardadas: 'Uložená města', mediaHistorica: 'historický průměr', prediccion: 'předpověď', horaLocal: 'Místní čas', altitudTxt: '{v} nadmořská výška',
+    ajustes: 'Nastavení', idioma: 'Jazyk', radar: '🌧 Radar srážek', probLluvia: 'Pravděpodobnost deště příští hodinu', ajustesTemp: 'Teplota', ajustesVel: 'Rychlost větru', diaViento: 'Rychlost větru', diaPrecip: 'Srážky', diaProbLluvia: 'Pravděpodobnost deště', ciudadesGuardadas: 'Uložená města', mediaHistorica: 'historický průměr', prediccion: 'předpověď', horaLocal: 'Místní čas', altitudTxt: '{v} nadmořská výška', ayudanosTitulo: 'Pomozte nám', ayudanosTexto: 'Myslíte, že se můžeme zlepšit? {escribenos} Pokud se vám aplikace líbí, {valoracion}', ayudanosEscribenos: 'Kontakt a návrhy', ayudanosValoracion: 'ohodnoťte nás na Google Play.', feedbackTitulo: 'Napište nám', feedbackNombre: 'Vaše jméno', feedbackEmail: 'Váš email (nepovinné)', feedbackMensaje: 'Napište nám, co můžeme zlepšit...', feedbackEnviar: 'Odeslat', feedbackEnviando: 'Odesílání...', feedbackGracias: 'Děkujeme za vaši pomoc! :)', feedbackError: 'Nepodařilo se odeslat. Zkuste to znovu.',
     bienvenidaSub: 'Povolte přístup k vaší poloze', bienvenidaBody: 'Abychom vám mohli zobrazit přesné počasí a teplotu ve vašem okolí.\n\n🔒 Vaše poloha se používá pouze v reálném čase pro zjištění počasí. Nikdy ji neukládáme ani nesdílíme s nikým.', bienvenidaBtn: 'Povolit polohu', bienvenidaLink: 'Raději vyhledám své město →', denegadoTit: 'Bez polohy', denegadoBody: 'Vaši polohu nemůžeme zjistit automaticky, ale aplikaci můžete stále používat vyhledáním svého města.', denegadoBtn: '🔍 Vyhledat mé město', denegadoAjustesBtn: 'Přejít do nastavení systému', denegadoInstr: 'Nastavení → Aplikace → QuickTemp → Oprávnění → Poloha → Povolit',
     cambiarCiudad: 'Změnit město',
     tuUbicacion: 'Vaše poloha',
@@ -1975,7 +1995,7 @@ document.getElementById('selectIdioma').addEventListener('change', (e) => {
   renderFavoritosLista();
 });
 
-const AYUDA_LABEL = { es:'Ayuda','es-US':'Ayuda', en:'Help', de:'Hilfe', fr:'Aide', pt:'Ajuda', it:'Aiuto', zh:'帮助', ca:'Ajuda', eu:'Laguntza', gl:'Axuda', ar:'مساعدة', ru:'Помощь', ja:'ヘルプ', ko:'도움말', nl:'Help', pl:'Pomoc', hi:'सहायता', ro:'Ajutor', hu:'Súgó', uk:'Довідка', da:'Hjælp', cs:'Nápověda' };
+const AYUDA_LABEL = { es:'Instrucciones de uso','es-US':'Instrucciones de uso', en:'How to use', de:'Bedienungsanleitung', fr:'Mode d’emploi', pt:'Instruções de utilização', 'pt-BR':'Instruções de uso', it:'Istruzioni per l’uso', zh:'使用说明', ca:'Instruccions d’ús', eu:'Erabiltzeko argibideak', gl:'Instrucións de uso', ar:'تعليمات الاستخدام', ru:'Инструкция по использованию', ja:'使い方', ko:'사용 방법', nl:'Gebruiksaanwijzing', pl:'Instrukcja obsługi', hi:'उपयोग निर्देश', ro:'Instrucțiuni de utilizare', hu:'Használati útmutató', uk:'Інструкція з використання', da:'Brugsanvisning', cs:'Návod k použití' };
 // Nombres de fase lunar (claves tal como las da WeatherAPI Astronomy)
 // para el texto sutil del modal de sol/noche, ej. "Luna menguante (8%)".
 const FASE_LUNAR = {
@@ -1988,17 +2008,93 @@ const FASE_LUNAR = {
   'Last Quarter':     { es:'Cuarto menguante','es-US':'Cuarto menguante', en:'Last quarter', de:'Letztes Viertel', fr:'Dernier quartier', pt:'Quarto minguante', it:'Ultimo quarto', zh:'下弦月', ca:'Quart minvant', eu:'Azken laurdena', gl:'Cuarto minguante', ar:'التربيع الأخير', ru:'Последняя четверть', ja:'下弦の月', ko:'하현달', nl:'Laatste kwartier', pl:'Ostatnia kwadra', hi:'अंतिम चतुर्थांश', ro:'Ultimul pătrar', hu:'Utolsó negyed', uk:'Остання чверть', da:'Sidste kvarter', cs:'Poslední čtvrť' },
   'Waning Crescent':  { es:'Luna menguante','es-US':'Luna menguante', en:'Waning crescent', de:'Abnehmende Sichel', fr:'Dernier croissant', pt:'Lua minguante', it:'Luna calante', zh:'残月', ca:'Lluna minvant', eu:'Ilargi beherakorra', gl:'Lúa minguante', ar:'هلال متناقص', ru:'Убывающий серп', ja:'細くなる月', ko:'그믐달', nl:'Afnemende maansikkel', pl:'Ubywający sierp', hi:'घटता अर्धचंद्र', ro:'Semilună descrescătoare', hu:'Fogyó sarló', uk:'Старий місяць', da:'Aftagende månesegl', cs:'Couvající srpek' },
 };
-const VALORAR_LABEL = { es:'Valorar QuickTemp','es-US':'Valorar QuickTemp', en:'Rate QuickTemp', de:'QuickTemp bewerten', fr:'Noter QuickTemp', pt:'Avaliar QuickTemp', it:'Valuta QuickTemp', zh:'评价 QuickTemp', ca:'Valorar QuickTemp', eu:'Baloratu QuickTemp', gl:'Valorar QuickTemp', ar:'قيّم QuickTemp', ru:'Оценить QuickTemp', ja:'QuickTempを評価', ko:'QuickTemp 평가하기', nl:'QuickTemp beoordelen', pl:'Oceń QuickTemp', hi:'QuickTemp को रेट करें', ro:'Evaluează QuickTemp', hu:'QuickTemp értékelése', uk:'Оцінити QuickTemp', da:'Bedøm QuickTemp', cs:'Ohodnotit QuickTemp' };
-// El boton "Valorar" solo se activa cuando la web se carga DESDE la app
-// Android (con ?apk=1 en la URL, lo pone MainActivity.kt), nunca para
-// visitantes normales de la web/PWA. Asi se puede probar en una APK de
-// pruebas sin que el boton aparezca en produccion hasta que se publique
-// la version de la APK que ya sabe abrir Play Store correctamente.
-const _mostrarBtnValorar = /[?&]apk=1(&|$)/.test(location.search) || localStorage.getItem('ql_apk') === '1';
-if (_mostrarBtnValorar) localStorage.setItem('ql_apk', '1');
+const VALORAR_LABEL = { es:'Valorar en Google Play','es-US':'Valorar en Google Play', en:'Rate on Google Play', de:'Bei Google Play bewerten', fr:'Évaluer sur Google Play', pt:'Avaliar no Google Play', 'pt-BR':'Avaliar no Google Play', it:'Valuta su Google Play', zh:'在 Google Play 上评分', ca:'Valorar a Google Play', eu:'Baloratu Google Play-n', gl:'Valorar en Google Play', ar:'قيّم على Google Play', ru:'Оценить в Google Play', ja:'Google Playで評価', ko:'Google Play에서 평가', nl:'Beoordelen op Google Play', pl:'Oceń w Google Play', hi:'Google Play पर रेट करें', ro:'Evaluează pe Google Play', hu:'Értékelés a Google Play-en', uk:'Оцінити в Google Play', da:'Bedøm på Google Play', cs:'Ohodnotit na Google Play' };
 const MAX_LABEL = { es:'Máx','es-US':'Máx', en:'Max', de:'Max', fr:'Max', pt:'Máx', 'pt-BR':'Máx', it:'Max', zh:'最高', ca:'Màx', eu:'Geh.', gl:'Máx', ar:'أعلى', ru:'Макс', ja:'最高', ko:'최고', nl:'Max', pl:'Maks', hi:'अधि.', ro:'Max', hu:'Max', uk:'Макс', da:'Maks', cs:'Max' };
 const MIN_LABEL = { es:'Mín','es-US':'Mín', en:'Min', de:'Min', fr:'Min', pt:'Mín', 'pt-BR':'Mín', it:'Min', zh:'最低', ca:'Mín', eu:'Gutx.', gl:'Mín', ar:'أدنى', ru:'Мин', ja:'最低', ko:'최저', nl:'Min', pl:'Min', hi:'न्यून.', ro:'Min', hu:'Min', uk:'Мін', da:'Min', cs:'Min' };
 const TIP_TARJETAS = { es:'Toca cualquier tarjeta para ver más','es-US':'Toca cualquier tarjeta para ver más', en:'Tap any card to see more', de:'Tippe auf eine Kachel für mehr Details', fr:'Touchez une carte pour en savoir plus', pt:'Toque num cartão para ver mais', it:'Tocca una scheda per saperne di più', zh:'点击任意卡片查看更多', ca:'Toca qualsevol targeta per veure més', eu:'Sakatu edozein txartel gehiago ikusteko', gl:'Toca calquera tarxeta para ver máis', ar:'اضغط على أي بطاقة لمزيد من التفاصيل', ru:'Нажмите на карточку, чтобы узнать больше', ja:'カードをタップすると詳細が見られます', ko:'카드를 탭하면 자세히 볼 수 있어요', nl:'Tik op een kaart voor meer info', pl:'Dotknij kartę, aby zobaczyć więcej', hi:'अधिक देखने के लिए किसी भी कार्ड पर टैप करें', ro:'Atinge orice card pentru mai multe detalii', hu:'Koppints egy kártyára a részletekért', uk:'Торкніться будь-якої картки, щоб дізнатися більше', da:'Tryk på et kort for at se mere', cs:'Klepnutím na kartu zobrazíte více' };
+// Pinta el bloque "Ayúdanos" del panel de ajustes: un párrafo traducido
+// con dos enlaces incrustados (escribenos por mailto, valoracion a la
+// ficha de Play Store) sustituyendo los placeholders {escribenos}/
+// {valoracion} de la plantilla T.ayudanosTexto.
+function pintarAyudanos() {
+  const elEscribenos = document.getElementById('ayudanosEscribenosLabel');
+  if (!elEscribenos) return;
+  elEscribenos.textContent = T.ayudanosEscribenos || 'Contacto y sugerencias';
+}
+
+// ── Modal de feedback ("Escríbenos") ─────────────────────────────────────
+// Envía el formulario a una Edge Function de Supabase (reenvía por email
+// vía Resend a dhaudiovisuales@gmail.com). Nunca se expone ninguna clave
+// secreta aquí: solo la publishable key del proyecto, pensada para usarse
+// en cliente.
+const QT_FEEDBACK_URL = 'https://lwakhrcidxmfidnxhyyg.supabase.co/functions/v1/quicktemp-feedback';
+const QT_FEEDBACK_KEY = 'sb_publishable_17PDO15KV6GrAPi4JxVT_A_b6znPkBj';
+
+function pintarTextosFeedback() {
+  const setPh = (id, val) => { const el = document.getElementById(id); if (el && val) el.placeholder = val; };
+  const setTxt = (id, val) => { const el = document.getElementById(id); if (el && val) el.textContent = val; };
+  setTxt('feedbackTitulo', T.feedbackTitulo);
+  setPh('feedbackNombre', T.feedbackNombre);
+  setPh('feedbackEmail', T.feedbackEmail);
+  setPh('feedbackMensaje', T.feedbackMensaje);
+  setTxt('feedbackEnviar', T.feedbackEnviar);
+}
+
+function abrirFeedbackModal() {
+  document.getElementById('ajustesPanel').hidden = true;
+  pintarTextosFeedback();
+  const form = document.getElementById('feedbackForm');
+  const gracias = document.getElementById('feedbackGracias');
+  form.hidden = false;
+  gracias.hidden = true;
+  document.getElementById('feedbackErrorMsg').hidden = true;
+  document.getElementById('feedbackModal').classList.add('open');
+}
+function cerrarFeedbackModal() {
+  document.getElementById('feedbackModal').classList.remove('open');
+}
+
+(function initFeedbackForm() {
+  const modal = document.getElementById('feedbackModal');
+  const form = document.getElementById('feedbackForm');
+  if (!modal || !form) return;
+  document.getElementById('feedbackClose').addEventListener('click', cerrarFeedbackModal);
+  modal.addEventListener('click', (e) => { if (e.target === modal) cerrarFeedbackModal(); });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('feedbackEnviar');
+    const errEl = document.getElementById('feedbackErrorMsg');
+    errEl.hidden = true;
+    const nombre = document.getElementById('feedbackNombre').value.trim();
+    const email = document.getElementById('feedbackEmail').value.trim();
+    const mensaje = document.getElementById('feedbackMensaje').value.trim();
+    if (!nombre || !mensaje) return;
+    btn.disabled = true;
+    const textoOriginal = btn.textContent;
+    btn.textContent = T.feedbackEnviando || 'Enviando...';
+    try {
+      const res = await fetch(QT_FEEDBACK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + QT_FEEDBACK_KEY },
+        body: JSON.stringify({ name: nombre, email, message: mensaje }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) throw new Error('send failed');
+      form.hidden = true;
+      const gracias = document.getElementById('feedbackGracias');
+      gracias.textContent = T.feedbackGracias || '¡Gracias por tu ayuda! :)';
+      gracias.hidden = false;
+      form.reset();
+    } catch (err) {
+      errEl.textContent = T.feedbackError || 'No se pudo enviar. Inténtalo de nuevo.';
+      errEl.hidden = false;
+    } finally {
+      btn.disabled = false;
+      btn.textContent = textoOriginal;
+    }
+  });
+})();
 function actualizarTextosFijos() {
   document.getElementById('btnActualizar').textContent = T.actualizar;
   document.getElementById('btnAjustes').textContent = T.ajustes;
@@ -2006,13 +2102,9 @@ function actualizarTextosFijos() {
   document.getElementById('ajustesTempLabel').textContent = T.ajustesTemp;
   document.getElementById('ajustesVelLabel').textContent = T.ajustesVel;
   document.getElementById('ajustesAyudaLabel').textContent = AYUDA_LABEL[idioma] || 'Help';
-  if (_mostrarBtnValorar) {
-    document.getElementById('ajustesValorarLabel').textContent = VALORAR_LABEL[idioma] || 'Rate QuickTemp';
-    document.getElementById('btnValorar').hidden = false;
-  }
+  document.getElementById('ajustesValorarLabel').textContent = VALORAR_LABEL[idioma] || 'Rate on Google Play';
   document.getElementById('btnRadar').textContent = T.radar;
-  const favsTit = document.getElementById('ajustesFavsTitulo');
-  if (favsTit) favsTit.textContent = T.ciudadesGuardadas;
+  pintarAyudanos();
   if (ultimaActualizacion) setEstado(T.actualizado + ' ' + new Date(ultimaActualizacion).toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' }));
   const bt = document.getElementById('brujulaTitulo'); if (bt) bt.textContent = T.brujula || 'Brújula';
   const bsb = document.getElementById('brujulaCerrarBtn'); if (bsb) bsb.textContent = T.cerrar || 'Cerrar';
@@ -2065,45 +2157,10 @@ function actualizarAjustes() {
   rellenarSelectIdioma();
   actualizarTextosFijos();
 }
-function renderFavsEnAjustes() {
-  const seccion = document.getElementById('ajustesFavsSeccion');
-  const lista = document.getElementById('ajustesFavsLista');
-  const favs = loadFavoritos();
-  if (!favs.length) { seccion.hidden = true; return; }
-  seccion.hidden = false;
-  lista.innerHTML = favs.map((f, i) => `
-    <div class="ajustes-fav-item" data-i="${i}">
-      <span class="ajustes-fav-nombre">${f.nombre}</span>
-      <button class="ajustes-fav-remove" data-i="${i}" aria-label="Eliminar">✕</button>
-    </div>`).join('');
-  lista.querySelectorAll('.ajustes-fav-item').forEach(el => {
-    el.addEventListener('click', (e) => {
-      if (e.target.classList.contains('ajustes-fav-remove')) return;
-      const f = loadFavoritos()[+el.dataset.i];
-      if (!f) return;
-      ubicacionManual = { lat: f.lat, lon: f.lon, nombre: f.nombre };
-      document.getElementById('ajustesPanel').hidden = true;
-      cargarDatos(f.lat, f.lon, f.nombre);
-    });
-  });
-  lista.querySelectorAll('.ajustes-fav-remove').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const favs = loadFavoritos();
-      favs.splice(+btn.dataset.i, 1);
-      saveFavoritos(favs);
-      renderFavsEnAjustes();
-      renderFavoritosLista();
-      actualizarBtnFav();
-    });
-  });
-}
-
 document.getElementById('btnAjustes').addEventListener('click', (e) => {
   e.stopPropagation();
   const panel = document.getElementById('ajustesPanel');
   panel.hidden = !panel.hidden;
-  if (!panel.hidden) renderFavsEnAjustes();
 });
 document.addEventListener('click', () => { document.getElementById('ajustesPanel').hidden = true; });
 document.getElementById('ajustesPanel').addEventListener('click', (e) => e.stopPropagation());
@@ -2191,11 +2248,8 @@ function inicializarTextosDeArranque() {
   document.getElementById('ajustesTempLabel').textContent = T.ajustesTemp || 'Temperature';
   document.getElementById('ajustesVelLabel').textContent = T.ajustesVel || 'Wind speed';
   document.getElementById('ajustesAyudaLabel').textContent = AYUDA_LABEL[idioma] || 'Help';
-  if (_mostrarBtnValorar) {
-    document.getElementById('ajustesValorarLabel').textContent = VALORAR_LABEL[idioma] || 'Rate QuickTemp';
-    document.getElementById('btnValorar').hidden = false;
-  }
-  document.getElementById('ajustesFavsTitulo').textContent = T.ciudadesGuardadas || 'Saved cities';
+  document.getElementById('ajustesValorarLabel').textContent = VALORAR_LABEL[idioma] || 'Rate on Google Play';
+  pintarAyudanos();
 }
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', inicializarTextosDeArranque);
@@ -6009,15 +6063,27 @@ function abrirEnGoogleMaps() {
     renderAyuda(); modal.classList.add('open');
   });
 
-  // Botón pasivo "Valorar QuickTemp": solo abre la ficha de Play Store.
-  // No hay ningún filtro ni pregunta previa -- el usuario decide por su
-  // cuenta si quiere entrar, sin que la app le empuje en ningún sentido.
-  // Solo visible cuando _mostrarBtnValorar es true (ver definicion mas
-  // arriba: la web cargada desde la APK con ?apk=1).
+  // Botón pasivo "Valorar QuickTemp": intenta abrir la app nativa de Play
+  // Store directamente en la ficha (market://, que Android resuelve con
+  // la app de Play Store instalada) y, si no se puede (navegador de
+  // escritorio, o el dispositivo no la resuelve), cae a la URL web normal
+  // tras un breve margen. No hay ningún filtro ni pregunta previa -- el
+  // usuario decide por su cuenta si quiere entrar.
   document.getElementById('btnValorar').addEventListener('click', (e) => {
     e.stopPropagation();
     document.getElementById('ajustesPanel').hidden = true;
-    window.location.href = 'https://play.google.com/store/apps/details?id=com.diegohg.quicktemp';
+    const pkg = 'com.diegohg.quicktemp';
+    const webUrl = `https://play.google.com/store/apps/details?id=${pkg}`;
+    const marketUrl = `market://details?id=${pkg}`;
+    const fallback = setTimeout(() => { window.location.href = webUrl; }, 800);
+    document.addEventListener('visibilitychange', () => { if (document.hidden) clearTimeout(fallback); }, { once: true });
+    window.location.href = marketUrl;
+  });
+
+  // Fila "Escríbenos" del bloque Ayúdanos: abre el modal de feedback.
+  document.getElementById('btnEscribenos').addEventListener('click', (e) => {
+    e.stopPropagation();
+    abrirFeedbackModal();
   });
 
   function cerrarAyuda() { modal.classList.remove('open'); }
