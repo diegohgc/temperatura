@@ -6063,21 +6063,25 @@ function abrirEnGoogleMaps() {
     renderAyuda(); modal.classList.add('open');
   });
 
-  // Botón pasivo "Valorar QuickTemp": intenta abrir la app nativa de Play
-  // Store directamente en la ficha (market://, que Android resuelve con
-  // la app de Play Store instalada) y, si no se puede (navegador de
-  // escritorio, o el dispositivo no la resuelve), cae a la URL web normal
-  // tras un breve margen. No hay ningún filtro ni pregunta previa -- el
-  // usuario decide por su cuenta si quiere entrar.
+  // Botón pasivo "Valorar QuickTemp": abre la ficha de Play Store.
+  // No hay ningún filtro ni pregunta previa -- el usuario decide por su
+  // cuenta si quiere entrar, sin que la app le empuje en ningún sentido.
+  //
+  // Importante (comprobado 2026-09-18 en la APK real): el esquema
+  // market:// NO funciona aquí porque esto corre dentro de un WebView
+  // (no un navegador completo como Chrome) -- el WebView no sabe
+  // resolverlo y muestra un error nativo "Página web no disponible /
+  // ERR_UNKNOWN_URL_SCHEME" en vez de abrir la app de Play Store. Para
+  // que el botón abra la app nativa de verdad (y no la ficha web dentro
+  // del propio WebView) hace falta un cambio en el lado nativo Android
+  // (repo quicktemp-android): interceptar esta URL en
+  // shouldOverrideUrlLoading() del WebViewClient y lanzar un Intent
+  // explícito hacia com.android.vending -- no se puede resolver solo con
+  // JS/HTML desde aquí.
   document.getElementById('btnValorar').addEventListener('click', (e) => {
     e.stopPropagation();
     document.getElementById('ajustesPanel').hidden = true;
-    const pkg = 'com.diegohg.quicktemp';
-    const webUrl = `https://play.google.com/store/apps/details?id=${pkg}`;
-    const marketUrl = `market://details?id=${pkg}`;
-    const fallback = setTimeout(() => { window.location.href = webUrl; }, 800);
-    document.addEventListener('visibilitychange', () => { if (document.hidden) clearTimeout(fallback); }, { once: true });
-    window.location.href = marketUrl;
+    window.location.href = 'https://play.google.com/store/apps/details?id=com.diegohg.quicktemp';
   });
 
   // Fila "Escríbenos" del bloque Ayúdanos: abre el modal de feedback.
