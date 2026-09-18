@@ -4196,7 +4196,15 @@ function renderDatos(datos) {
       else if (wapiCode === 1135) weatherCode = 45;
       else weatherCode = 48;
     }
-    else if ([1063,1150,1153,1180,1183].includes(wapiCode)) weatherCode = llueveDeVerdad ? 51 : 2;
+    // Llovizna real (drizzle) vs lluvia ligera real: WeatherAPI ya los
+    // distingue en su propia nomenclatura (1150/1153 "drizzle" vs
+    // 1180/1183 "rain"), pero antes se agrupaban todos como "Llovizna
+    // ligera" -- por eso nunca se veia "Lluvia"/"Lluvia ligera" aunque
+    // WeatherAPI reportara lluvia real. 1063 (posible lluvia dispersa,
+    // condicion de baja confianza) se queda con la llovizna por ser la
+    // más suave de las dos.
+    else if ([1063,1150,1153].includes(wapiCode)) weatherCode = llueveDeVerdad ? 51 : 2;
+    else if ([1180,1183].includes(wapiCode)) weatherCode = llueveDeVerdad ? 61 : 2; // patchy/light rain
     // Lluvia moderada/fuerte: antes se agrupaban todos estos codigos de
     // WeatherAPI en "Lluvia ligera" (61) sin mirar la intensidad real,
     // por lo que un aguacero fuerte se mostraba igual que una llovizna.
