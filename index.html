@@ -6481,7 +6481,7 @@ function wbgInit(key){
     case 'rain':{
       wbgClouds=_wbgNubesDensas(sc,'rgba(35,40,50,1)',0.35,0.85);
       const _rCount=[0,90,150,220][wbgIntensidad]||150, _rSpd=[0,4,5,6.5][wbgIntensidad]||5, _rSpdVar=[0,4,7,10][wbgIntensidad]||7;
-      wbgStreaks=Array.from({length:_rCount},()=>({x:Math.random()*wbgW,y:Math.random()*wbgH,spd:_rSpd+Math.random()*_rSpdVar,len:14+Math.random()*20,op:0.10+Math.random()*.18}));
+      wbgStreaks=Array.from({length:_rCount},()=>({x:Math.random()*wbgW,y:Math.random()*wbgH,spd:_rSpd+Math.random()*_rSpdVar,len:14+Math.random()*20,op:0.15+Math.random()*.20}));
       break;
     }
     case 'storm':
@@ -6492,14 +6492,14 @@ function wbgInit(key){
         {x:wbgW*.78,y:wbgH*.14,sc:0.30*sc,alpha:0.51,speed:0.18,flip:false,tex:1,tint:'rgba(35,40,50,1)',tintAlpha:0.35},
         {x:wbgW*.02,y:wbgH*.28,sc:0.24*sc,alpha:0.43,speed:0.24,flip:true, tex:0,tint:'rgba(35,40,50,1)',tintAlpha:0.35},
       ]);
-      wbgStreaks=Array.from({length:150},()=>({x:Math.random()*wbgW,y:Math.random()*wbgH,spd:5+Math.random()*7,len:14+Math.random()*20,op:0.10+Math.random()*.18}));
-      wbgHeavyS=Array.from({length:160},()=>({x:Math.random()*wbgW,y:Math.random()*wbgH,spd:8+Math.random()*10,len:20+Math.random()*30,op:0.10+Math.random()*.20}));
+      wbgStreaks=Array.from({length:150},()=>({x:Math.random()*wbgW,y:Math.random()*wbgH,spd:5+Math.random()*7,len:14+Math.random()*20,op:0.15+Math.random()*.20}));
+      wbgHeavyS=Array.from({length:160},()=>({x:Math.random()*wbgW,y:Math.random()*wbgH,spd:8+Math.random()*10,len:20+Math.random()*30,op:0.15+Math.random()*.22}));
       wbgLightT=2+Math.random()*4; wbgLightA=0;
       break;
     case 'drizzle':{
       wbgClouds=_wbgNubesDensas(sc,'rgba(45,52,62,1)',0.3,0.85);
       const _dCount=[0,60,100,140][wbgIntensidad]||100;
-      wbgDrizzle=Array.from({length:_dCount},()=>({x:Math.random()*wbgW,y:Math.random()*wbgH,spd:2.2+Math.random()*2.8,len:7+Math.random()*11,op:0.09+Math.random()*.14}));
+      wbgDrizzle=Array.from({length:_dCount},()=>({x:Math.random()*wbgW,y:Math.random()*wbgH,spd:2.2+Math.random()*2.8,len:7+Math.random()*11,op:0.14+Math.random()*.16}));
       break;
     }
     case 'snow':
