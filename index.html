@@ -6536,7 +6536,10 @@ function wbgInit(key){
       ]; break;
     case 'nightrain':{
       const _nrCount=[0,65,110,165][wbgIntensidad]||110, _nrSpd=[0,4,5,6.5][wbgIntensidad]||5, _nrSpdVar=[0,4,7,10][wbgIntensidad]||7;
-      wbgNightR=Array.from({length:_nrCount},()=>({x:Math.random()*wbgW,y:Math.random()*wbgH,spd:_nrSpd+Math.random()*_nrSpdVar,len:14+Math.random()*20,op:0.06+Math.random()*.11}));
+      // Opacidad de las gotas de noche: un poco más claritas que antes
+      // (0.06-0.17) para que se vean mejor en llovizna/lluvia ligera,
+      // sin tocar la cantidad de gotas (_nrCount).
+      wbgNightR=Array.from({length:_nrCount},()=>({x:Math.random()*wbgW,y:Math.random()*wbgH,spd:_nrSpd+Math.random()*_nrSpdVar,len:14+Math.random()*20,op:0.11+Math.random()*.14}));
       break;
     }
     case 'fog':
