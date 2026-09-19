@@ -4189,9 +4189,25 @@ function renderDatos(datos) {
     else if (wapiCode === 1006) weatherCode = 2;
     else if (wapiCode === 1009) weatherCode = 3;
     else if (wapiCode === 1030 || wapiCode === 1135 || wapiCode === 1147) {
-      // Niebla/bruma: solo aplicar si la visibilidad de OM confirma (<5 km)
+      // Niebla/bruma: WAPI la reporta con demasiada alegría (típico en
+      // mañanas con algo de humedad aunque en realidad esté despejado).
+      // Solo la confirmamos si la visibilidad real de OM es baja de verdad:
+      // niebla/bruma reales son <2000m; entre 2000-5000m es como mucho una
+      // ligera calima que no merece tapar un cielo despejado o nublado.
       const omVis = c.visibility ?? null; // metros
-      if (omVis !== null && omVis >= 5000) weatherCode = 3; // visibilidad OK → nublado
+      if (omVis !== null && omVis >= 2000) {
+        // Visibilidad buena: no es niebla real, usar la nubosidad de OM
+        // en su lugar para decidir despejado/parcial/nublado.
+        const omCloudNiebla = c.cloud_cover ?? null;
+        if (omCloudNiebla !== null) {
+          if      (omCloudNiebla >= 80) weatherCode = 3;
+          else if (omCloudNiebla >= 50) weatherCode = 2;
+          else if (omCloudNiebla >= 20) weatherCode = 1;
+          else weatherCode = 0;
+        } else {
+          weatherCode = 2; // sin dato de nubosidad, quedarse en un término medio
+        }
+      }
       else if (wapiCode === 1030) weatherCode = 47;
       else if (wapiCode === 1135) weatherCode = 45;
       else weatherCode = 48;
