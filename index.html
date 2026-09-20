@@ -1868,8 +1868,11 @@ function detectarIdioma() {
 let idioma = localStorage.getItem('ql_idioma') || detectarIdioma();
 let T = TRADUCCIONES[idioma] || TRADUCCIONES['en'];
 window.T = T;
-// Flag: true mientras la pantalla de bienvenida esté activa (bloquea GPS)
-let _bienvenidaActiva = !localStorage.getItem('ql_bienvenida_vista');
+// Ya no existe pantalla de bienvenida bloqueante (arranque sin fricción,
+// ver script de arranque más abajo) -- se deja esta variable en false
+// permanentemente para no tocar los puntos del código que aún la
+// consultan como guarda de seguridad.
+let _bienvenidaActiva = false;
 let ultimaActualizacion = null;
 const defaultF = (navigator.language || '').toLowerCase() === 'en-us';
 let usaFahrenheit = localStorage.getItem('ql_unidad') ? localStorage.getItem('ql_unidad') === 'F' : defaultF;
@@ -4610,6 +4613,10 @@ async function cargarDatos(latitude, longitude, nombreFijo, forzar = false) {
     document.getElementById('ciudadSub').textContent = _sp1.sub;
     const nombreCiudad = ciudad.sub ? `${ciudad.principal}, ${ciudad.sub}` : ciudad.principal;
     currentCoords = { lat: latitude, lon: longitude, nombre: nombreCiudad };
+    // Recordar la ultima ciudad vista (da igual si vino del GPS, de una
+    // busqueda manual o del arranque por defecto) para que la proxima
+    // apertura de la app cargue directamente aqui, sin fricción.
+    try { localStorage.setItem('ql_ultima_ubicacion', JSON.stringify({ lat: latitude, lon: longitude, nombre: ciudad.principal })); } catch (e) {}
     actualizarBtnFav();
     actualizarFavIdx();
     ultimosDatos = datosFinales;
@@ -7195,17 +7202,6 @@ window.aplicarFondoDinamico=function(weatherCode,isDay,astroData,lat,utcOffsetSe
   </div>
 </div>
 
-<!-- ── Pantalla de bienvenida (primera vez) ───────────────── -->
-<div id="modalBienvenida" style="display:none;position:fixed;inset:0;z-index:10000;background:linear-gradient(160deg,#1e3a5f,#3a6ea5);flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 28px;color:#fff">
-  <div style="font-size:3.5rem;margin-bottom:12px">🌡️</div>
-  <h1 style="font-size:1.8rem;font-weight:700;margin:0 0 6px;letter-spacing:-0.5px">QuickTemp</h1>
-  <p id="bienvenidaSubEl" style="font-size:1rem;opacity:0.7;margin:0 0 32px;font-weight:400"></p>
-  <p id="bienvenidaBodyEl" style="font-size:0.92rem;line-height:1.6;max-width:320px;opacity:0.85;margin:0 0 36px"></p>
-  <p id="bienvenidaNotaEl" style="font-size:0.78rem;color:#b8d4f0;margin:0 0 10px"></p>
-  <button id="btnBienvenidaPermitir" style="width:100%;max-width:300px;padding:16px;border:none;border-radius:16px;background:#fff;color:#1e3a5f;font-size:1rem;font-weight:700;cursor:pointer;margin-bottom:16px;letter-spacing:0.01em"></button>
-  <button id="btnBienvenidaCiudad" style="background:none;border:none;color:rgba(255,255,255,0.7);font-size:0.9rem;cursor:pointer;text-decoration:underline;padding:8px"></button>
-</div>
-
 <!-- ── Aviso de una sola vez: toca cualquier tarjeta para ampliar ── -->
 <div id="tipTarjetas" class="tip-pill" hidden>💡 <span id="tipTarjetasTxt"></span></div>
 
@@ -7221,18 +7217,11 @@ window.aplicarFondoDinamico=function(weatherCode,isDay,astroData,lat,utcOffsetSe
 
 <script>
 (function() {
-  const KEY = 'ql_bienvenida_vista';
-  const elBienvenida = document.getElementById('modalBienvenida');
   const elDenegado = document.getElementById('modalPermisoDenegado');
 
   // Aplicar traducciones (T está definido antes de este script)
   function aplicarTraducciones() {
     const t = (typeof T !== 'undefined') ? T : {};
-    document.getElementById('bienvenidaSubEl').textContent  = t.bienvenidaSub  || 'El tiempo real donde estás';
-    document.getElementById('bienvenidaBodyEl').textContent = t.bienvenidaBody || 'Para mostrarte la temperatura necesitamos saber dónde estás. Tu ubicación nunca sale de tu dispositivo.';
-    document.getElementById('bienvenidaNotaEl').textContent = t.bienvenidaNota || 'Solo te pediremos este permiso esta primera vez.';
-    document.getElementById('btnBienvenidaPermitir').textContent = t.bienvenidaBtn  || 'Permitir ubicación';
-    document.getElementById('btnBienvenidaCiudad').textContent  = t.bienvenidaLink || 'Prefiero buscar mi ciudad →';
     document.getElementById('denegadoTitEl').textContent   = t.denegadoTit       || 'Sin ubicación';
     document.getElementById('denegadoBodyEl').textContent  = t.denegadoBody      || 'No podemos detectar tu posición automáticamente, pero puedes usar la app igualmente buscando tu ciudad.';
     document.getElementById('btnDenegadoBuscar').textContent   = t.denegadoBtn        || '🔍 Buscar mi ciudad';
@@ -7270,30 +7259,41 @@ window.aplicarFondoDinamico=function(weatherCode,isDay,astroData,lat,utcOffsetSe
     });
   }
 
-  if (!localStorage.getItem(KEY)) {
-    // Primera vez: mostrar bienvenida, NO llamar actualizar()
-    elBienvenida.style.display = 'flex';
-  } else {
-    // Ya vio la bienvenida: mostrar spinner mientras carga y arrancar
-    if (elCargaInicial) elCargaInicial.hidden = false;
-    actualizar();
+  // ── Arranque sin fricción ──────────────────────────────────────────
+  // Ya no hay pantalla de bienvenida bloqueando la ubicación: la app
+  // carga directamente con la última ciudad vista (o Madrid la primera
+  // vez) para que el usuario vea la app funcionando al instante. El
+  // permiso de ubicación real del sistema solo se pide cuando el
+  // usuario toca algo que lo necesita explícitamente (icono de
+  // localizarme, "usar mi ubicación" del buscador, etc.) -- eso ya
+  // llamaba a actualizar() con ubicacionManual=null, que es lo que
+  // desencadena el permiso del navegador/WebView.
+  const KEY_UBIC = 'ql_ultima_ubicacion';
+  function ubicacionDeArranque() {
+    try {
+      const guardada = JSON.parse(localStorage.getItem(KEY_UBIC) || 'null');
+      if (guardada && typeof guardada.lat === 'number' && typeof guardada.lon === 'number') return guardada;
+    } catch (e) {}
+    return { lat: 40.4168, lon: -3.7038, nombre: 'Madrid' }; // fallback neutro, ver ejemplo pedido: Madrid
   }
+  if (elCargaInicial) elCargaInicial.hidden = false;
+  ubicacionManual = ubicacionDeArranque();
+  actualizar();
+  if (window._iniciarWatchVelocimetro) window._iniciarWatchVelocimetro();
 
-  document.getElementById('btnBienvenidaPermitir').addEventListener('click', () => {
-    localStorage.setItem(KEY, '1');
-    _bienvenidaActiva = false;
-    elBienvenida.style.display = 'none';
-    if (elCargaInicial) elCargaInicial.hidden = false;
-    if (window._iniciarWatchVelocimetro) window._iniciarWatchVelocimetro();
-    actualizar();
-  });
-
-  document.getElementById('btnBienvenidaCiudad').addEventListener('click', () => {
-    localStorage.setItem(KEY, '1');
-    _bienvenidaActiva = false;
-    elBienvenida.style.display = 'none';
-    document.getElementById('buscador').classList.add('abierto');
-  });
+  // Si el usuario ya concedió el permiso en una visita anterior, el
+  // navegador no vuelve a preguntar nada -- aprovechamos eso para
+  // refrescar a su ubicación real en segundo plano, sin aviso ninguno.
+  // Si el permiso aún no se decidió o está denegado, no se toca: solo
+  // se pedirá cuando pulse el icono de localizarme.
+  if (navigator.permissions && navigator.permissions.query) {
+    navigator.permissions.query({ name: 'geolocation' }).then(status => {
+      if (status.state === 'granted') {
+        ubicacionManual = null;
+        actualizar();
+      }
+    }).catch(() => {});
+  }
 
   window.mostrarPermisoDenegado = function() {
     elDenegado.style.display = 'flex';
