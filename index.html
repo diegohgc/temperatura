@@ -776,13 +776,10 @@
     <div id="intModalTitulo" style="font-size:1.1rem;font-weight:700;text-align:center;margin-bottom:12px"></div>
     <div id="intModalValor" style="font-size:2.5rem;font-weight:800;text-align:center;margin-bottom:6px"></div>
     <div id="intModalDetalle" style="font-size:0.88rem;text-align:center;line-height:1.6;padding:0 4px;margin-bottom:18px"></div>
-    <div id="intModalLuna" style="display:none;flex-direction:column;align-items:center;margin-bottom:18px">
-      <canvas id="intModalLunaCanvas" width="260" height="260" style="width:148px;height:148px"></canvas>
-      <div id="intModalLunaFase" style="font-size:0.76rem;color:rgba(255,255,255,0.7);letter-spacing:0.02em;margin-top:9px"></div>
-      <div id="intModalLunaHoras" style="font-size:0.78rem;opacity:0.6;letter-spacing:0.02em;margin-top:5px"></div>
-    </div>
     <!-- Buscador lunar interactivo: solo visible de noche, con la luna
-         realmente por encima del horizonte y sin ser luna nueva. -->
+         realmente por encima del horizonte y sin ser luna nueva. Unica
+         luna que se muestra en el modal (antes habia otra duplicada
+         encima, sin brujula, que se ha quitado). -->
     <div id="intModalLunaBrujula" style="display:none;flex-direction:column;align-items:center;margin-bottom:18px;width:100%">
       <div style="position:relative;width:172px;height:172px">
         <canvas id="intBrujulaLunaCanvas" width="260" height="260" style="width:172px;height:172px;position:absolute;inset:0"></canvas>
@@ -794,6 +791,8 @@
           </g>
         </svg>
       </div>
+      <div id="intModalLunaFase" style="font-size:0.76rem;color:rgba(255,255,255,0.7);letter-spacing:0.02em;margin-top:9px"></div>
+      <div id="intModalLunaHoras" style="font-size:0.78rem;opacity:0.6;letter-spacing:0.02em;margin-top:5px"></div>
       <div id="intBrujulaTexto" style="font-size:0.78rem;opacity:0.75;margin-top:10px;text-align:center;max-width:230px;line-height:1.5"></div>
       <button id="intBrujulaActivar" style="display:none;margin-top:10px;padding:9px 18px;border:none;border-radius:20px;background:rgba(255,255,255,0.14);color:#fff;font-size:0.8rem;font-weight:600;cursor:pointer"></button>
     </div>
@@ -3545,29 +3544,12 @@ function abrirModalInterior(tipo) {
   document.getElementById('intModalDetalle').textContent = detalle;
   document.getElementById('intModalSolArco').innerHTML = tipo === 'sol' ? generarArcoSolar() : '';
 
-  // Foto real de la luna (misma textura y fase que el fondo animado),
-  // con el nombre de la fase + % de iluminacion y la hora de salida/
-  // puesta debajo, en lineas minimalistas. Solo de noche -- de dia no
-  // hay luna que mostrar en el cielo, asi que el bloque entero se oculta.
-  const _elLuna = document.getElementById('intModalLuna');
-  if (tipo === 'sol' && !_ultimoIsDay && window.wbgRenderMoonTo) {
-    _elLuna.style.display = 'flex';
-    window.wbgRenderMoonTo(document.getElementById('intModalLunaCanvas'));
-    const _faseInfo = _ultimoMoonPhaseKey ? FASE_LUNAR[_ultimoMoonPhaseKey] : null;
-    const _faseNombre = _faseInfo ? (_faseInfo[lang] || _faseInfo.es) : '';
-    document.getElementById('intModalLunaFase').textContent =
-      _faseNombre ? `${_faseNombre}${_ultimoMoonIlumPct !== null ? ` (${_ultimoMoonIlumPct}%)` : ''}` : '';
-    const _subeStr = _ultimoMoonriseLocalHora, _bajaStr = _ultimoMoonsetLocalHora;
-    document.getElementById('intModalLunaHoras').textContent =
-      (_subeStr || _bajaStr) ? `↑ ${_subeStr || '--'}   |   ↓ ${_bajaStr || '--'}` : '';
-  } else {
-    _elLuna.style.display = 'none';
-  }
-
-  // Buscador lunar interactivo: visibilidad estricta -- de noche, con
-  // la luna realmente por encima del horizonte (altura>0 calculada de
-  // verdad, no solo el rango salida/puesta) y que no sea luna nueva
-  // (con 0% de iluminacion no hay nada que "buscar" en el cielo).
+  // Buscador lunar interactivo: unica luna del modal (foto real, misma
+  // textura/fase que el fondo animado, con su brujula). Visibilidad
+  // estricta -- de noche, con la luna realmente por encima del
+  // horizonte (altura>0 calculada de verdad, no solo el rango salida/
+  // puesta) y que no sea luna nueva (con 0% de iluminacion no hay nada
+  // que "buscar" en el cielo).
   const _elBrujulaLuna = document.getElementById('intModalLunaBrujula');
   const _latAct = currentCoords?.lat ?? null, _lonAct = currentCoords?.lon ?? null;
   const _esLunaNueva = !!(_ultimoMoonPhaseKey && /new moon/i.test(_ultimoMoonPhaseKey));
@@ -3577,6 +3559,13 @@ function abrirModalInterior(tipo) {
   if (_mostrarBrujulaLuna) {
     _elBrujulaLuna.style.display = 'flex';
     window.wbgRenderMoonTo(document.getElementById('intBrujulaLunaCanvas'));
+    const _faseInfo = _ultimoMoonPhaseKey ? FASE_LUNAR[_ultimoMoonPhaseKey] : null;
+    const _faseNombre = _faseInfo ? (_faseInfo[lang] || _faseInfo.es) : '';
+    document.getElementById('intModalLunaFase').textContent =
+      _faseNombre ? `${_faseNombre}${_ultimoMoonIlumPct !== null ? ` (${_ultimoMoonIlumPct}%)` : ''}` : '';
+    const _subeStr = _ultimoMoonriseLocalHora, _bajaStr = _ultimoMoonsetLocalHora;
+    document.getElementById('intModalLunaHoras').textContent =
+      (_subeStr || _bajaStr) ? `↑ ${_subeStr || '--'}   |   ↓ ${_bajaStr || '--'}` : '';
     iniciarBrujulaLuna(_posLunaAhora.azimut);
   } else {
     _elBrujulaLuna.style.display = 'none';
