@@ -4820,12 +4820,28 @@ document.addEventListener('visibilitychange', () => {
 });
 
 if ('serviceWorker' in navigator) {
+  let _swReg = null;
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
+    navigator.serviceWorker.register('sw.js').then(reg => {
+      _swReg = reg;
+      reg.update().catch(() => {});
+    }).catch(() => {});
   });
   navigator.serviceWorker.addEventListener('controllerchange', () => {
     window.location.reload();
   });
+  // El navegador comprueba sw.js en segundo plano por su cuenta, pero
+  // con margen de horas de retraso -- en la app envuelta en WebView
+  // (donde la sesión puede quedarse abierta días sin recargar del
+  // todo) eso deja publicaciones "atascadas" sin llegar. Forzamos la
+  // comprobación nosotros mismos: cada vez que la app vuelve a primer
+  // plano y, como red de seguridad, cada 10 minutos mientras esté
+  // abierta -- así una actualización tarda como mucho eso en notarse,
+  // en vez de depender de cuándo decida mirar el propio navegador.
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && _swReg) _swReg.update().catch(() => {});
+  });
+  setInterval(() => { if (_swReg) _swReg.update().catch(() => {}); }, 10 * 60 * 1000);
 }
 
 // ── Modal radar ───────────────────────────────────────────
