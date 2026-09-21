@@ -6790,6 +6790,7 @@ function wbgInit(key){
       break;
     }
     case 'fog':
+    case 'nightfog':
       wbgFogB=Array.from({length:7},()=>({
         x:Math.random()*wbgW*1.4-wbgW*.2,y:Math.random()*wbgH,
         rx:60+Math.random()*100,ry:30+Math.random()*60,
@@ -6964,8 +6965,12 @@ function wbgDraw(key,dt){
       });
       break;
     }
-    case 'fog':{
-      c.fillStyle=wbgGrad([[0,'#2a3540'],[.5,'#38474f'],[1,'#44555e']]);c.fillRect(0,0,wbgW,wbgH);
+    case 'fog':
+    case 'nightfog':{
+      c.fillStyle=key==='nightfog'
+        ?wbgGrad([[0,'#2a3540'],[.5,'#38474f'],[1,'#44555e']])
+        :wbgGrad([[0,'#aeb9c1'],[.5,'#c2ccd3'],[1,'#d6dde2']]);
+      c.fillRect(0,0,wbgW,wbgH);
       wbgFogB.forEach(b=>{
         b.x+=b.vx*dt*60;b.y+=b.vy*dt*60;
         if(b.x>wbgW+120)b.x=-120;if(b.x<-120)b.x=wbgW+120;
@@ -7129,7 +7134,7 @@ window.aplicarFondoDinamico=function(weatherCode,isDay,astroData,lat,utcOffsetSe
   else if(wc===1)                                   key=isDay?'mayormente':'nightcloud';
   else if(wc===2)                                   key=isDay?'partial':'nightcloud';
   else if(wc===3)                                   key=isDay?'cloudy':'nightcloudy';
-  else if(wc===45||wc===47||wc===48)                key='fog';
+  else if(wc===45||wc===47||wc===48)                key=isDay?'fog':'nightfog';
   else if(wc>=51&&wc<=57)                           key=isDay?'drizzle':'nightrain';
   else if(wc===71||wc===73||wc===75||wc===77||wc===85||wc===86) key='snow';
   else if((wc>=61&&wc<=69)||(wc>=80&&wc<=82))      key=isDay?'rain':'nightrain';
