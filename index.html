@@ -4380,11 +4380,13 @@ function renderDatos(datos) {
     else if (wapiCode === 1030 || wapiCode === 1135 || wapiCode === 1147) {
       // Niebla/bruma: WAPI la reporta con demasiada alegría (típico en
       // mañanas con algo de humedad aunque en realidad esté despejado).
-      // Solo la confirmamos si la visibilidad real de OM es baja de verdad:
-      // niebla/bruma reales son <2000m; entre 2000-5000m es como mucho una
-      // ligera calima que no merece tapar un cielo despejado o nublado.
+      // Solo la confirmamos si la visibilidad real de OM es baja de verdad.
+      // Umbral bajado a 1200m (antes 2000m, saltaba con demasiada
+      // facilidad): la definición meteorológica de niebla es <1000m y de
+      // bruma ~1-2km, así que exigir <1200m evita falsos positivos con
+      // calima ligera o humedad matinal sin visibilidad realmente reducida.
       const omVis = c.visibility ?? null; // metros
-      if (omVis !== null && omVis >= 2000) {
+      if (omVis !== null && omVis >= 1200) {
         // Visibilidad buena: no es niebla real, usar la nubosidad de OM
         // en su lugar para decidir despejado/parcial/nublado.
         const omCloudNiebla = c.cloud_cover ?? null;
