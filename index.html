@@ -4211,6 +4211,16 @@ function renderPanelInterior(uvIndex, aireData, sunsetStr, tieneMarea, utcOffset
   const sunset  = _sunsetCorr;
   const sunrise = _sunriseCorr;
 
+  // El "isDay" que llega de la API (Open-Meteo/WeatherAPI) tarda unos
+  // minutos en refrescarse tras el amanecer/anochecer real, así que justo
+  // al amanecer la tarjeta se quedaba unos minutos mostrando "Noche
+  // restante" con el dato viejo. Si tenemos hora real de amanecer/ocaso,
+  // se recalcula aquí con la hora local exacta en vez de fiarse del flag.
+  if (sunrise && sunset) {
+    isDay = now >= sunrise && now < sunset;
+    _ultimoIsDay = isDay;
+  }
+
   const NOCHE_RESTANTE = { es:'Noche restante','es-US':'Noche restante', en:'Night remaining', de:'Verbleibende Nacht', fr:'Nuit restante', pt:'Noite restante', it:'Notte rimanente', zh:'剩余夜晚', ca:'Nit restant', eu:'Gauaren hondarrak', gl:'Noite restante', ar:'ليل متبقٍ', ru:'Ночи осталось', ja:'残りの夜', ko:'남은 밤', nl:'Resterende nacht', pl:'Pozostała noc', hi:'शेष रात', ro:'Noapte rămasă', hu:'Hátralévő éjszaka', uk:'Залишок ночі', da:'Resterende nat', cs:'Zbývající noc' };
   let solTexto = null, solLabel = null;
   if (isDay) {
