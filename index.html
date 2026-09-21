@@ -4845,6 +4845,7 @@ async function actualizar(forzar = false) {
     fase1Cargada = true;
     fase1Resuelta = true;
     window._geoPromptEnCurso = false;
+    window._geoPermisoOK = true; // permiso de GPS realmente concedido
     clearTimeout(_timeoutSeguridad);
     const lat1 = pos.coords.latitude, lon1 = pos.coords.longitude;
     cargarDatos(lat1, lon1, null, forzar);
@@ -4862,12 +4863,14 @@ let timeoutBusqueda = null;
 async function actualizarPosicionYAltitud() {
   if (_bienvenidaActiva) return;
   if (ubicacionManual || !navigator.geolocation) return;
-  // No pedir ubicación aquí hasta que la carga inicial (actualizar()) ya
-  // haya resuelto una posición por algún medio (GPS, ciudad manual o IP).
-  // Si no, este setInterval podía lanzar su propia getCurrentPosition
-  // mientras el usuario todavía no había respondido al primer diálogo de
-  // permiso, y Android mostraba un SEGUNDO diálogo de ubicación seguido.
-  if (!currentCoords) return;
+  // OJO: no basta con comprobar "¿hay ya alguna ubicación cargada?"
+  // (currentCoords) -- el respaldo por IP (sin permiso) también rellena
+  // currentCoords, así que con el permiso todavía denegado este
+  // setInterval volvía a llamar a getCurrentPosition por su cuenta a
+  // los 10s, disparando un SEGUNDO diálogo nativo de Android con el
+  // tiempo ya cargado de fondo (por el respaldo de IP). Se exige
+  // específicamente que haya habido ya una concesión real de GPS.
+  if (!window._geoPermisoOK) return;
   navigator.geolocation.getCurrentPosition(async (pos) => {
     if (ubicacionManual) return; // el usuario buscó una ciudad mientras el GPS resolvía
     const { latitude, longitude } = pos.coords;
@@ -4887,9 +4890,10 @@ async function actualizarPosicionYAltitud() {
 async function actualizarCiudad() {
   if (_bienvenidaActiva) return;
   if (ubicacionManual || !navigator.geolocation) return;
-  // Mismo motivo que en actualizarPosicionYAltitud: esperar a que haya
-  // una posición inicial resuelta antes de volver a pedir ubicación.
-  if (!currentCoords) return;
+  // Mismo motivo que en actualizarPosicionYAltitud: exigir permiso de
+  // GPS realmente concedido, no solo "alguna ubicación cargada" (que
+  // también puede venir del respaldo por IP sin permiso).
+  if (!window._geoPermisoOK) return;
   navigator.geolocation.getCurrentPosition(async (pos) => {
     if (ubicacionManual) return; // el usuario buscó una ciudad mientras el GPS resolvía
     const { latitude, longitude } = pos.coords;
