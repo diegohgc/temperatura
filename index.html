@@ -4522,6 +4522,21 @@ function renderDatos(datos) {
         else if (wapiCloud >= 20) weatherCode = Math.min(weatherCode, 1); // mayormente despejado
         else weatherCode = Math.min(weatherCode, 0); // despejado
       }
+
+      // ── Matiz "solo nubes altas": WAPI no distingue a qué altura están
+      // las nubes, así que un cielo con velo de altocúmulos/altoestratos
+      // (nubes medias/altas al 100% pero SIN nubes bajas) puede marcar
+      // "Nublado" aunque a simple vista se vea mucho cielo y luz de sobra
+      // -- muy distinto de un cielo bajo y plomizo. Open-Meteo sí separa
+      // cloud_cover_low/mid/high, así que si vamos a mostrar "Nublado"
+      // pero casi no hay nubes bajas, se suaviza a "Parcialmente nublado".
+      // Ojo: esto NO es volver a usar el cloud_cover total de Open-Meteo
+      // como respaldo (eso se quitó); es un matiz distinto basado solo en
+      // la distribución por altura, algo que ninguna otra fuente da.
+      if (weatherCode === 3) {
+        const omLow = c.cloud_cover_low ?? null;
+        if (omLow !== null && omLow < 25) weatherCode = 2;
+      }
     }
   }
 
