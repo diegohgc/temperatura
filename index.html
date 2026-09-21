@@ -4787,12 +4787,25 @@ async function actualizar(forzar = false) {
   // (sin conexión, API caída...), como último recurso se ofrece la
   // búsqueda manual de ciudad, igual que antes.
   async function _fallbackSinUbicacion() {
+    // Se prueban dos proveedores de geolocalización por IP por si uno de
+    // los dos estuviera caído, limitado o bloqueado en la red/operador de
+    // la persona -- con uno solo, si ese fallaba, no había forma de saberlo
+    // ni de recuperarse.
     try {
       const r = await fetch('https://ipwho.is/', { cache: 'no-store' });
       const d = await r.json();
       if (d && d.success && d.latitude != null && d.longitude != null) {
         const nombreAprox = d.city || d.capital || d.country || null;
         cargarDatos(d.latitude, d.longitude, nombreAprox, forzar);
+        return;
+      }
+    } catch (e) {}
+    try {
+      const r2 = await fetch('https://ipapi.co/json/', { cache: 'no-store' });
+      const d2 = await r2.json();
+      if (d2 && !d2.error && d2.latitude != null && d2.longitude != null) {
+        const nombreAprox2 = d2.city || d2.country_name || null;
+        cargarDatos(d2.latitude, d2.longitude, nombreAprox2, forzar);
         return;
       }
     } catch (e) {}
