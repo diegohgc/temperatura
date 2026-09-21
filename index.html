@@ -4820,6 +4820,7 @@ async function actualizar(forzar = false) {
   const _timeoutSeguridad = setTimeout(() => {
     if (fase1Resuelta) return;
     fase1Resuelta = true;
+    window._geoPromptEnCurso = false;
     _fallbackSinUbicacion();
   }, 6000);
 
@@ -4832,15 +4833,25 @@ async function actualizar(forzar = false) {
   // y Android mostraba el diálogo de ubicación DOS veces seguidas al
   // abrir la app. Se usa directamente alta precisión desde el principio
   // para que solo haya una petición y, como mucho, un único diálogo.
+  // Mientras el navegador está resolviendo esta petición, en Android puede
+  // haber un diálogo nativo de permiso en pantalla. Si justo entonces
+  // llega una recarga automática por actualización del Service Worker,
+  // se interrumpe el diálogo y, al recargar, se vuelve a pedir la
+  // ubicación desde cero -- pareciendo que pregunta dos veces. Este flag
+  // se consulta desde el listener de "controllerchange" para retrasar esa
+  // recarga hasta que la petición de ubicación haya terminado del todo.
+  window._geoPromptEnCurso = true;
   navigator.geolocation.getCurrentPosition((pos) => {
     fase1Cargada = true;
     fase1Resuelta = true;
+    window._geoPromptEnCurso = false;
     clearTimeout(_timeoutSeguridad);
     const lat1 = pos.coords.latitude, lon1 = pos.coords.longitude;
     cargarDatos(lat1, lon1, null, forzar);
   }, (err) => {
-    if (fase1Cargada || fase1Resuelta) return;
+    if (fase1Cargada || fase1Resuelta) { window._geoPromptEnCurso = false; return; }
     fase1Resuelta = true;
+    window._geoPromptEnCurso = false;
     clearTimeout(_timeoutSeguridad);
     _fallbackSinUbicacion();
   }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 120000 });
@@ -5027,7 +5038,16 @@ if ('serviceWorker' in navigator) {
       _huboControladorAlCargar = true; // futuros cambios sí recargarán
       return;
     }
-    window.location.reload();
+    // Si hay una petición de ubicación en curso (posible diálogo nativo
+    // de permiso en pantalla en Android), esperar a que termine antes de
+    // recargar -- si no, la recarga interrumpe ese diálogo a medias y al
+    // volver a arrancar el JS se pide la ubicación otra vez, pareciendo
+    // un segundo aviso de permiso.
+    const _intentarRecargar = () => {
+      if (window._geoPromptEnCurso) { setTimeout(_intentarRecargar, 500); return; }
+      window.location.reload();
+    };
+    _intentarRecargar();
   });
   // El navegador comprueba sw.js en segundo plano por su cuenta, pero
   // con margen de horas de retraso -- en la app envuelta en WebView
