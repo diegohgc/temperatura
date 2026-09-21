@@ -3093,7 +3093,12 @@ function generarArcoSolar() {
     const BAJO_HORIZONTE = { es:'bajo el horizonte','es-US':'bajo el horizonte', en:'below horizon', de:'unter dem Horizont', fr:'sous l\'horizon', pt:'abaixo do horizonte', it:'sotto l\'orizzonte', zh:'地平线下', ca:'sota l\'horitzó', eu:'horizontearen azpian', gl:'baixo o horizonte', ar:'تحت الأفق', ru:'ниже горизонта', ja:'地平線下', ko:'지평선 아래', nl:'onder de horizon', pl:'poniżej horyzontu', hi:'क्षितिज के नीचे', ro:'sub orizont', hu:'a horizont alatt', uk:'нижче горизонту', da:'under horisonten', cs:'pod obzorem' };
     const SOL_ESTA = { es:'El sol está','es-US':'El sol está', en:'The sun is', de:'Die Sonne steht', fr:'Le soleil est', pt:'O sol está', it:'Il sole è', zh:'太阳位于', ca:'El sol és', eu:'Eguzkia', gl:'O sol está', ar:'الشمس', ru:'Солнце', ja:'太陽は', ko:'태양은', nl:'De zon staat', pl:'Słońce jest', hi:'सूर्य है', ro:'Soarele este', hu:'A nap', uk:'Сонце', da:'Solen er', cs:'Slunce je' };
     const langBase = (idioma || 'es').split('-')[0];
-    const nightLabelY = Math.max(14, Math.min(ny - 18, H - 8));
+    // Debajo del icono del sol (no encima, que pisaba otros textos), y
+    // centrado horizontalmente cerca del sol pero sin salirse del ancho
+    // del gráfico (el texto es largo y si el sol está pegado a un borde
+    // se solapaba con la hora de amanecer/anochecer de esa esquina).
+    const nightLabelY = Math.min(ny + 20, H - 6);
+    const nightLabelX = Math.min(Math.max(nx, 60), W - 60);
     // Igual que de dia: arco guia completo (toda la trayectoria real bajo
     // el horizonte, de anochecer a amanecer) + arco recorrido hasta ahora.
     const arcNocheGuia = ptsNoche(0, 1, 60).join(' ');
@@ -3138,6 +3143,18 @@ function generarArcoSolar() {
       <circle cx="${lx}" cy="${ly}" r="5.5" fill="#F5F0DC" stroke="#E8D98C" stroke-width="0.8"/>`;
     }
 
+    // Etiqueta de horas de visibilidad de la luna, encima de su
+    // trayectoria de puntos, con la hora de salida/puesta reales (mismos
+    // datos que usa el buscador lunar).
+    const LUNA_VISIBLE = { es:'Luna visible','es-US':'Luna visible', en:'Moon visible', de:'Mond sichtbar', fr:'Lune visible', pt:'Lua visível', it:'Luna visibile', zh:'月亮可见', ca:'Lluna visible', eu:'Ilargia ikusgai', gl:'Lúa visible', ar:'القمر مرئي', ru:'Луна видна', ja:'月が見える', ko:'달이 보임', nl:'Maan zichtbaar', pl:'Widoczny księżyc', hi:'चाँद दिखाई दे रहा', ro:'Luna vizibilă', hu:'Hold látható', uk:'Місяць видно', da:'Månen synlig', cs:'Měsíc viditelný' };
+    let lunaVisibleTexto = null;
+    if (_ultimoMoonriseLocalHora && _ultimoMoonsetLocalHora) {
+      lunaVisibleTexto = `🌙 ${LUNA_VISIBLE[langBase] || 'Luna visible'}: ${_ultimoMoonriseLocalHora}–${_ultimoMoonsetLocalHora}`;
+    }
+    const labelLuna = lunaVisibleTexto
+      ? `<text x="${cx}" y="12" text-anchor="middle" font-size="8.5" fill="rgba(232,217,140,0.75)">${lunaVisibleTexto}</text>`
+      : '';
+
     // Mismo sol que de dia, pero apagado (amarillo palido) para dejar
     // claro que es el SOL bajo el horizonte, no la luna.
     return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"
@@ -3146,11 +3163,12 @@ function generarArcoSolar() {
       <polyline points="${arcNocheGuia}" fill="none" stroke="rgba(160,200,255,0.18)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
       <polyline points="${arcNocheRec}" fill="none" stroke="rgba(160,200,255,0.55)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       ${arcoLuna}
+      ${labelLuna}
       ${marcadorLuna}
       <circle cx="${nx}" cy="${ny}" r="12" fill="rgba(232,217,140,0.18)"/>
       <circle cx="${nx}" cy="${ny}" r="7" fill="#E8D98C"/>
       <g stroke="#E8D98C" stroke-width="1.4" stroke-linecap="round" opacity="0.8">${rayosEn(nx, ny)}</g>
-      <text x="${nx}" y="${nightLabelY.toFixed(1)}" text-anchor="middle" font-size="9" fill="rgba(210,230,255,0.9)">${SOL_ESTA[langBase] || 'El sol está'} ${Math.round(Math.abs(altNocheActual))}° ${BAJO_HORIZONTE[langBase] || 'bajo el horizonte'}</text>
+      <text x="${nightLabelX.toFixed(1)}" y="${nightLabelY.toFixed(1)}" text-anchor="middle" font-size="9" fill="rgba(210,230,255,0.9)">${SOL_ESTA[langBase] || 'El sol está'} ${Math.round(Math.abs(altNocheActual))}° ${BAJO_HORIZONTE[langBase] || 'bajo el horizonte'}</text>
       <text x="${x0}" y="${(horizY+16).toFixed(1)}" text-anchor="middle" font-size="9.5" fill="rgba(255,255,255,0.5)">${amanecerStr}</text>
       <text x="${x1}" y="${(horizY+16).toFixed(1)}" text-anchor="middle" font-size="9.5" fill="rgba(255,255,255,0.5)">${anochecerStr}</text>
     </svg>`;
