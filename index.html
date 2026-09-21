@@ -4766,6 +4766,7 @@ async function actualizar(forzar = false) {
   // Fase 1: ubicación rápida (red/WiFi, ~1s) → carga el tiempo inmediatamente
   // Fase 2: GPS preciso en segundo plano → si difiere >500m, recarga silenciosamente
   let fase1Cargada = false;
+  let fase1Resuelta = false; // true en cuanto getCurrentPosition llama a exito O error
 
   function distanciaM(lat1, lon1, lat2, lon2) {
     const R = 6371000;
@@ -4775,8 +4776,24 @@ async function actualizar(forzar = false) {
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   }
 
+  // Red de seguridad: en algunos WebView/navegadores, si el permiso de
+  // ubicación está bloqueado a nivel de sistema (no solo denegado en el
+  // diálogo), getCurrentPosition se queda colgado sin llamar nunca ni al
+  // éxito ni al error -- ignorando incluso su propio "timeout". Eso dejaba
+  // la app en "Localizando..." para siempre, sin forma de usarla. Este
+  // timeout independiente garantiza que, pase lo que pase con la API de
+  // geolocalización, a los 10s como mucho se ofrezca la búsqueda manual.
+  const _timeoutSeguridad = setTimeout(() => {
+    if (fase1Resuelta) return;
+    fase1Resuelta = true;
+    if (window.mostrarPermisoDenegado) window.mostrarPermisoDenegado();
+    else setEstado(T.errorUbicacion);
+  }, 10000);
+
   navigator.geolocation.getCurrentPosition((pos) => {
     fase1Cargada = true;
+    fase1Resuelta = true;
+    clearTimeout(_timeoutSeguridad);
     const lat1 = pos.coords.latitude, lon1 = pos.coords.longitude;
     cargarDatos(lat1, lon1, null, forzar);
     // Fase 2: GPS preciso
@@ -4785,12 +4802,17 @@ async function actualizar(forzar = false) {
       if (distanciaM(lat1, lon1, lat2, lon2) > 500) cargarDatos(lat2, lon2, null, forzar);
     }, () => {}, { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 });
   }, (err) => {
-    if (fase1Cargada) return;
+    if (fase1Cargada || fase1Resuelta) return;
+    fase1Resuelta = true;
+    clearTimeout(_timeoutSeguridad);
     if (err.code === err.PERMISSION_DENIED) {
       if (window.mostrarPermisoDenegado) window.mostrarPermisoDenegado();
       else setEstado(T.permisoDenegado);
     } else {
-      setEstado(T.errorUbicacion);
+      // Error real (timeout, posición no disponible...): tambien ofrecemos
+      // la busqueda manual en vez de dejar solo un texto sin accion.
+      if (window.mostrarPermisoDenegado) window.mostrarPermisoDenegado();
+      else setEstado(T.errorUbicacion);
     }
   }, { enableHighAccuracy: false, timeout: 15000, maximumAge: 120000 });
 }
