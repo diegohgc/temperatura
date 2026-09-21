@@ -6470,6 +6470,39 @@ function wbgGrad(stops){
   stops.forEach(([s,c])=>g.addColorStop(s,c)); return g;
 }
 
+// Ventana de "hora dorada": cuanto mas cerca esta el momento actual del
+// amanecer/atardecer real (usando _ultimoSunrise/_ultimoSunset, ya
+// calculados y corregidos a hora local en otra parte del script), mas
+// fuerte el tinte calido. +/-45 min alrededor de cada uno, con pico justo
+// en la hora exacta y caida lineal hacia los bordes de la ventana.
+const WBG_GOLDEN_WINDOW_MS = 45 * 60 * 1000;
+function _wbgGoldenFactor(){
+  if (typeof _ultimoSunrise === 'undefined' || typeof _ultimoSunset === 'undefined') return 0;
+  if (!_ultimoSunrise || !_ultimoSunset) return 0;
+  const now = Date.now();
+  const sunrise = new Date(_ultimoSunrise).getTime();
+  const sunset  = new Date(_ultimoSunset).getTime();
+  const fr = Math.max(0, 1 - Math.abs(now - sunrise) / WBG_GOLDEN_WINDOW_MS);
+  const fs = Math.max(0, 1 - Math.abs(now - sunset)  / WBG_GOLDEN_WINDOW_MS);
+  return Math.min(1, Math.max(fr, fs));
+}
+// Overlay calido (naranja/rojizo) proporcional a _wbgGoldenFactor(). Solo se
+// llama desde los casos de cielo despejado/parcialmente nublado -- en
+// nublado denso, lluvia, tormenta, nieve o de noche no tiene sentido visual
+// y no se aplica. Se pinta como ultimo paso, encima del sol/nubes ya
+// dibujados, igual que la luz calida real tiñe todo el cielo en esos
+// momentos. No toca las tarjetas de la interfaz (van en capas por encima
+// del canvas de fondo), asi que el contraste de texto no se ve afectado.
+function _wbgAplicarGolden(){
+  const g = _wbgGoldenFactor();
+  if (g <= 0.02) return;
+  const c = wbgCtx;
+  c.save();
+  c.fillStyle = `rgba(255,120,55,${(0.34 * g).toFixed(3)})`;
+  c.fillRect(0, 0, wbgW, wbgH);
+  c.restore();
+}
+
 /* ── Fase lunar realista ── */
 // Caché de textura lunar (se regenera solo si cambia el radio)
 let _wbgLunaTexCache=null, _wbgLunaTexR=0;
@@ -6960,6 +6993,7 @@ function wbgDraw(key,dt){
         p.x+=p.vx*dt*60;p.y+=p.vy*dt*60;if(p.y<-10){p.y=wbgH+10;p.x=Math.random()*wbgW;}
         c.save();c.globalAlpha=p.op;c.fillStyle='rgba(255,240,200,1)';c.beginPath();c.arc(p.x,p.y,p.r,0,Math.PI*2);c.fill();c.restore();
       });
+      _wbgAplicarGolden();
       break;
     }
     case 'mayormente':{
@@ -6976,6 +7010,7 @@ function wbgDraw(key,dt){
         c.beginPath();c.arc(sxm,sym,discRm,0,Math.PI*2);c.fillStyle='rgba(255,255,225,.85)';c.fill();
       }
       wbgClouds.forEach(cl=>{_wbgAvanzarNube(cl,dt);wbgCloud(cl.x,cl.y,cl.sc,cl.alpha,cl.flip,null,null,cl.tex);});
+      _wbgAplicarGolden();
       break;
     }
     case 'partial':{
@@ -6992,6 +7027,7 @@ function wbgDraw(key,dt){
         c.beginPath();c.arc(sx,sy,discR2,0,Math.PI*2);c.fillStyle='rgba(255,255,220,.8)';c.fill();
       }
       wbgClouds.forEach(cl=>{_wbgAvanzarNube(cl,dt);wbgCloud(cl.x,cl.y,cl.sc,cl.alpha,cl.flip,null,null,cl.tex);});
+      _wbgAplicarGolden();
       break;
     }
     case 'cloudy':{
