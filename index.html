@@ -4506,28 +4506,29 @@ function renderDatos(datos) {
     else if ([1087,1273,1276,1279,1282].includes(wapiCode)) weatherCode = 95;
     else weatherCode = 2; // código WAPI no mapeado → nublado por defecto
 
-    // ── Corrección anti-optimismo: si WAPI dice despejado pero OM ve nubes ──
-    // Open-Meteo (ECMWF/ICON) es más preciso para nubosidad en Europa.
-    // Solo corregimos hacia más nubes, nunca hacia más sol.
-    // WMO: 0=Despejado, 1=Mayormente despejado, 2=Parcialmente nublado, 3=Nublado
-    if (weatherCode <= 2 && !llueveDeVerdad) {
+    // ── Corrección de nubosidad por consenso: antes esto eran dos
+    // correcciones asimétricas (una solo subía hacia más nubes mirando
+    // solo Open-Meteo, otra solo bajaba y solo si el código WAPI era
+    // exactamente 1009/"Overcast"). Eso dejaba un hueco: si WAPI daba un
+    // código "despejado/parcial" (1000/1003/1006) pero Open-Meteo por su
+    // cuenta reportaba ≥80% de nubes, se subía a "Nublado" sin ninguna
+    // forma de corregirlo de vuelta aunque WAPI (o la realidad) dijeran
+    // menos nubosidad. Ahora se promedian ambas fuentes cuando las dos
+    // están disponibles (o se usa la que haya) y esa nubosidad de
+    // consenso decide despejado/parcial/nublado en ambas direcciones,
+    // salvo que llueva de verdad.
+    if (!llueveDeVerdad) {
       const omCloud = c.cloud_cover ?? null;
-      if (omCloud !== null) {
-        if      (omCloud >= 80) weatherCode = Math.max(weatherCode, 3); // nublado
-        else if (omCloud >= 50) weatherCode = Math.max(weatherCode, 2); // parcialmente nublado
-      }
-    }
-
-    // ── Corrección anti-pesimismo: si WAPI dice Nublado (1009) pero OM ve
-    // cielo despejado. Mismo razonamiento que la de arriba, en sentido
-    // contrario — solo para el código "Overcast" puro, no para lluvia/niebla
-    // (esos ya tienen su propia validación con precipitación/visibilidad).
-    if (wapiCode === 1009 && !llueveDeVerdad) {
-      const omCloud2 = c.cloud_cover ?? null;
-      if (omCloud2 !== null) {
-        if      (omCloud2 < 20) weatherCode = 0;                    // despejado
-        else if (omCloud2 < 50) weatherCode = 1;                    // mayormente despejado
-        else if (omCloud2 < 80) weatherCode = Math.min(weatherCode, 2); // parcialmente nublado
+      const wapiCloud = wapiData?.current?.cloud ?? null;
+      let cloudConsenso = null;
+      if (omCloud !== null && wapiCloud !== null) cloudConsenso = (omCloud + wapiCloud) / 2;
+      else if (omCloud !== null) cloudConsenso = omCloud;
+      else if (wapiCloud !== null) cloudConsenso = wapiCloud;
+      if (cloudConsenso !== null && weatherCode <= 3) {
+        if      (cloudConsenso >= 80) weatherCode = 3; // nublado
+        else if (cloudConsenso >= 50) weatherCode = 2; // parcialmente nublado
+        else if (cloudConsenso >= 20) weatherCode = Math.min(weatherCode, 1); // mayormente despejado
+        else weatherCode = Math.min(weatherCode, 0); // despejado
       }
     }
   }
