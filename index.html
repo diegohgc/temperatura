@@ -4768,14 +4768,6 @@ async function actualizar(forzar = false) {
   let fase1Cargada = false;
   let fase1Resuelta = false; // true en cuanto getCurrentPosition llama a exito O error
 
-  function distanciaM(lat1, lon1, lat2, lon2) {
-    const R = 6371000;
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  }
-
   // Si no hay permiso de ubicación (denegado, bloqueado o simplemente
   // nunca resuelto), en vez de dejar a la persona sin nada usable se
   // intenta geolocalizar por IP -- no requiere ningún permiso, funciona
@@ -4831,23 +4823,27 @@ async function actualizar(forzar = false) {
     _fallbackSinUbicacion();
   }, 6000);
 
+  // Una única petición de ubicación (antes había una "fase 2" que pedía
+  // GPS de alta precisión justo después de la primera, automáticamente).
+  // Esa segunda llamada a getCurrentPosition disparaba su propia
+  // comprobación de permiso en el WebView nativo -- si la primera sólo
+  // se había concedido de forma aproximada (habitual en Android 12+ si
+  // no se marca "Precisa"), la segunda petición pedía permiso otra vez,
+  // y Android mostraba el diálogo de ubicación DOS veces seguidas al
+  // abrir la app. Se usa directamente alta precisión desde el principio
+  // para que solo haya una petición y, como mucho, un único diálogo.
   navigator.geolocation.getCurrentPosition((pos) => {
     fase1Cargada = true;
     fase1Resuelta = true;
     clearTimeout(_timeoutSeguridad);
     const lat1 = pos.coords.latitude, lon1 = pos.coords.longitude;
     cargarDatos(lat1, lon1, null, forzar);
-    // Fase 2: GPS preciso
-    navigator.geolocation.getCurrentPosition((pos2) => {
-      const lat2 = pos2.coords.latitude, lon2 = pos2.coords.longitude;
-      if (distanciaM(lat1, lon1, lat2, lon2) > 500) cargarDatos(lat2, lon2, null, forzar);
-    }, () => {}, { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 });
   }, (err) => {
     if (fase1Cargada || fase1Resuelta) return;
     fase1Resuelta = true;
     clearTimeout(_timeoutSeguridad);
     _fallbackSinUbicacion();
-  }, { enableHighAccuracy: false, timeout: 15000, maximumAge: 120000 });
+  }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 120000 });
 }
 
 let timeoutBusqueda = null;
