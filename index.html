@@ -4546,9 +4546,19 @@ function renderDatos(datos) {
   _ultimaTempC = tempActual;
   _ultimaSensacion = sensacionActual;
   elTemp.textContent = tempActual !== null ? toTemp(tempActual) : '--°';
+  // Mismo ajuste que mas abajo para el fondo animado: el isDay de la API
+  // tarda en refrescarse tras el amanecer/anochecer real. Aqui se usa el
+  // amanecer/ocaso calculado en la carga anterior (misma ubicacion, asi
+  // que sigue siendo válido) hasta que el bloque de astronomia de abajo
+  // lo recalcule con los datos frescos de esta carga.
+  let isDayParaIcono = isDay;
+  if (_ultimoSunrise && _ultimoSunset) {
+    const _now0 = Date.now();
+    isDayParaIcono = _now0 >= new Date(_ultimoSunrise).getTime() && _now0 < new Date(_ultimoSunset).getTime();
+  }
   if (weatherCode !== null) {
     elDesc.textContent = T.codigos[weatherCode] || '';
-    elIcono.innerHTML = iconoParaCodigo(weatherCode, isDay);
+    elIcono.innerHTML = iconoParaCodigo(weatherCode, isDayParaIcono);
   }
   // Guardar el código ya validado para que el modal de hoy lo use
   datos.weatherCodeValidado = weatherCode;
@@ -4639,7 +4649,20 @@ function renderDatos(datos) {
       ? Math.round(Number(astro.moon_illumination)) : null;
   }
   aplicarColorTemp(Math.round(tempActual));
-  if (window.aplicarFondoDinamico) aplicarFondoDinamico(weatherCode, isDay, astroData, currentCoords?.lat ?? 0, tiempo.utc_offset_seconds || 0, currentCoords?.lon ?? 0);
+  // El isDay que llega de la API tarda unos minutos en refrescarse tras el
+  // amanecer/anochecer real (mismo problema que ya se corrigió para la
+  // tarjeta "Sol restante"). Aqui tambien se recalcula con la hora exacta
+  // de amanecer/ocaso ya disponible, para que el fondo animado (y el
+  // tinte dorado de hora dorada) cambien justo en el momento real y no
+  // unos minutos tarde.
+  let isDayReal = isDay;
+  if (_ultimoSunrise && _ultimoSunset) {
+    const _now = Date.now();
+    const _sr = new Date(_ultimoSunrise).getTime();
+    const _ss = new Date(_ultimoSunset).getTime();
+    isDayReal = _now >= _sr && _now < _ss;
+  }
+  if (window.aplicarFondoDinamico) aplicarFondoDinamico(weatherCode, isDayReal, astroData, currentCoords?.lat ?? 0, tiempo.utc_offset_seconds || 0, currentCoords?.lon ?? 0);
   const max0 = tiempo.daily && tiempo.daily.temperature_2m_max ? tiempo.daily.temperature_2m_max[0] : null;
   const min0 = tiempo.daily && tiempo.daily.temperature_2m_min ? tiempo.daily.temperature_2m_min[0] : null;
   const elMinMax = document.getElementById('tempMinMax');
