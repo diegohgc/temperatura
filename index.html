@@ -3691,13 +3691,18 @@ function _lunaBrujulaTextoEstado(msg) {
   if (el) el.textContent = msg;
 }
 
+const _GIRA_TEL = { es:'Gira el teléfono: la flecha apunta hacia la Luna','es-US':'Gira el teléfono: la flecha apunta hacia la Luna', en:'Turn your phone: the arrow points to the Moon', de:'Drehe dein Handy: Der Pfeil zeigt zum Mond', fr:'Tournez votre téléphone : la flèche indique la Lune', pt:'Gire o telemóvel: a flecha aponta para a Lua', it:'Gira il telefono: la freccia indica la Luna', zh:'转动手机：箭头指向月亮', ca:'Gira el mòbil: la fletxa apunta cap a la Lluna', eu:'Biratu telefonoa: geziak Ilargira begiratzen du', gl:'Xira o móbil: a frecha apunta cara á Lúa', ar:'أدر هاتفك: يشير السهم إلى القمر', ru:'Поверните телефон: стрелка указывает на Луну', ja:'スマホを回してください：矢印が月を指します', ko:'휴대폰을 돌리세요: 화살표가 달을 가리킵니다', nl:'Draai je telefoon: de pijl wijst naar de Maan', pl:'Obróć telefon: strzałka wskazuje Księżyc', hi:'फोन घुमाएं: तीर चाँद की ओर इशारा करता है', ro:'Rotește telefonul: săgeata arată spre Lună', hu:'Fordítsd el a telefont: a nyíl a Holdra mutat', uk:'Поверніть телефон: стрілка вказує на Місяць', da:'Vend telefonen: pilen peger mod Månen', cs:'Otočte telefonem: šipka ukazuje na Měsíc', id:'Putar ponsel Anda: tanda panah mengarah ke Bulan' };
+const _SIN_ACCESO_ORIENT = { es:'Sin acceso a los sensores de orientación.','es-US':'Sin acceso a los sensores de orientación.', en:'No access to orientation sensors.', de:'Kein Zugriff auf die Ausrichtungssensoren.', fr:'Pas d\'accès aux capteurs d\'orientation.', pt:'Sem acesso aos sensores de orientação.', it:'Nessun accesso ai sensori di orientamento.', zh:'无法访问方向传感器。', ca:'Sense accés als sensors d\'orientació.', eu:'Ez dago orientazio-sentsoreetarako sarbiderik.', gl:'Sen acceso aos sensores de orientación.', ar:'لا يوجد وصول إلى مستشعرات الاتجاه.', ru:'Нет доступа к датчикам ориентации.', ja:'方向センサーにアクセスできません。', ko:'방향 센서에 액세스할 수 없습니다.', nl:'Geen toegang tot de oriëntatiesensoren.', pl:'Brak dostępu do czujników orientacji.', hi:'दिशा सेंसर तक पहुंच नहीं है।', ro:'Fără acces la senzorii de orientare.', hu:'Nincs hozzáférés az irányérzékelőkhöz.', uk:'Немає доступу до датчиків орієнтації.', da:'Ingen adgang til retningssensorerne.', cs:'Žádný přístup k senzorům orientace.', id:'Tidak ada akses ke sensor orientasi.' };
+const _ACTIVAR_BRUJULA = { es:'🧭 Activar brújula','es-US':'🧭 Activar brújula', en:'🧭 Enable compass', de:'🧭 Kompass aktivieren', fr:'🧭 Activer la boussole', pt:'🧭 Ativar bússola', it:'🧭 Attiva bussola', zh:'🧭 启用指南针', ca:'🧭 Activar brúixola', eu:'🧭 Aktibatu iparrorratza', gl:'🧭 Activar compás', ar:'🧭 تفعيل البوصلة', ru:'🧭 Включить компас', ja:'🧭 コンパスを有効化', ko:'🧭 나침반 활성화', nl:'🧭 Kompas inschakelen', pl:'🧭 Włącz kompas', hi:'🧭 कम्पास सक्षम करें', ro:'🧭 Activează busola', hu:'🧭 Iránytű engedélyezése', uk:'🧭 Увімкнути компас', da:'🧭 Aktivér kompas', cs:'🧭 Aktivovat kompas', id:'🧭 Aktifkan kompas' };
+
 function iniciarBrujulaLuna(azimutLuna) {
   _lunaBrujulaAzimut = azimutLuna;
   const btn = document.getElementById('intBrujulaActivar');
   const yaActiva = _lunaBrujulaActiva;
   _lunaBrujulaActiva = true;
   if (!yaActiva) _lunaBrujulaHeadingRaw = null;
-  _lunaBrujulaTextoEstado('🌙 Gira el teléfono: la flecha apunta hacia la Luna');
+  const _lang = (typeof idioma !== 'undefined') ? idioma : 'es';
+  _lunaBrujulaTextoEstado('🌙 ' + (_GIRA_TEL[_lang] || _GIRA_TEL[_lang.split('-')[0]] || _GIRA_TEL.es));
 
   const activarSensor = () => {
     if (_lunaBrujulaListener) return;
@@ -3711,13 +3716,14 @@ function iniciarBrujulaLuna(azimutLuna) {
     // iOS 13+: el permiso de sensores solo se puede pedir dentro de un
     // gesto directo del usuario -- se muestra un boton en vez de pedirlo
     // automaticamente (que fallaría silenciosamente).
-    btn.textContent = '🧭 Activar brújula';
+    btn.textContent = _ACTIVAR_BRUJULA[_lang] || _ACTIVAR_BRUJULA[_lang.split('-')[0]] || _ACTIVAR_BRUJULA.es;
     btn.style.display = 'inline-block';
     btn.onclick = () => {
+      const _msgSinAcceso = _SIN_ACCESO_ORIENT[_lang] || _SIN_ACCESO_ORIENT[_lang.split('-')[0]] || _SIN_ACCESO_ORIENT.es;
       DeviceOrientationEvent.requestPermission().then(resp => {
         if (resp === 'granted') activarSensor();
-        else _lunaBrujulaTextoEstado('Sin acceso a los sensores de orientación.');
-      }).catch(() => _lunaBrujulaTextoEstado('Sin acceso a los sensores de orientación.'));
+        else _lunaBrujulaTextoEstado(_msgSinAcceso);
+      }).catch(() => _lunaBrujulaTextoEstado(_msgSinAcceso));
     };
   } else {
     activarSensor();
