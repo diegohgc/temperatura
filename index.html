@@ -5006,6 +5006,16 @@ document.addEventListener('visibilitychange', () => {
 
 if ('serviceWorker' in navigator) {
   let _swReg = null;
+  // Si la página ya tenía un Service Worker controlándola al cargar, un
+  // "controllerchange" significa que hay una versión NUEVA de verdad y
+  // toca recargar para mostrarla. Pero en una instalación nueva (o con
+  // datos/caché borrados) no hay controlador todavía al cargar -- el SW
+  // se activa por primera vez segundos después, y ese primer
+  // "controllerchange" no tiene nada "viejo" que refrescar. Recargar en
+  // ese momento interrumpía flujos en curso, como el diálogo nativo de
+  // permiso de ubicación (Android), que se reiniciaba a medias y volvía
+  // a pedirse -- pareciendo que preguntaba dos veces.
+  let _huboControladorAlCargar = !!navigator.serviceWorker.controller;
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js').then(reg => {
       _swReg = reg;
@@ -5013,6 +5023,10 @@ if ('serviceWorker' in navigator) {
     }).catch(() => {});
   });
   navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!_huboControladorAlCargar) {
+      _huboControladorAlCargar = true; // futuros cambios sí recargarán
+      return;
+    }
     window.location.reload();
   });
   // El navegador comprueba sw.js en segundo plano por su cuenta, pero
