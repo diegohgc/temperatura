@@ -4855,6 +4855,12 @@ let timeoutBusqueda = null;
 async function actualizarPosicionYAltitud() {
   if (_bienvenidaActiva) return;
   if (ubicacionManual || !navigator.geolocation) return;
+  // No pedir ubicación aquí hasta que la carga inicial (actualizar()) ya
+  // haya resuelto una posición por algún medio (GPS, ciudad manual o IP).
+  // Si no, este setInterval podía lanzar su propia getCurrentPosition
+  // mientras el usuario todavía no había respondido al primer diálogo de
+  // permiso, y Android mostraba un SEGUNDO diálogo de ubicación seguido.
+  if (!currentCoords) return;
   navigator.geolocation.getCurrentPosition(async (pos) => {
     if (ubicacionManual) return; // el usuario buscó una ciudad mientras el GPS resolvía
     const { latitude, longitude } = pos.coords;
@@ -4874,6 +4880,9 @@ async function actualizarPosicionYAltitud() {
 async function actualizarCiudad() {
   if (_bienvenidaActiva) return;
   if (ubicacionManual || !navigator.geolocation) return;
+  // Mismo motivo que en actualizarPosicionYAltitud: esperar a que haya
+  // una posición inicial resuelta antes de volver a pedir ubicación.
+  if (!currentCoords) return;
   navigator.geolocation.getCurrentPosition(async (pos) => {
     if (ubicacionManual) return; // el usuario buscó una ciudad mientras el GPS resolvía
     const { latitude, longitude } = pos.coords;
