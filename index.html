@@ -4471,13 +4471,14 @@ function renderDatos(datos) {
       // calima ligera o humedad matinal sin visibilidad realmente reducida.
       const omVis = c.visibility ?? null; // metros
       if (omVis !== null && omVis >= 1200) {
-        // Visibilidad buena: no es niebla real, usar la nubosidad de OM
-        // en su lugar para decidir despejado/parcial/nublado.
-        const omCloudNiebla = c.cloud_cover ?? null;
-        if (omCloudNiebla !== null) {
-          if      (omCloudNiebla >= 80) weatherCode = 3;
-          else if (omCloudNiebla >= 50) weatherCode = 2;
-          else if (omCloudNiebla >= 20) weatherCode = 1;
+        // Visibilidad buena: no es niebla real, usar la nubosidad propia
+        // de WeatherAPI (no la de Open-Meteo, poco fiable aquí como
+        // respaldo) para decidir despejado/parcial/nublado.
+        const wapiCloudNiebla = wapiData?.current?.cloud ?? null;
+        if (wapiCloudNiebla !== null) {
+          if      (wapiCloudNiebla >= 80) weatherCode = 3;
+          else if (wapiCloudNiebla >= 50) weatherCode = 2;
+          else if (wapiCloudNiebla >= 20) weatherCode = 1;
           else weatherCode = 0;
         } else {
           weatherCode = 2; // sin dato de nubosidad, quedarse en un término medio
@@ -4506,28 +4507,19 @@ function renderDatos(datos) {
     else if ([1087,1273,1276,1279,1282].includes(wapiCode)) weatherCode = 95;
     else weatherCode = 2; // código WAPI no mapeado → nublado por defecto
 
-    // ── Corrección de nubosidad por consenso: antes esto eran dos
-    // correcciones asimétricas (una solo subía hacia más nubes mirando
-    // solo Open-Meteo, otra solo bajaba y solo si el código WAPI era
-    // exactamente 1009/"Overcast"). Eso dejaba un hueco: si WAPI daba un
-    // código "despejado/parcial" (1000/1003/1006) pero Open-Meteo por su
-    // cuenta reportaba ≥80% de nubes, se subía a "Nublado" sin ninguna
-    // forma de corregirlo de vuelta aunque WAPI (o la realidad) dijeran
-    // menos nubosidad. Ahora se promedian ambas fuentes cuando las dos
-    // están disponibles (o se usa la que haya) y esa nubosidad de
-    // consenso decide despejado/parcial/nublado en ambas direcciones,
-    // salvo que llueva de verdad.
+    // ── Corrección de nubosidad: usa SOLO la nubosidad propia de
+    // WeatherAPI (current.cloud), no la de Open-Meteo. Open-Meteo se usa
+    // en otras partes de la app (visibilidad para niebla, precipitación),
+    // pero para decidir despejado/parcial/nublado resultaba poco fiable
+    // como respaldo -- podía subir a "Nublado" con cielo realmente
+    // parcialmente nuboso. Solo corrige el código de condición de WAPI
+    // cuando este no encaja con lo que WAPI mismo reporta de nubosidad.
     if (!llueveDeVerdad) {
-      const omCloud = c.cloud_cover ?? null;
       const wapiCloud = wapiData?.current?.cloud ?? null;
-      let cloudConsenso = null;
-      if (omCloud !== null && wapiCloud !== null) cloudConsenso = (omCloud + wapiCloud) / 2;
-      else if (omCloud !== null) cloudConsenso = omCloud;
-      else if (wapiCloud !== null) cloudConsenso = wapiCloud;
-      if (cloudConsenso !== null && weatherCode <= 3) {
-        if      (cloudConsenso >= 80) weatherCode = 3; // nublado
-        else if (cloudConsenso >= 50) weatherCode = 2; // parcialmente nublado
-        else if (cloudConsenso >= 20) weatherCode = Math.min(weatherCode, 1); // mayormente despejado
+      if (wapiCloud !== null && weatherCode <= 3) {
+        if      (wapiCloud >= 80) weatherCode = 3; // nublado
+        else if (wapiCloud >= 50) weatherCode = 2; // parcialmente nublado
+        else if (wapiCloud >= 20) weatherCode = Math.min(weatherCode, 1); // mayormente despejado
         else weatherCode = Math.min(weatherCode, 0); // despejado
       }
     }
