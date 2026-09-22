@@ -5659,10 +5659,16 @@ function abrirEnGoogleMaps() {
   const aguja2 = document.getElementById('cabBrujulaAguja');
   if (!aguja && !aguja2) return;
 
-  const dirs = dirs16Idioma();
   let sensorRecibido = false;
 
   function pintarRumbo(h) {
+    // dirs16Idioma() se llama aqui, no una sola vez al cargar el script --
+    // si se cacheaba al inicio, se congelaba con el idioma que hubiera en
+    // ese instante (a veces todavia el 'es' por defecto, antes de que se
+    // determinase el idioma real de la sesion), y el resto de la interfaz
+    // cambiaba de idioma correctamente pero esta etiqueta se quedaba en
+    // español (p.ej. "NNO" en vez de "NNW" con la app en ingles).
+    const dirs = dirs16Idioma();
     if (aguja) aguja.style.transform = `rotate(${-h}deg)`;
     if (aguja2) aguja2.style.transform = `rotate(${-h}deg)`;
     const ag = document.getElementById('brujulaRosa');
