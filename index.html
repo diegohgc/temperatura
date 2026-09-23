@@ -4607,7 +4607,12 @@ function renderDatos(datos) {
       _ring.querySelector('.compass-o').textContent = _dv[6];
     }
   }
-  document.getElementById('modalVientoDirText').textContent = windDirStr + (windDeg !== null ? ' · ' + Math.round(windDeg) + '°' : '');
+  {
+    const _idx16 = {N:0,NNE:1,NE:2,ENE:3,E:4,ESE:5,SE:6,SSE:7,S:8,SSW:9,SW:10,WSW:11,W:12,WNW:13,NW:14,NNW:15};
+    const _dv16 = dirs16Idioma();
+    const _dirLocal = (windDirStr && _idx16[windDirStr] !== undefined) ? _dv16[_idx16[windDirStr]] : windDirStr;
+    document.getElementById('modalVientoDirText').textContent = _dirLocal + (windDeg !== null ? ' · ' + Math.round(windDeg) + '°' : '');
+  }
   if (windDeg !== null) document.getElementById('modalVientoFlecha').style.transform = `rotate(${windDeg + 180}deg)`;
   document.getElementById('mvLblVel').textContent = T.ajustesVel || 'Velocidad';
   document.getElementById('mvVel').textContent = toViento(windSpeedKmh);
