@@ -4597,6 +4597,16 @@ function renderDatos(datos) {
   document.getElementById('vientoDir').textContent = dirVientoTexto(windDirStr, windDeg);
   // Modal viento: rellenar datos
   document.getElementById('modalVientoTitulo').textContent = T.diaViento || 'Viento';
+  {
+    const _dv = dirs8Idioma();
+    const _ring = document.querySelector('#modalViento .compass-ring');
+    if (_ring) {
+      _ring.querySelector('.compass-n').textContent = _dv[0];
+      _ring.querySelector('.compass-e').textContent = _dv[2];
+      _ring.querySelector('.compass-s').textContent = _dv[4];
+      _ring.querySelector('.compass-o').textContent = _dv[6];
+    }
+  }
   document.getElementById('modalVientoDirText').textContent = windDirStr + (windDeg !== null ? ' · ' + Math.round(windDeg) + '°' : '');
   if (windDeg !== null) document.getElementById('modalVientoFlecha').style.transform = `rotate(${windDeg + 180}deg)`;
   document.getElementById('mvLblVel').textContent = T.ajustesVel || 'Velocidad';
