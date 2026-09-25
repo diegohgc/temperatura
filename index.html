@@ -4494,15 +4494,16 @@ function renderDatos(datos) {
       // bruma ~1-2km, así que exigir <1200m evita falsos positivos con
       // calima ligera o humedad matinal sin visibilidad realmente reducida.
       // OJO: la visibilidad de Open-Meteo (modelo ICON) puede fallar al
-      // revés -- se ha visto devolver >25km con niebla real confirmada por
-      // webcam, WAPI (Mist) y humedad ~95%. Por eso, si la humedad de WAPI
-      // ya es muy alta (>=90%, propia de niebla/bruma real), no se descarta
-      // la niebla solo porque OM diga que hay buena visibilidad: se exige
-      // ADEMÁS humedad más baja para aceptar el "no es niebla real" de OM.
+      // revés -- se ha visto devolver >25km con la webcam mostrando cielo
+      // cubierto real (no niebla de baja visibilidad, solo nublado). Por
+      // eso, cuando OM descarta la niebla, si la humedad de WAPI sigue
+      // siendo muy alta (>=90%, aire claramente húmedo/nuboso) no se
+      // confía en el "despejado" que saldría del cloud% de WAPI a solas:
+      // como mínimo se deja en "Parcialmente nublado", nunca despejado.
       const omVis = c.visibility ?? null; // metros
       const wapiHumNiebla = wapiData?.current?.humidity ?? null;
       const vieneMuyHumedo = wapiHumNiebla !== null && wapiHumNiebla >= 90;
-      if (omVis !== null && omVis >= 1200 && !vieneMuyHumedo) {
+      if (omVis !== null && omVis >= 1200) {
         // Visibilidad buena: no es niebla real, usar la nubosidad propia
         // de WeatherAPI (no la de Open-Meteo, poco fiable aquí como
         // respaldo) para decidir despejado/parcial/nublado.
@@ -4515,6 +4516,7 @@ function renderDatos(datos) {
         } else {
           weatherCode = 2; // sin dato de nubosidad, quedarse en un término medio
         }
+        if (vieneMuyHumedo) weatherCode = Math.max(weatherCode, 2);
       }
       else if (wapiCode === 1030) weatherCode = 47;
       else if (wapiCode === 1135) weatherCode = 45;
