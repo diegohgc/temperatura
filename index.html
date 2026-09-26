@@ -3837,7 +3837,8 @@ function abrirModalLluvia() {
     manana:   { es:'Mañana','es-US':'Mañana', en:'Tomorrow', de:'Morgen', fr:'Demain', pt:'Amanhã', it:'Domani', zh:'明天', ca:'Demà', eu:'Bihar', gl:'Mañá', ar:'غداً', ru:'Завтра', ja:'明日', ko:'내일', nl:'Morgen', pl:'Jutro', hi:'कल', ro:'Mâine', hu:'Holnap', uk:'Завтра', da:'I morgen', cs:'Zítra', id:'Besok', no:'I morgen' },
     noLluvia: { es:'Sin lluvias previstas','es-US':'Sin lluvias previstas', en:'No rain expected', de:'Kein Regen erwartet', fr:'Pas de pluie prévue', pt:'Sem chuva prevista', it:'Nessuna pioggia prevista', zh:'无预计降雨', ca:'Sense pluja prevista', eu:'Ez da euririk espero', gl:'Sen choiva prevista', ar:'لا أمطار متوقعة', ru:'Дождей не ожидается', ja:'雨の予報なし', ko:'비 예보 없음', nl:'Geen regen verwacht', pl:'Brak spodziewanego deszczu', hi:'कोई बारिश अपेक्षित नहीं', ro:'Nicio ploaie așteptată', hu:'Nem várható eső', uk:'Дощів не очікується', da:'Ingen regn forventet', cs:'Žádný déšť se neočekává', id:'Tidak ada hujan diperkirakan', no:'Ingen regn forventet' },
   };
-  const lang = idioma in STR.titulo ? idioma : 'en';
+  const _langBaseLluvia = (idioma || 'en').split('-')[0];
+  const lang = idioma in STR.titulo ? idioma : (_langBaseLluvia in STR.titulo ? _langBaseLluvia : 'en');
 
   const todasHoras = wapiData.forecast.forecastday.flatMap(d => d.hour);
   const ahoraEpoch = Date.now() / 1000;
@@ -4037,7 +4038,8 @@ function abrirModalSensacion() {
                id:'Suhu sebenarnya dan suhu terasa praktis sama. Tidak ada faktor besar yang mengubah persepsi.',
                no:'Den faktiske temperaturen og følelsen er stort sett like. Ingen faktorer påvirker opplevelsen nevneverdig.' },
   };
-  const lang = idioma in STRINGS.titulo ? idioma : 'en';
+  const _langBaseSens = (idioma || 'en').split('-')[0];
+  const lang = idioma in STRINGS.titulo ? idioma : (_langBaseSens in STRINGS.titulo ? _langBaseSens : 'en');
 
   document.getElementById('modalSensacionTitulo').textContent = STRINGS.titulo[lang];
   document.getElementById('msSensVal').textContent = toTemp(sens);
@@ -4119,7 +4121,8 @@ function consejoHumedad(tempC, rh) {
     hidra: { es:'Alta humedad con calor: mantente bien hidratado.','es-US':'Alta humedad con calor: mantente bien hidratado.', en:'High humidity and heat: stay well hydrated.', de:'Hohe Luftfeuchtigkeit und Hitze: gut hydriert bleiben.', fr:'Chaleur et humidité élevées : restez bien hydraté.', pt:'Alta humidade com calor: mantenha-se bem hidratado.', it:'Alta umidità e caldo: mantieniti ben idratato.', zh:'高温高湿：保持充足水分。', ca:'Alta humitat amb calor: manteniu-vos ben hidratat.', eu:'Hezetasun eta bero handia: ondo hidrataturik egon.', gl:'Alta humidade con calor: mantéñase ben hidratado.', ar:'رطوبة عالية مع الحرارة: ابق رطباً جيداً.', ru:'Высокая влажность и жара: пейте больше воды.', ja:'高温多湿: こまめに水分補給してください。', ko:'고온 다습: 충분한 수분을 섭취하세요.', nl:'Hoge luchtvochtigheid en hitte: blijf goed gehydrateerd.', pl:'Wysoka wilgotność i upał: nawadniaj się dobrze.', hi:'उच्च आर्द्रता और गर्मी: अच्छी तरह हाइड्रेटेड रहें।', ro:'Umiditate ridicată cu căldură: hidratați-vă bine.', hu:'Nagy páratartalom és meleg: maradj jól hidratált.', uk:'Висока вологість і спека: пийте достатньо води.', da:'Høj luftfugtighed og varme: sørg for at drikke rigeligt med væske.', cs:'Vysoká vlhkost a teplo: udržujte dostatečný pitný režim.', id:'Kelembapan tinggi dengan panas: jaga hidrasi tubuh dengan baik.', no:'Høy luftfuktighet og varme: sørg for å drikke nok væske.' },
     ideal: { es:'Condiciones ideales de humedad. Muy confortable.','es-US':'Condiciones ideales de humedad. Muy confortable.', en:'Ideal humidity conditions. Very comfortable.', de:'Ideale Feuchtigkeitsbedingungen. Sehr angenehm.', fr:'Conditions d\'humidité idéales. Très confortable.', pt:'Condições de humidade ideais. Muito confortável.', it:'Condizioni di umidità ideali. Molto confortevole.', zh:'湿度条件理想，非常舒适。', ca:'Condicions d\'humitat ideals. Molt confortable.', eu:'Hezetasun-baldintza ezin hobeak. Oso erosoa.', gl:'Condicións de humidade ideais. Moi confortable.', ar:'ظروف رطوبة مثالية. مريح جداً.', ru:'Идеальная влажность. Очень комфортно.', ja:'理想的な湿度条件。とても快適です。', ko:'이상적인 습도 조건입니다. 매우 쾌적합니다.', nl:'Ideale luchtvochtigheid. Zeer comfortabel.', pl:'Idealne warunki wilgotności. Bardzo komfortowo.', hi:'आदर्श आर्द्रता स्थितियाँ। बहुत आरामदायक।', ro:'Condiții ideale de umiditate. Foarte confortabil.', hu:'Ideális páratartalom. Nagyon kellemes.', uk:'Ідеальні умови вологості. Дуже комфортно.', da:'Ideelle fugtighedsforhold. Meget behageligt.', cs:'Ideální vlhkostní podmínky. Velmi příjemné.', id:'Kondisi kelembapan ideal. Sangat nyaman.', no:'Ideelle fuktighetsforhold. Svært behagelig.' },
   };
-  const lang = idioma in CONSEJOS.ideal ? idioma : 'en';
+  const _langBaseHum = (idioma || 'en').split('-')[0];
+  const lang = idioma in CONSEJOS.ideal ? idioma : (_langBaseHum in CONSEJOS.ideal ? _langBaseHum : 'en');
   if (diff < 3) return CONSEJOS.niebla[lang];
   if (rh < 30) return CONSEJOS.seco[lang];
   if (rh > 70 && tempC > 24) return CONSEJOS.hidra[lang];
