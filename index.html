@@ -5208,7 +5208,17 @@ function abrirModalRadar() {
   document.getElementById('radarTit').textContent = T.radar;
   document.getElementById('modalRadar').classList.add('abierto');
   document.body.style.overflow = 'hidden';
-  if (!radarMap) inicializarRadar();
+  if (!radarMap) {
+    inicializarRadar();
+  } else {
+    // El mapa ya existe de una apertura anterior -- si no se refresca
+    // aqui, se queda centrado en la PRIMERA ciudad con la que se abrio
+    // el radar (aunque luego se cambie de ciudad) y con los frames de
+    // lluvia de aquel momento (aunque pasen horas), porque crearMapaRadar
+    // solo se llamaba la primera vez. Se recentra y se vuelven a pedir
+    // los frames actuales de RainViewer cada vez que se reabre.
+    actualizarMapaRadar();
+  }
 }
 
 function cerrarModalRadar() {
@@ -5241,14 +5251,47 @@ let _radarFrames = [];
 let _radarLayer = null;
 let _radarIdx = 0;
 let _radarPlayInterval = null;
+let _radarMarker = null;
 
-async function crearMapaRadar() {
+function crearMapaRadar() {
   const lat = currentCoords ? currentCoords.lat : 43.5;
   const lon = currentCoords ? currentCoords.lon : -5.7;
 
   radarMap = L.map('radarMap', { zoomControl: true, attributionControl: false }).setView([lat, lon], 6);
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(radarMap);
-  L.circleMarker([lat, lon], { radius: 7, color: '#fff', fillColor: '#4af', fillOpacity: 1, weight: 2 }).addTo(radarMap);
+  _radarMarker = L.circleMarker([lat, lon], { radius: 7, color: '#fff', fillColor: '#4af', fillOpacity: 1, weight: 2 }).addTo(radarMap);
+  setTimeout(() => radarMap.invalidateSize(), 100);
+
+  const slider = document.getElementById('radarSlider');
+  slider.oninput = () => {
+    _radarIdx = parseInt(slider.value);
+    radarSetFrame(_radarIdx);
+    radarStopPlay();
+  };
+  const playBtn = document.getElementById('radarPlayBtn');
+  playBtn.onclick = () => {
+    if (_radarPlayInterval) { radarStopPlay(); return; }
+    playBtn.textContent = '⏹';
+    _radarPlayInterval = setInterval(() => {
+      _radarIdx = (_radarIdx + 1) % _radarFrames.length;
+      slider.value = _radarIdx;
+      radarSetFrame(_radarIdx);
+    }, 700);
+  };
+
+  actualizarMapaRadar();
+}
+
+// Recentra el mapa en la ciudad actual y vuelve a pedir a RainViewer los
+// frames de lluvia vigentes -- se llama tanto al crear el mapa por
+// primera vez como cada vez que se reabre el modal despues, para que no
+// se quede congelado en la primera ciudad/hora con la que se abrio.
+async function actualizarMapaRadar() {
+  radarStopPlay();
+  const lat = currentCoords ? currentCoords.lat : 43.5;
+  const lon = currentCoords ? currentCoords.lon : -5.7;
+  radarMap.setView([lat, lon], 6);
+  if (_radarMarker) _radarMarker.setLatLng([lat, lon]);
   setTimeout(() => radarMap.invalidateSize(), 100);
 
   // Frames pasados: RainViewer
@@ -5287,23 +5330,6 @@ async function crearMapaRadar() {
   slider.value = lastPastIdx;
   _radarIdx = lastPastIdx;
   radarSetFrame(_radarIdx);
-
-  slider.oninput = () => {
-    _radarIdx = parseInt(slider.value);
-    radarSetFrame(_radarIdx);
-    radarStopPlay();
-  };
-
-  const playBtn = document.getElementById('radarPlayBtn');
-  playBtn.onclick = () => {
-    if (_radarPlayInterval) { radarStopPlay(); return; }
-    playBtn.textContent = '⏹';
-    _radarPlayInterval = setInterval(() => {
-      _radarIdx = (_radarIdx + 1) % _radarFrames.length;
-      slider.value = _radarIdx;
-      radarSetFrame(_radarIdx);
-    }, 700);
-  };
 }
 
 function radarSetFrame(idx) {
