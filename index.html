@@ -5805,8 +5805,6 @@ function abrirEnGoogleMaps() {
 // ── Velocímetro ──────────────────────────────────────────────────────────────
 (function() {
   const UMBRAL_MS = 0.6; // ~2 km/h, por debajo se considera parado
-  const MAX_VEL = 220;   // km/h para escala del arco
-  const MAX_VEL_MPH = Math.round(MAX_VEL * 0.621371); // equivalente en mph, redondeado
   let velActual = 0, velMax = 0, velSuma = 0, velCount = 0;
   let watchId = null;
   let distMetros = 0, lastLat = null, lastLon = null;
@@ -5836,30 +5834,12 @@ function abrirEnGoogleMaps() {
     return (window.usaMph || false) ? 'mph' : 'km/h';
   }
 
-  // Marcas numéricas del arco (0, 1/4, 1/2, 3/4, máximo)
-  function dibujarTicks(maxDisplay) {
-    const ticksG = document.getElementById('brjVelTicks');
-    if (!ticksG) return;
-    const cx = 90, cy = 100, r = 80;
-    ticksG.innerHTML = [180, 135, 90, 45, 0].map(deg => {
-      const rad = deg * Math.PI / 180;
-      const x = cx + r * Math.cos(rad);
-      const y = cy - r * Math.sin(rad);
-      const val = Math.round(maxDisplay * (180 - deg) / 180);
-      const anchor = deg === 180 ? 'start' : deg === 0 ? 'end' : 'middle';
-      return `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="${anchor}">${val}</text>`;
-    }).join('');
-  }
-
   function actualizarPanelBrujula() {
     const T = window.T || {};
-    const usaMph = window.usaMph || false;
-    const maxDisplay = usaMph ? MAX_VEL_MPH : MAX_VEL;
 
     const velLabel = document.getElementById('brjVelLabel');
     const numero   = document.getElementById('brjVelNumero');
     const velUnit  = document.getElementById('brjVelUnit');
-    const arco     = document.getElementById('brjVelArco');
     const distLabel = document.getElementById('brjDistLabel');
     const distNum  = document.getElementById('brjDistNum');
     const distUnit = document.getElementById('brjDistUnit');
@@ -5872,11 +5852,6 @@ function abrirEnGoogleMaps() {
     const v = Math.round(msToDisplay(velActual));
     if (numero) numero.textContent = v;
     if (velUnit) velUnit.textContent = unidad();
-    if (arco) {
-      const pct = Math.min(v / maxDisplay, 1);
-      arco.style.strokeDashoffset = 220 - pct * 220;
-    }
-    dibujarTicks(maxDisplay);
 
     const [dVal, dUnit] = formatDist(distMetros);
     if (distNum) distNum.textContent = dVal;
@@ -7779,16 +7754,16 @@ window.aplicarFondoDinamico=function(weatherCode,isDay,astroData,lat,utcOffsetSe
     </svg>
     <div id="brujulaGradosTexto" style="font-size:2rem;font-weight:700;margin-top:12px;letter-spacing:2px">—</div>
     <div id="brujulaDireccionTexto" style="font-size:0.9rem;opacity:0.6;margin-top:2px">sin señal</div>
-    <!-- Velocímetro: arco con marcas -->
+    <!-- Velocímetro: numérico simple (el arco tipo velocímetro de coche,
+         con escala hasta 220 km/h, no tenía sentido para quien usa esto
+         caminando por un sendero: la aguja quedaba siempre pegada al
+         cero) -->
     <div style="margin-top:16px">
       <div id="brjVelLabel" style="font-size:0.6rem;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.38);margin-bottom:2px">Velocidad</div>
-      <svg width="180" height="118" viewBox="0 0 180 118" style="display:block;margin:0 auto">
-        <path d="M20 100 A70 70 0 0 1 160 100" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="9" stroke-linecap="round"/>
-        <path id="brjVelArco" d="M20 100 A70 70 0 0 1 160 100" fill="none" stroke="#4A9EFF" stroke-width="9" stroke-linecap="round" stroke-dasharray="220" stroke-dashoffset="220" style="transition:stroke-dashoffset 0.5s ease"/>
-        <g id="brjVelTicks" font-size="8" fill="rgba(255,255,255,0.4)" font-family="sans-serif"></g>
-        <text id="brjVelNumero" x="90" y="98" text-anchor="middle" font-size="26" font-weight="600" fill="#fff">0</text>
-        <text id="brjVelUnit" x="90" y="114" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.55)">km/h</text>
-      </svg>
+      <div style="display:flex;align-items:baseline;justify-content:center;gap:6px">
+        <span id="brjVelNumero" style="font-size:2.4rem;font-weight:700;font-variant-numeric:tabular-nums">0</span>
+        <span id="brjVelUnit" style="font-size:1rem;opacity:0.55">km/h</span>
+      </div>
     </div>
     <!-- Distancia: discreta, sin tarjeta -->
     <div style="margin-top:6px;font-size:0.78rem;opacity:0.55">
