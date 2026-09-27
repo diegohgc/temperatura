@@ -475,7 +475,7 @@
   <div id="bg"><canvas id="wbg"></canvas></div>
   <div id="swipeClip" style="width:100%;max-width:420px;overflow:hidden">
   <div class="card" id="pageCard">
-    <div id="cargaInicial" class="carga-inicial" hidden><div class="spinner"></div></div>
+    <div id="cargaInicial" class="carga-inicial" hidden><div style="display:flex;flex-direction:column;align-items:center;gap:12px"><div class="spinner"></div><div id="cargaInicialTexto" style="font-size:0.85rem;color:#fff;opacity:0.85"></div></div></div>
     <button class="btn-ajustes" id="btnAjustes"></button>
     <div id="ajustesPanel" hidden>
       <div class="ajustes-panel">
@@ -7760,7 +7760,11 @@ window.aplicarFondoDinamico=function(weatherCode,isDay,astroData,lat,utcOffsetSe
   // defecto. Si el usuario deniega el permiso, actualizar() ya
   // gestiona ese caso (mostrarPermisoDenegado) llevándolo al buscador
   // manual de ciudades.
-  if (elCargaInicial) elCargaInicial.hidden = false;
+  if (elCargaInicial) {
+    const _elCargaTxt = document.getElementById('cargaInicialTexto');
+    if (_elCargaTxt) _elCargaTxt.textContent = T.localizando || '';
+    elCargaInicial.hidden = false;
+  }
   actualizar();
   // El velocímetro ya NO se arranca aquí -- se arranca al abrir la
   // brújula (abrirModal en el bloque del velocímetro). Arrancarlo en el
