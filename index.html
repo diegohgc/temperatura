@@ -5942,6 +5942,17 @@ function abrirEnGoogleMaps() {
     abrirModal(); iniciarSensor(); iniciarModoDemoSiNoHaySensor();
   });
 
+  // La brujula pequeña de la cabecera usaba el mismo iniciarSensor() de
+  // arriba, pero solo se llamaba al pulsar el icono -- hasta ese primer
+  // toque se quedaba congelada sin moverse. En Android (sin
+  // requestPermission, no exige gesto del usuario) se puede arrancar el
+  // sensor directamente al cargar; en iOS 13+ (con requestPermission)
+  // sigue haciendo falta el gesto, así que ahí se mantiene como estaba,
+  // arrancando con el primer toque.
+  if (typeof DeviceOrientationEvent === 'undefined' || typeof DeviceOrientationEvent.requestPermission !== 'function') {
+    iniciarSensor();
+  }
+
   // Cerrar modal al pulsar fuera de la tarjeta (lazy)
   document.addEventListener('click', function(ev) {
     const m = document.getElementById('brujulaModal');
