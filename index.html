@@ -5611,7 +5611,13 @@ function animarSwipeEntrada() {
   }, { passive: true });
 })();
 
+// Pulsacion larga sobre el mapa: consultar el tiempo en cualquier punto
+// (pico de montana, cala escondida, etc.), no solo en la ubicacion actual.
+const MAPA_CONSULTAR_AQUI = { es:'¿Consultar esta ubicación?', 'es-US':'¿Consultar esta ubicación?', en:'Check the weather here?', de:'Wetter hier abrufen?', fr:'Consulter la météo ici ?', pt:'Consultar o tempo aqui?', 'pt-BR':'Consultar o tempo aqui?', it:'Consultare il meteo qui?', zh:'查询这里的天气？', ca:'Consultar el temps aquí?', eu:'Kontsultatu eguraldia hemen?', gl:'Consultar o tempo aquí?', ar:'الاطلاع على الطقس هنا؟', ru:'Узнать погоду здесь?', ja:'ここの天気を確認しますか？', ko:'여기 날씨를 확인할까요?', nl:'Weer hier bekijken?', pl:'Sprawdzić pogodę tutaj?', hi:'यहां का मौसम देखें?', ro:'Verifici vremea aici?', hu:'Megnézzük itt az időjárást?', uk:'Перевірити погоду тут?', da:'Tjek vejret her?', cs:'Zjistit počasí zde?', id:'Cek cuaca di sini?', no:'Sjekk været her?' };
+const MAPA_VER_TIEMPO = { es:'Ver el tiempo aquí', 'es-US':'Ver el tiempo aquí', en:'See weather here', de:'Wetter hier ansehen', fr:'Voir la météo ici', pt:'Ver o tempo aqui', 'pt-BR':'Ver o tempo aqui', it:'Vedi il meteo qui', zh:'查看这里的天气', ca:'Veure el temps aquí', eu:'Ikusi eguraldia hemen', gl:'Ver o tempo aquí', ar:'عرض الطقس هنا', ru:'Смотреть погоду здесь', ja:'ここの天気を見る', ko:'여기 날씨 보기', nl:'Weer hier bekijken', pl:'Zobacz pogodę tutaj', hi:'यहां मौसम देखें', ro:'Vezi vremea aici', hu:'Időjárás megtekintése itt', uk:'Переглянути погоду тут', da:'Se vejret her', cs:'Zobrazit počasí zde', id:'Lihat cuaca di sini', no:'Se været her' };
+
 let _mapaLeaflet = null;
+let _mapaMarcadorLargo = null;
 function abrirMapaAltitud() {
   if (!currentCoords) return;
   const { lat, lon } = currentCoords;
@@ -5627,13 +5633,39 @@ function abrirMapaAltitud() {
         maxZoom: 19
       }).addTo(_mapaLeaflet);
       _mapaLeaflet._marker = L.marker([lat, lon]).addTo(_mapaLeaflet);
+      // Pulsacion larga (o click-derecho en escritorio, mismo evento
+      // 'contextmenu' que Leaflet ya traduce solo en moviles): coloca una
+      // chincheta con un boton de confirmacion, para no cambiar la
+      // ubicacion por un toque impreciso sin querer.
+      _mapaLeaflet.on('contextmenu', (e) => {
+        const plat = e.latlng.lat, plon = e.latlng.lng;
+        if (_mapaMarcadorLargo) _mapaLeaflet.removeLayer(_mapaMarcadorLargo);
+        const _lang = (typeof idioma !== 'undefined') ? idioma : 'es';
+        const _lb = _lang.split('-')[0];
+        const _pregunta = MAPA_CONSULTAR_AQUI[_lang] || MAPA_CONSULTAR_AQUI[_lb] || MAPA_CONSULTAR_AQUI.en;
+        const _boton = MAPA_VER_TIEMPO[_lang] || MAPA_VER_TIEMPO[_lb] || MAPA_VER_TIEMPO.en;
+        const contenidoPopup = `
+          <div style="text-align:center;padding:2px 0">
+            <p style="margin:0 0 8px;font-size:0.82rem;color:#1e2330">${_pregunta}</p>
+            <button onclick="window._verTiempoDesdeMapa(${plat},${plon})"
+                    style="background:#4A9EFF;color:#fff;border:none;padding:8px 14px;border-radius:8px;font-weight:600;width:100%;cursor:pointer">${_boton}</button>
+          </div>`;
+        _mapaMarcadorLargo = L.marker([plat, plon]).addTo(_mapaLeaflet).bindPopup(contenidoPopup).openPopup();
+      });
     } else {
       _mapaLeaflet.setView([lat, lon], 14);
       if (_mapaLeaflet._marker) _mapaLeaflet._marker.setLatLng([lat, lon]);
+      if (_mapaMarcadorLargo) { _mapaLeaflet.removeLayer(_mapaMarcadorLargo); _mapaMarcadorLargo = null; }
       _mapaLeaflet.invalidateSize();
     }
   }, 50);
 }
+
+window._verTiempoDesdeMapa = function(lat, lon) {
+  ubicacionManual = { lat, lon, nombre: null };
+  cerrarMapaAltitud();
+  cargarDatos(lat, lon, null, true);
+};
 
 function cerrarMapaAltitud() {
   document.getElementById('mapaModal').style.display = 'none';
