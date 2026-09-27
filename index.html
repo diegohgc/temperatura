@@ -2272,6 +2272,15 @@ function actualizarAjustes() {
   document.getElementById('ajustesIdiomaLabel').textContent = T.idioma || 'Idioma';
   rellenarSelectIdioma();
   actualizarTextosFijos();
+  // inicializarTextosDeArranque() traduce el placeholder del buscador, el
+  // boton "Usar mi ubicacion", "Actualizar", etc. -- se definia mas abajo
+  // en el script y solo se llamaba UNA VEZ al arrancar, con el idioma que
+  // hubiera detectado en ese momento (el del sistema/navegador). Al
+  // cambiar despues el idioma a mano en el selector, estos textos
+  // concretos se quedaban congelados en el idioma inicial. Se llama aqui
+  // tambien, en cada cambio de idioma, para que se actualicen igual que
+  // el resto de la interfaz.
+  if (typeof inicializarTextosDeArranque === 'function') inicializarTextosDeArranque();
 }
 document.getElementById('btnAjustes').addEventListener('click', (e) => {
   e.stopPropagation();
