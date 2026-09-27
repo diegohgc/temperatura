@@ -4929,12 +4929,20 @@ async function actualizar(forzar = false) {
   // la app en "Localizando..." para siempre, sin forma de usarla. Este
   // timeout independiente garantiza que, pase lo que pase con la API de
   // geolocalización, a los 6s como mucho se ofrezca la búsqueda manual.
+  // Subido de 6000 a 8500ms (2026-09-27): con 6s, en GPS algo lentos
+  // (visto en un Samsung) daba tiempo a caer en el respaldo por IP --
+  // impreciso, ciudad cercana pero no la real (p.ej. Oviedo en vez de
+  // Gijon) -- antes de que el GPS real resolviera. Si luego el GPS
+  // resuelve, cargarDatos() se vuelve a llamar y se autocorrige solo,
+  // pero eso no pasa si el GPS de ese dispositivo nunca llega a resolver
+  // del todo dentro de un margen razonable. Mas margen aqui reduce las
+  // veces que se ve la ciudad aproximada por IP en vez de la real.
   const _timeoutSeguridad = setTimeout(() => {
     if (fase1Resuelta) return;
     fase1Resuelta = true;
     window._geoPromptEnCurso = false;
     _fallbackSinUbicacion();
-  }, 6000);
+  }, 8500);
 
   // Una única petición de ubicación (antes había una "fase 2" que pedía
   // GPS de alta precisión justo después de la primera, automáticamente).
