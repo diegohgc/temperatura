@@ -5681,10 +5681,49 @@ function abrirMapaAltitud() {
   setTimeout(() => {
     if (!_mapaLeaflet) {
       _mapaLeaflet = L.map('mapaLeaflet', { zoomControl: true }).setView([lat, lon], 14);
-      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      // Tres capas base: la urbana estandar de siempre, satelite (Esri,
+      // sin API key) y topografico con curvas de nivel (OpenTopoMap, sin
+      // API key) -- utiles sobre todo para senderistas/pescadores que
+      // quieran ver el relieve real antes de soltar la chincheta con la
+      // pulsacion larga. Mismo tipo de servicio gratuito "de uso
+      // razonable" que ya se usa para la capa urbana, sin clave ni cuota
+      // dura, pero tampoco pensado para trafico masivo tipo CDN comercial.
+      const _capaUrbana = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
         maxZoom: 19
-      }).addTo(_mapaLeaflet);
+      });
+      const _capaSatelite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles © Esri',
+        maxZoom: 19
+      });
+      const _capaTopografico = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenTopoMap (CC-BY-SA)',
+        maxZoom: 17
+      });
+      _capaUrbana.addTo(_mapaLeaflet);
+      const _langCapas = (typeof idioma !== 'undefined') ? idioma : 'es';
+      const _lbCapas = _langCapas.split('-')[0];
+      const _NOMBRES_CAPA = {
+        es:['Urbano','Satélite','Topográfico'], 'es-US':['Urbano','Satélite','Topográfico'],
+        en:['Street','Satellite','Topographic'], de:['Straße','Satellit','Topografisch'],
+        fr:['Rue','Satellite','Topographique'], pt:['Rua','Satélite','Topográfico'],
+        'pt-BR':['Rua','Satélite','Topográfico'], it:['Strada','Satellite','Topografico'],
+        zh:['街道','卫星','地形'], ca:['Urbà','Satèl·lit','Topogràfic'],
+        eu:['Kalea','Satelitea','Topografikoa'], gl:['Rúa','Satélite','Topográfico'],
+        ar:['خريطة الشوارع','قمر صناعي','طبوغرافي'], ru:['Улицы','Спутник','Топографическая'],
+        ja:['道路','衛星','地形'], ko:['거리','위성','지형'],
+        nl:['Straat','Satelliet','Topografisch'], pl:['Ulice','Satelita','Topograficzna'],
+        hi:['सड़क','उपग्रह','स्थलाकृतिक'], ro:['Stradă','Satelit','Topografică'],
+        hu:['Utca','Műhold','Topográfiai'], uk:['Вулиці','Супутник','Топографічна'],
+        da:['Gade','Satellit','Topografisk'], no:['Gate','Satellitt','Topografisk'],
+        cs:['Ulice','Satelit','Topografická'], id:['Jalan','Satelit','Topografi'],
+      };
+      const _nc = _NOMBRES_CAPA[_langCapas] || _NOMBRES_CAPA[_lbCapas] || _NOMBRES_CAPA.en;
+      L.control.layers({
+        [_nc[0]]: _capaUrbana,
+        [_nc[1]]: _capaSatelite,
+        [_nc[2]]: _capaTopografico,
+      }, null, { position: 'topright' }).addTo(_mapaLeaflet);
       _mapaLeaflet._marker = L.marker([lat, lon]).addTo(_mapaLeaflet);
       // Pulsacion larga (o click-derecho en escritorio, mismo evento
       // 'contextmenu' que Leaflet ya traduce solo en moviles): coloca una
