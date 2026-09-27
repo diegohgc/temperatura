@@ -3243,14 +3243,24 @@ function generarArcoSolar() {
 
     // Etiqueta de horas de visibilidad de la luna, encima de su
     // trayectoria de puntos, con la hora de salida/puesta reales (mismos
-    // datos que usa el buscador lunar).
+    // datos que usa el buscador lunar). La luna puede alcanzar mucha
+    // altura (arriba del todo del grafico) y pisar esta etiqueta si se
+    // deja fija en y=12 -- se sube por encima del punto mas alto que
+    // realmente alcance el arco/marcador de la luna en este momento.
     const LUNA_VISIBLE = { es:'Luna visible','es-US':'Luna visible', en:'Moon visible', de:'Mond sichtbar', fr:'Lune visible', pt:'Lua visível', it:'Luna visibile', zh:'月亮可见', ca:'Lluna visible', eu:'Ilargia ikusgai', gl:'Lúa visible', ar:'القمر مرئي', ru:'Луна видна', ja:'月が見える', ko:'달이 보임', nl:'Maan zichtbaar', pl:'Widoczny księżyc', hi:'चाँद दिखाई दे रहा', ro:'Luna vizibilă', hu:'Hold látható', uk:'Місяць видно', da:'Månen synlig', cs:'Měsíc viditelný', id:'Bulan terlihat', no:'Månen synlig' };
     let lunaVisibleTexto = null;
     if (_ultimoMoonriseLocalHora && _ultimoMoonsetLocalHora) {
       lunaVisibleTexto = `🌙 ${LUNA_VISIBLE[langBase] || 'Luna visible'}: ${_ultimoMoonriseLocalHora}–${_ultimoMoonsetLocalHora}`;
     }
+    let _minYLuna = Infinity;
+    tramosLuna.forEach(tr => tr.forEach(p => { const py = parseFloat(p.split(',')[1]); if (py < _minYLuna) _minYLuna = py; }));
+    if (marcadorLuna && lunaAhora.altura > 0) {
+      const _lyMarcador = horizY - (Math.min(lunaAhora.altura, 90) / 90) * ry;
+      if (_lyMarcador < _minYLuna) _minYLuna = _lyMarcador;
+    }
+    const labelLunaY = Number.isFinite(_minYLuna) ? Math.min(12, _minYLuna - 9) : 12;
     const labelLuna = lunaVisibleTexto
-      ? `<text x="${cx}" y="12" text-anchor="middle" font-size="8.5" fill="rgba(232,217,140,0.75)">${lunaVisibleTexto}</text>`
+      ? `<text x="${cx}" y="${labelLunaY.toFixed(1)}" text-anchor="middle" font-size="8.5" fill="rgba(232,217,140,0.75)">${lunaVisibleTexto}</text>`
       : '';
 
     // Mismo sol que de dia, pero apagado (amarillo palido) para dejar
