@@ -5615,15 +5615,25 @@ function animarSwipeEntrada() {
 // (pico de montana, cala escondida, etc.), no solo en la ubicacion actual.
 const MAPA_CONSULTAR_AQUI = { es:'¿Consultar esta ubicación?', 'es-US':'¿Consultar esta ubicación?', en:'Check the weather here?', de:'Wetter hier abrufen?', fr:'Consulter la météo ici ?', pt:'Consultar o tempo aqui?', 'pt-BR':'Consultar o tempo aqui?', it:'Consultare il meteo qui?', zh:'查询这里的天气？', ca:'Consultar el temps aquí?', eu:'Kontsultatu eguraldia hemen?', gl:'Consultar o tempo aquí?', ar:'الاطلاع على الطقس هنا؟', ru:'Узнать погоду здесь?', ja:'ここの天気を確認しますか？', ko:'여기 날씨를 확인할까요?', nl:'Weer hier bekijken?', pl:'Sprawdzić pogodę tutaj?', hi:'यहां का मौसम देखें?', ro:'Verifici vremea aici?', hu:'Megnézzük itt az időjárást?', uk:'Перевірити погоду тут?', da:'Tjek vejret her?', cs:'Zjistit počasí zde?', id:'Cek cuaca di sini?', no:'Sjekk været her?' };
 const MAPA_VER_TIEMPO = { es:'Ver el tiempo aquí', 'es-US':'Ver el tiempo aquí', en:'See weather here', de:'Wetter hier ansehen', fr:'Voir la météo ici', pt:'Ver o tempo aqui', 'pt-BR':'Ver o tempo aqui', it:'Vedi il meteo qui', zh:'查看这里的天气', ca:'Veure el temps aquí', eu:'Ikusi eguraldia hemen', gl:'Ver o tempo aquí', ar:'عرض الطقس هنا', ru:'Смотреть погоду здесь', ja:'ここの天気を見る', ko:'여기 날씨 보기', nl:'Weer hier bekijken', pl:'Zobacz pogodę tutaj', hi:'यहां मौसम देखें', ro:'Vezi vremea aici', hu:'Időjárás megtekintése itt', uk:'Переглянути погоду тут', da:'Se vejret her', cs:'Zobrazit počasí zde', id:'Lihat cuaca di sini', no:'Se været her' };
+const MAPA_PISTA_LARGA = { es:'Mantén pulsado el mapa para consultar otro punto', 'es-US':'Mantén pulsado el mapa para consultar otro punto', en:'Long-press the map to check another spot', de:'Karte lange drücken, um einen anderen Ort abzufragen', fr:'Appui long sur la carte pour consulter un autre endroit', pt:'Mantenha premido o mapa para consultar outro ponto', 'pt-BR':'Mantenha pressionado o mapa para consultar outro ponto', it:'Tieni premuto sulla mappa per consultare un altro punto', zh:'长按地图可查询其他地点', ca:'Mantén premut el mapa per consultar un altre punt', eu:'Eutsi mapa sakatuta beste puntu bat kontsultatzeko', gl:'Mantén premido o mapa para consultar outro punto', ar:'اضغط مطولاً على الخريطة للاطلاع على نقطة أخرى', ru:'Нажмите и удерживайте карту, чтобы узнать погоду в другом месте', ja:'地図を長押しすると別の場所を確認できます', ko:'지도를 길게 눌러 다른 지점을 확인하세요', nl:'Houd de kaart ingedrukt om een andere plek te bekijken', pl:'Przytrzymaj mapę, aby sprawdzić inne miejsce', hi:'किसी अन्य स्थान की जांच के लिए मानचित्र को दबाए रखें', ro:'Apasă lung pe hartă pentru a verifica alt loc', hu:'Tartsd lenyomva a térképet egy másik hely megtekintéséhez', uk:'Натисніть і утримуйте карту, щоб перевірити інше місце', da:'Hold kortet nede for at tjekke et andet sted', cs:'Podržte mapu pro zobrazení jiného místa', id:'Tekan lama peta untuk memeriksa lokasi lain', no:'Trykk og hold på kartet for å sjekke et annet sted' };
 
 let _mapaLeaflet = null;
 let _mapaMarcadorLargo = null;
+let _mapaTituloOriginal = '', _mapaAltOriginal = '';
 function abrirMapaAltitud() {
   if (!currentCoords) return;
   const { lat, lon } = currentCoords;
   const modal = document.getElementById('mapaModal');
-  document.getElementById('mapaModalTitulo').textContent = currentCoords.nombre || '';
-  document.getElementById('mapaModalAltitud').textContent = document.getElementById('altitud').textContent;
+  _mapaTituloOriginal = currentCoords.nombre || '';
+  _mapaAltOriginal = document.getElementById('altitud').textContent;
+  document.getElementById('mapaModalTitulo').textContent = _mapaTituloOriginal;
+  document.getElementById('mapaModalAltitud').textContent = _mapaAltOriginal;
+  {
+    const _lang = (typeof idioma !== 'undefined') ? idioma : 'es';
+    const _lb = _lang.split('-')[0];
+    document.getElementById('mapaModalPista').textContent =
+      '💡 ' + (MAPA_PISTA_LARGA[_lang] || MAPA_PISTA_LARGA[_lb] || MAPA_PISTA_LARGA.en);
+  }
   modal.style.display = 'flex';
   setTimeout(() => {
     if (!_mapaLeaflet) {
@@ -5651,6 +5661,25 @@ function abrirMapaAltitud() {
                     style="background:#4A9EFF;color:#fff;border:none;padding:8px 14px;border-radius:8px;font-weight:600;width:100%;cursor:pointer">${_boton}</button>
           </div>`;
         _mapaMarcadorLargo = L.marker([plat, plon]).addTo(_mapaLeaflet).bindPopup(contenidoPopup).openPopup();
+        // Adelanto informativo: mientras se decide si confirmar, el
+        // titulo del modal ya muestra el nombre/altitud del punto pulsado
+        // (sin tocar currentCoords/ubicacionManual hasta que se confirme).
+        const _tituloEl = document.getElementById('mapaModalTitulo');
+        const _altEl = document.getElementById('mapaModalAltitud');
+        _tituloEl.textContent = '…';
+        Promise.all([
+          obtenerCiudad(plat, plon),
+          fetch(`https://api.open-meteo.com/v1/elevation?latitude=${plat}&longitude=${plon}`).then(r => r.json()).catch(() => null),
+        ]).then(([ciudadPunto, elevData]) => {
+          if (!_mapaMarcadorLargo) return; // se cerro/cancelo mientras tanto
+          _tituloEl.textContent = ciudadPunto.sub ? `${ciudadPunto.principal}, ${ciudadPunto.sub}` : ciudadPunto.principal;
+          const elev = elevData?.elevation?.[0];
+          if (elev !== undefined && elev !== null) _altEl.textContent = formatAltitud(Math.round(elev) + ' m');
+        }).catch(() => {});
+        _mapaMarcadorLargo.on('popupclose', () => {
+          _tituloEl.textContent = _mapaTituloOriginal;
+          _altEl.textContent = _mapaAltOriginal;
+        });
       });
     } else {
       _mapaLeaflet.setView([lat, lon], 14);
@@ -7604,6 +7633,7 @@ window.aplicarFondoDinamico=function(weatherCode,isDay,astroData,lat,utcOffsetSe
       <button onclick="cerrarMapaAltitud()" style="border:none;background:rgba(255,255,255,0.1);color:inherit;border-radius:50%;width:32px;height:32px;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
     </div>
     <div id="mapaLeaflet" style="width:100%;height:280px"></div>
+    <div id="mapaModalPista" style="padding:8px 18px 0;font-size:0.72rem;opacity:0.5;text-align:center"></div>
     <div style="padding:10px 18px 14px;display:flex;gap:10px">
       <button id="mapaAbrirGMaps" onclick="abrirEnGoogleMaps()" style="flex:1;padding:9px;border:none;border-radius:12px;background:rgba(255,255,255,0.1);color:inherit;font-size:0.9rem;cursor:pointer">Google Maps ↗</button>
     </div>
