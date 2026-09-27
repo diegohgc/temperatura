@@ -3732,6 +3732,7 @@ let _lunaBrujulaHeadingRaw = null;
 let _lunaBrujulaListener = null;
 let _lunaBrujulaRAF = null;
 let _lunaBrujulaActiva = false;
+let _lunaBrujulaPermisoConcedido = false; // recordar el permiso ya concedido esta sesion de la app, para no volver a pedirlo cada vez que se abre el modal
 
 function _lunaBrujulaOnOrientation(e) {
   let heading = null;
@@ -3782,7 +3783,12 @@ function iniciarBrujulaLuna(azimutLuna) {
     btn.style.display = 'none';
   };
 
-  if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+  if (_lunaBrujulaPermisoConcedido) {
+    // Ya se concedio el permiso antes en esta misma sesion de la app --
+    // no tiene sentido volver a pedirlo (ni volver a mostrar el boton)
+    // cada vez que se abre el modal.
+    activarSensor();
+  } else if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
     // iOS 13+: el permiso de sensores solo se puede pedir dentro de un
     // gesto directo del usuario -- se muestra un boton en vez de pedirlo
     // automaticamente (que fallaría silenciosamente).
@@ -3791,7 +3797,7 @@ function iniciarBrujulaLuna(azimutLuna) {
     btn.onclick = () => {
       const _msgSinAcceso = _SIN_ACCESO_ORIENT[_lang] || _SIN_ACCESO_ORIENT[_lang.split('-')[0]] || _SIN_ACCESO_ORIENT.es;
       DeviceOrientationEvent.requestPermission().then(resp => {
-        if (resp === 'granted') activarSensor();
+        if (resp === 'granted') { _lunaBrujulaPermisoConcedido = true; activarSensor(); }
         else _lunaBrujulaTextoEstado(_msgSinAcceso);
       }).catch(() => _lunaBrujulaTextoEstado(_msgSinAcceso));
     };
