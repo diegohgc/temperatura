@@ -1,4 +1,4 @@
-const CACHE = 'temperatura-v159';
+const CACHE = 'temperatura-v160';
 const ASSETS = ['./manifest.json', './icon-192.png', './icon-512.png', './nube-textura.png', './nube2-textura.png', './sol-textura.png', './luna-textura.png'];
 
 self.addEventListener('install', (e) => {
@@ -22,22 +22,25 @@ self.addEventListener('fetch', (e) => {
       e.request.url.includes('cdnjs.cloudflare.com') || e.request.url.includes('tomorrow.io')) return;
 
   if (e.request.mode === 'navigate' || e.request.url.endsWith('index.html')) {
-    // Stale-while-revalidate: sirve la copia guardada al instante (apertura
-    // rápida) y en paralelo pide la version fresca en segundo plano para
-    // la próxima apertura. Los datos del tiempo nunca pasan por aqui (se
-    // excluyen arriba), así que esto nunca deja una temperatura anticuada,
-    // solo puede dejar el código/diseño "una apertura por detrás" justo
-    // despues de publicar un cambio.
+    // Red primero, cache como respaldo solo si falla/no hay conexion. Antes
+    // era stale-while-revalidate (servia la copia guardada al instante y
+    // dejaba la version fresca para la SIGUIENTE apertura) -- eso hacia que
+    // cualquier usuario que no borrara cache/datos fuera siempre "una
+    // apertura por detras" de cada cambio publicado. Como la app ya
+    // necesita conexion para los datos del tiempo, casi nunca hay usuarios
+    // realmente offline, asi que priorizar red no penaliza la velocidad de
+    // apertura en la practica y todos ven las novedades al instante.
     e.respondWith(
       caches.open(CACHE).then(async (cache) => {
-        const cached = await cache.match('./index.html');
-        const actualizado = fetch(new Request(e.request, { cache: 'no-cache' }))
-          .then((resp) => {
-            if (resp && resp.ok) cache.put('./index.html', resp.clone());
-            return resp;
-          })
-          .catch(() => cached);
-        return cached || actualizado;
+        try {
+          const resp = await fetch(new Request(e.request, { cache: 'no-cache' }));
+          if (resp && resp.ok) cache.put('./index.html', resp.clone());
+          return resp;
+        } catch (err) {
+          const cached = await cache.match('./index.html');
+          if (cached) return cached;
+          throw err;
+        }
       })
     );
     return;
