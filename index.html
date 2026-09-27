@@ -5734,6 +5734,12 @@ function abrirMapaAltitud() {
       // chincheta con un boton de confirmacion, para no cambiar la
       // ubicacion por un toque impreciso sin querer.
       _mapaLeaflet.on('contextmenu', (e) => {
+        // Vibracion sutil al soltar la chincheta -- en moviles con haptico
+        // nativo de long-press (p.ej. algunos Xiaomi/MIUI) se solapa con
+        // el del sistema sin problema (se nota como un solo toque un poco
+        // mas firme); en los que no lo tienen (visto en varios Samsung),
+        // esta es la unica señal tactil de que se ha registrado la pulsacion.
+        if (navigator.vibrate) navigator.vibrate(15);
         const plat = e.latlng.lat, plon = e.latlng.lng;
         if (_mapaMarcadorLargo) _mapaLeaflet.removeLayer(_mapaMarcadorLargo);
         const _lang = (typeof idioma !== 'undefined') ? idioma : 'es';
