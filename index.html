@@ -2451,6 +2451,10 @@ function renderFavoritosLista() {
 document.getElementById('btnFavorito').addEventListener('click', (e) => {
   e.stopPropagation();
   if (!currentCoords) return;
+  // Vibracion sutil de confirmacion al marcar/quitar favorito -- en iOS
+  // (Safari/WebView) navigator.vibrate no existe y esto no hace nada,
+  // sin romper nada; solo tiene efecto real en Android.
+  if (navigator.vibrate) navigator.vibrate(15);
   const favs = loadFavoritos();
   const idx = favs.findIndex(f => Math.abs(f.lat - currentCoords.lat) < 0.01 && Math.abs(f.lon - currentCoords.lon) < 0.01);
   if (idx >= 0) favs.splice(idx, 1);
@@ -5773,6 +5777,10 @@ function abrirMapaAltitud() {
 }
 
 window._verTiempoDesdeMapa = function(lat, lon) {
+  // Vibracion sutil de confirmacion al confirmar el cambio de ubicacion
+  // desde el mapa (ver comentario igual en el toggle de favorito sobre
+  // por que no hace nada en iOS).
+  if (navigator.vibrate) navigator.vibrate(15);
   ubicacionManual = { lat, lon, nombre: null };
   cerrarMapaAltitud();
   cargarDatos(lat, lon, null, true);
