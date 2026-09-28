@@ -7167,7 +7167,15 @@ function _wbgPaintMoon(ctx,cx,cy,r,cacheHolder,haloOuter){
   const phase=wbgMoonPhase;
   const illum=(1-Math.cos(phase*Math.PI*2))/2;
   if(illum<0.015) return false;
-  if(!cacheHolder.tex||Math.abs(cacheHolder.r-r)>0.5){ cacheHolder.tex=_wbgBuildLunaTex(r); cacheHolder.r=r; }
+  // Si la textura se construyo ANTES de que luna-textura.png terminara
+  // de cargar, quedaba cacheada para siempre con el dibujo de repuesto
+  // (gris, procedural) aunque la foto real ya estuviera lista -- el radio
+  // no cambia entre frames, asi que la condicion de cache nunca detectaba
+  // que habia que reconstruir. Se guarda tambien si se construyo "con
+  // foto" o no, y se fuerza una reconstruccion en cuanto cambie.
+  if(!cacheHolder.tex||Math.abs(cacheHolder.r-r)>0.5||cacheHolder.conFoto!==_wbgLunaImg._loaded){
+    cacheHolder.tex=_wbgBuildLunaTex(r); cacheHolder.r=r; cacheHolder.conFoto=_wbgLunaImg._loaded;
+  }
   const sz=cacheHolder.tex.width, ox=sz/2;
   const oc=document.createElement('canvas'); oc.width=sz; oc.height=sz;
   const ot=oc.getContext('2d'); ot.drawImage(cacheHolder.tex,0,0);
