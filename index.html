@@ -4936,7 +4936,7 @@ function renderDatos(datos) {
 
 // ── Caché WeatherAPI (forecast + astronomy) ──────────────────────────────────
 const _WAPI_CACHE_KEY = 'ql_wapi_cache';
-const _WAPI_CACHE_TTL = 30 * 60 * 1000; // 30 minutos
+const _WAPI_CACHE_TTL = 15 * 60 * 1000; // 15 minutos
 
 function _getWapiCache(lat, lon) {
   try {
