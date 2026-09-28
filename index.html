@@ -4740,11 +4740,13 @@ function renderDatos(datos) {
   // otro lado (se queda en 0mm con lluvia real cayendo), y eso habria
   // ocultado lluvia de verdad de forma permanente. Termino medio: WAPI es
   // la fuente principal de la app, asi que si su propio dato de precip_mm
-  // ya es consistente (>=0.5mm) se confia en el solo. Open-Meteo solo se
-  // exige como segunda confirmacion en la zona dudosa (0.2-0.5mm), que es
+  // ya es consistente (>=1.0mm) se confia en el solo. Open-Meteo solo se
+  // exige como segunda confirmacion en la zona dudosa (0.2-1.0mm), que es
   // donde ocurren los falsos positivos de nowcast anticipando lluvia que
-  // aun no ha llegado.
-  const llueveDeVerdad = precipRealWAPI >= 0.5 || (precipRealWAPI >= 0.2 && precipRealOM >= 0.2);
+  // aun no ha llegado (umbral subido de 0.5 a 1.0mm tras comprobar en
+  // vivo un caso -- Gijon, 28 sept 2026 -- donde WAPI marcaba 0.58mm de
+  // "Light rain shower" y Open-Meteo, que acertaba, seguia en 0mm).
+  const llueveDeVerdad = precipRealWAPI >= 1.0 || (precipRealWAPI >= 0.2 && precipRealOM >= 0.2);
 
   // ── ÚNICA FUENTE: WEATHERAPI ──
   if (wapiCode !== null) {
