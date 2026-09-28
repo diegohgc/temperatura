@@ -3087,6 +3087,71 @@ async function obtenerTiempo(lat, lon) {
   return _mergeUv(data);
 }
 
+// ── Google Weather API: tiempo actual + previsión por horas ──────────────────
+// Fuente de mayor precisión que Open-Meteo para estos dos datos concretos
+// (confirmado en pruebas reales: Open-Meteo acertaba mejor que WeatherAPI,
+// pero Google es superior a ambos). Se usa SOLO para actual + horas; el
+// resto (diario, historico, calidad del aire, mareas, elevacion) sigue
+// viniendo de Open-Meteo, y la luna de WeatherAPI Astronomy -- no tiene
+// sentido pagar por mas de lo necesario. Si Google falla (red, cuota
+// agotada, key mal configurada) se cae automaticamente a Open-Meteo, que
+// ya se pide siempre en paralelo, así que nunca se pierde el dato.
+const GOOGLE_WEATHER_KEY = 'AIzaSyDIVQ6AugNr3kLUUYEzPRVgHKJno8Wpy7I';
+
+// Traduccion del enum weatherCondition.type de Google a los codigos WMO
+// que ya usa toda la app (iconoParaCodigo/iconoConProb/T.codigos). No
+// hay tabla oficial de equivalencia, es una correspondencia razonada
+// por descripcion.
+function googleTypeToWMO(type) {
+  const m = {
+    CLEAR: 0, MOSTLY_CLEAR: 1, PARTLY_CLOUDY: 2, MOSTLY_CLOUDY: 3, CLOUDY: 3, WINDY: 2,
+    WIND_AND_RAIN: 61,
+    LIGHT_RAIN_SHOWERS: 80, CHANCE_OF_SHOWERS: 80, SCATTERED_SHOWERS: 80, HEAVY_RAIN_SHOWERS: 82,
+    RAIN_SHOWERS_AND_ISOLATED_THUNDERSTORMS: 95,
+    LIGHT_TO_MODERATE_RAIN: 61, MODERATE_TO_HEAVY_RAIN: 63, RAIN: 61, LIGHT_RAIN: 61,
+    HEAVY_RAIN: 65, RAIN_PERIODICALLY_HEAVY: 65,
+    LIGHT_SNOW_SHOWERS: 71, CHANCE_OF_SNOW_SHOWERS: 71, SCATTERED_SNOW_SHOWERS: 71, HEAVY_SNOW_SHOWERS: 75,
+    LIGHT_TO_MODERATE_SNOW: 71, MODERATE_TO_HEAVY_SNOW: 73, SNOW: 73, LIGHT_SNOW: 71, HEAVY_SNOW: 75,
+    SNOWSTORM: 75, SNOW_PERIODICALLY_HEAVY: 75, HEAVY_SNOW_STORM: 75, BLOWING_SNOW: 75, RAIN_AND_SNOW: 73,
+    HAIL: 96, HAIL_SHOWERS: 96,
+    THUNDERSTORM: 95, THUNDERSHOWER: 95, LIGHT_THUNDERSTORM_RAIN: 95, SCATTERED_THUNDERSTORMS: 95, HEAVY_THUNDERSTORM: 99,
+    FOG: 45, HAZE: 45, SMOKE: 45, DUST: 45, MIST: 45,
+  };
+  return m[type] ?? null;
+}
+
+async function obtenerGoogleWeather(lat, lon) {
+  const [rCur, rHor] = await Promise.all([
+    fetch(`https://weather.googleapis.com/v1/currentConditions:lookup?key=${GOOGLE_WEATHER_KEY}&location.latitude=${lat}&location.longitude=${lon}`),
+    fetch(`https://weather.googleapis.com/v1/forecast/hours:lookup?key=${GOOGLE_WEATHER_KEY}&location.latitude=${lat}&location.longitude=${lon}&hours=12`),
+  ]);
+  if (!rCur.ok || !rHor.ok) throw new Error('Google Weather API error');
+  const [current, horas] = await Promise.all([rCur.json(), rHor.json()]);
+  if (current.error || horas.error) throw new Error('Google Weather API error');
+  return { current, horas };
+}
+
+// Convierte la respuesta de forecast/hours:lookup de Google al mismo
+// formato {time, temperature_2m, precipitation_probability, weather_code,
+// is_day} que ya consume renderHoras()/renderDias(), para no duplicar esa
+// logica de render.
+function googleHorasAOpenMeteoShape(horas) {
+  const arr = horas?.forecastHours;
+  if (!Array.isArray(arr) || !arr.length) return null;
+  const out = { time: [], temperature_2m: [], precipitation_probability: [], weather_code: [], is_day: [] };
+  for (const h of arr) {
+    const t = h.interval?.startTime;
+    if (!t) continue;
+    out.time.push(t);
+    out.temperature_2m.push(h.temperature?.degrees ?? null);
+    out.precipitation_probability.push(h.precipitation?.probability?.percent ?? null);
+    out.weather_code.push(googleTypeToWMO(h.weatherCondition?.type) ?? 2);
+    out.is_day.push(h.isDaytime === false ? 0 : 1);
+  }
+  return out.time.length ? out : null;
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 function renderHoras(hourly) {
   elHoras.innerHTML = '';
   if (!hourly || !hourly.time) return;
@@ -4647,16 +4712,25 @@ function colorParaAQI(aqi, tipo) {
 }
 
 function renderDatos(datos) {
-  const { tiempo, ciudad, mdata, elevacion, aireData, astroData, aemetActual, aemetHoras, aemetObs, nwsActual, dwdObs } = datos;
+  const { tiempo, ciudad, mdata, elevacion, aireData, astroData, googleData, aemetActual, aemetHoras, aemetObs, nwsActual, dwdObs } = datos;
   const c = tiempo.current;
   const m15 = tiempo.minutely_15;
   let weatherCode = null;
-  let isDay = c.is_day === 1;
 
-  // ── ÚNICA FUENTE: OPEN-METEO ── su weather_code ya es WMO nativo, sin
-  // necesidad de traducción (antes había que mapear los códigos propios de
-  // WeatherAPI a WMO; ya no aplica).
-  weatherCode = c.weather_code ?? null;
+  // ── Google Weather API: fuente preferente para el tiempo actual y la
+  // previsión por horas cercana (confirmado más preciso que Open-Meteo y
+  // WeatherAPI en pruebas reales). Si Google falla o no trae algún campo,
+  // cada valor cae individualmente a Open-Meteo -- nunca se pierde el
+  // dato, solo se pierde precisión puntual. El resto de la app (diario,
+  // histórico, calidad del aire, mareas, elevación) sigue en Open-Meteo,
+  // y la luna en WeatherAPI Astronomy: no tiene sentido pagar por más de
+  // lo necesario.
+  const gCur = googleData?.current ?? null;
+  const gWmo = gCur ? googleTypeToWMO(gCur.weatherCondition?.type) : null;
+  const gHourly = googleData?.horas ? googleHorasAOpenMeteoShape(googleData.horas) : null;
+
+  weatherCode = gWmo ?? c.weather_code ?? null;
+  let isDay = gCur ? (gCur.isDaytime !== false ? 1 : 0) === 1 : c.is_day === 1;
 
   // ── Matiz "solo nubes altas": un cielo con velo de altocúmulos/
   // altoestratos (nubes medias/altas al 100% pero SIN nubes bajas) puede
@@ -4664,16 +4738,16 @@ function renderDatos(datos) {
   // mucho cielo y luz de sobra -- muy distinto de un cielo bajo y plomizo.
   // Open-Meteo separa cloud_cover_low/mid/high, así que si el código dice
   // "Nublado" pero casi no hay nubes bajas, se suaviza a "Parcialmente
-  // nublado". Se mantiene porque sigue siendo información que Open-Meteo
-  // mismo aporta (no es un cruce con otra fuente que ya no existe).
-  if (weatherCode === 3) {
+  // nublado". Solo aplica cuando el código viene de Open-Meteo (si viene
+  // de Google no tenemos ese desglose de nubes para contrastarlo).
+  if (!gWmo && weatherCode === 3) {
     const omLow = c.cloud_cover_low ?? null;
     if (omLow !== null && omLow < 25) weatherCode = 2;
   }
 
-  // Temperatura y sensación: Open-Meteo
-  const tempActual = c.temperature_2m ?? null;
-  const sensacionActual = c.apparent_temperature ?? null;
+  // Temperatura y sensación: Google si está disponible, si no Open-Meteo
+  const tempActual = gCur?.temperature?.degrees ?? c.temperature_2m ?? null;
+  const sensacionActual = gCur?.feelsLikeTemperature?.degrees ?? c.apparent_temperature ?? null;
   _ultimaTempC = tempActual;
   _ultimaSensacion = sensacionActual;
   elTemp.textContent = tempActual !== null ? toTemp(tempActual) : '--°';
@@ -4682,21 +4756,22 @@ function renderDatos(datos) {
   }
   // Guardar el código ya validado para que el modal de hoy lo use
   datos.weatherCodeValidado = weatherCode;
-  // Probabilidad lluvia: Open-Meteo, hora actual del hourly
-  let probLluviaActual = null;
+  // Probabilidad lluvia: Google (primera hora de su previsión) si está
+  // disponible, si no Open-Meteo.
+  let probLluviaActual = gCur?.precipitation?.probability?.percent ?? null;
   const ahoraEpoch = Date.now() / 1000;
-  if (tiempo.hourly?.time) {
+  if (probLluviaActual === null && tiempo.hourly?.time) {
     const idxActual = tiempo.hourly.time.findIndex(t => new Date(t).getTime() / 1000 >= ahoraEpoch);
     if (idxActual >= 0 && tiempo.hourly.precipitation_probability) {
       probLluviaActual = tiempo.hourly.precipitation_probability[idxActual] ?? null;
     }
   }
-  // Viento: Open-Meteo
-  const windSpeedKmh = c.wind_speed_10m ?? null;
+  // Viento: Google si está disponible, si no Open-Meteo
+  const windSpeedKmh = gCur?.wind?.speed?.value ?? c.wind_speed_10m ?? null;
   _ultimoVientoKmh = windSpeedKmh;
-  const windDeg = c.wind_direction_10m ?? null;
+  const windDeg = gCur?.wind?.direction?.degrees ?? c.wind_direction_10m ?? null;
   const windDirStr = '';
-  const gustKmh = c.wind_gusts_10m ?? null;
+  const gustKmh = gCur?.wind?.gust?.value ?? c.wind_gusts_10m ?? null;
   // Actualizar labels de tarjetas según idioma
   document.getElementById('cLblLluvia').textContent = getCardLabel('lluvia');
   document.getElementById('cLblSensacion').textContent = T.sensacion || 'Sensación';
@@ -4706,7 +4781,8 @@ function renderDatos(datos) {
   document.getElementById('lluvia').textContent = probLluviaActual !== null ? probLluviaActual + '%' : '--';
   elSensacion.textContent = sensacionActual !== null ? toTemp(sensacionActual) : '--°';
   elViento.textContent = windSpeedKmh !== null ? toViento(windSpeedKmh) : '--';
-  elHumedad.textContent = c.relative_humidity_2m !== undefined ? c.relative_humidity_2m + '%' : '--';
+  const humedadActual = gCur?.relativeHumidity ?? c.relative_humidity_2m ?? null;
+  elHumedad.textContent = humedadActual !== null ? humedadActual + '%' : '--';
   // Tarjeta viento: dirección en texto largo
   document.getElementById('vientoDir').textContent = dirVientoTexto(windDirStr, windDeg);
   // Modal viento: rellenar datos
@@ -4736,7 +4812,7 @@ function renderDatos(datos) {
   document.getElementById('mvDir').textContent = windDirStr ? dirVientoTexto(windDirStr, windDeg) : '--';
   document.getElementById('mvBeaufort').textContent = beaufort(windSpeedKmh);
   // Previsión horaria: Open-Meteo
-  renderHoras(tiempo.hourly);
+  renderHoras(gHourly || tiempo.hourly);
   renderSol(tiempo.daily, astroData);
   renderDias(tiempo.daily, tiempo.hourly);
   const tieneMarea = renderMarea(mdata);
@@ -4825,19 +4901,20 @@ async function cargarDatos(latitude, longitude, nombreFijo, forzar = false) {
   try {
     // Intentar caché de astronomía (fase lunar, salvo recarga forzada)
     const cached = forzar ? null : _getAstroCache(latitude, longitude);
-    const [tiempo, ciudad, mdata, elevacion, aireData, astroData] = await Promise.all([
+    const [tiempo, ciudad, mdata, elevacion, aireData, astroData, googleData] = await Promise.all([
       obtenerTiempo(latitude, longitude),
       nombreFijo ? Promise.resolve({ principal: nombreFijo, sub: null }) : obtenerCiudad(latitude, longitude),
       obtenerMarea(latitude, longitude).catch(() => null),
       fetch(`https://api.open-meteo.com/v1/elevation?latitude=${latitude}&longitude=${longitude}`).then(r => r.json()).catch(() => null),
       obtenerCalidadAire(latitude, longitude).catch(() => null),
       cached ? Promise.resolve(cached.astro) : fetch(`https://api.weatherapi.com/v1/astronomy.json?key=1273625cfc2746fcaa760211260309&q=${latitude},${longitude}&dt=${new Date().toISOString().split('T')[0]}`).then(r => r.json()).catch(() => null),
+      obtenerGoogleWeather(latitude, longitude).catch(() => null),
     ]);
     // Si WeatherAPI devolvió un error JSON (plan caducado, key desactivada…) tratar como null
     const astroDataClean = (astroData && astroData.error) ? null : astroData;
     // Guardar en caché si se obtuvieron datos frescos de la API
     if (!cached && astroDataClean) _setAstroCache(latitude, longitude, astroDataClean);
-    const datosFinales = { tiempo, ciudad, mdata, elevacion, aireData, astroData: astroDataClean, aemetActual: null, aemetHoras: null, aemetObs: null, nwsActual: null, dwdObs: null };
+    const datosFinales = { tiempo, ciudad, mdata, elevacion, aireData, astroData: astroDataClean, googleData, aemetActual: null, aemetHoras: null, aemetObs: null, nwsActual: null, dwdObs: null };
     const _sp1 = _splitNombreCiudad(ciudad);
     elCiudadNombre.textContent = _sp1.principal;
     document.getElementById('ciudadSub').textContent = _sp1.sub;
