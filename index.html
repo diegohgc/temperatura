@@ -3072,7 +3072,7 @@ async function obtenerTiempoNWS(lat, lon) {
 async function obtenerTiempo(lat, lon) {
   // ICON seamless: mejor nubosidad local. UV se pide aparte (ICON no lo incluye).
   const [r, rUv] = await Promise.all([
-    fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,is_day,cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high,precipitation,visibility&hourly=temperature_2m,precipitation_probability,weather_code,is_day&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max,wind_speed_10m_max,wind_direction_10m_dominant,precipitation_sum&forecast_days=7&timezone=auto&minutely_15=weather_code,is_day&models=icon_seamless`),
+    fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,is_day,cloud_cover,cloud_cover_low,cloud_cover_mid,cloud_cover_high,precipitation,visibility&hourly=temperature_2m,precipitation_probability,precipitation,weather_code,is_day&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max,wind_speed_10m_max,wind_direction_10m_dominant,precipitation_sum&forecast_days=7&timezone=auto&minutely_15=weather_code,is_day&models=icon_seamless`),
     fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=uv_index&daily=uv_index_max&forecast_days=7&timezone=auto`)
   ]);
   if (!r.ok) throw new Error('Error al consultar el tiempo');
@@ -3141,7 +3141,7 @@ function wapiCodeToWMO(code) {
   return 2; // fallback parcialmente nublado
 }
 
-function renderHorasWAPI(wapiData) {
+function renderHorasWAPI(wapiData, omHourly) {
   elHoras.innerHTML = '';
   if (!wapiData?.forecast?.forecastday) return;
   // Juntar todas las horas de hoy + mañana
@@ -3153,9 +3153,29 @@ function renderHorasWAPI(wapiData) {
   for (const h of proximas) {
     const hora = new Date(h.time_epoch * 1000).getHours() + 'h';
     let wmo = wapiCodeToWMO(h.condition.code);
-    const prob = h.chance_of_rain ?? null;
+    let prob = h.chance_of_rain ?? null;
     // Si probabilidad < 40% y el código indica lluvia, mostrar nublado
     if ((prob === null || prob < 40) && wmo >= 51 && wmo < 95) wmo = 2;
+    // Segunda opinion de Open-Meteo, hora a hora: mismo criterio que el
+    // "ahora mismo" (llueveDeVerdad) -- si el dato de WAPI para esta hora
+    // concreta es flojo/dudoso (0.2-1.0mm) y Open-Meteo no lo confirma en
+    // ese mismo bucket horario, se suaviza a nublado en vez de forzar el
+    // icono de lluvia. Si WAPI ya trae un dato solido (>=1.0mm) se
+    // confia en el solo, igual que en el "ahora mismo". OJO: iconoConProb()
+    // decide el icono a partir de "prob", no de "wmo" (mira mas abajo), asi
+    // que hay que rebajar tambien "prob" o el icono de lluvia seguiria
+    // saliendo pese a bajar wmo.
+    if (omHourly && omHourly.time && wmo >= 51 && wmo < 95) {
+      const precipWAPI = h.precip_mm ?? 0;
+      if (precipWAPI < 1.0) {
+        const omIdx = omHourly.time.findIndex(t => Math.abs(new Date(t).getTime() / 1000 - h.time_epoch) < 1800);
+        const precipOM = omIdx >= 0 && omHourly.precipitation ? (omHourly.precipitation[omIdx] ?? 0) : null;
+        if (precipOM !== null && precipOM < 0.2) {
+          wmo = 2;
+          prob = Math.min(prob ?? 0, UMBRAL_LLOVIZNA - 1);
+        }
+      }
+    }
     const div = document.createElement('div');
     div.className = 'hora';
     div.innerHTML = `
@@ -4908,8 +4928,9 @@ function renderDatos(datos) {
   document.getElementById('mvLblDir').textContent = getCardLabel('dir');
   document.getElementById('mvDir').textContent = windDirStr ? dirVientoTexto(windDirStr, windDeg) : '--';
   document.getElementById('mvBeaufort').textContent = beaufort(windSpeedKmh);
-  // Previsión horaria: WeatherAPI únicamente
-  if (wapiData?.forecast?.forecastday) renderHorasWAPI(wapiData);
+  // Previsión horaria: WeatherAPI únicamente (con Open-Meteo como
+  // segunda opinion hora a hora, ver renderHorasWAPI)
+  if (wapiData?.forecast?.forecastday) renderHorasWAPI(wapiData, tiempo.hourly);
   else elHoras.innerHTML = '';
   renderSol(tiempo.daily, astroData);
   renderDias(tiempo.daily, tiempo.hourly);
