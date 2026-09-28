@@ -4694,11 +4694,16 @@ function renderDatos(datos) {
   // icono/animacion de lluvia -- eso hacia que un "nowcast" de WeatherAPI
   // anticipando un chubasco que aun no habia llegado (precip_mm > 0 antes
   // de caer la primera gota real) ya mostrara lluvia activa aunque
-  // Open-Meteo siguiera marcando 0mm. Ahora se exige que AMBAS fuentes
-  // independientes coincidan en que esta lloviendo de verdad; si solo una
-  // lo dice, cae al codigo "nublado" normal (mas honesto que forzar
-  // lluvia por un falso positivo de una sola fuente).
-  const llueveDeVerdad = precipRealOM >= 0.2 && precipRealWAPI >= 0.2;
+  // Open-Meteo siguiera marcando 0mm. Exigir SIEMPRE las dos fuentes (AND
+  // estricto) se probo y se descarto: Open-Meteo falla a menudo por el
+  // otro lado (se queda en 0mm con lluvia real cayendo), y eso habria
+  // ocultado lluvia de verdad de forma permanente. Termino medio: WAPI es
+  // la fuente principal de la app, asi que si su propio dato de precip_mm
+  // ya es consistente (>=0.5mm) se confia en el solo. Open-Meteo solo se
+  // exige como segunda confirmacion en la zona dudosa (0.2-0.5mm), que es
+  // donde ocurren los falsos positivos de nowcast anticipando lluvia que
+  // aun no ha llegado.
+  const llueveDeVerdad = precipRealWAPI >= 0.5 || (precipRealWAPI >= 0.2 && precipRealOM >= 0.2);
 
   // ── ÚNICA FUENTE: WEATHERAPI ──
   if (wapiCode !== null) {
