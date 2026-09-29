@@ -5706,6 +5706,12 @@ function animarSwipeEntrada() {
 
   document.body.addEventListener('touchstart', e => {
     if (!loadFavoritos().length) return;
+    // Con un modal abierto (mareas, lluvia, brújula, mapa...) el gesto es
+    // para ese modal (arrastrar la línea del gráfico, cerrar, etc.), no
+    // para cambiar de ciudad favorita por detrás -- antes no se comprobaba
+    // y un swipe sobre cualquier modal cambiaba igualmente la ciudad de
+    // fondo sin que se viera hasta cerrarlo.
+    if (window.algunModalVisible && window.algunModalVisible()) { swiping = false; return; }
     if (enScrollHorizontal(e.target)) { swiping = false; return; }
     tx = e.touches[0].clientX;
     ty = e.touches[0].clientY;
@@ -8075,6 +8081,7 @@ window.aplicarFondoDinamico=function(weatherCode,isDay,astroData,lat,utcOffsetSe
   function algunModalVisible() {
     return MODALES.some(m => { const el = m.el(); return el && m.visible(el); });
   }
+  window.algunModalVisible = algunModalVisible;
   function cerrarModalVisible() {
     for (const m of MODALES) {
       const el = m.el();
