@@ -3120,35 +3120,16 @@ function googleTypeToWMO(type) {
   return m[type] ?? null;
 }
 
+// Solo currentConditions -- la prevision por horas volvio a Open-Meteo
+// (ya se pedia igualmente para diario/historico, asi que usarla ahi no
+// cuesta ninguna llamada extra, y reduce el gasto de Google a la mitad:
+// 1 llamada por apertura en vez de 2).
 async function obtenerGoogleWeather(lat, lon) {
-  const [rCur, rHor] = await Promise.all([
-    fetch(`https://weather.googleapis.com/v1/currentConditions:lookup?key=${GOOGLE_WEATHER_KEY}&location.latitude=${lat}&location.longitude=${lon}`),
-    fetch(`https://weather.googleapis.com/v1/forecast/hours:lookup?key=${GOOGLE_WEATHER_KEY}&location.latitude=${lat}&location.longitude=${lon}&hours=12`),
-  ]);
-  if (!rCur.ok || !rHor.ok) throw new Error('Google Weather API error');
-  const [current, horas] = await Promise.all([rCur.json(), rHor.json()]);
-  if (current.error || horas.error) throw new Error('Google Weather API error');
-  return { current, horas };
-}
-
-// Convierte la respuesta de forecast/hours:lookup de Google al mismo
-// formato {time, temperature_2m, precipitation_probability, weather_code,
-// is_day} que ya consume renderHoras()/renderDias(), para no duplicar esa
-// logica de render.
-function googleHorasAOpenMeteoShape(horas) {
-  const arr = horas?.forecastHours;
-  if (!Array.isArray(arr) || !arr.length) return null;
-  const out = { time: [], temperature_2m: [], precipitation_probability: [], weather_code: [], is_day: [] };
-  for (const h of arr) {
-    const t = h.interval?.startTime;
-    if (!t) continue;
-    out.time.push(t);
-    out.temperature_2m.push(h.temperature?.degrees ?? null);
-    out.precipitation_probability.push(h.precipitation?.probability?.percent ?? null);
-    out.weather_code.push(googleTypeToWMO(h.weatherCondition?.type) ?? 2);
-    out.is_day.push(h.isDaytime === false ? 0 : 1);
-  }
-  return out.time.length ? out : null;
+  const rCur = await fetch(`https://weather.googleapis.com/v1/currentConditions:lookup?key=${GOOGLE_WEATHER_KEY}&location.latitude=${lat}&location.longitude=${lon}`);
+  if (!rCur.ok) throw new Error('Google Weather API error');
+  const current = await rCur.json();
+  if (current.error) throw new Error('Google Weather API error');
+  return { current };
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -4727,7 +4708,6 @@ function renderDatos(datos) {
   // lo necesario.
   const gCur = googleData?.current ?? null;
   const gWmo = gCur ? googleTypeToWMO(gCur.weatherCondition?.type) : null;
-  const gHourly = googleData?.horas ? googleHorasAOpenMeteoShape(googleData.horas) : null;
 
   weatherCode = gWmo ?? c.weather_code ?? null;
   let isDay = gCur ? (gCur.isDaytime !== false ? 1 : 0) === 1 : c.is_day === 1;
@@ -4812,7 +4792,7 @@ function renderDatos(datos) {
   document.getElementById('mvDir').textContent = windDirStr ? dirVientoTexto(windDirStr, windDeg) : '--';
   document.getElementById('mvBeaufort').textContent = beaufort(windSpeedKmh);
   // Previsión horaria: Open-Meteo
-  renderHoras(gHourly || tiempo.hourly);
+  renderHoras(tiempo.hourly);
   renderSol(tiempo.daily, astroData);
   renderDias(tiempo.daily, tiempo.hourly);
   const tieneMarea = renderMarea(mdata);
