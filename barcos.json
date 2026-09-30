@@ -1,0 +1,256 @@
+{
+  "puertos": [
+    {
+      "nombre": "A Coruña",
+      "lat": 43.3664,
+      "lon": -8.3906,
+      "atracados": 1,
+      "fondeados": 0,
+      "barcos": [
+        {
+          "mmsi": 319353400,
+          "nombre": "MARAVI",
+          "lat": 43.366841666666666,
+          "lon": -8.383436666666666,
+          "estado": "atracado"
+        }
+      ]
+    },
+    {
+      "nombre": "Vigo",
+      "lat": 42.2406,
+      "lon": -8.7207,
+      "atracados": 1,
+      "fondeados": 0,
+      "barcos": [
+        {
+          "mmsi": 740366000,
+          "nombre": "ROBIN M LEE",
+          "lat": 42.241366666666664,
+          "lon": -8.718355,
+          "estado": "atracado"
+        }
+      ]
+    },
+    {
+      "nombre": "Málaga",
+      "lat": 36.7106,
+      "lon": -4.4128,
+      "atracados": 4,
+      "fondeados": 0,
+      "barcos": [
+        {
+          "mmsi": 305937000,
+          "nombre": "MEIKE-B",
+          "lat": 36.71196666666666,
+          "lon": -4.419766666666666,
+          "estado": "atracado"
+        },
+        {
+          "mmsi": 319077300,
+          "nombre": "I DYNASTY",
+          "lat": 36.71552333333333,
+          "lon": -4.414656666666667,
+          "estado": "atracado"
+        },
+        {
+          "mmsi": 311001496,
+          "nombre": "SILVER RAY",
+          "lat": 36.70780333333333,
+          "lon": -4.415796666666666,
+          "estado": "atracado"
+        },
+        {
+          "mmsi": 310799000,
+          "nombre": "ANAWA",
+          "lat": 36.717014999999996,
+          "lon": -4.414305,
+          "estado": "atracado"
+        }
+      ]
+    },
+    {
+      "nombre": "Cartagena",
+      "lat": 37.595,
+      "lon": -0.9864,
+      "atracados": 2,
+      "fondeados": 2,
+      "barcos": [
+        {
+          "mmsi": 538005202,
+          "nombre": "CONTI SHANGHAI",
+          "lat": 37.561553333333336,
+          "lon": -1.0570666666666666,
+          "estado": "fondeado"
+        },
+        {
+          "mmsi": 255917357,
+          "nombre": "ADA",
+          "lat": 37.55112333333333,
+          "lon": -1.044165,
+          "estado": "fondeado"
+        },
+        {
+          "mmsi": 352001478,
+          "nombre": "TUNA QUEEN",
+          "lat": 37.59092833333333,
+          "lon": -0.9749066666666667,
+          "estado": "atracado"
+        },
+        {
+          "mmsi": 374762000,
+          "nombre": "LADY TUNA",
+          "lat": 37.59100166666666,
+          "lon": -0.9751916666666667,
+          "estado": "atracado"
+        }
+      ]
+    },
+    {
+      "nombre": "Alicante",
+      "lat": 38.3406,
+      "lon": -0.4806,
+      "atracados": 1,
+      "fondeados": 0,
+      "barcos": [
+        {
+          "mmsi": 244357000,
+          "nombre": "ENDURANCE",
+          "lat": 38.333805,
+          "lon": -0.4874116666666667,
+          "estado": "atracado"
+        }
+      ]
+    },
+    {
+      "nombre": "Valencia",
+      "lat": 39.4442,
+      "lon": -0.3103,
+      "atracados": 3,
+      "fondeados": 2,
+      "barcos": [
+        {
+          "mmsi": 253098000,
+          "nombre": "VITRUVIUS",
+          "lat": 39.45471333333333,
+          "lon": -0.31093499999999996,
+          "estado": "fondeado"
+        },
+        {
+          "mmsi": 247384100,
+          "nombre": "ECO ADRIATICA",
+          "lat": 39.44328666666667,
+          "lon": -0.30532833333333337,
+          "estado": "atracado"
+        },
+        {
+          "mmsi": 563293500,
+          "nombre": "ZIM RUBY",
+          "lat": 39.39301,
+          "lon": -0.2626583333333333,
+          "estado": "fondeado"
+        },
+        {
+          "mmsi": 219726000,
+          "nombre": "BRISBANE MAERSK",
+          "lat": 39.44923666666667,
+          "lon": -0.317145,
+          "estado": "atracado"
+        },
+        {
+          "mmsi": 565448000,
+          "nombre": "MAERSK SEMBAWANG",
+          "lat": 39.44747666666667,
+          "lon": -0.31321,
+          "estado": "atracado"
+        }
+      ]
+    },
+    {
+      "nombre": "Sagunto",
+      "lat": 39.6417,
+      "lon": -0.2222,
+      "atracados": 1,
+      "fondeados": 1,
+      "barcos": [
+        {
+          "mmsi": 225410000,
+          "nombre": "GERNIKA NM",
+          "lat": 39.65485666666667,
+          "lon": -0.215915,
+          "estado": "fondeado"
+        },
+        {
+          "mmsi": 431190000,
+          "nombre": "LYRA LEADER",
+          "lat": 39.638715000000005,
+          "lon": -0.22177333333333332,
+          "estado": "atracado"
+        }
+      ]
+    },
+    {
+      "nombre": "Barcelona",
+      "lat": 41.35,
+      "lon": 2.16,
+      "atracados": 0,
+      "fondeados": 2,
+      "barcos": [
+        {
+          "mmsi": 249306000,
+          "nombre": "SEAMERIT",
+          "lat": 41.304116666666665,
+          "lon": 2.18931,
+          "estado": "fondeado"
+        },
+        {
+          "mmsi": 305850000,
+          "nombre": "SLOMAN HERA",
+          "lat": 41.31078333333333,
+          "lon": 2.1859933333333337,
+          "estado": "fondeado"
+        }
+      ]
+    },
+    {
+      "nombre": "Santa Cruz de Tenerife",
+      "lat": 28.4711,
+      "lon": -16.2464,
+      "atracados": 1,
+      "fondeados": 1,
+      "barcos": [
+        {
+          "mmsi": 255806454,
+          "nombre": "BBC LIMA",
+          "lat": 28.462313333333334,
+          "lon": -16.246521666666666,
+          "estado": "atracado"
+        },
+        {
+          "mmsi": 249581000,
+          "nombre": "ALAND",
+          "lat": 28.501955,
+          "lon": -16.181338333333333,
+          "estado": "fondeado"
+        }
+      ]
+    },
+    {
+      "nombre": "Anchorage Saradinero (Santander)",
+      "lat": 43.48111,
+      "lon": -3.77278,
+      "atracados": 0,
+      "fondeados": 1,
+      "barcos": [
+        {
+          "mmsi": 373189000,
+          "nombre": "ATAYAL MARINER",
+          "lat": 43.48583,
+          "lon": -3.758481666666667,
+          "estado": "fondeado"
+        }
+      ]
+    }
+  ],
+  "actualizado": 1790790315
+}

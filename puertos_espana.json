@@ -1,0 +1,257 @@
+[
+  {
+    "nombre": "El Musel (Gijón)",
+    "lat": 43.5769,
+    "lon": -5.7136
+  },
+  {
+    "nombre": "Avilés",
+    "lat": 43.5806,
+    "lon": -5.9319
+  },
+  {
+    "nombre": "Santander",
+    "lat": 43.4623,
+    "lon": -3.7997
+  },
+  {
+    "nombre": "Bilbao",
+    "lat": 43.35,
+    "lon": -3.05
+  },
+  {
+    "nombre": "Pasajes (San Sebastián)",
+    "lat": 43.3244,
+    "lon": -1.9297
+  },
+  {
+    "nombre": "A Coruña",
+    "lat": 43.3664,
+    "lon": -8.3906
+  },
+  {
+    "nombre": "Ferrol",
+    "lat": 43.4839,
+    "lon": -8.2367
+  },
+  {
+    "nombre": "Vigo",
+    "lat": 42.2406,
+    "lon": -8.7207
+  },
+  {
+    "nombre": "Marín (Pontevedra)",
+    "lat": 42.3928,
+    "lon": -8.6981
+  },
+  {
+    "nombre": "Huelva",
+    "lat": 37.175,
+    "lon": -6.9444
+  },
+  {
+    "nombre": "Cádiz",
+    "lat": 36.5297,
+    "lon": -6.2925
+  },
+  {
+    "nombre": "Algeciras",
+    "lat": 36.1408,
+    "lon": -5.4436
+  },
+  {
+    "nombre": "Málaga",
+    "lat": 36.7106,
+    "lon": -4.4128
+  },
+  {
+    "nombre": "Motril",
+    "lat": 36.7269,
+    "lon": -3.5203
+  },
+  {
+    "nombre": "Almería",
+    "lat": 36.8358,
+    "lon": -2.4644
+  },
+  {
+    "nombre": "Cartagena",
+    "lat": 37.595,
+    "lon": -0.9864
+  },
+  {
+    "nombre": "Alicante",
+    "lat": 38.3406,
+    "lon": -0.4806
+  },
+  {
+    "nombre": "Valencia",
+    "lat": 39.4442,
+    "lon": -0.3103
+  },
+  {
+    "nombre": "Sagunto",
+    "lat": 39.6417,
+    "lon": -0.2222
+  },
+  {
+    "nombre": "Castellón",
+    "lat": 39.9792,
+    "lon": -0.0219
+  },
+  {
+    "nombre": "Tarragona",
+    "lat": 41.0864,
+    "lon": 1.2422
+  },
+  {
+    "nombre": "Barcelona",
+    "lat": 41.35,
+    "lon": 2.16
+  },
+  {
+    "nombre": "Palma de Mallorca",
+    "lat": 39.55,
+    "lon": 2.63
+  },
+  {
+    "nombre": "Maó (Menorca)",
+    "lat": 39.885,
+    "lon": 4.27
+  },
+  {
+    "nombre": "Eivissa (Ibiza)",
+    "lat": 38.9067,
+    "lon": 1.4394
+  },
+  {
+    "nombre": "Las Palmas de Gran Canaria",
+    "lat": 28.135,
+    "lon": -15.4111
+  },
+  {
+    "nombre": "Santa Cruz de Tenerife",
+    "lat": 28.4711,
+    "lon": -16.2464
+  },
+  {
+    "nombre": "Arrecife (Lanzarote)",
+    "lat": 28.9633,
+    "lon": -13.5406
+  },
+  {
+    "nombre": "Fondeadero de los Terreros",
+    "lat": 37.36667,
+    "lon": -1.66667
+  },
+  {
+    "nombre": "Port de Sóller",
+    "lat": 39.79543,
+    "lon": 2.68772
+  },
+  {
+    "nombre": "Fondeadero de San José",
+    "lat": 36.75754,
+    "lon": -2.10656
+  },
+  {
+    "nombre": "Port de Sant Antoni",
+    "lat": 38.97649,
+    "lon": 1.29965
+  },
+  {
+    "nombre": "Puerto de Poniente",
+    "lat": 37.4,
+    "lon": -1.58333
+  },
+  {
+    "nombre": "Puerto Petro",
+    "lat": 39.35,
+    "lon": 3.2
+  },
+  {
+    "nombre": "Puerto de Mazarrón",
+    "lat": 37.56315,
+    "lon": -1.25768
+  },
+  {
+    "nombre": "Puerto Marymontaña",
+    "lat": 38.61667,
+    "lon": -0.01667
+  },
+  {
+    "nombre": "Puerto de Mahón",
+    "lat": 39.86769,
+    "lon": 4.31033
+  },
+  {
+    "nombre": "Puerto de Garrucha",
+    "lat": 37.18333,
+    "lon": -1.81667
+  },
+  {
+    "nombre": "Fondeadero del Escobonal",
+    "lat": 28.23333,
+    "lon": -16.38333
+  },
+  {
+    "nombre": "Puerto Colom",
+    "lat": 39.4,
+    "lon": 3.25
+  },
+  {
+    "nombre": "Puerto de Candelaria",
+    "lat": 28.35591,
+    "lon": -16.36903
+  },
+  {
+    "nombre": "Port de ses Caletes",
+    "lat": 39.09383,
+    "lon": 1.56023
+  },
+  {
+    "nombre": "Port d'Alcúdia",
+    "lat": 39.83333,
+    "lon": 3.13333
+  },
+  {
+    "nombre": "Fondeadero del Fangal",
+    "lat": 40.77641,
+    "lon": 0.74384
+  },
+  {
+    "nombre": "Puerto de Castro Urdiales",
+    "lat": 43.38333,
+    "lon": -3.21667
+  },
+  {
+    "nombre": "Anchorage Saradinero (Santander)",
+    "lat": 43.48111,
+    "lon": -3.77278
+  },
+  {
+    "nombre": "Hafen del Rosario",
+    "lat": 28.4957,
+    "lon": -13.85427
+  },
+  {
+    "nombre": "Minorca Harbor",
+    "lat": 39.99022,
+    "lon": 3.8273
+  },
+  {
+    "nombre": "Puerto de Roquetas de Mar",
+    "lat": 36.75657,
+    "lon": -2.60523
+  },
+  {
+    "nombre": "Puerto de Lekeitio",
+    "lat": 43.36394,
+    "lon": -2.50232
+  },
+  {
+    "nombre": "Puerto de Elantxobe",
+    "lat": 43.40343,
+    "lon": -2.63823
+  }
+]

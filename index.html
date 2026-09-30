@@ -839,6 +839,19 @@
     <div id="modalMareaAgua" style="display:flex;gap:8px;justify-content:center;margin-bottom:10px"></div>
     <svg id="mareaChart" viewBox="0 0 360 130" preserveAspectRatio="none"></svg>
     <div class="modal-extremos" id="modalExtremost"></div>
+    <div id="marceBarcosCard" style="display:none;margin-top:10px;background:rgba(255,255,255,0.06);border-radius:14px;padding:12px 14px;cursor:pointer" onclick="window.abrirMapaBarcos && abrirMapaBarcos()">
+      <div style="font-size:0.7rem;opacity:0.6;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px" id="marceBarcosPuerto"></div>
+      <div style="display:flex;gap:18px">
+        <div>
+          <div style="font-size:1.4rem;font-weight:700" id="marceBarcosAtracados">0</div>
+          <div style="font-size:0.72rem;opacity:0.6" id="marceBarcosLblAtracados">Atracados</div>
+        </div>
+        <div>
+          <div style="font-size:1.4rem;font-weight:700" id="marceBarcosFondeados">0</div>
+          <div style="font-size:0.72rem;opacity:0.6" id="marceBarcosLblFondeados">Fondeados</div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -5448,6 +5461,48 @@ function abrirModalMarea() {
     renderModalMareaChart(mdata);
     renderModalMareaExtremost(mdata);
   } catch(e) {}
+  cargarYRenderBarcos();
+}
+
+// ── Barcos en el puerto (PRUEBA LOCAL, aun no en produccion) ────────────────
+// Lee barcos.json (generado por el script de Aisstream.io) y busca el
+// puerto mas cercano a la ciudad actual, dentro de un radio razonable
+// (si no hay ningun puerto rastreado cerca, no se muestra nada). Solo
+// cubre España por ahora.
+let _ultimoBarcosPuerto = null;
+function _distKm(lat1, lon1, lat2, lon2) {
+  const R = 6371, r = Math.PI / 180;
+  const dLat = (lat2 - lat1) * r, dLon = (lon2 - lon1) * r;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*r)*Math.cos(lat2*r)*Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+async function cargarYRenderBarcos() {
+  const card = document.getElementById('marceBarcosCard');
+  if (!card) return;
+  card.style.display = 'none';
+  _ultimoBarcosPuerto = null;
+  if (!currentCoords) return;
+  try {
+    const r = await fetch('barcos.json');
+    if (!r.ok) return;
+    const data = await r.json();
+    let mejor = null, mejorDist = null;
+    for (const p of (data.puertos || [])) {
+      const d = _distKm(currentCoords.lat, currentCoords.lon, p.lat, p.lon);
+      if (mejorDist === null || d < mejorDist) { mejorDist = d; mejor = p; }
+    }
+    // Radio razonable: si el puerto rastreado mas cercano esta a mas de
+    // ~60km, no es realmente "tu puerto" -- no mostrar nada en vez de un
+    // dato posiblemente irrelevante.
+    if (!mejor || mejorDist > 60) return;
+    _ultimoBarcosPuerto = mejor;
+    document.getElementById('marceBarcosPuerto').textContent = '⚓ ' + mejor.nombre;
+    document.getElementById('marceBarcosAtracados').textContent = mejor.atracados;
+    document.getElementById('marceBarcosFondeados').textContent = mejor.fondeados;
+    document.getElementById('marceBarcosLblAtracados').textContent = T.barcosAtracados || 'Atracados';
+    document.getElementById('marceBarcosLblFondeados').textContent = T.barcosFondeados || 'Fondeados';
+    card.style.display = 'block';
+  } catch (e) {}
 }
 
 function cerrarModalMarea() {
@@ -5731,6 +5786,39 @@ const MAPA_PISTA_LARGA = { es:'Mantén pulsado el mapa para consultar otro punto
 let _mapaLeaflet = null;
 let _mapaMarcadorLargo = null;
 let _mapaTituloOriginal = '', _mapaAltOriginal = '';
+// Abre el mismo mapa Leaflet del modal de altitud, pero centrado en el
+// puerto y con un pin por cada barco (PRUEBA LOCAL). Reutiliza
+// abrirMapaAltitud() para toda la inicializacion (capas, controles) y
+// luego re-centra + añade los marcadores de barcos encima.
+let _barcosMarkers = [];
+window.abrirMapaBarcos = function() {
+  if (!_ultimoBarcosPuerto) return;
+  abrirMapaAltitud();
+  setTimeout(() => {
+    if (!_mapaLeaflet) return;
+    _barcosMarkers.forEach(m => _mapaLeaflet.removeLayer(m));
+    _barcosMarkers = [];
+    // Ocultar el pin de "tu ubicacion" -- no aporta nada en la vista de
+    // barcos y se superponia con los pines de colores.
+    if (_mapaLeaflet._marker) _mapaLeaflet._marker.setOpacity(0);
+    _mapaLeaflet.setView([_ultimoBarcosPuerto.lat, _ultimoBarcosPuerto.lon], 13);
+    document.getElementById('mapaModalTitulo').textContent = '⚓ ' + _ultimoBarcosPuerto.nombre;
+    document.getElementById('mapaModalAltitud').textContent =
+      `${_ultimoBarcosPuerto.atracados} atracados · ${_ultimoBarcosPuerto.fondeados} fondeados`;
+    for (const b of (_ultimoBarcosPuerto.barcos || [])) {
+      const color = b.estado === 'atracado' ? '#4ADE80' : '#FBBF24';
+      const icon = L.divIcon({
+        className: '',
+        html: `<div style="width:14px;height:14px;border-radius:50%;background:${color};border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,0.4)"></div>`,
+        iconSize: [14, 14],
+      });
+      const m = L.marker([b.lat, b.lon], { icon }).addTo(_mapaLeaflet)
+        .bindPopup(`<strong>${b.nombre || 'Sin nombre'}</strong><br>${b.estado === 'atracado' ? 'Atracado' : 'Fondeado'}`);
+      _barcosMarkers.push(m);
+    }
+  }, 120);
+};
+
 function abrirMapaAltitud() {
   if (!currentCoords) return;
   const { lat, lon } = currentCoords;
@@ -5840,7 +5928,7 @@ function abrirMapaAltitud() {
       });
     } else {
       _mapaLeaflet.setView([lat, lon], 14);
-      if (_mapaLeaflet._marker) _mapaLeaflet._marker.setLatLng([lat, lon]);
+      if (_mapaLeaflet._marker) { _mapaLeaflet._marker.setLatLng([lat, lon]); _mapaLeaflet._marker.setOpacity(1); }
       if (_mapaMarcadorLargo) { _mapaLeaflet.removeLayer(_mapaMarcadorLargo); _mapaMarcadorLargo = null; }
       _mapaLeaflet.invalidateSize();
     }
