@@ -7,26 +7,34 @@ jobs:
   probar:
     runs-on: ubuntu-latest
     steps:
-      - name: Consultar Overpass
+      - name: Consultar Overpass (bbox, sin area de pais)
         run: |
           cat > query.overpass <<'EOF'
-          [out:json][timeout:120];
-          area["ISO3166-1"="ES"][admin_level=2]->.es;
+          [out:json][timeout:180][bbox:27.0,-18.5,44.0,4.5];
           (
-            node["seamark:type"="harbour"](area.es);
-            node["harbour"="yes"](area.es);
-            node["leisure"="marina"](area.es);
-            way["seamark:type"="harbour"](area.es);
-            way["harbour"="yes"](area.es);
-            way["leisure"="marina"](area.es);
+            node["seamark:type"="harbour"];
+            node["harbour"="yes"];
+            node["leisure"="marina"];
+            way["seamark:type"="harbour"];
+            way["harbour"="yes"];
+            way["leisure"="marina"];
           );
           out center tags;
           EOF
-          curl -s -X POST -d @query.overpass "https://overpass-api.de/api/interpreter" -o resultado.json
-          echo "--- tamaño ---"
+          for URL in "https://overpass.kumi.systems/api/interpreter" "https://overpass-api.de/api/interpreter" "https://overpass.private.coffee/api/interpreter"; do
+            echo "=== probando $URL ==="
+            curl -s -A "Mozilla/5.0 (compatible; QuickTempBot/1.0)" -X POST -d @query.overpass "$URL" -o resultado.json
+            SIZE=$(wc -c < resultado.json)
+            echo "tamaño: $SIZE"
+            head -c 500 resultado.json
+            echo ""
+            if [ "$SIZE" -gt 1000 ] && head -c 50 resultado.json | grep -q "elements\|version"; then
+              echo "=== OK, usando $URL ==="
+              break
+            fi
+          done
+          echo "--- tamaño final ---"
           wc -c resultado.json
-          echo "--- primeras lineas ---"
-          head -c 2000 resultado.json
       - name: Subir resultado
         uses: actions/upload-artifact@v4
         with:
