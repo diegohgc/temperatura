@@ -2623,7 +2623,7 @@ document.getElementById('btnFavorito').addEventListener('click', (e) => {
   // Vibracion sutil de confirmacion al marcar/quitar favorito -- en iOS
   // (Safari/WebView) navigator.vibrate no existe y esto no hace nada,
   // sin romper nada; solo tiene efecto real en Android.
-  if (navigator.vibrate) navigator.vibrate(15);
+  if (navigator.vibrate) navigator.vibrate(35);
   const favs = loadFavoritos();
   const idx = favs.findIndex(f => Math.abs(f.lat - currentCoords.lat) < 0.01 && Math.abs(f.lon - currentCoords.lon) < 0.01);
   if (idx >= 0) favs.splice(idx, 1);
@@ -5790,7 +5790,7 @@ function abrirMapaAltitud() {
         // el del sistema sin problema (se nota como un solo toque un poco
         // mas firme); en los que no lo tienen (visto en varios Samsung),
         // esta es la unica señal tactil de que se ha registrado la pulsacion.
-        if (navigator.vibrate) navigator.vibrate(15);
+        if (navigator.vibrate) navigator.vibrate(35);
         const plat = e.latlng.lat, plon = e.latlng.lng;
         if (_mapaMarcadorLargo) _mapaLeaflet.removeLayer(_mapaMarcadorLargo);
         const _lang = (typeof idioma !== 'undefined') ? idioma : 'es';
@@ -5837,7 +5837,7 @@ window._verTiempoDesdeMapa = function(lat, lon) {
   // Vibracion sutil de confirmacion al confirmar el cambio de ubicacion
   // desde el mapa (ver comentario igual en el toggle de favorito sobre
   // por que no hace nada en iOS).
-  if (navigator.vibrate) navigator.vibrate(15);
+  if (navigator.vibrate) navigator.vibrate(35);
   ubicacionManual = { lat, lon, nombre: null };
   cerrarMapaAltitud();
   cargarDatos(lat, lon, null, true);
