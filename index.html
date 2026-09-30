@@ -851,6 +851,7 @@
           <div style="font-size:0.72rem;opacity:0.6" id="marceBarcosLblFondeados">Fondeados</div>
         </div>
       </div>
+      <div style="font-size:0.68rem;opacity:0.5;margin-top:8px;line-height:1.3" id="marceBarcosNota">Solo barcos con transpondedor AIS (mercantes, pesca de altura, ferries...). La pesca de bajura no siempre lo lleva.</div>
     </div>
   </div>
 </div>
@@ -5501,6 +5502,7 @@ async function cargarYRenderBarcos() {
     document.getElementById('marceBarcosFondeados').textContent = mejor.fondeados;
     document.getElementById('marceBarcosLblAtracados').textContent = T.barcosAtracados || 'Atracados';
     document.getElementById('marceBarcosLblFondeados').textContent = T.barcosFondeados || 'Fondeados';
+    document.getElementById('marceBarcosNota').textContent = T.barcosNota || 'Solo barcos con transpondedor AIS (mercantes, pesca de altura, ferries...). La pesca de bajura no siempre lo lleva.';
     card.style.display = 'block';
   } catch (e) {}
 }
