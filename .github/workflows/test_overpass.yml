@@ -1,0 +1,34 @@
+name: Test Overpass (puertos España) - temporal
+
+on:
+  workflow_dispatch:
+
+jobs:
+  probar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Consultar Overpass
+        run: |
+          cat > query.overpass <<'EOF'
+          [out:json][timeout:120];
+          area["ISO3166-1"="ES"][admin_level=2]->.es;
+          (
+            node["seamark:type"="harbour"](area.es);
+            node["harbour"="yes"](area.es);
+            node["leisure"="marina"](area.es);
+            way["seamark:type"="harbour"](area.es);
+            way["harbour"="yes"](area.es);
+            way["leisure"="marina"](area.es);
+          );
+          out center tags;
+          EOF
+          curl -s -X POST -d @query.overpass "https://overpass-api.de/api/interpreter" -o resultado.json
+          echo "--- tamaño ---"
+          wc -c resultado.json
+          echo "--- primeras lineas ---"
+          head -c 2000 resultado.json
+      - name: Subir resultado
+        uses: actions/upload-artifact@v4
+        with:
+          name: overpass-resultado
+          path: resultado.json
