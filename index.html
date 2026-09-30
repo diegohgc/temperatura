@@ -4780,7 +4780,10 @@ function renderDatos(datos) {
   {
     const _idx16 = {N:0,NNE:1,NE:2,ENE:3,E:4,ESE:5,SE:6,SSE:7,S:8,SSW:9,SW:10,WSW:11,W:12,WNW:13,NW:14,NNW:15};
     const _dv16 = dirs16Idioma();
-    const _dirLocal = (windDirStr && _idx16[windDirStr] !== undefined) ? _dv16[_idx16[windDirStr]] : windDirStr;
+    const _idxDesdeGrados = windDeg !== null ? Math.round(windDeg / 22.5) % 16 : null;
+    const _dirLocal = (windDirStr && _idx16[windDirStr] !== undefined)
+      ? _dv16[_idx16[windDirStr]]
+      : (_idxDesdeGrados !== null ? _dv16[_idxDesdeGrados] : '');
     document.getElementById('modalVientoDirText').textContent = _dirLocal + (windDeg !== null ? ' · ' + Math.round(windDeg) + '°' : '');
   }
   if (windDeg !== null) document.getElementById('modalVientoFlecha').style.transform = `rotate(${windDeg + 180}deg)`;
@@ -4789,7 +4792,7 @@ function renderDatos(datos) {
   document.getElementById('mvLblRafagas').textContent = getCardLabel('rafagas');
   document.getElementById('mvRafagas').textContent = gustKmh !== null ? toViento(gustKmh) : '--';
   document.getElementById('mvLblDir').textContent = getCardLabel('dir');
-  document.getElementById('mvDir').textContent = windDirStr ? dirVientoTexto(windDirStr, windDeg) : '--';
+  document.getElementById('mvDir').textContent = windDeg !== null ? dirVientoTexto(windDirStr, windDeg) : '--';
   document.getElementById('mvBeaufort').textContent = beaufort(windSpeedKmh);
   // Previsión horaria: Open-Meteo
   renderHoras(tiempo.hourly);
