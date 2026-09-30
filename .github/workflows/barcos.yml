@@ -2,7 +2,12 @@ name: Barcos en puertos de España (Aisstream)
 
 on:
   schedule:
-    - cron: '*/20 * * * *'
+    # Minutos :07/:27/:47 a propósito, no :00/:20/:40 -- GitHub avisa en su
+    # documentación de que los minutos redondos (sobre todo el inicio de
+    # cada hora) son los de más carga y los workflows programados ahí se
+    # pueden saltar sin más (no se retrasan, se pierden). Descubierto tras
+    # 2h+ sin que este cron se disparara ni una vez con '*/20 * * * *'.
+    - cron: '7,27,47 * * * *'
   workflow_dispatch:
 
 jobs:
