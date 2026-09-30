@@ -1318,5 +1318,170 @@
     "nombre": "Club Nautic Sant Pere Pescador",
     "lat": 42.1850963,
     "lon": 3.0846849
+  },
+  {
+    "nombre": "Club de Vela Blanes",
+    "lat": 41.674522,
+    "lon": 2.7970286
+  },
+  {
+    "nombre": "Marina",
+    "lat": 41.5335343,
+    "lon": -8.7849296
+  },
+  {
+    "nombre": "Puerto Tofiño",
+    "lat": 39.8960512,
+    "lon": 0.6836061
+  },
+  {
+    "nombre": "Puerto Vueltas",
+    "lat": 28.0814364,
+    "lon": -17.331644
+  },
+  {
+    "nombre": "Puerto Playa de Santiago",
+    "lat": 28.0267039,
+    "lon": -17.1975359
+  },
+  {
+    "nombre": "Marina La Gomera (San Sebastian)",
+    "lat": 28.0886213,
+    "lon": -17.1085563
+  },
+  {
+    "nombre": "Marina",
+    "lat": 41.6941028,
+    "lon": -8.821058
+  },
+  {
+    "nombre": "Confraría de Pescadores",
+    "lat": 43.1852718,
+    "lon": -9.0902877
+  },
+  {
+    "nombre": "Marina da Póvoa de Varzim",
+    "lat": 41.3688582,
+    "lon": -8.7633127
+  },
+  {
+    "nombre": "Capitania do Porto de Vila Real de Santo António",
+    "lat": 37.1917917,
+    "lon": -7.4136083
+  },
+  {
+    "nombre": "Puerto de Ortiguera",
+    "lat": 43.5606651,
+    "lon": -6.7409359
+  },
+  {
+    "nombre": "Socoa",
+    "lat": 43.3949351,
+    "lon": -1.6838447
+  },
+  {
+    "nombre": "Port of Gibraltar",
+    "lat": 36.1458686,
+    "lon": -5.3636199
+  },
+  {
+    "nombre": "Embarcadero de Logroño",
+    "lat": 42.4706361,
+    "lon": -2.4545595
+  },
+  {
+    "nombre": "Porto de Muxía",
+    "lat": 43.1048548,
+    "lon": -9.2146537
+  },
+  {
+    "nombre": "Tanja Marina Bay International",
+    "lat": 35.7847546,
+    "lon": -5.79783
+  },
+  {
+    "nombre": "Club Náutico de Camariñas",
+    "lat": 43.1267345,
+    "lon": -9.1831519
+  },
+  {
+    "nombre": "Porto de Castropol",
+    "lat": 43.5272329,
+    "lon": -7.0322041
+  },
+  {
+    "nombre": "Marina Smir",
+    "lat": 35.7539057,
+    "lon": -5.340768
+  },
+  {
+    "nombre": "Port-Argelès",
+    "lat": 42.5416713,
+    "lon": 3.0504463
+  },
+  {
+    "nombre": "Port de Biarritz",
+    "lat": 43.4835999,
+    "lon": -1.5649167
+  },
+  {
+    "nombre": "Doca das Três Marias",
+    "lat": 37.1180767,
+    "lon": -7.6308436
+  },
+  {
+    "nombre": "Port de Capbreton",
+    "lat": 43.6518691,
+    "lon": -1.4359852
+  },
+  {
+    "nombre": "Port Kabila",
+    "lat": 35.7193988,
+    "lon": -5.3355885
+  },
+  {
+    "nombre": "Port du Boramar",
+    "lat": 42.5263063,
+    "lon": 3.0853459
+  },
+  {
+    "nombre": "Porto Deportivo de Foz",
+    "lat": 43.5690689,
+    "lon": -7.2505321
+  },
+  {
+    "nombre": "Port Cerbère",
+    "lat": 42.4417126,
+    "lon": 3.1672504
+  },
+  {
+    "nombre": "Porto de Recreio de Olhão",
+    "lat": 37.0230855,
+    "lon": -7.8364207
+  },
+  {
+    "nombre": "Porto de Pesca da Culatra",
+    "lat": 36.9961529,
+    "lon": -7.8407437
+  },
+  {
+    "nombre": "Marina de Faro",
+    "lat": 37.0152199,
+    "lon": -7.936535
+  },
+  {
+    "nombre": "Badia de Tossa",
+    "lat": 41.7198205,
+    "lon": 2.9373248
+  },
+  {
+    "nombre": "Porto de Santa Mariña",
+    "lat": 43.1933908,
+    "lon": -9.134882
+  },
+  {
+    "nombre": "Porto de Nois",
+    "lat": 43.6142071,
+    "lon": -7.309374
   }
 ]
