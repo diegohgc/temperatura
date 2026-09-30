@@ -2125,7 +2125,18 @@ let _bienvenidaActiva = false;
 let ultimaActualizacion = null;
 const defaultF = (navigator.language || '').toLowerCase() === 'en-us';
 let usaFahrenheit = localStorage.getItem('ql_unidad') ? localStorage.getItem('ql_unidad') === 'F' : defaultF;
-let usaMph = localStorage.getItem('ql_velocidad') === 'mph';
+// Antes, sin haber guardado nunca una preferencia explicita de velocidad,
+// usaMph arrancaba en false (km/h) pase lo que pase -- para que los
+// usuarios en-US siguieran viendo mph por defecto sin tener que tocar
+// nada, toViento() forzaba mph tambien cuando usaFahrenheit era true.
+// Eso tenia un efecto secundario: una vez el usuario elegia Fahrenheit,
+// el boton "km/h" de Ajustes dejaba de hacer nada (toViento seguia
+// forzando mph por el "||"), aunque el boton se marcara como activo.
+// Ahora el valor por defecto de usaMph ya tiene en cuenta el idioma del
+// dispositivo (igual que usaFahrenheit), y toViento() respeta siempre la
+// eleccion explicita del usuario -- las dos unidades quedan
+// independientes entre si, como cualquier otra app de tiempo.
+let usaMph = localStorage.getItem('ql_velocidad') ? localStorage.getItem('ql_velocidad') === 'mph' : defaultF;
 window.usaMph = usaMph;
 function toTemp(c) {
   return usaFahrenheit ? Math.round(c * 9 / 5 + 32) + '°F' : Math.round(c) + '°';
@@ -2134,7 +2145,7 @@ function toAlt(m, decimals = 1) {
   return usaFahrenheit ? (m * 3.28084).toFixed(decimals) + ' ft' : m.toFixed(decimals) + ' m';
 }
 function toViento(kmh) {
-  return (usaMph || usaFahrenheit) ? Math.round(kmh * 0.621371) + ' mph' : Math.round(kmh) + ' km/h';
+  return usaMph ? Math.round(kmh * 0.621371) + ' mph' : Math.round(kmh) + ' km/h';
 }
 // Abreviaturas de rumbo (8 y 16 puntos) por idioma -- antes se usaban
 // siempre las españolas (p.ej. "NO") sin traducir, mostrando cosas como
