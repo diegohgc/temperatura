@@ -141,7 +141,7 @@
     background: rgba(255,255,255,0.1); color: #ffffff; font-size: 0.85rem;
   }
   .buscador input::placeholder { color: rgba(255,229,102,0.6); }
-  .resultados { text-align: left; margin-top: 4px; }
+  .resultados { text-align: left; margin-top: 4px; max-height: 50vh; overflow-y: auto; }
   .resultado-item { padding: 8px 10px; font-size: 1.05rem; opacity: 0.9; cursor: pointer; border-radius: 8px; }
   .resultado-item:active { background: rgba(255,255,255,0.15); }
   .link-ubicacion {
@@ -5133,7 +5133,7 @@ inputCiudad.addEventListener('input', () => {
   if (texto.length < 2) { elResultadosCiudad.innerHTML = ''; return; }
   timeoutBusqueda = setTimeout(async () => {
     try {
-      const r = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(texto)}&count=10&language=${T.locale.split('-')[0]}`);
+      const r = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(texto)}&count=20&language=${T.locale.split('-')[0]}`);
       const data = await r.json();
       elResultadosCiudad.innerHTML = '';
       (data.results || []).forEach((res) => {
