@@ -330,6 +330,7 @@
   }
   .hora .t { font-size: 0.9rem; font-weight: 600; }
   .hora .p { font-size: 0.75rem; opacity: 0.8; color: #bfe0ff; margin-top: 2px; }
+  .hora .mm { font-size: 0.65rem; opacity: 0.6; color: #bfe0ff; margin-top: 1px; }
   .dia { flex: 0 0 auto; text-align: center; min-width: 52px; }
   .dia .d { font-size: 0.8rem; opacity: 0.75; margin-bottom: 4px; text-transform: capitalize; }
   .dia .icono-dia { width: 28px; height: 28px; margin: 0 auto 4px; }
@@ -3211,6 +3212,7 @@ function renderHoras(hourly) {
     const hora = new Date(t).getHours() + 'h';
     const temp = hourly.temperature_2m[i];
     const prob = hourly.precipitation_probability ? hourly.precipitation_probability[i] : null;
+    const mm = hourly.precipitation ? hourly.precipitation[i] : null;
     const div = document.createElement('div');
     div.className = 'hora';
     div.innerHTML = `
@@ -3218,6 +3220,7 @@ function renderHoras(hourly) {
       <div class="icono-hora">${iconoConProb(hourly.weather_code[i], prob, hourly.is_day ? hourly.is_day[i] === 1 : true)}</div>
       <div class="t">${toTemp(temp)}</div>
       ${prob !== null ? `<div class="p">${prob}%</div>` : ''}
+      ${mm !== null && mm > 0 ? `<div class="mm">${mm.toFixed(1)}mm</div>` : ''}
     `;
     elHoras.appendChild(div);
   }
