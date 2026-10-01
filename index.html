@@ -543,6 +543,7 @@
         <div id="solInfo"></div>
       </div>
     </div>
+    <div id="alertaLluviaCard" style="display:none;margin:4px 0 2px;background:linear-gradient(135deg,rgba(255,120,40,0.85),rgba(230,60,30,0.85));border-radius:14px;padding:10px 14px;text-align:center;font-size:0.82rem;font-weight:600;line-height:1.35;box-shadow:0 2px 10px rgba(0,0,0,0.25)"></div>
     <div id="swipeDots" style="display:flex;justify-content:center;gap:6px;padding:4px 0 2px;min-height:14px"></div>
     <div class="buscador" id="buscador" hidden>
       <input type="text" id="inputCiudad" placeholder="Buscar ciudad..." autocomplete="off" />
@@ -892,7 +893,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Mareas de Hoy',
     pleamar: 'Pleamar',
     bajamar: 'Bajamar',
-    coefMarea: 'Coeficiente de marea', mareasVivas: 'Mareas vivas', mareasMuertas: 'Mareas muertas', solunarTitulo: 'Tabla solunar', periodoMayor: 'Periodo mayor', periodoMenor: 'Periodo menor',
+    coefMarea: 'Coeficiente de marea', mareasVivas: 'Mareas vivas', mareasMuertas: 'Mareas muertas', solunarTitulo: 'Tabla solunar', periodoMayor: 'Periodo mayor', periodoMenor: 'Periodo menor', alertaLluviaHora: '⚠️ Lluvia intensa prevista: {mm}mm a las {hora}', alertaLluviaDia: '⚠️ Lluvia intensa prevista: {mm}mm acumulados hoy',
     olas: 'Olas',
     altitud: 'Altitud',
     tuVelocidad: 'Tu velocidad', velMax: 'Máx.', velMedia: 'Media', distancia: 'Distancia', resetDist: 'Reiniciar',
@@ -935,7 +936,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Mareas de Hoy',
     pleamar: 'Marea alta',
     bajamar: 'Marea baja',
-    coefMarea: 'Coeficiente de marea', mareasVivas: 'Mareas vivas', mareasMuertas: 'Mareas muertas', solunarTitulo: 'Tabla solunar', periodoMayor: 'Periodo mayor', periodoMenor: 'Periodo menor',
+    coefMarea: 'Coeficiente de marea', mareasVivas: 'Mareas vivas', mareasMuertas: 'Mareas muertas', solunarTitulo: 'Tabla solunar', periodoMayor: 'Periodo mayor', periodoMenor: 'Periodo menor', alertaLluviaHora: '⚠️ Lluvia intensa prevista: {mm}mm a las {hora}', alertaLluviaDia: '⚠️ Lluvia intensa prevista: {mm}mm acumulados hoy',
     olas: 'Olas',
     altitud: 'Altitud',
     tuVelocidad: 'Tu velocidad', velMax: 'Máx.', velMedia: 'Media', distancia: 'Distancia', resetDist: 'Reiniciar',
@@ -978,7 +979,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Today\'s Tides',
     pleamar: 'High tide',
     bajamar: 'Low tide',
-    coefMarea: 'Tide coefficient', mareasVivas: 'Spring tide', mareasMuertas: 'Neap tide', solunarTitulo: 'Solunar table', periodoMayor: 'Major period', periodoMenor: 'Minor period',
+    coefMarea: 'Tide coefficient', mareasVivas: 'Spring tide', mareasMuertas: 'Neap tide', solunarTitulo: 'Solunar table', periodoMayor: 'Major period', periodoMenor: 'Minor period', alertaLluviaHora: '⚠️ Heavy rain expected: {mm}mm at {hora}', alertaLluviaDia: '⚠️ Heavy rain expected: {mm}mm total today',
     olas: 'Waves',
     altitud: 'Altitude',
     tuVelocidad: 'Your speed', velMax: 'Max.', velMedia: 'Avg.', distancia: 'Distance', resetDist: 'Reset',
@@ -1020,7 +1021,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Bugünün Gelgitleri',
     pleamar: 'Yüksek gelgit',
     bajamar: 'Düşük gelgit',
-    coefMarea: 'Gelgit katsayısı', mareasVivas: 'Büyük gelgit', mareasMuertas: 'Küçük gelgit', solunarTitulo: 'Solunar tablo', periodoMayor: 'Büyük dönem', periodoMenor: 'Küçük dönem',
+    coefMarea: 'Gelgit katsayısı', mareasVivas: 'Büyük gelgit', mareasMuertas: 'Küçük gelgit', solunarTitulo: 'Solunar tablo', periodoMayor: 'Büyük dönem', periodoMenor: 'Küçük dönem', alertaLluviaHora: '⚠️ Şiddetli yağmur bekleniyor: saat {hora} itibariyle {mm}mm', alertaLluviaDia: '⚠️ Şiddetli yağmur bekleniyor: bugün toplam {mm}mm',
     olas: 'Dalgalar',
     altitud: 'Rakım',
     tuVelocidad: 'Hızınız', velMax: 'Maks.', velMedia: 'Ort.', distancia: 'Mesafe', resetDist: 'Sıfırla',
@@ -1062,7 +1063,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Thủy triều hôm nay',
     pleamar: 'Triều cao',
     bajamar: 'Triều thấp',
-    coefMarea: 'Hệ số thủy triều', mareasVivas: 'Triều cường', mareasMuertas: 'Triều kém', solunarTitulo: 'Bảng solunar', periodoMayor: 'Giai đoạn chính', periodoMenor: 'Giai đoạn phụ',
+    coefMarea: 'Hệ số thủy triều', mareasVivas: 'Triều cường', mareasMuertas: 'Triều kém', solunarTitulo: 'Bảng solunar', periodoMayor: 'Giai đoạn chính', periodoMenor: 'Giai đoạn phụ', alertaLluviaHora: '⚠️ Dự báo mưa lớn: {mm}mm lúc {hora}', alertaLluviaDia: '⚠️ Dự báo mưa lớn: tổng {mm}mm hôm nay',
     olas: 'Sóng',
     altitud: 'Độ cao',
     tuVelocidad: 'Tốc độ của bạn', velMax: 'Tối đa', velMedia: 'TB', distancia: 'Khoảng cách', resetDist: 'Đặt lại',
@@ -1104,7 +1105,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'น้ำขึ้นน้ำลงวันนี้',
     pleamar: 'น้ำขึ้นสูงสุด',
     bajamar: 'น้ำลงต่ำสุด',
-    coefMarea: 'ค่าสัมประสิทธิ์น้ำขึ้นน้ำลง', mareasVivas: 'น้ำเกิด', mareasMuertas: 'น้ำตาย', solunarTitulo: 'ตารางโซลูนาร์', periodoMayor: 'ช่วงเวลาหลัก', periodoMenor: 'ช่วงเวลารอง',
+    coefMarea: 'ค่าสัมประสิทธิ์น้ำขึ้นน้ำลง', mareasVivas: 'น้ำเกิด', mareasMuertas: 'น้ำตาย', solunarTitulo: 'ตารางโซลูนาร์', periodoMayor: 'ช่วงเวลาหลัก', periodoMenor: 'ช่วงเวลารอง', alertaLluviaHora: '⚠️ คาดว่าฝนจะตกหนัก: {mm}มม. เวลา {hora}', alertaLluviaDia: '⚠️ คาดว่าฝนจะตกหนัก: รวม {mm}มม. วันนี้',
     olas: 'คลื่น',
     altitud: 'ระดับความสูง',
     tuVelocidad: 'ความเร็วของคุณ', velMax: 'สูงสุด', velMedia: 'เฉลี่ย', distancia: 'ระยะทาง', resetDist: 'รีเซ็ต',
@@ -1147,7 +1148,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Dagens tidvatten',
     pleamar: 'Högvatten',
     bajamar: 'Lågvatten',
-    coefMarea: 'Tidvattenkoefficient', mareasVivas: 'Springflod', mareasMuertas: 'Nipflod', solunarTitulo: 'Solunar-tabell', periodoMayor: 'Stor period', periodoMenor: 'Liten period',
+    coefMarea: 'Tidvattenkoefficient', mareasVivas: 'Springflod', mareasMuertas: 'Nipflod', solunarTitulo: 'Solunar-tabell', periodoMayor: 'Stor period', periodoMenor: 'Liten period', alertaLluviaHora: '⚠️ Kraftigt regn väntas: {mm}mm kl {hora}', alertaLluviaDia: '⚠️ Kraftigt regn väntas: {mm}mm totalt idag',
     olas: 'Vågor',
     altitud: 'Höjd',
     tuVelocidad: 'Din hastighet', velMax: 'Max.', velMedia: 'Snitt', distancia: 'Distans', resetDist: 'Återställ',
@@ -1190,7 +1191,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Gezeiten Heute',
     pleamar: 'Hochwasser',
     bajamar: 'Niedrigwasser',
-    coefMarea: 'Gezeitenkoeffizient', mareasVivas: 'Springtide', mareasMuertas: 'Nipptide', solunarTitulo: 'Solunar-Tabelle', periodoMayor: 'Hauptperiode', periodoMenor: 'Nebenperiode',
+    coefMarea: 'Gezeitenkoeffizient', mareasVivas: 'Springtide', mareasMuertas: 'Nipptide', solunarTitulo: 'Solunar-Tabelle', periodoMayor: 'Hauptperiode', periodoMenor: 'Nebenperiode', alertaLluviaHora: '⚠️ Starkregen erwartet: {mm}mm um {hora}', alertaLluviaDia: '⚠️ Starkregen erwartet: {mm}mm heute insgesamt',
     olas: 'Wellen',
     altitud: 'Höhe',
     tuVelocidad: 'Deine Geschwindigkeit', velMax: 'Max.', velMedia: 'Ø', distancia: 'Distanz', resetDist: 'Zurücksetzen',
@@ -1233,7 +1234,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Marées du Jour',
     pleamar: 'Pleine mer',
     bajamar: 'Basse mer',
-    coefMarea: 'Coefficient de marée', mareasVivas: 'Vives-eaux', mareasMuertas: 'Mortes-eaux', solunarTitulo: 'Tableau solunaire', periodoMayor: 'Période majeure', periodoMenor: 'Période mineure',
+    coefMarea: 'Coefficient de marée', mareasVivas: 'Vives-eaux', mareasMuertas: 'Mortes-eaux', solunarTitulo: 'Tableau solunaire', periodoMayor: 'Période majeure', periodoMenor: 'Période mineure', alertaLluviaHora: '⚠️ Fortes pluies prévues : {mm}mm à {hora}', alertaLluviaDia: '⚠️ Fortes pluies prévues : {mm}mm cumulés aujourd’hui',
     olas: 'Vagues',
     altitud: 'Altitude',
     tuVelocidad: 'Votre vitesse', velMax: 'Max.', velMedia: 'Moy.', distancia: 'Distance', resetDist: 'Réinitialiser',
@@ -1276,7 +1277,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Marés de Hoje',
     pleamar: 'Maré alta',
     bajamar: 'Maré baixa',
-    coefMarea: 'Coeficiente de maré', mareasVivas: 'Maré viva', mareasMuertas: 'Maré morta', solunarTitulo: 'Tabela solunar', periodoMayor: 'Período maior', periodoMenor: 'Período menor',
+    coefMarea: 'Coeficiente de maré', mareasVivas: 'Maré viva', mareasMuertas: 'Maré morta', solunarTitulo: 'Tabela solunar', periodoMayor: 'Período maior', periodoMenor: 'Período menor', alertaLluviaHora: '⚠️ Chuva intensa prevista: {mm}mm às {hora}', alertaLluviaDia: '⚠️ Chuva intensa prevista: {mm}mm acumulados hoje',
     olas: 'Ondas',
     altitud: 'Altitude',
     tuVelocidad: 'Sua velocidade', velMax: 'Máx.', velMedia: 'Média', distancia: 'Distância', resetDist: 'Reiniciar',
@@ -1319,7 +1320,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Marés de hoje',
     pleamar: 'Maré alta',
     bajamar: 'Maré baixa',
-    coefMarea: 'Coeficiente de maré', mareasVivas: 'Maré viva', mareasMuertas: 'Maré morta', solunarTitulo: 'Tabela solunar', periodoMayor: 'Período maior', periodoMenor: 'Período menor',
+    coefMarea: 'Coeficiente de maré', mareasVivas: 'Maré viva', mareasMuertas: 'Maré morta', solunarTitulo: 'Tabela solunar', periodoMayor: 'Período maior', periodoMenor: 'Período menor', alertaLluviaHora: '⚠️ Chuva intensa prevista: {mm}mm às {hora}', alertaLluviaDia: '⚠️ Chuva intensa prevista: {mm}mm acumulados hoje',
     olas: 'Ondas',
     altitud: 'Altitude',
     tuVelocidad: 'Sua velocidade', velMax: 'Máx.', velMedia: 'Média', distancia: 'Distância', resetDist: 'Reiniciar',
@@ -1362,7 +1363,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Maree di Oggi',
     pleamar: 'Alta marea',
     bajamar: 'Bassa marea',
-    coefMarea: 'Coefficiente di marea', mareasVivas: 'Marea sizigiale', mareasMuertas: 'Marea di quadratura', solunarTitulo: 'Tabella solunare', periodoMayor: 'Periodo maggiore', periodoMenor: 'Periodo minore',
+    coefMarea: 'Coefficiente di marea', mareasVivas: 'Marea sizigiale', mareasMuertas: 'Marea di quadratura', solunarTitulo: 'Tabella solunare', periodoMayor: 'Periodo maggiore', periodoMenor: 'Periodo minore', alertaLluviaHora: '⚠️ Pioggia intensa prevista: {mm}mm alle {hora}', alertaLluviaDia: '⚠️ Pioggia intensa prevista: {mm}mm totali oggi',
     olas: 'Onde',
     altitud: 'Altitudine',
     tuVelocidad: 'La tua velocità', velMax: 'Max.', velMedia: 'Media', distancia: 'Distanza', resetDist: 'Azzera',
@@ -1405,7 +1406,7 @@ const TRADUCCIONES = {
     mareasDeHoy: '今日潮汐',
     pleamar: '高潮',
     bajamar: '低潮',
-    coefMarea: '潮汐系数', mareasVivas: '大潮', mareasMuertas: '小潮', solunarTitulo: '太阳月亮表', periodoMayor: '主要时段', periodoMenor: '次要时段',
+    coefMarea: '潮汐系数', mareasVivas: '大潮', mareasMuertas: '小潮', solunarTitulo: '太阳月亮表', periodoMayor: '主要时段', periodoMenor: '次要时段', alertaLluviaHora: '⚠️ 预计有强降雨：{hora} 达 {mm}毫米', alertaLluviaDia: '⚠️ 预计有强降雨：今日累计 {mm}毫米',
     olas: '浪高',
     altitud: '海拔',
     tuVelocidad: '你的速度', velMax: '最高', velMedia: '平均', distancia: '距离', resetDist: '重置',
@@ -1448,7 +1449,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Marees d\'Avui',
     pleamar: 'Plenamar',
     bajamar: 'Baixamar',
-    coefMarea: 'Coeficient de marea', mareasVivas: 'Marea viva', mareasMuertas: 'Marea morta', solunarTitulo: 'Taula solunar', periodoMayor: 'Període major', periodoMenor: 'Període menor',
+    coefMarea: 'Coeficient de marea', mareasVivas: 'Marea viva', mareasMuertas: 'Marea morta', solunarTitulo: 'Taula solunar', periodoMayor: 'Període major', periodoMenor: 'Període menor', alertaLluviaHora: '⚠️ Pluja intensa prevista: {mm}mm a les {hora}', alertaLluviaDia: '⚠️ Pluja intensa prevista: {mm}mm acumulats avui',
     olas: 'Onades',
     altitud: 'Altitud',
     tuVelocidad: 'La teva velocitat', velMax: 'Màx.', velMedia: 'Mitjana', distancia: 'Distància', resetDist: 'Reinicia',
@@ -1491,7 +1492,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Gaurko Mareak',
     pleamar: 'Goi-marea',
     bajamar: 'Behe-marea',
-    coefMarea: 'Marea koefizientea', mareasVivas: 'Marea bizia', mareasMuertas: 'Marea hila', solunarTitulo: 'Taula solunarra', periodoMayor: 'Aldi nagusia', periodoMenor: 'Aldi txikia',
+    coefMarea: 'Marea koefizientea', mareasVivas: 'Marea bizia', mareasMuertas: 'Marea hila', solunarTitulo: 'Taula solunarra', periodoMayor: 'Aldi nagusia', periodoMenor: 'Aldi txikia', alertaLluviaHora: '⚠️ Euri trinkoa aurreikusita: {mm}mm {hora}etan', alertaLluviaDia: '⚠️ Euri trinkoa aurreikusita: gaur {mm}mm metatuta',
     olas: 'Olatuak',
     altitud: 'Altitudea',
     tuVelocidad: 'Zure abiadura', velMax: 'Max.', velMedia: 'Batez beste', distancia: 'Distantzia', resetDist: 'Berrezarri',
@@ -1534,7 +1535,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Marés de Hoxe',
     pleamar: 'Preamar',
     bajamar: 'Baixamar',
-    coefMarea: 'Coeficiente de marea', mareasVivas: 'Marea viva', mareasMuertas: 'Marea morta', solunarTitulo: 'Táboa solunar', periodoMayor: 'Período maior', periodoMenor: 'Período menor',
+    coefMarea: 'Coeficiente de marea', mareasVivas: 'Marea viva', mareasMuertas: 'Marea morta', solunarTitulo: 'Táboa solunar', periodoMayor: 'Período maior', periodoMenor: 'Período menor', alertaLluviaHora: '⚠️ Chuvia intensa prevista: {mm}mm ás {hora}', alertaLluviaDia: '⚠️ Chuvia intensa prevista: {mm}mm acumulados hoxe',
     olas: 'Ondas',
     altitud: 'Altitude',
     tuVelocidad: 'A túa velocidade', velMax: 'Máx.', velMedia: 'Media', distancia: 'Distancia', resetDist: 'Reiniciar',
@@ -1577,7 +1578,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'مد وجزر اليوم',
     pleamar: 'مد عالٍ',
     bajamar: 'جزر',
-    coefMarea: 'معامل المد والجزر', mareasVivas: 'مد كبير', mareasMuertas: 'مد ضعيف', solunarTitulo: 'جدول شمسي قمري', periodoMayor: 'فترة رئيسية', periodoMenor: 'فترة ثانوية',
+    coefMarea: 'معامل المد والجزر', mareasVivas: 'مد كبير', mareasMuertas: 'مد ضعيف', solunarTitulo: 'جدول شمسي قمري', periodoMayor: 'فترة رئيسية', periodoMenor: 'فترة ثانوية', alertaLluviaHora: '⚠️ من المتوقع هطول أمطار غزيرة: {mm}مم الساعة {hora}', alertaLluviaDia: '⚠️ من المتوقع هطول أمطار غزيرة: {mm}مم إجمالاً اليوم',
     olas: 'أمواج',
     altitud: 'الارتفاع',
     tuVelocidad: 'سرعتك', velMax: 'أقصى', velMedia: 'متوسط', distancia: 'المسافة', resetDist: 'إعادة',
@@ -1620,7 +1621,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Приливы сегодня',
     pleamar: 'Полная вода',
     bajamar: 'Малая вода',
-    coefMarea: 'Коэффициент прилива', mareasVivas: 'Сизигийный прилив', mareasMuertas: 'Квадратурный прилив', solunarTitulo: 'Солунарная таблица', periodoMayor: 'Главный период', periodoMenor: 'Малый период',
+    coefMarea: 'Коэффициент прилива', mareasVivas: 'Сизигийный прилив', mareasMuertas: 'Квадратурный прилив', solunarTitulo: 'Солунарная таблица', periodoMayor: 'Главный период', periodoMenor: 'Малый период', alertaLluviaHora: '⚠️ Ожидается сильный дождь: {mm}мм в {hora}', alertaLluviaDia: '⚠️ Ожидается сильный дождь: {mm}мм всего за сегодня',
     olas: 'Волны',
     altitud: 'Высота',
     tuVelocidad: 'Ваша скорость', velMax: 'Макс.', velMedia: 'Средн.', distancia: 'Расстояние', resetDist: 'Сброс',
@@ -1663,7 +1664,7 @@ const TRADUCCIONES = {
     mareasDeHoy: '本日の潮汐',
     pleamar: '満潮',
     bajamar: '干潮',
-    coefMarea: '潮汐係数', mareasVivas: '大潮', mareasMuertas: '小潮', solunarTitulo: 'ソルナーテーブル', periodoMayor: 'メジャー期間', periodoMenor: 'マイナー期間',
+    coefMarea: '潮汐係数', mareasVivas: '大潮', mareasMuertas: '小潮', solunarTitulo: 'ソルナーテーブル', periodoMayor: 'メジャー期間', periodoMenor: 'マイナー期間', alertaLluviaHora: '⚠️ 激しい雨の予報：{hora}に{mm}mm', alertaLluviaDia: '⚠️ 激しい雨の予報：本日合計{mm}mm',
     olas: '波高',
     altitud: '標高',
     tuVelocidad: '現在の速度', velMax: '最高', velMedia: '平均', distancia: '距離', resetDist: 'リセット',
@@ -1706,7 +1707,7 @@ const TRADUCCIONES = {
     mareasDeHoy: '오늘의 조석',
     pleamar: '만조',
     bajamar: '간조',
-    coefMarea: '조수 계수', mareasVivas: '사리', mareasMuertas: '조금', solunarTitulo: '솔루나 표', periodoMayor: '주요 시간대', periodoMenor: '보조 시간대',
+    coefMarea: '조수 계수', mareasVivas: '사리', mareasMuertas: '조금', solunarTitulo: '솔루나 표', periodoMayor: '주요 시간대', periodoMenor: '보조 시간대', alertaLluviaHora: '⚠️ 폭우 예상: {hora}에 {mm}mm', alertaLluviaDia: '⚠️ 폭우 예상: 오늘 누적 {mm}mm',
     olas: '파도',
     altitud: '고도',
     tuVelocidad: '현재 속도', velMax: '최고', velMedia: '평균', distancia: '거리', resetDist: '초기화',
@@ -1749,7 +1750,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Getijden vandaag',
     pleamar: 'Hoogwater',
     bajamar: 'Laagwater',
-    coefMarea: 'Getijcoëfficiënt', mareasVivas: 'Springtij', mareasMuertas: 'Doodtij', solunarTitulo: 'Solunartabel', periodoMayor: 'Grote periode', periodoMenor: 'Kleine periode',
+    coefMarea: 'Getijcoëfficiënt', mareasVivas: 'Springtij', mareasMuertas: 'Doodtij', solunarTitulo: 'Solunartabel', periodoMayor: 'Grote periode', periodoMenor: 'Kleine periode', alertaLluviaHora: '⚠️ Hevige regen verwacht: {mm}mm om {hora}', alertaLluviaDia: '⚠️ Hevige regen verwacht: {mm}mm totaal vandaag',
     olas: 'Golven',
     altitud: 'Hoogte',
     tuVelocidad: 'Uw snelheid', velMax: 'Max.', velMedia: 'Gem.', distancia: 'Afstand', resetDist: 'Resetten',
@@ -1792,7 +1793,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Pływy dzisiaj',
     pleamar: 'Pełna woda',
     bajamar: 'Niska woda',
-    coefMarea: 'Współczynnik pływów', mareasVivas: 'Pływy syzygijne', mareasMuertas: 'Pływy kwadraturowe', solunarTitulo: 'Tabela solunarna', periodoMayor: 'Okres główny', periodoMenor: 'Okres mniejszy',
+    coefMarea: 'Współczynnik pływów', mareasVivas: 'Pływy syzygijne', mareasMuertas: 'Pływy kwadraturowe', solunarTitulo: 'Tabela solunarna', periodoMayor: 'Okres główny', periodoMenor: 'Okres mniejszy', alertaLluviaHora: '⚠️ Spodziewane ulewne opady: {mm}mm o {hora}', alertaLluviaDia: '⚠️ Spodziewane ulewne opady: {mm}mm łącznie dzisiaj',
     olas: 'Fale',
     altitud: 'Wysokość',
     tuVelocidad: 'Twoja prędkość', velMax: 'Maks.', velMedia: 'Śred.', distancia: 'Dystans', resetDist: 'Resetuj',
@@ -1835,7 +1836,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'आज का ज्वार-भाटा',
     pleamar: 'उच्च ज्वार',
     bajamar: 'निम्न ज्वार',
-    coefMarea: 'ज्वार गुणांक', mareasVivas: 'बड़ा ज्वार', mareasMuertas: 'छोटा ज्वार', solunarTitulo: 'सोलुनार तालिका', periodoMayor: 'प्रमुख अवधि', periodoMenor: 'लघु अवधि',
+    coefMarea: 'ज्वार गुणांक', mareasVivas: 'बड़ा ज्वार', mareasMuertas: 'छोटा ज्वार', solunarTitulo: 'सोलुनार तालिका', periodoMayor: 'प्रमुख अवधि', periodoMenor: 'लघु अवधि', alertaLluviaHora: '⚠️ भारी बारिश की संभावना: {hora} बजे {mm}मिमी', alertaLluviaDia: '⚠️ भारी बारिश की संभावना: आज कुल {mm}मिमी',
     olas: 'लहरें',
     altitud: 'ऊँचाई',
     tuVelocidad: 'आपकी गति', velMax: 'अधिकतम', velMedia: 'औसत', distancia: 'दूरी', resetDist: 'रीसेट',
@@ -1878,7 +1879,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Mareele de azi',
     pleamar: 'Flux',
     bajamar: 'Reflux',
-    coefMarea: 'Coeficient de maree', mareasVivas: 'Maree mare', mareasMuertas: 'Maree mica', solunarTitulo: 'Tabel solunar', periodoMayor: 'Perioada majora', periodoMenor: 'Perioada minora',
+    coefMarea: 'Coeficient de maree', mareasVivas: 'Maree mare', mareasMuertas: 'Maree mica', solunarTitulo: 'Tabel solunar', periodoMayor: 'Perioada majora', periodoMenor: 'Perioada minora', alertaLluviaHora: '⚠️ Ploaie intensa prevazuta: {mm}mm la ora {hora}', alertaLluviaDia: '⚠️ Ploaie intensa prevazuta: {mm}mm total azi',
     olas: 'Valuri',
     altitud: 'Altitudine',
     tuVelocidad: 'Viteza ta', velMax: 'Max.', velMedia: 'Med.', distancia: 'Distanță', resetDist: 'Resetare',
@@ -1921,7 +1922,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Mai árapály',
     pleamar: 'Dagály',
     bajamar: 'Apály',
-    coefMarea: 'Árapály-együttható', mareasVivas: 'Szökőár', mareasMuertas: 'Vakár', solunarTitulo: 'Szolunáris táblázat', periodoMayor: 'Fő periódus', periodoMenor: 'Kis periódus',
+    coefMarea: 'Árapály-együttható', mareasVivas: 'Szökőár', mareasMuertas: 'Vakár', solunarTitulo: 'Szolunáris táblázat', periodoMayor: 'Fő periódus', periodoMenor: 'Kis periódus', alertaLluviaHora: '⚠️ Heves eső várható: {mm}mm {hora}-kor', alertaLluviaDia: '⚠️ Heves eső várható: ma összesen {mm}mm',
     olas: 'Hullámok',
     altitud: 'Magasság',
     tuVelocidad: 'Sebességed', velMax: 'Max.', velMedia: 'Átlag', distancia: 'Távolság', resetDist: 'Visszaállít',
@@ -1964,7 +1965,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Приливи сьогодні',
     pleamar: 'Повна вода',
     bajamar: 'Мала вода',
-    coefMarea: 'Коефіцієнт припливу', mareasVivas: 'Сизигійний приплив', mareasMuertas: 'Квадратурний приплив', solunarTitulo: 'Солунарна таблиця', periodoMayor: 'Головний період', periodoMenor: 'Малий період',
+    coefMarea: 'Коефіцієнт припливу', mareasVivas: 'Сизигійний приплив', mareasMuertas: 'Квадратурний приплив', solunarTitulo: 'Солунарна таблиця', periodoMayor: 'Головний період', periodoMenor: 'Малий період', alertaLluviaHora: '⚠️ Очікується сильний дощ: {mm}мм о {hora}', alertaLluviaDia: '⚠️ Очікується сильний дощ: {mm}мм всього сьогодні',
     olas: 'Хвилі',
     altitud: 'Висота',
     tuVelocidad: 'Ваша швидкість', velMax: 'Макс.', velMedia: 'Серед.', distancia: 'Відстань', resetDist: 'Скинути',
@@ -2007,7 +2008,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Dagens tidevand',
     pleamar: 'Højvande',
     bajamar: 'Lavvande',
-    coefMarea: 'Tidevandskoefficient', mareasVivas: 'Springflod', mareasMuertas: 'Nipflod', solunarTitulo: 'Solunar-tabel', periodoMayor: 'Stor periode', periodoMenor: 'Lille periode',
+    coefMarea: 'Tidevandskoefficient', mareasVivas: 'Springflod', mareasMuertas: 'Nipflod', solunarTitulo: 'Solunar-tabel', periodoMayor: 'Stor periode', periodoMenor: 'Lille periode', alertaLluviaHora: '⚠️ Kraftig regn ventes: {mm}mm kl. {hora}', alertaLluviaDia: '⚠️ Kraftig regn ventes: {mm}mm i alt i dag',
     olas: 'Bølger',
     altitud: 'Højde',
     tuVelocidad: 'Din hastighed', velMax: 'Maks.', velMedia: 'Gnsn.', distancia: 'Afstand', resetDist: 'Nulstil',
@@ -2050,7 +2051,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Dagens tidevann',
     pleamar: 'Høyvann',
     bajamar: 'Lavvann',
-    coefMarea: 'Tidevannskoeffisient', mareasVivas: 'Springflo', mareasMuertas: 'Nippflo', solunarTitulo: 'Solunar-tabell', periodoMayor: 'Stor periode', periodoMenor: 'Liten periode',
+    coefMarea: 'Tidevannskoeffisient', mareasVivas: 'Springflo', mareasMuertas: 'Nippflo', solunarTitulo: 'Solunar-tabell', periodoMayor: 'Stor periode', periodoMenor: 'Liten periode', alertaLluviaHora: '⚠️ Kraftig regn ventet: {mm}mm kl. {hora}', alertaLluviaDia: '⚠️ Kraftig regn ventet: {mm}mm totalt i dag',
     olas: 'Bølger',
     altitud: 'Høyde',
     tuVelocidad: 'Din hastighet', velMax: 'Maks.', velMedia: 'Snitt', distancia: 'Avstand', resetDist: 'Nullstill',
@@ -2093,7 +2094,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Dnešní přílivy',
     pleamar: 'Příliv',
     bajamar: 'Odliv',
-    coefMarea: 'Koeficient přílivu', mareasVivas: 'Výjimečný příliv', mareasMuertas: 'Mrtvý příliv', solunarTitulo: 'Solunární tabulka', periodoMayor: 'Hlavní období', periodoMenor: 'Vedlejší období',
+    coefMarea: 'Koeficient přílivu', mareasVivas: 'Výjimečný příliv', mareasMuertas: 'Mrtvý příliv', solunarTitulo: 'Solunární tabulka', periodoMayor: 'Hlavní období', periodoMenor: 'Vedlejší období', alertaLluviaHora: '⚠️ Očekávají se silné deště: {mm}mm v {hora}', alertaLluviaDia: '⚠️ Očekávají se silné deště: dnes celkem {mm}mm',
     olas: 'Vlny',
     altitud: 'Nadmořská výška',
     tuVelocidad: 'Vaše rychlost', velMax: 'Max.', velMedia: 'Prům.', distancia: 'Vzdálenost', resetDist: 'Resetovat',
@@ -2136,7 +2137,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Pasang Surut Hari Ini',
     pleamar: 'Pasang tinggi',
     bajamar: 'Surut rendah',
-    coefMarea: 'Koefisien pasang surut', mareasVivas: 'Pasang purnama', mareasMuertas: 'Pasang perbani', solunarTitulo: 'Tabel solunar', periodoMayor: 'Periode utama', periodoMenor: 'Periode kecil',
+    coefMarea: 'Koefisien pasang surut', mareasVivas: 'Pasang purnama', mareasMuertas: 'Pasang perbani', solunarTitulo: 'Tabel solunar', periodoMayor: 'Periode utama', periodoMenor: 'Periode kecil', alertaLluviaHora: '⚠️ Hujan lebat diperkirakan: {mm}mm pada {hora}', alertaLluviaDia: '⚠️ Hujan lebat diperkirakan: total {mm}mm hari ini',
     olas: 'Ombak',
     altitud: 'Ketinggian',
     tuVelocidad: 'Kecepatan Anda', velMax: 'Maks.', velMedia: 'Rata-rata', distancia: 'Jarak', resetDist: 'Atur ulang',
@@ -4797,6 +4798,47 @@ function colorParaAQI(aqi, tipo) {
   return (escala.find(([max]) => aqi <= max) || escala[escala.length-1])[1];
 }
 
+// ── Aviso de lluvia intensa ───────────────────────────────────────────
+// Umbral propio (no es un aviso oficial de ningun organismo): se activa
+// si alguna hora de las proximas 24h supera UMBRAL_HORA mm, o si el
+// acumulado de hoy supera UMBRAL_DIA mm. Basado solo en Open-Meteo, que
+// ya se pide en cada carga -- sin llamadas nuevas.
+const ALERTA_LLUVIA_UMBRAL_HORA = 15; // mm en una sola hora
+const ALERTA_LLUVIA_UMBRAL_DIA = 40;  // mm acumulados en el dia
+function renderAlertaLluvia(hourly, daily) {
+  const card = document.getElementById('alertaLluviaCard');
+  if (!card) return;
+  card.style.display = 'none';
+  if (!hourly || !hourly.time || !hourly.precipitation) return;
+
+  const ahora = Date.now();
+  const limite24h = ahora + 24 * 3600000;
+  let picoMm = 0, picoHora = null;
+  for (let i = 0; i < hourly.time.length; i++) {
+    const t = new Date(hourly.time[i]).getTime();
+    if (t < ahora || t > limite24h) continue;
+    const mm = hourly.precipitation[i];
+    if (mm !== null && mm > picoMm) { picoMm = mm; picoHora = t; }
+  }
+  const acumuladoHoy = daily && daily.precipitation_sum ? (daily.precipitation_sum[0] ?? 0) : 0;
+
+  const disparaHora = picoMm >= ALERTA_LLUVIA_UMBRAL_HORA;
+  const disparaDia = acumuladoHoy >= ALERTA_LLUVIA_UMBRAL_DIA;
+  if (!disparaHora && !disparaDia) return;
+
+  const horaTxt = picoHora ? new Date(picoHora).toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' }) : '';
+  let texto;
+  if (disparaHora) {
+    texto = (T.alertaLluviaHora || '⚠️ Lluvia intensa prevista: {mm}mm a las {hora}')
+      .replace('{mm}', picoMm.toFixed(0)).replace('{hora}', horaTxt);
+  } else {
+    texto = (T.alertaLluviaDia || '⚠️ Lluvia intensa prevista: {mm}mm acumulados hoy')
+      .replace('{mm}', acumuladoHoy.toFixed(0));
+  }
+  card.textContent = texto;
+  card.style.display = 'block';
+}
+
 function renderDatos(datos) {
   const { tiempo, ciudad, mdata, elevacion, aireData, astroData, googleData, aemetActual, aemetHoras, aemetObs, nwsActual, dwdObs } = datos;
   const c = tiempo.current;
@@ -4902,6 +4944,7 @@ function renderDatos(datos) {
   // Previsión horaria: Open-Meteo
   renderHoras(tiempo.hourly);
   renderSol(tiempo.daily, astroData);
+  renderAlertaLluvia(tiempo.hourly, tiempo.daily);
   renderDias(tiempo.daily, tiempo.hourly);
   const tieneMarea = renderMarea(mdata);
   renderPanelInterior(c.uv_index, aireData, tiempo.daily && tiempo.daily.sunset ? tiempo.daily.sunset[0] : null, tieneMarea, tiempo.utc_offset_seconds, tiempo.daily && tiempo.daily.sunrise ? tiempo.daily.sunrise[0] : null, c.is_day === 1);
