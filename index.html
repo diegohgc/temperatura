@@ -839,6 +839,17 @@
     <div id="modalMareaAgua" style="display:flex;gap:8px;justify-content:center;margin-bottom:10px"></div>
     <svg id="mareaChart" viewBox="0 0 360 130" preserveAspectRatio="none"></svg>
     <div class="modal-extremos" id="modalExtremost"></div>
+    <div id="coefMareaCard" style="display:none;margin-top:10px;background:rgba(255,255,255,0.06);border-radius:14px;padding:10px 14px;text-align:center">
+      <div style="font-size:0.7rem;opacity:0.6;text-transform:uppercase;letter-spacing:0.5px" id="coefMareaLbl">Coeficiente de marea</div>
+      <div style="display:flex;align-items:baseline;justify-content:center;gap:8px;margin-top:2px">
+        <div style="font-size:1.6rem;font-weight:700" id="coefMareaVal">--</div>
+        <div style="font-size:0.8rem;opacity:0.75" id="coefMareaTag"></div>
+      </div>
+    </div>
+    <div id="solunarCard" style="display:none;margin-top:10px;background:rgba(255,255,255,0.06);border-radius:14px;padding:12px 14px">
+      <div style="font-size:0.7rem;opacity:0.6;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px" id="solunarLbl">Tabla solunar</div>
+      <div style="display:flex;flex-direction:column;gap:6px" id="solunarLista"></div>
+    </div>
     <div id="marceBarcosCard" style="display:none;margin-top:10px;background:rgba(255,255,255,0.06);border-radius:14px;padding:12px 14px;cursor:pointer" onclick="window.abrirMapaBarcos && abrirMapaBarcos()">
       <div style="font-size:0.7rem;opacity:0.6;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px" id="marceBarcosPuerto"></div>
       <div style="display:flex;gap:18px">
@@ -880,6 +891,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Mareas de Hoy',
     pleamar: 'Pleamar',
     bajamar: 'Bajamar',
+    coefMarea: 'Coeficiente de marea', mareasVivas: 'Mareas vivas', mareasMuertas: 'Mareas muertas', solunarTitulo: 'Tabla solunar', periodoMayor: 'Periodo mayor', periodoMenor: 'Periodo menor',
     olas: 'Olas',
     altitud: 'Altitud',
     tuVelocidad: 'Tu velocidad', velMax: 'Máx.', velMedia: 'Media', distancia: 'Distancia', resetDist: 'Reiniciar',
@@ -922,6 +934,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Mareas de Hoy',
     pleamar: 'Marea alta',
     bajamar: 'Marea baja',
+    coefMarea: 'Coeficiente de marea', mareasVivas: 'Mareas vivas', mareasMuertas: 'Mareas muertas', solunarTitulo: 'Tabla solunar', periodoMayor: 'Periodo mayor', periodoMenor: 'Periodo menor',
     olas: 'Olas',
     altitud: 'Altitud',
     tuVelocidad: 'Tu velocidad', velMax: 'Máx.', velMedia: 'Media', distancia: 'Distancia', resetDist: 'Reiniciar',
@@ -964,6 +977,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Today\'s Tides',
     pleamar: 'High tide',
     bajamar: 'Low tide',
+    coefMarea: 'Tide coefficient', mareasVivas: 'Spring tide', mareasMuertas: 'Neap tide', solunarTitulo: 'Solunar table', periodoMayor: 'Major period', periodoMenor: 'Minor period',
     olas: 'Waves',
     altitud: 'Altitude',
     tuVelocidad: 'Your speed', velMax: 'Max.', velMedia: 'Avg.', distancia: 'Distance', resetDist: 'Reset',
@@ -1005,6 +1019,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Bugünün Gelgitleri',
     pleamar: 'Yüksek gelgit',
     bajamar: 'Düşük gelgit',
+    coefMarea: 'Gelgit katsayısı', mareasVivas: 'Büyük gelgit', mareasMuertas: 'Küçük gelgit', solunarTitulo: 'Solunar tablo', periodoMayor: 'Büyük dönem', periodoMenor: 'Küçük dönem',
     olas: 'Dalgalar',
     altitud: 'Rakım',
     tuVelocidad: 'Hızınız', velMax: 'Maks.', velMedia: 'Ort.', distancia: 'Mesafe', resetDist: 'Sıfırla',
@@ -1046,6 +1061,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Thủy triều hôm nay',
     pleamar: 'Triều cao',
     bajamar: 'Triều thấp',
+    coefMarea: 'Hệ số thủy triều', mareasVivas: 'Triều cường', mareasMuertas: 'Triều kém', solunarTitulo: 'Bảng solunar', periodoMayor: 'Giai đoạn chính', periodoMenor: 'Giai đoạn phụ',
     olas: 'Sóng',
     altitud: 'Độ cao',
     tuVelocidad: 'Tốc độ của bạn', velMax: 'Tối đa', velMedia: 'TB', distancia: 'Khoảng cách', resetDist: 'Đặt lại',
@@ -1087,6 +1103,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'น้ำขึ้นน้ำลงวันนี้',
     pleamar: 'น้ำขึ้นสูงสุด',
     bajamar: 'น้ำลงต่ำสุด',
+    coefMarea: 'ค่าสัมประสิทธิ์น้ำขึ้นน้ำลง', mareasVivas: 'น้ำเกิด', mareasMuertas: 'น้ำตาย', solunarTitulo: 'ตารางโซลูนาร์', periodoMayor: 'ช่วงเวลาหลัก', periodoMenor: 'ช่วงเวลารอง',
     olas: 'คลื่น',
     altitud: 'ระดับความสูง',
     tuVelocidad: 'ความเร็วของคุณ', velMax: 'สูงสุด', velMedia: 'เฉลี่ย', distancia: 'ระยะทาง', resetDist: 'รีเซ็ต',
@@ -1129,6 +1146,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Dagens tidvatten',
     pleamar: 'Högvatten',
     bajamar: 'Lågvatten',
+    coefMarea: 'Tidvattenkoefficient', mareasVivas: 'Springflod', mareasMuertas: 'Nipflod', solunarTitulo: 'Solunar-tabell', periodoMayor: 'Stor period', periodoMenor: 'Liten period',
     olas: 'Vågor',
     altitud: 'Höjd',
     tuVelocidad: 'Din hastighet', velMax: 'Max.', velMedia: 'Snitt', distancia: 'Distans', resetDist: 'Återställ',
@@ -1171,6 +1189,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Gezeiten Heute',
     pleamar: 'Hochwasser',
     bajamar: 'Niedrigwasser',
+    coefMarea: 'Gezeitenkoeffizient', mareasVivas: 'Springtide', mareasMuertas: 'Nipptide', solunarTitulo: 'Solunar-Tabelle', periodoMayor: 'Hauptperiode', periodoMenor: 'Nebenperiode',
     olas: 'Wellen',
     altitud: 'Höhe',
     tuVelocidad: 'Deine Geschwindigkeit', velMax: 'Max.', velMedia: 'Ø', distancia: 'Distanz', resetDist: 'Zurücksetzen',
@@ -1213,6 +1232,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Marées du Jour',
     pleamar: 'Pleine mer',
     bajamar: 'Basse mer',
+    coefMarea: 'Coefficient de marée', mareasVivas: 'Vives-eaux', mareasMuertas: 'Mortes-eaux', solunarTitulo: 'Tableau solunaire', periodoMayor: 'Période majeure', periodoMenor: 'Période mineure',
     olas: 'Vagues',
     altitud: 'Altitude',
     tuVelocidad: 'Votre vitesse', velMax: 'Max.', velMedia: 'Moy.', distancia: 'Distance', resetDist: 'Réinitialiser',
@@ -1255,6 +1275,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Marés de Hoje',
     pleamar: 'Maré alta',
     bajamar: 'Maré baixa',
+    coefMarea: 'Coeficiente de maré', mareasVivas: 'Maré viva', mareasMuertas: 'Maré morta', solunarTitulo: 'Tabela solunar', periodoMayor: 'Período maior', periodoMenor: 'Período menor',
     olas: 'Ondas',
     altitud: 'Altitude',
     tuVelocidad: 'Sua velocidade', velMax: 'Máx.', velMedia: 'Média', distancia: 'Distância', resetDist: 'Reiniciar',
@@ -1297,6 +1318,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Marés de hoje',
     pleamar: 'Maré alta',
     bajamar: 'Maré baixa',
+    coefMarea: 'Coeficiente de maré', mareasVivas: 'Maré viva', mareasMuertas: 'Maré morta', solunarTitulo: 'Tabela solunar', periodoMayor: 'Período maior', periodoMenor: 'Período menor',
     olas: 'Ondas',
     altitud: 'Altitude',
     tuVelocidad: 'Sua velocidade', velMax: 'Máx.', velMedia: 'Média', distancia: 'Distância', resetDist: 'Reiniciar',
@@ -1339,6 +1361,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Maree di Oggi',
     pleamar: 'Alta marea',
     bajamar: 'Bassa marea',
+    coefMarea: 'Coefficiente di marea', mareasVivas: 'Marea sizigiale', mareasMuertas: 'Marea di quadratura', solunarTitulo: 'Tabella solunare', periodoMayor: 'Periodo maggiore', periodoMenor: 'Periodo minore',
     olas: 'Onde',
     altitud: 'Altitudine',
     tuVelocidad: 'La tua velocità', velMax: 'Max.', velMedia: 'Media', distancia: 'Distanza', resetDist: 'Azzera',
@@ -1381,6 +1404,7 @@ const TRADUCCIONES = {
     mareasDeHoy: '今日潮汐',
     pleamar: '高潮',
     bajamar: '低潮',
+    coefMarea: '潮汐系数', mareasVivas: '大潮', mareasMuertas: '小潮', solunarTitulo: '太阳月亮表', periodoMayor: '主要时段', periodoMenor: '次要时段',
     olas: '浪高',
     altitud: '海拔',
     tuVelocidad: '你的速度', velMax: '最高', velMedia: '平均', distancia: '距离', resetDist: '重置',
@@ -1423,6 +1447,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Marees d\'Avui',
     pleamar: 'Plenamar',
     bajamar: 'Baixamar',
+    coefMarea: 'Coeficient de marea', mareasVivas: 'Marea viva', mareasMuertas: 'Marea morta', solunarTitulo: 'Taula solunar', periodoMayor: 'Període major', periodoMenor: 'Període menor',
     olas: 'Onades',
     altitud: 'Altitud',
     tuVelocidad: 'La teva velocitat', velMax: 'Màx.', velMedia: 'Mitjana', distancia: 'Distància', resetDist: 'Reinicia',
@@ -1465,6 +1490,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Gaurko Mareak',
     pleamar: 'Goi-marea',
     bajamar: 'Behe-marea',
+    coefMarea: 'Marea koefizientea', mareasVivas: 'Marea bizia', mareasMuertas: 'Marea hila', solunarTitulo: 'Taula solunarra', periodoMayor: 'Aldi nagusia', periodoMenor: 'Aldi txikia',
     olas: 'Olatuak',
     altitud: 'Altitudea',
     tuVelocidad: 'Zure abiadura', velMax: 'Max.', velMedia: 'Batez beste', distancia: 'Distantzia', resetDist: 'Berrezarri',
@@ -1507,6 +1533,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Marés de Hoxe',
     pleamar: 'Preamar',
     bajamar: 'Baixamar',
+    coefMarea: 'Coeficiente de marea', mareasVivas: 'Marea viva', mareasMuertas: 'Marea morta', solunarTitulo: 'Táboa solunar', periodoMayor: 'Período maior', periodoMenor: 'Período menor',
     olas: 'Ondas',
     altitud: 'Altitude',
     tuVelocidad: 'A túa velocidade', velMax: 'Máx.', velMedia: 'Media', distancia: 'Distancia', resetDist: 'Reiniciar',
@@ -1549,6 +1576,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'مد وجزر اليوم',
     pleamar: 'مد عالٍ',
     bajamar: 'جزر',
+    coefMarea: 'معامل المد والجزر', mareasVivas: 'مد كبير', mareasMuertas: 'مد ضعيف', solunarTitulo: 'جدول شمسي قمري', periodoMayor: 'فترة رئيسية', periodoMenor: 'فترة ثانوية',
     olas: 'أمواج',
     altitud: 'الارتفاع',
     tuVelocidad: 'سرعتك', velMax: 'أقصى', velMedia: 'متوسط', distancia: 'المسافة', resetDist: 'إعادة',
@@ -1591,6 +1619,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Приливы сегодня',
     pleamar: 'Полная вода',
     bajamar: 'Малая вода',
+    coefMarea: 'Коэффициент прилива', mareasVivas: 'Сизигийный прилив', mareasMuertas: 'Квадратурный прилив', solunarTitulo: 'Солунарная таблица', periodoMayor: 'Главный период', periodoMenor: 'Малый период',
     olas: 'Волны',
     altitud: 'Высота',
     tuVelocidad: 'Ваша скорость', velMax: 'Макс.', velMedia: 'Средн.', distancia: 'Расстояние', resetDist: 'Сброс',
@@ -1633,6 +1662,7 @@ const TRADUCCIONES = {
     mareasDeHoy: '本日の潮汐',
     pleamar: '満潮',
     bajamar: '干潮',
+    coefMarea: '潮汐係数', mareasVivas: '大潮', mareasMuertas: '小潮', solunarTitulo: 'ソルナーテーブル', periodoMayor: 'メジャー期間', periodoMenor: 'マイナー期間',
     olas: '波高',
     altitud: '標高',
     tuVelocidad: '現在の速度', velMax: '最高', velMedia: '平均', distancia: '距離', resetDist: 'リセット',
@@ -1675,6 +1705,7 @@ const TRADUCCIONES = {
     mareasDeHoy: '오늘의 조석',
     pleamar: '만조',
     bajamar: '간조',
+    coefMarea: '조수 계수', mareasVivas: '사리', mareasMuertas: '조금', solunarTitulo: '솔루나 표', periodoMayor: '주요 시간대', periodoMenor: '보조 시간대',
     olas: '파도',
     altitud: '고도',
     tuVelocidad: '현재 속도', velMax: '최고', velMedia: '평균', distancia: '거리', resetDist: '초기화',
@@ -1717,6 +1748,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Getijden vandaag',
     pleamar: 'Hoogwater',
     bajamar: 'Laagwater',
+    coefMarea: 'Getijcoëfficiënt', mareasVivas: 'Springtij', mareasMuertas: 'Doodtij', solunarTitulo: 'Solunartabel', periodoMayor: 'Grote periode', periodoMenor: 'Kleine periode',
     olas: 'Golven',
     altitud: 'Hoogte',
     tuVelocidad: 'Uw snelheid', velMax: 'Max.', velMedia: 'Gem.', distancia: 'Afstand', resetDist: 'Resetten',
@@ -1759,6 +1791,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Pływy dzisiaj',
     pleamar: 'Pełna woda',
     bajamar: 'Niska woda',
+    coefMarea: 'Współczynnik pływów', mareasVivas: 'Pływy syzygijne', mareasMuertas: 'Pływy kwadraturowe', solunarTitulo: 'Tabela solunarna', periodoMayor: 'Okres główny', periodoMenor: 'Okres mniejszy',
     olas: 'Fale',
     altitud: 'Wysokość',
     tuVelocidad: 'Twoja prędkość', velMax: 'Maks.', velMedia: 'Śred.', distancia: 'Dystans', resetDist: 'Resetuj',
@@ -1801,6 +1834,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'आज का ज्वार-भाटा',
     pleamar: 'उच्च ज्वार',
     bajamar: 'निम्न ज्वार',
+    coefMarea: 'ज्वार गुणांक', mareasVivas: 'बड़ा ज्वार', mareasMuertas: 'छोटा ज्वार', solunarTitulo: 'सोलुनार तालिका', periodoMayor: 'प्रमुख अवधि', periodoMenor: 'लघु अवधि',
     olas: 'लहरें',
     altitud: 'ऊँचाई',
     tuVelocidad: 'आपकी गति', velMax: 'अधिकतम', velMedia: 'औसत', distancia: 'दूरी', resetDist: 'रीसेट',
@@ -1843,6 +1877,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Mareele de azi',
     pleamar: 'Flux',
     bajamar: 'Reflux',
+    coefMarea: 'Coeficient de maree', mareasVivas: 'Maree mare', mareasMuertas: 'Maree mica', solunarTitulo: 'Tabel solunar', periodoMayor: 'Perioada majora', periodoMenor: 'Perioada minora',
     olas: 'Valuri',
     altitud: 'Altitudine',
     tuVelocidad: 'Viteza ta', velMax: 'Max.', velMedia: 'Med.', distancia: 'Distanță', resetDist: 'Resetare',
@@ -1885,6 +1920,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Mai árapály',
     pleamar: 'Dagály',
     bajamar: 'Apály',
+    coefMarea: 'Árapály-együttható', mareasVivas: 'Szökőár', mareasMuertas: 'Vakár', solunarTitulo: 'Szolunáris táblázat', periodoMayor: 'Fő periódus', periodoMenor: 'Kis periódus',
     olas: 'Hullámok',
     altitud: 'Magasság',
     tuVelocidad: 'Sebességed', velMax: 'Max.', velMedia: 'Átlag', distancia: 'Távolság', resetDist: 'Visszaállít',
@@ -1927,6 +1963,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Приливи сьогодні',
     pleamar: 'Повна вода',
     bajamar: 'Мала вода',
+    coefMarea: 'Коефіцієнт припливу', mareasVivas: 'Сизигійний приплив', mareasMuertas: 'Квадратурний приплив', solunarTitulo: 'Солунарна таблиця', periodoMayor: 'Головний період', periodoMenor: 'Малий період',
     olas: 'Хвилі',
     altitud: 'Висота',
     tuVelocidad: 'Ваша швидкість', velMax: 'Макс.', velMedia: 'Серед.', distancia: 'Відстань', resetDist: 'Скинути',
@@ -1969,6 +2006,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Dagens tidevand',
     pleamar: 'Højvande',
     bajamar: 'Lavvande',
+    coefMarea: 'Tidevandskoefficient', mareasVivas: 'Springflod', mareasMuertas: 'Nipflod', solunarTitulo: 'Solunar-tabel', periodoMayor: 'Stor periode', periodoMenor: 'Lille periode',
     olas: 'Bølger',
     altitud: 'Højde',
     tuVelocidad: 'Din hastighed', velMax: 'Maks.', velMedia: 'Gnsn.', distancia: 'Afstand', resetDist: 'Nulstil',
@@ -2011,6 +2049,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Dagens tidevann',
     pleamar: 'Høyvann',
     bajamar: 'Lavvann',
+    coefMarea: 'Tidevannskoeffisient', mareasVivas: 'Springflo', mareasMuertas: 'Nippflo', solunarTitulo: 'Solunar-tabell', periodoMayor: 'Stor periode', periodoMenor: 'Liten periode',
     olas: 'Bølger',
     altitud: 'Høyde',
     tuVelocidad: 'Din hastighet', velMax: 'Maks.', velMedia: 'Snitt', distancia: 'Avstand', resetDist: 'Nullstill',
@@ -2053,6 +2092,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Dnešní přílivy',
     pleamar: 'Příliv',
     bajamar: 'Odliv',
+    coefMarea: 'Koeficient přílivu', mareasVivas: 'Výjimečný příliv', mareasMuertas: 'Mrtvý příliv', solunarTitulo: 'Solunární tabulka', periodoMayor: 'Hlavní období', periodoMenor: 'Vedlejší období',
     olas: 'Vlny',
     altitud: 'Nadmořská výška',
     tuVelocidad: 'Vaše rychlost', velMax: 'Max.', velMedia: 'Prům.', distancia: 'Vzdálenost', resetDist: 'Resetovat',
@@ -2095,6 +2135,7 @@ const TRADUCCIONES = {
     mareasDeHoy: 'Pasang Surut Hari Ini',
     pleamar: 'Pasang tinggi',
     bajamar: 'Surut rendah',
+    coefMarea: 'Koefisien pasang surut', mareasVivas: 'Pasang purnama', mareasMuertas: 'Pasang perbani', solunarTitulo: 'Tabel solunar', periodoMayor: 'Periode utama', periodoMenor: 'Periode kecil',
     olas: 'Ombak',
     altitud: 'Ketinggian',
     tuVelocidad: 'Kecepatan Anda', velMax: 'Maks.', velMedia: 'Rata-rata', distancia: 'Jarak', resetDist: 'Atur ulang',
@@ -4352,7 +4393,11 @@ document.getElementById('modalHumedad').addEventListener('click', (e) => {
 });
 
 async function obtenerMarea(lat, lon) {
-  const url = `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&hourly=sea_level_height_msl,sea_surface_temperature,wave_height&forecast_days=2&timezone=auto`;
+  // past_days=15: con forecast_days=2 cubre ~17 dias, mas de un ciclo
+  // vivas/muertas completo (~14.77 dias), para poder calcular el
+  // coeficiente de marea comparando la amplitud de hoy contra el rango
+  // real de esta ubicacion en ese periodo (ver mas abajo).
+  const url = `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&hourly=sea_level_height_msl,sea_surface_temperature,wave_height&forecast_days=2&past_days=15&timezone=auto`;
   const r = await fetch(url);
   if (!r.ok) throw new Error('No es costero');
   const data = await r.json();
@@ -4365,8 +4410,11 @@ async function obtenerMarea(lat, lon) {
   const ahora = Date.now();
   const hoy = new Date().toDateString();
 
-  // Find today's extremes
-  const extremos = [];
+  // Todos los extremos del periodo completo (incluye los ~15 dias
+  // pasados que trae past_days): hace falta el conjunto completo para
+  // calcular el coeficiente de marea (amplitud de hoy vs. el rango
+  // real de esta ubicacion), no solo los de hoy/mañana.
+  const extremosFull = [];
   for (let i = 1; i < alturas.length - 1; i++) {
     if (alturas[i] === null || alturas[i-1] === null || alturas[i+1] === null) continue;
     const subeBefore = alturas[i] > alturas[i-1];
@@ -4384,9 +4432,38 @@ async function obtenerMarea(lat, lon) {
         altura = h1 - (h0-h2)*(h0-h2)/(8*den);
       }
     }
-    const manana6 = new Date(); manana6.setDate(manana6.getDate() + 1); manana6.setHours(6, 0, 0, 0);
-    if (horaMs > manana6.getTime()) continue;
-    extremos.push({ hora: horaMs, altura: Math.max(0, altura), tipo: subeBefore ? 'pleamar' : 'bajamar' });
+    extremosFull.push({ hora: horaMs, altura: Math.max(0, altura), tipo: subeBefore ? 'pleamar' : 'bajamar' });
+  }
+
+  // Extremos de hoy (para el grafico/lista, igual que antes)
+  const hoyMedianoche = new Date(); hoyMedianoche.setHours(0, 0, 0, 0);
+  const manana6 = new Date(hoyMedianoche); manana6.setDate(manana6.getDate() + 1); manana6.setHours(6, 0, 0, 0);
+  const extremos = extremosFull.filter(e => e.hora >= hoyMedianoche.getTime() && e.hora <= manana6.getTime());
+
+  // Coeficiente de marea (aproximado, 20-120 al estilo frances): la
+  // amplitud pleamar-bajamar de cada ciclo, comparada contra el rango
+  // real min/max de amplitudes en los ~17 dias disponibles (mas de un
+  // ciclo vivas/muertas completo). No es el coeficiente oficial SHOM
+  // (ese usa efemerides astronomicas), pero refleja la amplitud real
+  // de marea en este punto concreto de la costa.
+  let coefMarea = null;
+  if (extremosFull.length >= 4) {
+    const amplitudes = [];
+    for (let i = 1; i < extremosFull.length; i++) {
+      amplitudes.push({
+        mid: (extremosFull[i].hora + extremosFull[i-1].hora) / 2,
+        amp: Math.abs(extremosFull[i].altura - extremosFull[i-1].altura)
+      });
+    }
+    const valores = amplitudes.map(a => a.amp);
+    const ampMin = Math.min(...valores), ampMax = Math.max(...valores);
+    let masCercana = amplitudes[0], mejorDist = Infinity;
+    for (const a of amplitudes) {
+      const d = Math.abs(a.mid - ahora);
+      if (d < mejorDist) { mejorDist = d; masCercana = a; }
+    }
+    const rango = (ampMax - ampMin) || 1;
+    coefMarea = Math.round(20 + ((masCercana.amp - ampMin) / rango) * 100);
   }
 
   // Current state
@@ -4433,7 +4510,7 @@ async function obtenerMarea(lat, lon) {
     }
   }
 
-  return { extremos, subiendo, horaNext, tempAgua, waveHeight, tiempos, alturas };
+  return { extremos, subiendo, horaNext, tempAgua, waveHeight, tiempos, alturas, coefMarea };
 }
 
 function _mareaInterp(slice, t) {
@@ -5461,8 +5538,81 @@ function abrirModalMarea() {
   try {
     renderModalMareaChart(mdata);
     renderModalMareaExtremost(mdata);
+    renderCoefMarea(mdata);
+    renderSolunar();
   } catch(e) {}
   cargarYRenderBarcos();
+}
+
+// ── Coeficiente de marea ─────────────────────────────────────────────
+function renderCoefMarea(mdata) {
+  const card = document.getElementById('coefMareaCard');
+  if (!card) return;
+  if (mdata.coefMarea === null || mdata.coefMarea === undefined) { card.style.display = 'none'; return; }
+  document.getElementById('coefMareaLbl').textContent = T.coefMarea || 'Coeficiente de marea';
+  document.getElementById('coefMareaVal').textContent = mdata.coefMarea;
+  const tagEl = document.getElementById('coefMareaTag');
+  if (mdata.coefMarea >= 70) {
+    tagEl.textContent = '🌊 ' + (T.mareasVivas || 'Mareas vivas');
+  } else if (mdata.coefMarea <= 45) {
+    tagEl.textContent = '〰️ ' + (T.mareasMuertas || 'Mareas muertas');
+  } else {
+    tagEl.textContent = '';
+  }
+  card.style.display = 'block';
+}
+
+// ── Tabla solunar ─────────────────────────────────────────────────────
+// Periodos mayores (luna en el cenit/nadir, ~2h cada uno) y menores
+// (orto/ocaso lunar, ~1h cada uno). Calculo puramente astronomico a
+// partir del orto/ocaso de la luna que ya tenemos cacheados
+// (_ultimoMoonriseLocalHora/_ultimoMoonsetLocalHora) -- sin llamadas a
+// APIs nuevas. El transito (cenit) se aproxima como el punto medio
+// entre orto y ocaso de luna visible; el nadir (periodo mayor opuesto)
+// esta medio dia lunar despues (~12h25m, la mitad de 24h50m).
+function _horaStrAMin(hhmm) {
+  const [h, m] = hhmm.split(':').map(Number);
+  return h * 60 + m;
+}
+function _minAHoraStr(min) {
+  min = ((min % 1440) + 1440) % 1440;
+  const h = Math.floor(min / 60), m = Math.round(min % 60);
+  return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+}
+function calcularSolunar() {
+  const orto = _ultimoMoonriseLocalHora, ocaso = _ultimoMoonsetLocalHora;
+  if (!orto || !ocaso) return null;
+  const ortoMin = _horaStrAMin(orto);
+  let ocasoMin = _horaStrAMin(ocaso);
+  if (ocasoMin < ortoMin) ocasoMin += 1440; // ocaso es ya del dia siguiente
+  const transitoMin = (ortoMin + ocasoMin) / 2;
+  const nadirMin = transitoMin + 745.3; // medio dia lunar: 24h50m / 2
+
+  const ventanaMayor = 60, ventanaMenor = 30; // minutos a cada lado
+  return [
+    { tipo: 'mayor', centro: transitoMin, vent: ventanaMayor },
+    { tipo: 'mayor', centro: nadirMin, vent: ventanaMayor },
+    { tipo: 'menor', centro: ortoMin, vent: ventanaMenor },
+    { tipo: 'menor', centro: ocasoMin, vent: ventanaMenor }
+  ].sort((a, b) => a.centro - b.centro);
+}
+function renderSolunar() {
+  const card = document.getElementById('solunarCard');
+  if (!card) return;
+  const periodos = calcularSolunar();
+  if (!periodos) { card.style.display = 'none'; return; }
+  document.getElementById('solunarLbl').textContent = T.solunarTitulo || 'Tabla solunar';
+  const lista = document.getElementById('solunarLista');
+  lista.innerHTML = periodos.map(p => {
+    const label = p.tipo === 'mayor' ? (T.periodoMayor || 'Periodo mayor') : (T.periodoMenor || 'Periodo menor');
+    const icono = p.tipo === 'mayor' ? '🌕' : '🌓';
+    const desde = _minAHoraStr(p.centro - p.vent), hasta = _minAHoraStr(p.centro + p.vent);
+    return `<div style="display:flex;justify-content:space-between;align-items:center;font-size:0.85rem">
+      <span style="opacity:0.8">${icono} ${label}</span>
+      <span style="font-weight:600;font-variant-numeric:tabular-nums">${desde} – ${hasta}</span>
+    </div>`;
+  }).join('');
+  card.style.display = 'block';
 }
 
 // ── Barcos en el puerto (PRUEBA LOCAL, aun no en produccion) ────────────────
