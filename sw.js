@@ -1,9 +1,17 @@
-const CACHE = 'temperatura-v199';
+const CACHE = 'temperatura-v200';
 const ASSETS = ['./manifest.json', './icon-192.png', './icon-512.png', './nube-textura.png', './nube2-textura.png', './sol-textura.png', './luna-textura.png'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)));
-  self.skipWaiting();
+  // Sin skipWaiting(): a proposito. El service worker nuevo se queda
+  // "esperando" hasta que el usuario cierre TODAS las pestañas/la app
+  // (cierre forzado, no solo minimizar) y la vuelva a abrir -- en vez de
+  // tomar el control a media sesion, lo que antes daba la sensacion de
+  // "recarga rara"/doble carga cuando publicabamos un cambio con la app
+  // ya abierta. index.html se sigue pidiendo siempre con red primero
+  // (ver fetch de abajo), asi que el contenido en si no se queda
+  // desactualizado -- esto solo retrasa cuando el propio service worker
+  // (y su cache de iconos/manifest) se renueva.
 });
 
 self.addEventListener('activate', (e) => {
@@ -12,7 +20,8 @@ self.addEventListener('activate', (e) => {
       Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))
     )
   );
-  self.clients.claim();
+  // Sin clients.claim(): por el mismo motivo de arriba, no toma el
+  // control de las pestañas ya abiertas, solo de las aperturas siguientes.
 });
 
 self.addEventListener('fetch', (e) => {
