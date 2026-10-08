@@ -5103,6 +5103,9 @@ async function cargarDatos(latitude, longitude, nombreFijo, forzar = false) {
       cached ? Promise.resolve(cached.astro) : fetch(`https://api.weatherapi.com/v1/astronomy.json?key=1273625cfc2746fcaa760211260309&q=${latitude},${longitude}&dt=${new Date().toISOString().split('T')[0]}`).then(r => r.json()).catch(() => null),
       obtenerGoogleWeather(latitude, longitude).catch(() => null),
     ]);
+    // La carga ya trae la altitud de este punto: anotarlo para que el
+    // refresco periodico de altitud no la vuelva a pedir al instante.
+    if (elevacion && elevacion.elevation && elevacion.elevation.length) _ultimaElevPos = { lat: latitude, lon: longitude };
     // Si WeatherAPI devolvió un error JSON (plan caducado, key desactivada…) tratar como null
     const astroDataClean = (astroData && astroData.error) ? null : astroData;
     // Guardar en caché si se obtuvieron datos frescos de la API
@@ -5250,6 +5253,12 @@ async function actualizar(forzar = false) {
 
 let timeoutBusqueda = null;
 
+// Posicion donde se pidio la altitud por ultima vez: la altitud del terreno
+// solo cambia si te mueves, asi que no hace falta preguntar a Open-Meteo
+// cada 10 s estando quieto (antes eran ~360 llamadas por hora con la app
+// abierta). Solo se vuelve a pedir si te has movido mas de 150 m.
+let _ultimaElevPos = null;
+const ELEV_MIN_DISTANCIA_KM = 0.15;
 async function actualizarPosicionYAltitud() {
   if (_bienvenidaActiva) return;
   if (ubicacionManual || !navigator.geolocation) return;
@@ -5265,11 +5274,13 @@ async function actualizarPosicionYAltitud() {
     if (ubicacionManual) return; // el usuario buscó una ciudad mientras el GPS resolvía
     const { latitude, longitude } = pos.coords;
     currentCoords = { ...currentCoords, lat: latitude, lon: longitude };
+    if (_ultimaElevPos && _distKm(_ultimaElevPos.lat, _ultimaElevPos.lon, latitude, longitude) < ELEV_MIN_DISTANCIA_KM) return;
     try {
       const r = await fetch(`https://api.open-meteo.com/v1/elevation?latitude=${latitude}&longitude=${longitude}`);
       const data = await r.json();
       const alt = data.elevation && data.elevation.length ? data.elevation[0] : null;
       if (alt !== null) {
+        _ultimaElevPos = { lat: latitude, lon: longitude };
         const altTxt2 = usaMph ? `${Math.round(alt * 3.28084)} ft` : `${Math.round(alt)} m`;
         elAltitud.textContent = formatAltitud(altTxt2);
       }
