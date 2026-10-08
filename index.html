@@ -3732,34 +3732,96 @@ function cerrarModalDia() {
 }
 
 // Media histórica de temperatura para una fecha
-const _climaCache = {};
+// Media historica (30 años) de max/min para un dia concreto. Antes: 30
+// llamadas a Open-Meteo (una por año) CADA vez que se tocaba un dia, y solo
+// se recordaban mientras la app seguia abierta. Ahora: una llamada por año
+// pide una ventana de 14 dias (6 antes y 7 despues del dia tocado, que
+// cubre los 7 dias de la prevision) y el resultado se guarda de forma
+// permanente en el movil (localStorage) -- la media de 30 años no cambia.
+const _climaCache = {};   // por ubicacion: { 'MM-DD': { max, min, años } }
+const _climaEnCurso = {}; // descarga en vuelo por ubicacion (evita lanzar 30 llamadas por cada toque)
+function _climaClave(lat, lon, anioIni) { return `${lat.toFixed(2)},${lon.toFixed(2)},${anioIni}`; }
+function _climaLeerLS(k) {
+  try {
+    const raw = localStorage.getItem('ql_clima2_' + k);
+    if (!raw) return {};
+    const dict = {};
+    for (const [md, v] of Object.entries(JSON.parse(raw).d || {})) dict[md] = { max: v[0], min: v[1], años: v[2] };
+    return dict;
+  } catch (e) { return {}; }
+}
+function _climaGuardarLS(k, dict) {
+  try {
+    // Solo se persisten fechas con al menos 25 de los 30 años: si Open-Meteo
+    // rechazara algunas llamadas, no se guarda para siempre una media coja.
+    const d = {};
+    for (const [md, v] of Object.entries(dict)) if (v.años >= 25) d[md] = [v.max, v.min, v.años];
+    if (!Object.keys(d).length) return;
+    localStorage.setItem('ql_clima2_' + k, JSON.stringify({ ts: Date.now(), d }));
+    // Conservar solo las 10 ubicaciones mas recientes (y limpiar rangos de años antiguos)
+    const claves = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const kk = localStorage.key(i);
+      if (kk && kk.startsWith('ql_clima2_')) {
+        let ts = 0;
+        try { ts = JSON.parse(localStorage.getItem(kk)).ts || 0; } catch (e) {}
+        claves.push({ kk, ts });
+      }
+    }
+    if (claves.length > 10) {
+      claves.sort((a, b) => a.ts - b.ts);
+      for (const c of claves.slice(0, claves.length - 10)) localStorage.removeItem(c.kk);
+    }
+  } catch (e) {}
+}
+async function _climaDescargarVentana(lat, lon, month, day, anioIni, anioFin) {
+  const k = _climaClave(lat, lon, anioIni);
+  const fmt = (d) => d.toISOString().slice(0, 10);
+  const pedidos = [];
+  for (let y = anioIni; y <= anioFin; y++) {
+    const ini = new Date(Date.UTC(y, month - 1, day - 6));
+    const fin = new Date(Date.UTC(y, month - 1, day + 7));
+    pedidos.push(
+      fetch(`https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&start_date=${fmt(ini)}&end_date=${fmt(fin)}&daily=temperature_2m_max,temperature_2m_min&timezone=auto`)
+        .then(r => r.ok ? r.json() : null).catch(() => null)
+    );
+  }
+  const resultados = await Promise.all(pedidos);
+  const acum = {}; // 'MM-DD' -> { max: [], min: [] }
+  for (const r of resultados) {
+    const tiempos = r && r.daily && r.daily.time;
+    if (!tiempos) continue;
+    tiempos.forEach((fecha, i) => {
+      const mx = r.daily.temperature_2m_max[i], mn = r.daily.temperature_2m_min[i];
+      if (mx == null || mn == null) return;
+      const md = fecha.slice(5);
+      (acum[md] = acum[md] || { max: [], min: [] });
+      acum[md].max.push(mx);
+      acum[md].min.push(mn);
+    });
+  }
+  const avg = arr => Math.round(arr.reduce((s, v) => s + v, 0) / arr.length);
+  const dict = _climaCache[k] || (_climaCache[k] = {});
+  for (const [md, v] of Object.entries(acum)) dict[md] = { max: avg(v.max), min: avg(v.min), años: v.max.length };
+  _climaGuardarLS(k, dict);
+}
 async function fetchClimaNormal(lat, lon, month, day) {
   const anioFin = new Date().getFullYear() - 1;
   const anioIni = anioFin - 29;
-  const key = `${lat.toFixed(2)},${lon.toFixed(2)},${month},${day},${anioIni}`;
-  if (_climaCache[key]) return _climaCache[key];
-  const mm = String(month).padStart(2, '0');
-  const dd = String(day).padStart(2, '0');
-  const anioActual = new Date().getFullYear();
-  const anios = [];
-  for (let y = anioActual - 30; y < anioActual; y++) anios.push(y);
-  const fetches = anios.map(y =>
-    fetch(`https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&start_date=${y}-${mm}-${dd}&end_date=${y}-${mm}-${dd}&daily=temperature_2m_max,temperature_2m_min&timezone=auto`)
-      .then(r => r.ok ? r.json() : null).catch(() => null)
-  );
-  const resultados = await Promise.all(fetches);
-  const maxVals = [], minVals = [];
-  for (const r of resultados) {
-    if (r && r.daily && r.daily.temperature_2m_max && r.daily.temperature_2m_max[0] != null) {
-      maxVals.push(r.daily.temperature_2m_max[0]);
-      minVals.push(r.daily.temperature_2m_min[0]);
+  const k = _climaClave(lat, lon, anioIni);
+  const md = `${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  if (!_climaCache[k]) _climaCache[k] = _climaLeerLS(k);
+  for (let intento = 0; intento < 2; intento++) {
+    if (_climaCache[k][md]) return _climaCache[k][md];
+    if (!_climaEnCurso[k]) {
+      const p = _climaDescargarVentana(lat, lon, month, day, anioIni, anioFin);
+      _climaEnCurso[k] = p;
+      const limpiar = () => { if (_climaEnCurso[k] === p) delete _climaEnCurso[k]; };
+      p.then(limpiar, limpiar);
     }
+    try { await _climaEnCurso[k]; } catch (e) {}
   }
-  if (!maxVals.length) return null;
-  const avg = arr => Math.round(arr.reduce((s, v) => s + v, 0) / arr.length);
-  const result = { max: avg(maxVals), min: avg(minVals), años: maxVals.length };
-  _climaCache[key] = result;
-  return result;
+  return _climaCache[k][md] || null;
 }
 
 // Pulsar temperatura grande → previsión de hoy
