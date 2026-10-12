@@ -2711,14 +2711,16 @@ const ICONOS = {
   nieve: '<svg viewBox="0 0 24 24"><path d="M6.5 12.5h11a3.5 3.5 0 0 0 .5-6.96A5 5 0 0 0 8.6 4.85 4 4 0 0 0 6.5 12.5z" fill="url(#ql-cloud-snow)" stroke="none"/><path d="M9 17v4M7.3 18.2l3.4 1.6M11.3 18.2l-3.4 1.6M15 17v4M13.3 18.2l3.4 1.6M17.3 18.2l-3.4 1.6" stroke="#B8DCFF" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg>',
   tormenta: '<svg viewBox="0 0 24 24"><path d="M6.5 11.5h11a3.5 3.5 0 0 0 .5-6.96A5 5 0 0 0 8.6 3.85 4 4 0 0 0 6.5 11.5z" fill="url(#ql-cloud-storm)" stroke="none"/><path d="M13 11.5l-3 5h3l-2 4.5 5.5-6.5h-3z" fill="#FFE040" stroke="#FFC000" stroke-width="0.5" stroke-linejoin="round"/></svg>',
   luna: '<svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z" fill="url(#ql-moon)" stroke="none"/></svg>',
+  solNubeMayor: '<svg viewBox="0 0 24 24"><circle cx="16.5" cy="7" r="3" fill="url(#ql-sun)" stroke="none"/><path d="M16.5 3.2a3.8 3.8 0 0 1 3.7 2.9" stroke="#FFAA00" stroke-width="1.3" stroke-linecap="round" fill="none"/><path d="M5.5 20h12.5a4 4 0 0 0 .6-7.95A5.8 5.8 0 0 0 7.8 10.7 4.6 4.6 0 0 0 5.5 20z" fill="url(#ql-cloud-fair)" stroke="none"/></svg>',
+  lunaNubeMayor: '<svg viewBox="0 0 24 24"><path d="M15.6 9.2a3 3 0 0 1 1.9-5 2.2 2.2 0 0 0 2.2 3 4.3 4.3 0 0 1-1.5 4.5" fill="url(#ql-moon)" stroke="none"/><path d="M5.5 20h12.5a4 4 0 0 0 .6-7.95A5.8 5.8 0 0 0 7.8 10.7 4.6 4.6 0 0 0 5.5 20z" fill="url(#ql-cloud-fair)" stroke="none"/></svg>',
   lunaNube: '<svg viewBox="0 0 24 24"><path d="M8.8 9.3a3.3 3.3 0 0 1 2.1-5.5 2.4 2.4 0 0 0 2.4 3.3 4.7 4.7 0 0 1-1.6 4.9" fill="url(#ql-moon)" stroke="none"/><path d="M7 19.5h10.5a3.5 3.5 0 0 0 .5-6.96A5 5 0 0 0 8.6 11.2 4 4 0 0 0 7 19.5z" fill="url(#ql-cloud-fair)" stroke="none"/></svg>',
 };
 
 
-function iconoParaCodigo(codigo, esDia = true) {
+function iconoParaCodigo(codigo, esDia = true, mayorNublado = false) {
   if (codigo === 0) return esDia ? ICONOS.sol : ICONOS.luna;
   if (codigo === 1 || codigo === 2) return esDia ? ICONOS.solNube : ICONOS.lunaNube;
-  if (codigo === 3) return ICONOS.nube;
+  if (codigo === 3) return mayorNublado ? (esDia ? ICONOS.solNubeMayor : ICONOS.lunaNubeMayor) : ICONOS.nube;
   if (codigo === 45 || codigo === 47 || codigo === 48) return ICONOS.niebla;
   if (codigo >= 51 && codigo <= 55) return ICONOS.llovizna;
   if ((codigo >= 61 && codigo <= 65) || (codigo >= 80 && codigo <= 82)) return ICONOS.lluvia;
@@ -4919,6 +4921,7 @@ function renderDatos(datos) {
   const gWmo = gCur ? googleTypeToWMO(gCur.weatherCondition?.type) : null;
 
   weatherCode = gWmo ?? c.weather_code ?? null;
+  const mayorNubladoGoogle = gCur?.weatherCondition?.type === 'MOSTLY_CLOUDY' && weatherCode === 3;
   let isDay = gCur ? (gCur.isDaytime !== false ? 1 : 0) === 1 : c.is_day === 1;
 
   // ── Matiz "solo nubes altas": un cielo con velo de altocúmulos/
@@ -4943,7 +4946,7 @@ function renderDatos(datos) {
   if (weatherCode !== null) {
     // Google distingue "Mayormente nublado" de "Nublado"; ambos usan el
     // código 3 (mismo icono), solo cambia el texto.
-    elDesc.textContent = (gCur?.weatherCondition?.type === 'MOSTLY_CLOUDY' && weatherCode === 3 && T.mayorNublado)
+    elDesc.textContent = (mayorNubladoGoogle && T.mayorNublado)
       ? T.mayorNublado : (T.codigos[weatherCode] || '');
   }
   // Guardar el código ya validado para que el modal de hoy lo use
@@ -5048,8 +5051,8 @@ function renderDatos(datos) {
   // frescos de esta carga), no antes -- pintarlo antes usaba el amanecer/
   // ocaso de la carga anterior y podia mostrar sol de noche o luna de dia
   // justo tras cruzar la medianoche o al cambiar de ubicacion.
-  if (weatherCode !== null) elIcono.innerHTML = iconoParaCodigo(weatherCode, isDayReal);
-  if (window.aplicarFondoDinamico) aplicarFondoDinamico(weatherCode, isDayReal, astroData, currentCoords?.lat ?? 0, tiempo.utc_offset_seconds || 0, currentCoords?.lon ?? 0);
+  if (weatherCode !== null) elIcono.innerHTML = iconoParaCodigo(weatherCode, isDayReal, mayorNubladoGoogle);
+  if (window.aplicarFondoDinamico) aplicarFondoDinamico(weatherCode, isDayReal, astroData, currentCoords?.lat ?? 0, tiempo.utc_offset_seconds || 0, currentCoords?.lon ?? 0, mayorNubladoGoogle);
   const max0 = tiempo.daily && tiempo.daily.temperature_2m_max ? tiempo.daily.temperature_2m_max[0] : null;
   const min0 = tiempo.daily && tiempo.daily.temperature_2m_min ? tiempo.daily.temperature_2m_min[0] : null;
   const elMinMax = document.getElementById('tempMinMax');
@@ -7838,6 +7841,17 @@ function wbgInit(key){
         {x:wbgW*.48,y:wbgH*.44,sc:0.22*sc,alpha:0.48,speed:0.26,flip:false,tex:1},
         {x:wbgW*.88,y:wbgH*.46,sc:0.20*sc,alpha:0.44,speed:0.18,flip:true, tex:0},
       ]; break;
+    case 'mostlycloudy': // Mayormente nublado: casi todo cubierto pero con huecos de cielo
+      wbgClouds=[
+        {x:wbgW*.00,y:wbgH*.06,sc:0.56*sc,alpha:0.88,speed:0.09,flip:false,tex:0},
+        {x:wbgW*.50,y:wbgH*.05,sc:0.54*sc,alpha:0.82,speed:0.12,flip:true, tex:0},
+        {x:wbgW*.18,y:wbgH*.20,sc:0.42*sc,alpha:0.74,speed:0.14,flip:false,tex:1},
+        {x:wbgW*.70,y:wbgH*.22,sc:0.40*sc,alpha:0.70,speed:0.16,flip:true, tex:0},
+        {x:wbgW*.35,y:wbgH*.34,sc:0.32*sc,alpha:0.60,speed:0.18,flip:false,tex:1},
+        {x:wbgW*.88,y:wbgH*.10,sc:0.32*sc,alpha:0.62,speed:0.17,flip:true, tex:1},
+        {x:wbgW*.05,y:wbgH*.36,sc:0.26*sc,alpha:0.52,speed:0.22,flip:false,tex:0},
+        {x:wbgW*.62,y:wbgH*.40,sc:0.24*sc,alpha:0.48,speed:0.24,flip:true, tex:0},
+      ]; break;
     case 'rain':{
       wbgClouds=_wbgNubesDensas(sc,'rgba(35,40,50,1)',0.35,0.85);
       const _rCount=[0,90,150,220][wbgIntensidad]||150, _rSpd=[0,4,5,6.5][wbgIntensidad]||5, _rSpdVar=[0,4,7,10][wbgIntensidad]||7;
@@ -8038,6 +8052,12 @@ function wbgDraw(key,dt){
       wbgClouds.forEach(cl=>{_wbgAvanzarNube(cl,dt);wbgCloud(cl.x,cl.y,cl.sc,cl.alpha,cl.flip,null,null,cl.tex);});
       break;
     }
+    case 'mostlycloudy':{
+      c.fillStyle=wbgGrad([[0,'#6f95b5'],[.6,'#8fb0c9'],[1,'#b0c8d8']]);c.fillRect(0,0,wbgW,wbgH);
+      _wbgNubesDifusas('rgba(205,212,220,0.9)',0.22,sc,_WBG_MANCHAS_EXTRA);
+      wbgClouds.forEach(cl=>{_wbgAvanzarNube(cl,dt);wbgCloud(cl.x,cl.y,cl.sc,cl.alpha,cl.flip,null,null,cl.tex);});
+      break;
+    }
     case 'rain':{
       c.fillStyle=wbgGrad([[0,'#282b2e'],[1,'#383c40']]);c.fillRect(0,0,wbgW,wbgH);
       _wbgNubesDifusas('rgba(150,158,165,0.9)',0.24,sc);
@@ -8192,8 +8212,8 @@ function wbgDraw(key,dt){
     }
   }
   /* Capa de legibilidad: oscurece la zona de texto en fondos claros */
-  if(key==='sun'||key==='mayormente'||key==='partial'||key==='cloudy'||key==='snow'){
-    const oa={sun:0.35,mayormente:0.28,partial:0.22,cloudy:0.16,snow:0.20}[key];
+  if(key==='sun'||key==='mayormente'||key==='partial'||key==='mostlycloudy'||key==='cloudy'||key==='snow'){
+    const oa={sun:0.35,mayormente:0.28,partial:0.22,mostlycloudy:0.19,cloudy:0.16,snow:0.20}[key];
     const rd=c.createLinearGradient(0,0,0,wbgH*.60);
     rd.addColorStop(0,`rgba(0,0,0,${oa})`);
     rd.addColorStop(0.55,'rgba(0,0,0,0)');
@@ -8251,7 +8271,7 @@ function wbgSetMoon(astro,utcOffsetSec){
 }
 
 /* ── Punto de entrada: llamado desde renderDatos ── */
-window.aplicarFondoDinamico=function(weatherCode,isDay,astroData,lat,utcOffsetSec,lon){
+window.aplicarFondoDinamico=function(weatherCode,isDay,astroData,lat,utcOffsetSec,lon,mayorNublado){
   wbgLat=lat??0;
   wbgLon=lon??0;
   wbgSetMoon(astroData?.astronomy?.astro,utcOffsetSec);
@@ -8262,7 +8282,7 @@ window.aplicarFondoDinamico=function(weatherCode,isDay,astroData,lat,utcOffsetSe
   if(wc===0)                                       key=isDay?'sun':'night';
   else if(wc===1)                                   key=isDay?'mayormente':'nightcloud';
   else if(wc===2)                                   key=isDay?'partial':'nightcloud';
-  else if(wc===3)                                   key=isDay?'cloudy':'nightcloudy';
+  else if(wc===3)                                   key=isDay?(mayorNublado?'mostlycloudy':'cloudy'):'nightcloudy';
   else if(wc===45||wc===47||wc===48)                key=isDay?'fog':'nightfog';
   else if(wc>=51&&wc<=57)                           key=isDay?'drizzle':'nightrain';
   else if(wc===71||wc===73||wc===75||wc===77||wc===85||wc===86) key='snow';
@@ -8273,7 +8293,7 @@ window.aplicarFondoDinamico=function(weatherCode,isDay,astroData,lat,utcOffsetSe
   // codigos WMO ...1/80 = ligera, ...5/82 = fuerte, el resto = moderada.
   wbgIntensidad = ([51,61,80].includes(wc)) ? 1 : ([55,65,82].includes(wc)) ? 3 : 2;
   if(key!==wbgCondKey || wbgIntensidad!==wbgIntensidadPrev){wbgCondKey=key;wbgIntensidadPrev=wbgIntensidad;wbgInit(key);}
-  const _bright = key==='sun'||key==='mayormente'||key==='partial'||key==='cloudy'||key==='snow';
+  const _bright = key==='sun'||key==='mayormente'||key==='partial'||key==='mostlycloudy'||key==='cloudy'||key==='snow';
   document.body.classList.toggle('wbg-bright', _bright);
 };
 

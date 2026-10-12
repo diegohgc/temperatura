@@ -1,4 +1,4 @@
-const CACHE = 'temperatura-v205';
+const CACHE = 'temperatura-v206';
 const ASSETS = ['./manifest.json', './icon-192.png', './icon-512.png', './nube-textura.png', './nube2-textura.png', './sol-textura.png', './luna-textura.png'];
 
 self.addEventListener('install', (e) => {
