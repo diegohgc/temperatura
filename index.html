@@ -5019,7 +5019,10 @@ function renderDatos(datos) {
   // (códigos 0-2) pero Open-Meteo marca casi todo cubierto Y con nubes
   // bajas, se muestra "Nublado". No toca nada si Google ya dice nublado,
   // lluvia, niebla o tormenta, ni la temperatura ni la previsión por horas.
-  if (gWmo !== null && gWmo <= 2 && (c.cloud_cover ?? 0) >= 95 && (c.cloud_cover_low ?? 0) >= 80) {
+  // Umbrales calibrados con el modelo que pide la app (icon_seamless): ese
+  // día daba 88 % total y 76 % bajas con código 3 (otros modelos varían
+  // mucho: Météo-France 100 %, ECMWF 51 %, GFS 19 %).
+  if (gWmo !== null && gWmo <= 2 && c.weather_code === 3 && (c.cloud_cover ?? 0) >= 85 && (c.cloud_cover_low ?? 0) >= 70) {
     weatherCode = 3;
   }
   const mayorNubladoGoogle = gCur?.weatherCondition?.type === 'MOSTLY_CLOUDY' && weatherCode === 3;
