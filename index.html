@@ -5011,6 +5011,17 @@ function renderDatos(datos) {
   const gWmo = gCur ? googleTypeToWMO(gCur.weatherCondition?.type) : null;
 
   weatherCode = gWmo ?? c.weather_code ?? null;
+
+  // ── Corrección de nubosidad: a veces Google da "despejado/poco nublado"
+  // con el cielo completamente tapado (visto en Gijón, 15-oct-2026: Google
+  // 41 % y "parcialmente nublado" todo el día, Open-Meteo 100 % de nubes
+  // bajas y el cielo realmente cubierto). Si Google dice cielo abierto
+  // (códigos 0-2) pero Open-Meteo marca casi todo cubierto Y con nubes
+  // bajas, se muestra "Nublado". No toca nada si Google ya dice nublado,
+  // lluvia, niebla o tormenta, ni la temperatura ni la previsión por horas.
+  if (gWmo !== null && gWmo <= 2 && (c.cloud_cover ?? 0) >= 95 && (c.cloud_cover_low ?? 0) >= 80) {
+    weatherCode = 3;
+  }
   const mayorNubladoGoogle = gCur?.weatherCondition?.type === 'MOSTLY_CLOUDY' && weatherCode === 3;
   let isDay = gCur ? (gCur.isDaytime !== false ? 1 : 0) === 1 : c.is_day === 1;
 
