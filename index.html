@@ -8244,7 +8244,7 @@ function wbgDraw(key,dt){
     case 'night':{
       c.fillStyle=wbgGrad([[0,'#060912'],[.6,'#0b1428'],[1,'#0f1e3a']]);c.fillRect(0,0,wbgW,wbgH);
       if(wbgMoonUp){
-        const mx=wbgW*.72,my=wbgH*.14,mr=28*sc;
+        const mx=wbgW*.5,my=wbgH*.14,mr=28*sc;
         if(wbgDrawMoon(mx,my,mr)){
           const il=(1-Math.cos(wbgMoonPhase*Math.PI*2))/2;
           const gg=c.createRadialGradient(mx,my,mr,mx,my,mr*3.5);
@@ -8267,7 +8267,7 @@ function wbgDraw(key,dt){
       c.fillStyle=wbgGrad([[0,'#060912'],[.6,'#0b1428'],[1,'#0f1e3a']]);c.fillRect(0,0,wbgW,wbgH);
       _wbgNubesDifusas('rgba(50,65,85,0.9)',0.20,sc,_WBG_MANCHAS_EXTRA);
       if(wbgMoonUp){
-        const mx=wbgW*.72,my=wbgH*.12,mr=26*sc;
+        const mx=wbgW*.5,my=wbgH*.12,mr=26*sc;
         if(wbgDrawMoon(mx,my,mr)){
           const il=(1-Math.cos(wbgMoonPhase*Math.PI*2))/2;
           const gg=c.createRadialGradient(mx,my,mr,mx,my,mr*3);
