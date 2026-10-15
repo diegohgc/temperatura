@@ -330,7 +330,12 @@
   }
   .hora .t { font-size: 0.9rem; font-weight: 600; }
   .hora .p { font-size: 0.75rem; opacity: 0.8; color: #bfe0ff; margin-top: 2px; }
-  .hora .mm { font-size: 0.65rem; opacity: 0.6; color: #bfe0ff; margin-top: 1px; }
+  .valoracion-card { margin: 4px 0 2px; background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.22); border-radius: 14px; padding: 10px 14px; text-align: center; font-size: 0.82rem; line-height: 1.35; backdrop-filter: blur(6px); }
+.valoracion-card[hidden] { display: none; }
+.valoracion-card .val-botones { display: flex; gap: 8px; justify-content: center; margin: 8px 0 6px; }
+.valoracion-card button { flex: 1; max-width: 140px; padding: 7px 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.18); color: inherit; font: inherit; font-weight: 600; cursor: pointer; }
+.valoracion-card a { font-size: 0.74rem; opacity: 0.75; color: inherit; text-decoration: underline; }
+.hora .mm { font-size: 0.65rem; opacity: 0.6; color: #bfe0ff; margin-top: 1px; }
   .dia { flex: 0 0 auto; text-align: center; min-width: 52px; }
   .dia .d { font-size: 0.8rem; opacity: 0.75; margin-bottom: 4px; text-transform: capitalize; }
   .dia .icono-dia { width: 28px; height: 28px; margin: 0 auto 4px; }
@@ -543,6 +548,7 @@
         <div id="solInfo"></div>
       </div>
     </div>
+    <div id="valoracionCard" class="valoracion-card" hidden></div>
     <div id="alertaLluviaCard" style="display:none;margin:4px 0 2px;background:linear-gradient(135deg,rgba(255,120,40,0.85),rgba(230,60,30,0.85));border-radius:14px;padding:10px 14px;text-align:center;font-size:0.82rem;font-weight:600;line-height:1.35;box-shadow:0 2px 10px rgba(0,0,0,0.25)"></div>
     <div id="swipeDots" style="display:flex;justify-content:center;gap:6px;padding:4px 0 2px;min-height:14px"></div>
     <div class="buscador" id="buscador" hidden>
@@ -4869,6 +4875,90 @@ function colorParaAQI(aqi, tipo) {
 // ya se pide en cada carga -- sin llamadas nuevas.
 const ALERTA_LLUVIA_UMBRAL_HORA = 15; // mm en una sola hora
 const ALERTA_LLUVIA_UMBRAL_DIA = 40;  // mm acumulados en el dia
+const VALORACION_TXT = {
+  'es': ['¿Te gusta QuickTemp? Una valoración nos ayuda mucho','Valorar ⭐','Ahora no','¿Algo que mejorar? Escríbenos'],
+  'en': ['Enjoying QuickTemp? A rating helps us a lot','Rate ⭐','Not now','Something to improve? Write to us'],
+  'vi': ['Bạn thích QuickTemp? Một đánh giá giúp chúng tôi rất nhiều','Đánh giá ⭐','Để sau','Cần cải thiện gì? Hãy nhắn cho chúng tôi'],
+  'tr': ['QuickTemp\'i beğendiniz mi? Bir puan bize çok yardımcı olur','Puanla ⭐','Şimdi değil','Geliştirilecek bir şey mi var? Bize yazın'],
+  'th': ['ชอบ QuickTemp ไหม? การให้คะแนนช่วยเราได้มาก','ให้คะแนน ⭐','ไว้ก่อน','มีอะไรให้ปรับปรุงไหม? เขียนถึงเรา'],
+  'sv': ['Gillar du QuickTemp? Ett betyg hjälper oss mycket','Betygsätt ⭐','Inte nu','Något att förbättra? Skriv till oss'],
+  'de': ['Gefällt dir QuickTemp? Eine Bewertung hilft uns sehr','Bewerten ⭐','Nicht jetzt','Etwas zu verbessern? Schreib uns'],
+  'fr': ['QuickTemp vous plaît ? Une note nous aide beaucoup','Évaluer ⭐','Pas maintenant','Une amélioration à suggérer ? Écrivez-nous'],
+  'pt': ['Gosta do QuickTemp? Uma avaliação ajuda-nos muito','Avaliar ⭐','Agora não','Algo a melhorar? Escreva-nos'],
+  'it': ['Ti piace QuickTemp? Una valutazione ci aiuta molto','Valuta ⭐','Non ora','Qualcosa da migliorare? Scrivici'],
+  'zh': ['喜欢 QuickTemp 吗？您的评分对我们帮助很大','去评分 ⭐','以后再说','有需要改进的地方？联系我们'],
+  'ca': ['T\'agrada QuickTemp? Una valoració ens ajuda molt','Valorar ⭐','Ara no','Alguna cosa a millorar? Escriu-nos'],
+  'eu': ['QuickTemp gustatzen zaizu? Balorazio batek asko laguntzen digu','Baloratu ⭐','Orain ez','Zerbait hobetzeko? Idatzi iezaguzu'],
+  'gl': ['Gústache QuickTemp? Unha valoración axúdanos moito','Valorar ⭐','Agora non','Algo que mellorar? Escríbenos'],
+  'ar': ['هل يعجبك QuickTemp؟ تقييمك يساعدنا كثيرًا','قيّم ⭐','ليس الآن','هل هناك ما يمكن تحسينه؟ راسلنا'],
+  'ru': ['Нравится QuickTemp? Ваша оценка очень нам поможет','Оценить ⭐','Не сейчас','Что улучшить? Напишите нам'],
+  'ja': ['QuickTempは気に入っていただけましたか？評価が大きな励みになります','評価する ⭐','今はしない','改善点があればご連絡ください'],
+  'ko': ['QuickTemp이 마음에 드시나요? 평가는 큰 힘이 됩니다','평가하기 ⭐','나중에','개선할 점이 있나요? 문의하기'],
+  'nl': ['Bevalt QuickTemp? Een beoordeling helpt ons enorm','Beoordelen ⭐','Niet nu','Iets te verbeteren? Schrijf ons'],
+  'pl': ['Podoba Ci się QuickTemp? Ocena bardzo nam pomaga','Oceń ⭐','Nie teraz','Coś do poprawy? Napisz do nas'],
+  'hi': ['QuickTemp पसंद आया? एक रेटिंग से हमें बहुत मदद मिलती है','रेट करें ⭐','अभी नहीं','कुछ सुधारना है? हमें लिखें'],
+  'ro': ['Îți place QuickTemp? O evaluare ne ajută mult','Evaluează ⭐','Nu acum','Ceva de îmbunătățit? Scrie-ne'],
+  'hu': ['Tetszik a QuickTemp? Egy értékelés sokat segít nekünk','Értékelés ⭐','Most nem','Van min javítani? Írj nekünk'],
+  'uk': ['Подобається QuickTemp? Ваша оцінка дуже нам допоможе','Оцінити ⭐','Не зараз','Що покращити? Напишіть нам'],
+  'da': ['Kan du lide QuickTemp? En bedømmelse hjælper os meget','Bedøm ⭐','Ikke nu','Noget at forbedre? Skriv til os'],
+  'no': ['Liker du QuickTemp? En vurdering hjelper oss mye','Vurder ⭐','Ikke nå','Noe å forbedre? Skriv til oss'],
+  'cs': ['Líbí se vám QuickTemp? Hodnocení nám moc pomůže','Ohodnotit ⭐','Teď ne','Co zlepšit? Napište nám'],
+  'id': ['Suka QuickTemp? Penilaian Anda sangat membantu kami','Beri nilai ⭐','Nanti saja','Ada yang perlu diperbaiki? Hubungi kami'],
+  'es-US': ['¿Te gusta QuickTemp? Una valoración nos ayuda mucho','Valorar ⭐','Ahora no','¿Algo que mejorar? Escríbenos'],
+  'pt-BR': ['Gosta do QuickTemp? Uma avaliação ajuda-nos muito','Avaliar ⭐','Agora não','Algo a melhorar? Escreva-nos'],
+};
+
+// ── Petición de valoración dentro de la app ─────────────────────────────
+// Tarjeta discreta bajo la cabecera: aparece tras 5 días distintos de uso,
+// solo cuando la carga de datos ha ido bien, y respeta "Ahora no"
+// (60 días de pausa, máximo 3 veces en total). Los dos botones principales
+// pesan lo mismo; el enlace "Escríbenos" abre el formulario de feedback.
+const VALORACION_DIAS_MIN = 5, VALORACION_PAUSA_DIAS = 60, VALORACION_MAX_RECHAZOS = 3;
+function _valoracionEstado() {
+  try { return JSON.parse(localStorage.getItem('ql_valoracion')) || {}; } catch (e) { return {}; }
+}
+function _valoracionGuardar(s) {
+  try { localStorage.setItem('ql_valoracion', JSON.stringify(s)); } catch (e) {}
+}
+function registrarDiaDeUso() {
+  const s = _valoracionEstado();
+  const hoy = new Date().toISOString().slice(0, 10);
+  if (s.ultimoDia !== hoy) { s.ultimoDia = hoy; s.dias = (s.dias || 0) + 1; _valoracionGuardar(s); }
+}
+function evaluarPeticionValoracion(forzar) {
+  const card = document.getElementById('valoracionCard');
+  if (!card || !card.hidden) return;
+  if (!forzar) {
+    const s = _valoracionEstado();
+    if (s.hecho || (s.rechazos || 0) >= VALORACION_MAX_RECHAZOS) return;
+    if ((s.dias || 0) < VALORACION_DIAS_MIN) return;
+    if (s.ultimoRechazo && Date.now() - s.ultimoRechazo < VALORACION_PAUSA_DIAS * 86400000) return;
+  }
+  const tx = VALORACION_TXT[idioma] || VALORACION_TXT[String(idioma).slice(0, 2)] || VALORACION_TXT.en;
+  card.innerHTML =
+    '<div class="val-texto">' + tx[0] + '</div>' +
+    '<div class="val-botones"><button type="button" id="valBtnValorar">' + tx[1] + '</button>' +
+    '<button type="button" id="valBtnAhoraNo">' + tx[2] + '</button></div>' +
+    '<a href="#" id="valBtnEscribir">' + tx[3] + '</a>';
+  card.hidden = false;
+  document.getElementById('valBtnValorar').onclick = () => {
+    const e = _valoracionEstado(); e.hecho = true; _valoracionGuardar(e);
+    card.hidden = true;
+    window.location.href = 'https://play.google.com/store/apps/details?id=com.diegohg.quicktemp';
+  };
+  document.getElementById('valBtnAhoraNo').onclick = () => {
+    const e = _valoracionEstado(); e.rechazos = (e.rechazos || 0) + 1; e.ultimoRechazo = Date.now(); _valoracionGuardar(e);
+    card.hidden = true;
+  };
+  document.getElementById('valBtnEscribir').onclick = (ev) => {
+    ev.preventDefault();
+    const e = _valoracionEstado(); e.ultimoRechazo = Date.now(); _valoracionGuardar(e);
+    card.hidden = true;
+    abrirFeedbackModal();
+  };
+}
+registrarDiaDeUso();
+
 function renderAlertaLluvia(hourly, daily) {
   const card = document.getElementById('alertaLluviaCard');
   if (!card) return;
@@ -5013,6 +5103,7 @@ function renderDatos(datos) {
   renderHoras(tiempo.hourly);
   renderSol(tiempo.daily, astroData);
   renderAlertaLluvia(tiempo.hourly, tiempo.daily);
+  if (tiempo?.current && navigator.onLine) setTimeout(evaluarPeticionValoracion, 4000);
   renderDias(tiempo.daily, tiempo.hourly);
   const tieneMarea = renderMarea(mdata);
   renderPanelInterior(c.uv_index, aireData, tiempo.daily && tiempo.daily.sunset ? tiempo.daily.sunset[0] : null, tieneMarea, tiempo.utc_offset_seconds, tiempo.daily && tiempo.daily.sunrise ? tiempo.daily.sunrise[0] : null, c.is_day === 1);
