@@ -654,6 +654,7 @@
   </div>
 
 <!-- Modal radar -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><filter id="radarRefuerzo" color-interpolation-filters="sRGB"><feComponentTransfer><feFuncA type="linear" slope="2.0" intercept="0"/></feComponentTransfer></filter></svg>
 <div id="modalRadar" role="dialog" aria-modal="true">
   <div id="radarSheet">
     <div class="modal-handle-row">
@@ -5763,10 +5764,16 @@ async function actualizarMapaRadar() {
   radarSetFrame(_radarIdx);
 }
 
-// Radar: esquema de color de RainViewer (2 = azul universal, 6 = NEXRAD
-// verde/amarillo/rojo, mas visible sobre el mapa de calles) y opacidad.
-const RADAR_ESQUEMA = 6;
-const RADAR_OPACIDAD = 0.8;
+// Radar: RainViewer sirve SIEMPRE la misma paleta (probado pixel a pixel:
+// los esquemas 0-8 dan la misma imagen), asi que el parametro de esquema no
+// cambia nada. Lo que si importa: los ecos debiles (llovizna) vienen con
+// poca opacidad propia (~25-40 %), y sobre el mapa de calles casi no se ven.
+// Por eso se aplica un filtro SVG (#radarRefuerzo) que multiplica la opacidad
+// de cada pixel (x2, tope 100 %): la llovizna se ve clara y las zonas sin
+// lluvia siguen transparentes.
+const RADAR_ESQUEMA = 2;
+const RADAR_OPACIDAD = 0.92;
+const RADAR_REFUERZO = true;
 // Si la ultima imagen del radar es mas vieja que esto (min) se avisa con un ⚠
 const RADAR_EDAD_AVISO_MIN = 20;
 
@@ -5777,6 +5784,9 @@ function radarSetFrame(idx) {
   _radarLayer = L.tileLayer(frame.url, {
     opacity: RADAR_OPACIDAD, maxZoom: 19, maxNativeZoom: frame.maxNativeZoom
   }).addTo(radarMap);
+  if (RADAR_REFUERZO) {
+    try { _radarLayer.getContainer().style.filter = 'url(#radarRefuerzo)'; } catch (e) {}
+  }
 
   const d = new Date(frame.time);
   const hora = d.toLocaleTimeString(T.locale, { hour: '2-digit', minute: '2-digit' });
