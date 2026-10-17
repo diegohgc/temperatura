@@ -8651,6 +8651,8 @@ window.aplicarFondoDinamico=function(weatherCode,isDay,astroData,lat,utcOffsetSe
     { el: () => document.getElementById('mapaModal'),      visible: el => el.style.display === 'flex', cerrar: () => window.cerrarMapaAltitud && cerrarMapaAltitud() },
     { el: () => document.getElementById('brujulaModal'),   visible: el => el.style.display === 'flex', cerrar: el => { el.style.display = 'none'; } },
     { el: () => document.getElementById('ayudaModal'),     visible: el => el.classList.contains('open'), cerrar: el => { el.classList.remove('open'); } },
+    { el: () => document.getElementById('feedbackModal'),  visible: el => el.classList.contains('open'), cerrar: () => window.cerrarFeedbackModal && cerrarFeedbackModal() },
+    { el: () => document.getElementById('ajustesPanel'),   visible: el => !el.hidden, cerrar: el => { el.hidden = true; } },
     { el: () => document.getElementById('buscador'),       visible: el => !el.hidden, cerrar: () => window.cerrarBuscador ? cerrarBuscador() : (document.getElementById('buscador').hidden = true) },
   ];
 
