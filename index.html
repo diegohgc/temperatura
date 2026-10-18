@@ -4955,6 +4955,18 @@ const VALORACION_TXT = {
   'pt-BR': ['Gosta do QuickTemp? Uma avaliação ajuda-nos muito','Avaliar ⭐','Agora não','Algo a melhorar? Escreva-nos'],
 };
 
+// Abre la ficha de QuickTemp en Play Store. En la app Android (WebView, el
+// user agent lleva "; wv)") se usa market://, que MainActivity.kt abre
+// directamente en la app de Play Store; en navegador/PWA, el enlace https.
+// La pequeña espera evita que el history.back() interno que se dispara al
+// cerrar un modal (panel de Ajustes) cancele la navegacion recien pedida.
+function abrirFichaPlayStore() {
+  const id = 'com.diegohg.quicktemp';
+  const enWebView = /; wv\)/.test(navigator.userAgent || '');
+  const url = enWebView ? 'market://details?id=' + id : 'https://play.google.com/store/apps/details?id=' + id;
+  setTimeout(() => { window.location.href = url; }, 350);
+}
+
 // ── Petición de valoración dentro de la app ─────────────────────────────
 // Tarjeta discreta bajo la cabecera: aparece tras 5 días distintos de uso,
 // solo cuando la carga de datos ha ido bien, y respeta "Ahora no"
@@ -4991,7 +5003,7 @@ function evaluarPeticionValoracion(forzar) {
   document.getElementById('valBtnValorar').onclick = () => {
     const e = _valoracionEstado(); e.hecho = true; _valoracionGuardar(e);
     card.hidden = true;
-    window.location.href = 'https://play.google.com/store/apps/details?id=com.diegohg.quicktemp';
+    abrirFichaPlayStore();
   };
   document.getElementById('valBtnAhoraNo').onclick = () => {
     const e = _valoracionEstado(); e.rechazos = (e.rechazos || 0) + 1; e.ultimoRechazo = Date.now(); _valoracionGuardar(e);
@@ -7595,7 +7607,7 @@ function abrirEnGoogleMaps() {
   document.getElementById('btnValorar').addEventListener('click', (e) => {
     e.stopPropagation();
     document.getElementById('ajustesPanel').hidden = true;
-    window.location.href = 'https://play.google.com/store/apps/details?id=com.diegohg.quicktemp';
+    abrirFichaPlayStore();
   });
 
   // Fila "Escríbenos" del bloque Ayúdanos: abre el modal de feedback.
