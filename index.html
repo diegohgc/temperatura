@@ -4956,14 +4956,18 @@ const VALORACION_TXT = {
 };
 
 // Abre la ficha de QuickTemp en Play Store. En la app Android (WebView, el
-// user agent lleva "; wv)") se usa market://, que MainActivity.kt abre
-// directamente en la app de Play Store; en navegador/PWA, el enlace https.
+// user agent lleva "; wv)") se usa un intent:// con package=com.android.vending
+// (MainActivity.kt lo interpreta con Intent.parseUri): fuerza Google Play. Con
+// market:// a secas, moviles como Vivo/Xiaomi/Huawei abren SU tienda propia.
+// En navegador/PWA se usa el enlace https normal.
 // La pequeña espera evita que el history.back() interno que se dispara al
 // cerrar un modal (panel de Ajustes) cancele la navegacion recien pedida.
 function abrirFichaPlayStore() {
   const id = 'com.diegohg.quicktemp';
   const enWebView = /; wv\)/.test(navigator.userAgent || '');
-  const url = enWebView ? 'market://details?id=' + id : 'https://play.google.com/store/apps/details?id=' + id;
+  const url = enWebView
+    ? 'intent://details?id=' + id + '#Intent;scheme=market;action=android.intent.action.VIEW;package=com.android.vending;end'
+    : 'https://play.google.com/store/apps/details?id=' + id;
   setTimeout(() => { window.location.href = url; }, 350);
 }
 
