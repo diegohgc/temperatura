@@ -304,6 +304,9 @@
   #radarPlayBtn { display: block; width: 100%; margin-top: 8px; background: rgba(255,255,255,0.1); border: none; border-radius: 8px; color: #ffffff; font-size: 0.78rem; padding: 6px; cursor: pointer; }
   .radar-nowcast { color: #7dd3fc; }
   .radar-vieja { color: #fbbf24; }
+  #radarOpacRow { display: flex; align-items: center; gap: 10px; margin: 8px 4px 0; opacity: 0.85; }
+  #radarOpacRow span { font-size: 1rem; }
+  #radarOpacidad { flex: 1; accent-color: #7dd3fc; cursor: pointer; }
   #radarAviso { text-align: center; font-size: 0.68rem; opacity: 0.55; margin: 6px 14px 2px; line-height: 1.35; }
   .modal-titulo {
     font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em;
@@ -654,7 +657,7 @@
   </div>
 
 <!-- Modal radar -->
-<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><filter id="radarRefuerzo" color-interpolation-filters="sRGB"><feComponentTransfer><feFuncA type="linear" slope="2.0" intercept="0"/></feComponentTransfer></filter></svg>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><filter id="radarRefuerzo" color-interpolation-filters="sRGB"><feComponentTransfer><feFuncA type="gamma" amplitude="1" exponent="0.8" offset="0"/></feComponentTransfer></filter></svg>
 <div id="modalRadar" role="dialog" aria-modal="true">
   <div id="radarSheet">
     <div class="modal-handle-row">
@@ -668,6 +671,7 @@
       <input id="radarSlider" type="range" min="0" value="0" step="1">
       <button id="radarPlayBtn">▶</button>
     </div>
+    <div id="radarOpacRow"><span aria-hidden="true">◐</span><input id="radarOpacidad" type="range" min="20" max="100" step="5" aria-label="Opacidad del radar"></div>
     <div id="radarAviso"></div>
   </div>
 </div>
@@ -5652,6 +5656,14 @@ document.getElementById('modalRadar').addEventListener('click', (e) => {
 
 function abrirModalRadar() {
   document.getElementById('radarTit').textContent = T.radar;
+  const _opSlider = document.getElementById('radarOpacidad');
+  if (_opSlider) {
+    _opSlider.value = Math.round(radarOpacidad() * 100);
+    _opSlider.oninput = () => {
+      try { localStorage.setItem('ql_radar_opac', _opSlider.value); } catch (e) {}
+      if (_radarLayer) _radarLayer.setOpacity(_opSlider.value / 100);
+    };
+  }
   const _avisoRadar = document.getElementById('radarAviso');
   if (_avisoRadar) _avisoRadar.textContent = T.radarAviso || '';
   document.getElementById('modalRadar').classList.add('abierto');
@@ -5785,10 +5797,19 @@ async function actualizarMapaRadar() {
 // cambia nada. Lo que si importa: los ecos debiles (llovizna) vienen con
 // poca opacidad propia (~25-40 %), y sobre el mapa de calles casi no se ven.
 // Por eso se aplica un filtro SVG (#radarRefuerzo) que multiplica la opacidad
-// de cada pixel (x2, tope 100 %): la llovizna se ve clara y las zonas sin
-// lluvia siguen transparentes.
+// de cada pixel con una curva suave (gamma 0.8: sube bastante las muy debiles y
+// casi nada las fuertes), asi la llovizna se ve y el mapa de debajo sigue
+// visible al ampliar. La opacidad final la elige el usuario con el
+// deslizador del modal (se guarda en localStorage 'ql_radar_opac').
 const RADAR_ESQUEMA = 2;
-const RADAR_OPACIDAD = 0.92;
+const RADAR_OPACIDAD = 0.6;   // valor por defecto
+function radarOpacidad() {
+  try {
+    const v = parseInt(localStorage.getItem('ql_radar_opac'), 10);
+    if (v >= 20 && v <= 100) return v / 100;
+  } catch (e) {}
+  return RADAR_OPACIDAD;
+}
 const RADAR_REFUERZO = true;
 // Si la ultima imagen del radar es mas vieja que esto (min) se avisa con un ⚠
 const RADAR_EDAD_AVISO_MIN = 20;
@@ -5798,7 +5819,7 @@ function radarSetFrame(idx) {
   if (!frame || !radarMap) return;
   if (_radarLayer) radarMap.removeLayer(_radarLayer);
   _radarLayer = L.tileLayer(frame.url, {
-    opacity: RADAR_OPACIDAD, maxZoom: 19, maxNativeZoom: frame.maxNativeZoom
+    opacity: radarOpacidad(), maxZoom: 19, maxNativeZoom: frame.maxNativeZoom
   }).addTo(radarMap);
   if (RADAR_REFUERZO) {
     try { _radarLayer.getContainer().style.filter = 'url(#radarRefuerzo)'; } catch (e) {}
